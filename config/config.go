@@ -29,7 +29,7 @@ func (c Config) validate() error {
 		),
 		validation.Field(&c.RateLimitGlobal, validation.By(validatePositiveInt)),
 		validation.Field(&c.RateLimitPerClient, validation.By(validatePositiveInt)),
-		validation.Field(&c.WriteTimeout, validation.Min(time.Duration(0))),
+		validation.Field(&c.WriteTimeout, validation.Min(time.Second)),
 	)
 }
 
