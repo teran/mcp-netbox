@@ -15,6 +15,7 @@ import (
 
 type (
 	SitesInput struct {
+		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		Region   string `json:"region,omitempty" jsonschema:"filter by region (slug or name)"`
 		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, planned, etc.)"`
 		Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug or name)"`
@@ -23,6 +24,7 @@ type (
 	}
 
 	DevicesInput struct {
+		Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
 		Role         string `json:"role,omitempty" jsonschema:"filter by device role (slug)"`
 		Manufacturer string `json:"manufacturer,omitempty" jsonschema:"filter by manufacturer (slug)"`
@@ -37,6 +39,7 @@ type (
 	}
 
 	IPAddressesInput struct {
+		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		Address  string `json:"address,omitempty" jsonschema:"filter by address (e.g. 192.168.1.0/24)"`
 		Device   string `json:"device,omitempty" jsonschema:"filter by assigned device name"`
 		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, reserved, etc.)"`
@@ -48,6 +51,7 @@ type (
 	}
 
 	PrefixesInput struct {
+		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		Prefix   string `json:"prefix,omitempty" jsonschema:"filter by prefix (e.g. 10.0.0.0/8)"`
 		Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
 		VRF      string `json:"vrf,omitempty" jsonschema:"filter by VRF (rd or name)"`
@@ -61,6 +65,7 @@ type (
 	}
 
 	VLANsInput struct {
+		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
 		Group    string `json:"group,omitempty" jsonschema:"filter by VLAN group (slug)"`
 		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, reserved, etc.)"`
@@ -71,6 +76,7 @@ type (
 	}
 
 	VirtualMachinesInput struct {
+		Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		Cluster      string `json:"cluster,omitempty" jsonschema:"filter by cluster (name)"`
 		ClusterGroup string `json:"cluster_group,omitempty" jsonschema:"filter by cluster group (slug)"`
 		Role         string `json:"role,omitempty" jsonschema:"filter by VM role (slug)"`
@@ -83,6 +89,7 @@ type (
 	}
 
 	ClustersInput struct {
+		Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		ClusterType  string `json:"cluster_type,omitempty" jsonschema:"filter by cluster type (slug)"`
 		ClusterGroup string `json:"cluster_group,omitempty" jsonschema:"filter by cluster group (slug)"`
 		Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
@@ -93,6 +100,7 @@ type (
 	}
 
 	CircuitsInput struct {
+		Q           string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		Provider    string `json:"provider,omitempty" jsonschema:"filter by provider (slug)"`
 		CircuitType string `json:"circuit_type,omitempty" jsonschema:"filter by circuit type (slug)"`
 		Site        string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
@@ -108,6 +116,7 @@ type (
 	}
 
 	RacksInput struct {
+		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
 		Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
 		Location string `json:"location,omitempty" jsonschema:"filter by location (slug)"`
 		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, planned, etc.)"`
@@ -156,6 +165,7 @@ type SitesOutput struct {
 func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SitesInput, SitesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in SitesInput) (*mcp.CallToolResult, SitesOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "region", in.Region)
 		addParam(params, "status", in.Status)
 		addParam(params, "tenant", in.Tenant)
@@ -179,6 +189,7 @@ type DevicesOutput struct {
 func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DevicesInput, DevicesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in DevicesInput) (*mcp.CallToolResult, DevicesOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "site", in.Site)
 		addParam(params, "role", in.Role)
 		addParam(params, "manufacturer", in.Manufacturer)
@@ -208,6 +219,7 @@ type IPAddressesOutput struct {
 func NewGetIPAddressesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[IPAddressesInput, IPAddressesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressesInput) (*mcp.CallToolResult, IPAddressesOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "address", in.Address)
 		addParam(params, "device", in.Device)
 		addParam(params, "status", in.Status)
@@ -234,6 +246,7 @@ type PrefixesOutput struct {
 func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PrefixesInput, PrefixesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in PrefixesInput) (*mcp.CallToolResult, PrefixesOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "prefix", in.Prefix)
 		addParam(params, "site", in.Site)
 		addParam(params, "vrf", in.VRF)
@@ -262,6 +275,7 @@ type VLANsOutput struct {
 func NewGetVLANsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLANsInput, VLANsOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in VLANsInput) (*mcp.CallToolResult, VLANsOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "site", in.Site)
 		addParam(params, "group", in.Group)
 		addParam(params, "status", in.Status)
@@ -287,6 +301,7 @@ type VirtualMachinesOutput struct {
 func NewGetVirtualMachinesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VirtualMachinesInput, VirtualMachinesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachinesInput) (*mcp.CallToolResult, VirtualMachinesOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "cluster", in.Cluster)
 		addParam(params, "cluster_group", in.ClusterGroup)
 		addParam(params, "role", in.Role)
@@ -314,6 +329,7 @@ type ClustersOutput struct {
 func NewGetClustersHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClustersInput, ClustersOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in ClustersInput) (*mcp.CallToolResult, ClustersOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "type", in.ClusterType)
 		addParam(params, "group", in.ClusterGroup)
 		addParam(params, "site", in.Site)
@@ -339,6 +355,7 @@ type CircuitsOutput struct {
 func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitsInput, CircuitsOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitsInput) (*mcp.CallToolResult, CircuitsOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "provider", in.Provider)
 		addParam(params, "type", in.CircuitType)
 		addParam(params, "site", in.Site)
@@ -386,6 +403,7 @@ type RacksOutput struct {
 func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RacksInput, RacksOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in RacksInput) (*mcp.CallToolResult, RacksOutput, error) {
 		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
 		addParam(params, "site", in.Site)
 		addParam(params, "location", in.Location)
 		addParam(params, "status", in.Status)
