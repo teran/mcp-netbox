@@ -147,8 +147,10 @@ func addIntParam(m map[string]string, key string, value int) {
 // — handler factories —
 
 type SitesOutput struct {
-	Count   int           `json:"count"`
-	Results []domain.Site `json:"results"`
+	Count    int           `json:"count"`
+	Next     string        `json:"next"`
+	Previous string        `json:"previous"`
+	Results  []domain.Site `json:"results"`
 }
 
 func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SitesInput, SitesOutput] {
@@ -163,13 +165,15 @@ func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Site
 			return &mcp.CallToolResult{IsError: true}, SitesOutput{}, fmt.Errorf("list sites: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, SitesOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, SitesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
 
 type DevicesOutput struct {
-	Count   int             `json:"count"`
-	Results []domain.Device `json:"results"`
+	Count    int             `json:"count"`
+	Next     string          `json:"next"`
+	Previous string          `json:"previous"`
+	Results  []domain.Device `json:"results"`
 }
 
 func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DevicesInput, DevicesOutput] {
@@ -190,13 +194,15 @@ func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[De
 			return &mcp.CallToolResult{IsError: true}, DevicesOutput{}, fmt.Errorf("list devices: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, DevicesOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, DevicesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
 
 type IPAddressesOutput struct {
-	Count   int                `json:"count"`
-	Results []domain.IPAddress `json:"results"`
+	Count    int                `json:"count"`
+	Next     string             `json:"next"`
+	Previous string             `json:"previous"`
+	Results  []domain.IPAddress `json:"results"`
 }
 
 func NewGetIPAddressesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[IPAddressesInput, IPAddressesOutput] {
@@ -214,13 +220,15 @@ func NewGetIPAddressesHandler(svc *application.NetworkService) mcp.ToolHandlerFo
 			return &mcp.CallToolResult{IsError: true}, IPAddressesOutput{}, fmt.Errorf("list IP addresses: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, IPAddressesOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, IPAddressesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
 
 type PrefixesOutput struct {
-	Count   int             `json:"count"`
-	Results []domain.Prefix `json:"results"`
+	Count    int             `json:"count"`
+	Next     string          `json:"next"`
+	Previous string          `json:"previous"`
+	Results  []domain.Prefix `json:"results"`
 }
 
 func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PrefixesInput, PrefixesOutput] {
@@ -240,13 +248,15 @@ func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[P
 			return &mcp.CallToolResult{IsError: true}, PrefixesOutput{}, fmt.Errorf("list prefixes: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, PrefixesOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, PrefixesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
 
 type VLANsOutput struct {
-	Count   int           `json:"count"`
-	Results []domain.VLAN `json:"results"`
+	Count    int           `json:"count"`
+	Next     string        `json:"next"`
+	Previous string        `json:"previous"`
+	Results  []domain.VLAN `json:"results"`
 }
 
 func NewGetVLANsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLANsInput, VLANsOutput] {
@@ -263,13 +273,15 @@ func NewGetVLANsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLAN
 			return &mcp.CallToolResult{IsError: true}, VLANsOutput{}, fmt.Errorf("list VLANs: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, VLANsOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, VLANsOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
 
 type VirtualMachinesOutput struct {
-	Count   int                     `json:"count"`
-	Results []domain.VirtualMachine `json:"results"`
+	Count    int                     `json:"count"`
+	Next     string                  `json:"next"`
+	Previous string                  `json:"previous"`
+	Results  []domain.VirtualMachine `json:"results"`
 }
 
 func NewGetVirtualMachinesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VirtualMachinesInput, VirtualMachinesOutput] {
@@ -288,13 +300,15 @@ func NewGetVirtualMachinesHandler(svc *application.NetworkService) mcp.ToolHandl
 			return &mcp.CallToolResult{IsError: true}, VirtualMachinesOutput{}, fmt.Errorf("list VMs: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, VirtualMachinesOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, VirtualMachinesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
 
 type ClustersOutput struct {
-	Count   int              `json:"count"`
-	Results []domain.Cluster `json:"results"`
+	Count    int              `json:"count"`
+	Next     string           `json:"next"`
+	Previous string           `json:"previous"`
+	Results  []domain.Cluster `json:"results"`
 }
 
 func NewGetClustersHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClustersInput, ClustersOutput] {
@@ -311,13 +325,15 @@ func NewGetClustersHandler(svc *application.NetworkService) mcp.ToolHandlerFor[C
 			return &mcp.CallToolResult{IsError: true}, ClustersOutput{}, fmt.Errorf("list clusters: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, ClustersOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, ClustersOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
 
 type CircuitsOutput struct {
-	Count   int              `json:"count"`
-	Results []domain.Circuit `json:"results"`
+	Count    int              `json:"count"`
+	Next     string           `json:"next"`
+	Previous string           `json:"previous"`
+	Results  []domain.Circuit `json:"results"`
 }
 
 func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitsInput, CircuitsOutput] {
@@ -334,7 +350,7 @@ func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[C
 			return &mcp.CallToolResult{IsError: true}, CircuitsOutput{}, fmt.Errorf("list circuits: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, CircuitsOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, CircuitsOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
 
@@ -361,8 +377,10 @@ func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 }
 
 type RacksOutput struct {
-	Count   int           `json:"count"`
-	Results []domain.Rack `json:"results"`
+	Count    int           `json:"count"`
+	Next     string        `json:"next"`
+	Previous string        `json:"previous"`
+	Results  []domain.Rack `json:"results"`
 }
 
 func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RacksInput, RacksOutput] {
@@ -378,6 +396,6 @@ func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Rack
 			return &mcp.CallToolResult{IsError: true}, RacksOutput{}, fmt.Errorf("list racks: %w", err)
 		}
 
-		return &mcp.CallToolResult{}, RacksOutput{Count: resp.Count, Results: resp.Results}, nil
+		return &mcp.CallToolResult{}, RacksOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }
