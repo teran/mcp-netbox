@@ -117,20 +117,18 @@ type (
 	}
 )
 
-type GenericObjectOutput struct {
-	Data interface{} `json:"data"`
-}
-
 // — helpers —
 
 func paginationParams(page, pageSize int) map[string]string {
 	params := make(map[string]string)
-	if page > 0 {
-		params["offset"] = strconv.Itoa((page - 1) * pageSize)
+	if page < 1 {
+		page = 1
 	}
-	if pageSize > 0 {
-		params["limit"] = strconv.Itoa(min(pageSize, 100))
+	if pageSize < 1 {
+		pageSize = 25
 	}
+	params["offset"] = strconv.Itoa((page - 1) * pageSize)
+	params["limit"] = strconv.Itoa(min(pageSize, 100))
 	return params
 }
 
