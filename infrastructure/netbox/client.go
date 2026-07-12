@@ -92,7 +92,7 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
 	}
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 100*1024*1024)) // 100 MB limit
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024)) // 10 MB limit
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
