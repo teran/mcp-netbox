@@ -4,7 +4,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
@@ -114,23 +113,9 @@ func RateLimitMiddleware(cfg RateLimiterConfig) (func(http.Handler) http.Handler
 }
 
 func extractClientIP(r *http.Request) string {
-	// Check X-Client-IP header first
-	if xci := r.Header.Get("X-Client-Ip"); xci != "" {
-		if ip := net.ParseIP(strings.TrimSpace(xci)); ip != nil {
-			return ip.String()
-		}
-	}
-
-	// Check X-Forwarded-For header
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		if parts := strings.Split(xff, ","); len(parts) > 0 {
-			if ip := net.ParseIP(strings.TrimSpace(parts[0])); ip != nil {
-				return ip.String()
-			}
-		}
-	}
-
-	// Fall back to RemoteAddr
+	// Only use RemoteAddr to prevent IP spoofing via X-Forwarded-For / X-Client-IP headers.
+	// If running behind a reverse proxy, ensure the proxy sets X-Envoy-External-Address
+	// or use a trusted header via configuration.
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr

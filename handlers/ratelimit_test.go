@@ -20,10 +20,10 @@ func TestExtractClientIP(t *testing.T) {
 		remote   string
 		expected string
 	}{
-		{"X-Client-IP", map[string]string{"X-Client-IP": "10.0.0.1"}, "127.0.0.1:12345", "10.0.0.1"},
-		{"X-Forwarded-For", map[string]string{"X-Forwarded-For": "192.168.1.1, 10.0.0.1"}, "127.0.0.1:12345", "192.168.1.1"},
-		{"RemoteAddr fallback", nil, "10.0.0.2:56789", "10.0.0.2"},
+		{"RemoteAddr parsed", nil, "10.0.0.2:56789", "10.0.0.2"},
 		{"RemoteAddr no port", nil, "10.0.0.3", "10.0.0.3"},
+		{"X-Forwarded-For overridden by RemoteAddr", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "10.0.0.4:12345", "10.0.0.4"},
+		{"X-Client-IP overridden by RemoteAddr", map[string]string{"X-Client-IP": "10.0.0.1"}, "10.0.0.5:12345", "10.0.0.5"},
 	}
 
 	for _, tc := range tests {
