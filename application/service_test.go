@@ -96,137 +96,249 @@ func TestNetworkService_ListSites(t *testing.T) {
 func TestNetworkService_ListDevices(t *testing.T) {
 	t.Parallel()
 
-	svc := newTestService(&mockRepo{
-		listDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
-			return &domain.PaginatedResponse[domain.Device]{Count: 0}, nil
-		},
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+				return &domain.PaginatedResponse[domain.Device]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListDevices(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListDevices() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
 	})
-	resp, err := svc.ListDevices(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("ListDevices() returned error: %v", err)
-	}
-	if resp.Count != 0 {
-		t.Errorf("Count = %d, want %d", resp.Count, 0)
-	}
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListDevices(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 func TestNetworkService_ListIPAddresses(t *testing.T) {
 	t.Parallel()
 
-	svc := newTestService(&mockRepo{
-		listIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
-			return &domain.PaginatedResponse[domain.IPAddress]{Count: 0}, nil
-		},
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+				return &domain.PaginatedResponse[domain.IPAddress]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListIPAddresses(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListIPAddresses() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
 	})
-	resp, err := svc.ListIPAddresses(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("ListIPAddresses() returned error: %v", err)
-	}
-	if resp.Count != 0 {
-		t.Errorf("Count = %d, want %d", resp.Count, 0)
-	}
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListIPAddresses(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 func TestNetworkService_ListPrefixes(t *testing.T) {
 	t.Parallel()
 
-	svc := newTestService(&mockRepo{
-		listPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
-			return &domain.PaginatedResponse[domain.Prefix]{Count: 0}, nil
-		},
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+				return &domain.PaginatedResponse[domain.Prefix]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListPrefixes(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListPrefixes() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
 	})
-	resp, err := svc.ListPrefixes(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("ListPrefixes() returned error: %v", err)
-	}
-	if resp.Count != 0 {
-		t.Errorf("Count = %d, want %d", resp.Count, 0)
-	}
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListPrefixes(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 func TestNetworkService_ListVLANs(t *testing.T) {
 	t.Parallel()
 
-	svc := newTestService(&mockRepo{
-		listVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
-			return &domain.PaginatedResponse[domain.VLAN]{Count: 0}, nil
-		},
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+				return &domain.PaginatedResponse[domain.VLAN]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListVLANs(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListVLANs() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
 	})
-	resp, err := svc.ListVLANs(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("ListVLANs() returned error: %v", err)
-	}
-	if resp.Count != 0 {
-		t.Errorf("Count = %d, want %d", resp.Count, 0)
-	}
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListVLANs(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 func TestNetworkService_ListVirtualMachines(t *testing.T) {
 	t.Parallel()
 
-	svc := newTestService(&mockRepo{
-		listVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
-			return &domain.PaginatedResponse[domain.VirtualMachine]{Count: 0}, nil
-		},
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+				return &domain.PaginatedResponse[domain.VirtualMachine]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListVirtualMachines(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListVirtualMachines() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
 	})
-	resp, err := svc.ListVirtualMachines(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("ListVirtualMachines() returned error: %v", err)
-	}
-	if resp.Count != 0 {
-		t.Errorf("Count = %d, want %d", resp.Count, 0)
-	}
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListVirtualMachines(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 func TestNetworkService_ListClusters(t *testing.T) {
 	t.Parallel()
 
-	svc := newTestService(&mockRepo{
-		listClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
-			return &domain.PaginatedResponse[domain.Cluster]{Count: 0}, nil
-		},
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+				return &domain.PaginatedResponse[domain.Cluster]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListClusters(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListClusters() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
 	})
-	resp, err := svc.ListClusters(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("ListClusters() returned error: %v", err)
-	}
-	if resp.Count != 0 {
-		t.Errorf("Count = %d, want %d", resp.Count, 0)
-	}
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListClusters(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 func TestNetworkService_ListCircuits(t *testing.T) {
 	t.Parallel()
 
-	svc := newTestService(&mockRepo{
-		listCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
-			return &domain.PaginatedResponse[domain.Circuit]{Count: 0}, nil
-		},
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+				return &domain.PaginatedResponse[domain.Circuit]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListCircuits(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListCircuits() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
 	})
-	resp, err := svc.ListCircuits(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("ListCircuits() returned error: %v", err)
-	}
-	if resp.Count != 0 {
-		t.Errorf("Count = %d, want %d", resp.Count, 0)
-	}
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListCircuits(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 func TestNetworkService_ListRacks(t *testing.T) {
 	t.Parallel()
 
-	svc := newTestService(&mockRepo{
-		listRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
-			return &domain.PaginatedResponse[domain.Rack]{Count: 0}, nil
-		},
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+				return &domain.PaginatedResponse[domain.Rack]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListRacks(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListRacks() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
 	})
-	resp, err := svc.ListRacks(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("ListRacks() returned error: %v", err)
-	}
-	if resp.Count != 0 {
-		t.Errorf("Count = %d, want %d", resp.Count, 0)
-	}
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockRepo{
+			listRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListRacks(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 func TestNetworkService_GetObject(t *testing.T) {

@@ -2,6 +2,9 @@ package domain
 
 import "context"
 
+// NetworkRepository defines the port (interface) for NetBox data access.
+// Implementations provide CRUD operations for sites, devices, IP addresses,
+// prefixes, VLANs, virtual machines, clusters, circuits, and racks.
 type NetworkRepository interface {
 	ListSites(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Site], error)
 	ListDevices(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Device], error)

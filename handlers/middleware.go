@@ -34,7 +34,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, `{"error":"authorization token is required"}`, http.StatusUnauthorized)
+			http.Error(w, fmt.Sprintf(`{"error":"%s"}`, ErrTokenRequired.Error()), http.StatusUnauthorized)
 			return
 		}
 

@@ -1,5 +1,9 @@
+// Package domain provides the core domain models and repository interfaces
+// for the NetBox MCP server. These types are free of external dependencies
+// and represent the pure business objects of the value chain.
 package domain
 
+// Site represents a NetBox site (physical location or data center).
 type (
 	Site struct {
 		ID              int     `json:"id"`
@@ -202,6 +206,8 @@ type (
 	}
 )
 
+// PaginatedResponse wraps a paginated API response with the total count,
+// navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {
 	Count    int    `json:"count"`
 	Next     string `json:"next"`
