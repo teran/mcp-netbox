@@ -330,7 +330,7 @@ func (c *Client) ListRacks(ctx context.Context, token string, params map[string]
 }
 
 // GetObject retrieves a single object by its type and ID.
-func (c *Client) GetObject(ctx context.Context, token, objectType string, id int, params map[string]string) (interface{}, error) {
+func (c *Client) GetObject(ctx context.Context, token, objectType string, id int, params map[string]string) (domain.RawObject, error) {
 	endpoint, ok := objectTypeToEndpoint[objectType]
 	if !ok {
 		return nil, fmt.Errorf("unknown object type: %s", objectType)
@@ -339,16 +339,10 @@ func (c *Client) GetObject(ctx context.Context, token, objectType string, id int
 	path := fmt.Sprintf("%s%d/", endpoint, id)
 	body, err := c.get(ctx, token, path, params)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s #%d: %w", objectType, id, err)
 	}
 
-	// Return raw JSON for generic object retrieval
-	var raw interface{}
-	if err := json.Unmarshal(body, &raw); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal: %w", err)
-	}
-
-	return raw, nil
+	return domain.RawObject(body), nil
 }
 
 // Ensure Client implements domain.NetworkRepository.

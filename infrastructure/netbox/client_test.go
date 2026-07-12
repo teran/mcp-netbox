@@ -390,12 +390,12 @@ func TestClient_GetObject(t *testing.T) {
 		if err != nil {
 			t.Fatalf("GetObject() returned error: %v", err)
 		}
-		m, ok := resp.(map[string]interface{})
-		if !ok {
-			t.Fatalf("expected map[string]interface{}, got %T", resp)
+		var result map[string]interface{}
+		if err := json.Unmarshal(resp, &result); err != nil {
+			t.Fatalf("failed to unmarshal response: %v", err)
 		}
-		if m["name"] != "Test" {
-			t.Errorf("name = %v, want %v", m["name"], "Test")
+		if result["name"] != "Test" {
+			t.Errorf("name = %v, want %v", result["name"], "Test")
 		}
 	})
 

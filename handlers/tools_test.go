@@ -20,7 +20,7 @@ type mockRepo struct {
 	listClustersFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error)
 	listCircuitsFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error)
 	listRacksFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error)
-	getObjectFunc           func(ctx context.Context, token string, objectType string, id int, params map[string]string) (interface{}, error)
+	getObjectFunc           func(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error)
 }
 
 func (m *mockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -50,7 +50,7 @@ func (m *mockRepo) ListCircuits(ctx context.Context, token string, params map[st
 func (m *mockRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 	return m.listRacksFunc(ctx, token, params)
 }
-func (m *mockRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (interface{}, error) {
+func (m *mockRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
 	return m.getObjectFunc(ctx, token, objectType, id, params)
 }
 
@@ -301,8 +301,8 @@ func TestGetObjectByIDHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockRepo{
-			getObjectFunc: func(_ context.Context, _ string, objectType string, id int, _ map[string]string) (interface{}, error) {
-				return map[string]interface{}{"id": float64(id), "name": "Test"}, nil
+			getObjectFunc: func(_ context.Context, _ string, objectType string, id int, _ map[string]string) (domain.RawObject, error) {
+				return domain.RawObject(`{"id":1,"name":"Test"}`), nil
 			},
 		}, "token")
 
@@ -331,7 +331,7 @@ func TestGetObjectByIDHandler(t *testing.T) {
 
 	t.Run("invalid id", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockRepo{
-			getObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (interface{}, error) {
+			getObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (domain.RawObject, error) {
 				return nil, errors.New("not found")
 			},
 		}, "token")
@@ -344,7 +344,7 @@ func TestGetObjectByIDHandler(t *testing.T) {
 
 	t.Run("error from service", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockRepo{
-			getObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (interface{}, error) {
+			getObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (domain.RawObject, error) {
 				return nil, errors.New("not found")
 			},
 		}, "token")

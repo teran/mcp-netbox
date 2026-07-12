@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -40,8 +41,8 @@ func (r *nilRepo) ListCircuits(ctx context.Context, token string, params map[str
 func (r *nilRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 	return &domain.PaginatedResponse[domain.Rack]{Count: 0, Results: []domain.Rack{}}, nil
 }
-func (r *nilRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (interface{}, error) {
-	return map[string]interface{}{"id": float64(id)}, nil
+func (r *nilRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
+	return domain.RawObject(fmt.Sprintf(`{"id":%d}`, id)), nil
 }
 
 func TestRegisterTools(t *testing.T) {

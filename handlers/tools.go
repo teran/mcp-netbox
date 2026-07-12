@@ -339,7 +339,7 @@ func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[C
 }
 
 type GetObjectOutput struct {
-	Data interface{} `json:"data"`
+	Data domain.RawObject `json:"data"`
 }
 
 func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor[GetObjectInput, GetObjectOutput] {

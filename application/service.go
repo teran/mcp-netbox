@@ -96,7 +96,7 @@ func (s *NetworkService) ListRacks(ctx context.Context, params map[string]string
 	return resp, nil
 }
 
-func (s *NetworkService) GetObject(ctx context.Context, objectType string, id int) (interface{}, error) {
+func (s *NetworkService) GetObject(ctx context.Context, objectType string, id int) (domain.RawObject, error) {
 	resp, err := s.repo.GetObject(ctx, s.token, objectType, id, nil)
 	if err != nil {
 		return nil, fmt.Errorf("get object: %w", err)

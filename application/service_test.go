@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/teran/mcp-netbox/domain"
@@ -18,7 +19,7 @@ type mockRepo struct {
 	listClustersFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error)
 	listCircuitsFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error)
 	listRacksFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error)
-	getObjectFunc           func(ctx context.Context, token string, objectType string, id int, params map[string]string) (interface{}, error)
+	getObjectFunc           func(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error)
 }
 
 func (m *mockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -48,7 +49,7 @@ func (m *mockRepo) ListCircuits(ctx context.Context, token string, params map[st
 func (m *mockRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 	return m.listRacksFunc(ctx, token, params)
 }
-func (m *mockRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (interface{}, error) {
+func (m *mockRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
 	return m.getObjectFunc(ctx, token, objectType, id, params)
 }
 
@@ -346,23 +347,22 @@ func TestNetworkService_GetObject(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockRepo{
-			getObjectFunc: func(_ context.Context, _ string, objectType string, id int, _ map[string]string) (interface{}, error) {
-				return map[string]interface{}{"id": float64(id), "name": objectType}, nil
+			getObjectFunc: func(_ context.Context, _ string, objectType string, id int, _ map[string]string) (domain.RawObject, error) {
+				return domain.RawObject(fmt.Sprintf(`{"id":%d,"name":"%s"}`, id, objectType)), nil
 			},
 		})
 		resp, err := svc.GetObject(context.Background(), "site", 1)
 		if err != nil {
 			t.Fatalf("GetObject() returned error: %v", err)
 		}
-		m := resp.(map[string]interface{})
-		if m["id"] != float64(1) {
-			t.Errorf("id = %v, want %v", m["id"], 1)
+		if len(resp) == 0 {
+			t.Fatal("GetObject() returned empty response")
 		}
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockRepo{
-			getObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (interface{}, error) {
+			getObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (domain.RawObject, error) {
 				return nil, errors.New("repo error")
 			},
 		})

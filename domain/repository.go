@@ -1,6 +1,13 @@
 package domain
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
+
+// RawObject is a JSON-preserving type for generic object retrieval via get_object_by_id.
+// It preserves the exact JSON structure from NetBox, avoiding map[string]interface{} lossiness.
+type RawObject json.RawMessage
 
 // NetworkRepository defines the port (interface) for NetBox data access.
 // Implementations provide CRUD operations for sites, devices, IP addresses,
@@ -15,5 +22,5 @@ type NetworkRepository interface {
 	ListClusters(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Cluster], error)
 	ListCircuits(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Circuit], error)
 	ListRacks(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Rack], error)
-	GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (interface{}, error)
+	GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (RawObject, error)
 }
