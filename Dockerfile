@@ -5,7 +5,7 @@
 #   cp dist/mcp-netbox_linux_arm64_v8.0/mcp-netbox mcp-netbox-linux-arm64
 #   docker buildx build --platform linux/amd64,linux/arm64 -t image:tag .
 
-FROM alpine:latest AS base
+FROM alpine:3.21 AS base
 RUN apk add --no-cache ca-certificates && \
     echo 'nobody:x:65534:65534:nobody:/:/sbin/nologin' > /etc/passwd-minimal
 

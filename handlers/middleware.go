@@ -15,12 +15,12 @@ import (
 	"unicode"
 )
 
-// contextKey is an unexported type for context value keys.
-type contextKey string
+// ContextKey is an unexported type for context value keys.
+type ContextKey string
 
 const (
 	// TokenContextKey is the context key storing the NetBox API token.
-	TokenContextKey contextKey = "netbox_token"
+	TokenContextKey ContextKey = "netbox_token"
 
 	// MaxTokenLength is the maximum allowed length for the Authorization token.
 	MaxTokenLength = 512
