@@ -87,6 +87,14 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 		return nil, fmt.Errorf("forbidden: token lacks required permissions")
 	}
 
+	if resp.StatusCode == http.StatusTooManyRequests {
+		retryAfter := resp.Header.Get("Retry-After")
+		if retryAfter != "" {
+			return nil, fmt.Errorf("rate limited by NetBox: retry after %ss", retryAfter)
+		}
+		return nil, fmt.Errorf("rate limited by NetBox")
+	}
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
