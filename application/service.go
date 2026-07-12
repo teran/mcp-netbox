@@ -1,0 +1,105 @@
+// Package application provides the business logic / use case layer.
+package application
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/teran/mcp-netbox/domain"
+)
+
+// NetworkService is the service layer that translates tool requests into
+// repository calls with the user's token.
+type NetworkService struct {
+	repo  domain.NetworkRepository
+	token string
+}
+
+// NewNetworkService creates a new NetworkService backed by the given repository,
+// using the given API token for all requests.
+func NewNetworkService(repo domain.NetworkRepository, token string) *NetworkService {
+	return &NetworkService{
+		repo:  repo,
+		token: token,
+	}
+}
+
+func (s *NetworkService) ListSites(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+	resp, err := s.repo.ListSites(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list sites: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListDevices(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+	resp, err := s.repo.ListDevices(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list devices: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListIPAddresses(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+	resp, err := s.repo.ListIPAddresses(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list IP addresses: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListPrefixes(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+	resp, err := s.repo.ListPrefixes(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list prefixes: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListVLANs(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+	resp, err := s.repo.ListVLANs(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list VLANs: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListVirtualMachines(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+	resp, err := s.repo.ListVirtualMachines(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list virtual machines: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListClusters(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+	resp, err := s.repo.ListClusters(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list clusters: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListCircuits(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+	resp, err := s.repo.ListCircuits(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list circuits: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListRacks(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+	resp, err := s.repo.ListRacks(ctx, s.token, params)
+	if err != nil {
+		return nil, fmt.Errorf("list racks: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) GetObject(ctx context.Context, objectType string, id int) (interface{}, error) {
+	resp, err := s.repo.GetObject(ctx, s.token, objectType, id, nil)
+	if err != nil {
+		return nil, fmt.Errorf("get object: %w", err)
+	}
+	return resp, nil
+}
