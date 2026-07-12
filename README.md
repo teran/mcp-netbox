@@ -12,6 +12,8 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 - **Comprehensive NetBox coverage** — sites, devices, IP addresses, prefixes, VLANs, VMs, clusters, circuits, racks, and generic `get_object_by_id`.
 - **Prometheus metrics** — on a separate HTTP server (default `:8081`).
 - **Rate limiting** — configurable global and per-client rate limits.
+- **Health endpoint** — `GET /healthz` returns `{"status":"ok"}`.
+- **Pagination** — all list tools support `page` and `page_size` parameters with `next`/`previous` navigation URLs.
 
 ## Tools
 
@@ -39,7 +41,7 @@ All configuration is via environment variables:
 | `PROMETHEUS_METRICS_ADDR` | No | `:8081` | Prometheus `/metrics` endpoint |
 | `RATE_LIMIT_GLOBAL` | No | `100` | Global rate limit (requests/second) |
 | `RATE_LIMIT_PER_CLIENT` | No | `10` | Per-client IP rate limit |
-| `WRITE_TIMEOUT` | No | `300` | HTTP write timeout in seconds |
+| `WRITE_TIMEOUT` | No | `300s` | HTTP write timeout (Go duration, e.g. 60s, 5m) |
 
 The NetBox API token is supplied per-request in the `Authorization` header as `Bearer <token>`. Both v1 (`Token <token>`) and v2 (`Bearer nbt_<key>.<token>`) tokens are supported.
 
