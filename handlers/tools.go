@@ -26,7 +26,7 @@ type (
 		Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
 		Role         string `json:"role,omitempty" jsonschema:"filter by device role (slug)"`
 		Manufacturer string `json:"manufacturer,omitempty" jsonschema:"filter by manufacturer (slug)"`
-		DeviceType   string `json:"device_type,omitempty" jsonschema:"filter by device type (model slug)"`
+		DeviceType   string `json:"device_type,omitempty" jsonschema:"filter by device type slug (e.g. c-1250)"`
 		Status       string `json:"status,omitempty" jsonschema:"filter by status (active, planned, etc.)"`
 		Name         string `json:"name,omitempty" jsonschema:"filter by name (partial match)"`
 		Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
@@ -180,7 +180,7 @@ func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[De
 		addParam(params, "site", in.Site)
 		addParam(params, "role", in.Role)
 		addParam(params, "manufacturer", in.Manufacturer)
-		addParam(params, "device_type_id", in.DeviceType)
+		addParam(params, "device_type", in.DeviceType)
 		addParam(params, "status", in.Status)
 		addParam(params, "name__ic", in.Name)
 		addParam(params, "tenant", in.Tenant)
