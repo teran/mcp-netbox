@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/teran/mcp-netbox/domain"
 )
 
 func TestClient_ListSites(t *testing.T) {
@@ -726,4 +728,300 @@ func TestJSONRoundTripWireSites(t *testing.T) {
 	if len(d.Tags) != 1 || d.Tags[0].Name != "prod" {
 		t.Errorf("tags mismatch: %+v", d.Tags)
 	}
+}
+
+// --- doRequest direct tests ---
+
+func TestDoRequest_Success(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Accept") != "application/json" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if r.Header.Get("Authorization") != "Bearer test-token" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"name":"test"}`))
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	body, err := client.doRequest(context.Background(), "test-token", http.MethodGet, "/api/dcim/sites/", nil)
+	if err != nil {
+		t.Fatalf("doRequest() returned error: %v", err)
+	}
+	if string(body) != `{"name":"test"}` {
+		t.Errorf("body = %q, want %q", string(body), `{"name":"test"}`)
+	}
+}
+
+func TestDoRequest_Unauthorized(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	_, err := client.doRequest(context.Background(), "bad-token", http.MethodGet, "/api/dcim/sites/", nil)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+	if !contains(err.Error(), "unauthorized") {
+		t.Errorf("error = %q, want it to contain 'unauthorized'", err.Error())
+	}
+}
+
+func TestDoRequest_Forbidden(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+	if !contains(err.Error(), "forbidden") {
+		t.Errorf("error = %q, want it to contain 'forbidden'", err.Error())
+	}
+}
+
+func TestDoRequest_NotFound(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+	if !contains(err.Error(), "not found") {
+		t.Errorf("error = %q, want it to contain 'not found'", err.Error())
+	}
+}
+
+func TestDoRequest_RateLimited(t *testing.T) {
+	t.Parallel()
+
+	t.Run("without Retry-After", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusTooManyRequests)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+		if !contains(err.Error(), "rate limited") {
+			t.Errorf("error = %q, want it to contain 'rate limited'", err.Error())
+		}
+	})
+
+	t.Run("with Retry-After", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Retry-After", "5")
+			w.WriteHeader(http.StatusTooManyRequests)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+		if !contains(err.Error(), "retry after 5s") {
+			t.Errorf("error = %q, want it to contain 'retry after 5s'", err.Error())
+		}
+	})
+}
+
+func TestDoRequest_UnexpectedStatus(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"detail":"internal error"}`))
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+	if !contains(err.Error(), "unexpected status 500") {
+		t.Errorf("error = %q, want it to contain 'unexpected status 500'", err.Error())
+	}
+}
+
+func TestDoRequest_QueryParams(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("name") != "test-site" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if r.URL.Query().Get("status") != "active" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"result":"ok"}`))
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	body, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", map[string]string{
+		"name":   "test-site",
+		"status": "active",
+	})
+	if err != nil {
+		t.Fatalf("doRequest() returned error: %v", err)
+	}
+	if string(body) != `{"result":"ok"}` {
+		t.Errorf("body = %q, want %q", string(body), `{"result":"ok"}`)
+	}
+}
+
+// TestDoRequest_WithBodyLimit verifies that doRequest enforces a 10 MB body limit.
+func TestDoRequest_WithBodyLimit(t *testing.T) {
+	t.Parallel()
+
+	// Generate a payload larger than 10 MB.
+	size := 11 * 1024 * 1024
+	largeBody := make([]byte, size)
+	for i := range largeBody {
+		largeBody[i] = 'x'
+	}
+	largeBody = append([]byte(`{"data":"`), largeBody...)
+	largeBody = append(largeBody, `"}`...)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write(largeBody)
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	body, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	if err != nil {
+		t.Fatalf("doRequest() returned error: %v", err)
+	}
+	if len(body) > 10*1024*1024 {
+		t.Errorf("body length = %d, expected at most %d (10 MB limit)", len(body), 10*1024*1024)
+	}
+}
+
+// TestDoRequest_GetObjectUnknownType tests the object type lookup error path.
+func TestDoRequest_GetObjectUnknownType(t *testing.T) {
+	t.Parallel()
+
+	client := NewClient("http://example.com", http.DefaultClient)
+	_, err := client.GetObject(context.Background(), "token", "nonexistent_type", 1, nil)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+	if !contains(err.Error(), "unknown object type") {
+		t.Errorf("error = %q, want it to contain 'unknown object type'", err.Error())
+	}
+}
+
+// --- convertPaginated generic function test ---
+
+func TestConvertPaginated(t *testing.T) {
+	t.Parallel()
+
+	// Dummy conversion function: WireSite -> string (just the name).
+	convert := func(w WireSite) string {
+		return w.Name
+	}
+
+	resp := &domain.PaginatedResponse[WireSite]{
+		Count:    2,
+		Next:     "http://example.com/api/dcim/sites/?page=2",
+		Previous: "http://example.com/api/dcim/sites/?page=1",
+		Results: []WireSite{
+			{ID: 1, Name: "Site A", Slug: "site-a"},
+			{ID: 2, Name: "Site B", Slug: "site-b"},
+		},
+	}
+
+	converted := convertPaginated(resp, convert)
+
+	if converted.Count != 2 {
+		t.Errorf("Count = %d, want %d", converted.Count, 2)
+	}
+	if converted.Next != resp.Next {
+		t.Errorf("Next = %q, want %q", converted.Next, resp.Next)
+	}
+	if converted.Previous != resp.Previous {
+		t.Errorf("Previous = %q, want %q", converted.Previous, resp.Previous)
+	}
+	if len(converted.Results) != 2 {
+		t.Fatalf("len(Results) = %d, want %d", len(converted.Results), 2)
+	}
+	if converted.Results[0] != "Site A" {
+		t.Errorf("Results[0] = %q, want %q", converted.Results[0], "Site A")
+	}
+	if converted.Results[1] != "Site B" {
+		t.Errorf("Results[1] = %q, want %q", converted.Results[1], "Site B")
+	}
+}
+
+// TestConvertPaginated_Empty tests convertPaginated with zero results.
+func TestConvertPaginated_Empty(t *testing.T) {
+	t.Parallel()
+
+	convert := func(w WireSite) string {
+		return w.Name
+	}
+
+	resp := &domain.PaginatedResponse[WireSite]{
+		Count:    0,
+		Next:     "",
+		Previous: "",
+		Results:  []WireSite{},
+	}
+
+	converted := convertPaginated(resp, convert)
+
+	if converted.Count != 0 {
+		t.Errorf("Count = %d, want %d", converted.Count, 0)
+	}
+	if len(converted.Results) != 0 {
+		t.Errorf("len(Results) = %d, want %d", len(converted.Results), 0)
+	}
+}
+
+// contains is a helper to check substring presence.
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && containsStr(s, substr)
+}
+
+// containsStr is a simple substring check without importing strings.
+func containsStr(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
 }

@@ -1,8 +1,46 @@
 package handlers
 
 import (
+	"context"
+	"errors"
 	"testing"
+
+	"github.com/teran/mcp-netbox/application"
+	"github.com/teran/mcp-netbox/domain"
 )
+
+type stubRepo struct{}
+
+func (s *stubRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListDevices(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListIPAddresses(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListPrefixes(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListVLANs(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListVirtualMachines(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListClusters(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListCircuits(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
+	return nil, errors.New("not implemented")
+}
 
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
@@ -75,6 +113,35 @@ func TestAddIntParam(t *testing.T) {
 		addIntParam(m, "family", 0)
 		if _, ok := m["family"]; ok {
 			t.Error("family param should not be set for zero value")
+		}
+	})
+}
+
+func TestResolveService(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns context service when present", func(t *testing.T) {
+		svc := application.NewNetworkService(&stubRepo{}, "ctx-token")
+		ctx := context.WithValue(context.Background(), svcContextKey, svc)
+
+		got := resolveService(ctx, nil)
+		if got == nil {
+			t.Fatal("resolveService() = nil, want non-nil")
+		}
+	})
+
+	t.Run("returns fallback svc when context has none", func(t *testing.T) {
+		fallback := application.NewNetworkService(&stubRepo{}, "fallback-token")
+		got := resolveService(context.Background(), fallback)
+		if got == nil {
+			t.Fatal("resolveService() = nil, want non-nil")
+		}
+	})
+
+	t.Run("returns nil when neither context nor fallback has service", func(t *testing.T) {
+		got := resolveService(context.Background(), nil)
+		if got != nil {
+			t.Fatal("resolveService() = non-nil, want nil")
 		}
 	})
 }
