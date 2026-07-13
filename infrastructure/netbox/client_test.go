@@ -450,6 +450,20 @@ func TestClient_HTTPErrors(t *testing.T) {
 		}
 	})
 
+	t.Run("rate limited (429) with Retry-After", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Retry-After", "30")
+			w.WriteHeader(http.StatusTooManyRequests)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListSites(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+
 	t.Run("request failure", func(t *testing.T) {
 		client := NewClient("http://127.0.0.1:1", http.DefaultClient)
 		_, err := client.ListSites(context.Background(), "token", nil)
