@@ -7,53 +7,10 @@ import (
 	"testing"
 
 	"github.com/teran/mcp-netbox/domain"
+	"github.com/teran/mcp-netbox/internal/mockrepo"
 )
 
-type mockRepo struct {
-	listSitesFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error)
-	listDevicesFunc         func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error)
-	listIPAddressesFunc     func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error)
-	listPrefixesFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error)
-	listVLANsFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error)
-	listVirtualMachinesFunc func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error)
-	listClustersFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error)
-	listCircuitsFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error)
-	listRacksFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error)
-	getObjectFunc           func(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error)
-}
-
-func (m *mockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
-	return m.listSitesFunc(ctx, token, params)
-}
-func (m *mockRepo) ListDevices(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
-	return m.listDevicesFunc(ctx, token, params)
-}
-func (m *mockRepo) ListIPAddresses(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
-	return m.listIPAddressesFunc(ctx, token, params)
-}
-func (m *mockRepo) ListPrefixes(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
-	return m.listPrefixesFunc(ctx, token, params)
-}
-func (m *mockRepo) ListVLANs(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
-	return m.listVLANsFunc(ctx, token, params)
-}
-func (m *mockRepo) ListVirtualMachines(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
-	return m.listVirtualMachinesFunc(ctx, token, params)
-}
-func (m *mockRepo) ListClusters(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
-	return m.listClustersFunc(ctx, token, params)
-}
-func (m *mockRepo) ListCircuits(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
-	return m.listCircuitsFunc(ctx, token, params)
-}
-func (m *mockRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
-	return m.listRacksFunc(ctx, token, params)
-}
-func (m *mockRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
-	return m.getObjectFunc(ctx, token, objectType, id, params)
-}
-
-func newTestService(repo *mockRepo) *NetworkService {
+func newTestService(repo *mockrepo.MockRepo) *NetworkService {
 	return NewNetworkService(repo, "test-token")
 }
 
@@ -61,8 +18,8 @@ func TestNetworkService_ListSites(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listSitesFunc: func(_ context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListSitesFunc: func(_ context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want %q", token, "test-token")
 				}
@@ -82,8 +39,8 @@ func TestNetworkService_ListSites(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listSitesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListSitesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -98,8 +55,8 @@ func TestNetworkService_ListDevices(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
 				return &domain.PaginatedResponse[domain.Device]{Count: 0}, nil
 			},
 		})
@@ -113,8 +70,8 @@ func TestNetworkService_ListDevices(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -129,8 +86,8 @@ func TestNetworkService_ListIPAddresses(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
 				return &domain.PaginatedResponse[domain.IPAddress]{Count: 0}, nil
 			},
 		})
@@ -144,8 +101,8 @@ func TestNetworkService_ListIPAddresses(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -160,8 +117,8 @@ func TestNetworkService_ListPrefixes(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
 				return &domain.PaginatedResponse[domain.Prefix]{Count: 0}, nil
 			},
 		})
@@ -175,8 +132,8 @@ func TestNetworkService_ListPrefixes(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -191,8 +148,8 @@ func TestNetworkService_ListVLANs(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
 				return &domain.PaginatedResponse[domain.VLAN]{Count: 0}, nil
 			},
 		})
@@ -206,8 +163,8 @@ func TestNetworkService_ListVLANs(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -222,8 +179,8 @@ func TestNetworkService_ListVirtualMachines(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
 				return &domain.PaginatedResponse[domain.VirtualMachine]{Count: 0}, nil
 			},
 		})
@@ -237,8 +194,8 @@ func TestNetworkService_ListVirtualMachines(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -253,8 +210,8 @@ func TestNetworkService_ListClusters(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
 				return &domain.PaginatedResponse[domain.Cluster]{Count: 0}, nil
 			},
 		})
@@ -268,8 +225,8 @@ func TestNetworkService_ListClusters(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -284,8 +241,8 @@ func TestNetworkService_ListCircuits(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
 				return &domain.PaginatedResponse[domain.Circuit]{Count: 0}, nil
 			},
 		})
@@ -299,8 +256,8 @@ func TestNetworkService_ListCircuits(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -315,8 +272,8 @@ func TestNetworkService_ListRacks(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 				return &domain.PaginatedResponse[domain.Rack]{Count: 0}, nil
 			},
 		})
@@ -330,8 +287,8 @@ func TestNetworkService_ListRacks(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			listRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -346,8 +303,8 @@ func TestNetworkService_GetObject(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			getObjectFunc: func(_ context.Context, _ string, objectType string, id int, _ map[string]string) (domain.RawObject, error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			GetObjectFunc: func(_ context.Context, _ string, objectType string, id int, _ map[string]string) (domain.RawObject, error) {
 				return domain.RawObject(fmt.Sprintf(`{"id":%d,"name":"%s"}`, id, objectType)), nil
 			},
 		})
@@ -361,8 +318,8 @@ func TestNetworkService_GetObject(t *testing.T) {
 	})
 
 	t.Run("error propagation", func(t *testing.T) {
-		svc := newTestService(&mockRepo{
-			getObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (domain.RawObject, error) {
+		svc := newTestService(&mockrepo.MockRepo{
+			GetObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (domain.RawObject, error) {
 				return nil, errors.New("repo error")
 			},
 		})
