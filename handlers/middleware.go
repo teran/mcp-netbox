@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -155,12 +155,24 @@ func SanitizeLog(s string) string {
 	}, s)
 }
 
+// SecurityHeadersMiddleware sets standard security HTTP headers on every response.
+func SecurityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		// HSTS is intentionally omitted — TLS termination is handled by the reverse proxy.
+		// CSP is intentionally omitted — MCP uses JSON-RPC and does not serve HTML.
+		next.ServeHTTP(w, r)
+	})
+}
+
 // RecoveryMiddleware catches panics in downstream handlers and returns 500.
 func RecoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rec := recover(); rec != nil {
-				log.Printf("PANIC: %v\n%s", rec, debug.Stack())
+				slog.Error("panic recovered", "error", rec, "stack", string(debug.Stack()))
 				http.Error(w, `{"error":"internal server error"}`, http.StatusInternalServerError)
 			}
 		}()
@@ -202,14 +214,14 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		duration := time.Since(start)
 
-		log.Printf("mcp_log http_method=%s path=%s method=%s duration=%s req_size=%d resp_size=%d status=%d", //nolint:gosec
-			SanitizeLog(r.Method),
-			SanitizeLog(r.URL.Path),
-			SanitizeLog(toolName),
-			duration,
-			len(body),
-			lrw.bodySize,
-			lrw.statusCode,
+		slog.Info("mcp_request",
+			"http_method", r.Method,
+			"path", r.URL.Path,
+			"method", toolName,
+			"duration", duration,
+			"req_size", len(body),
+			"resp_size", lrw.bodySize,
+			"status", lrw.statusCode,
 		)
 	})
 }

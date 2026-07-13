@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"sync"
@@ -103,7 +103,8 @@ func RateLimitMiddleware(cfg RateLimiterConfig) (func(http.Handler) http.Handler
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			clientIP := extractClientIP(r)
 			if !rl.Allow(clientIP) {
-				log.Printf("Rate limit exceeded for client IP: %s", SanitizeLog(clientIP)) //nolint:gosec
+				slog.Warn("rate limit exceeded", "client_ip", SanitizeLog(clientIP))
+				w.Header().Set("Retry-After", "1")
 				http.Error(w, `{"error":"rate limit exceeded"}`, http.StatusTooManyRequests)
 				return
 			}

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"context"
 	"io"
 	"net/http"
@@ -366,11 +365,34 @@ func TestTokenMiddleware(t *testing.T) {
 	})
 }
 
+func TestSecurityHeadersMiddleware(t *testing.T) {
+	t.Parallel()
+
+	handler := SecurityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
+	}
+	if rec.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Errorf("X-Content-Type-Options = %q, want %q", rec.Header().Get("X-Content-Type-Options"), "nosniff")
+	}
+	if rec.Header().Get("X-Frame-Options") != "DENY" {
+		t.Errorf("X-Frame-Options = %q, want %q", rec.Header().Get("X-Frame-Options"), "DENY")
+	}
+	if rec.Header().Get("Referrer-Policy") != "strict-origin-when-cross-origin" {
+		t.Errorf("Referrer-Policy = %q, want %q", rec.Header().Get("Referrer-Policy"), "strict-origin-when-cross-origin")
+	}
+}
+
 func TestLoggingMiddleware_ToolCallMethod(t *testing.T) {
 	t.Parallel()
 
-	var buf bytes.Buffer
-	// We can't easily capture log output, so just verify it doesn't crash
 	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
@@ -382,5 +404,4 @@ func TestLoggingMiddleware_ToolCallMethod(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
 	}
-	_ = buf
 }
