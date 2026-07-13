@@ -15,17 +15,18 @@ const svcContextKey ContextKey = "netbox_service"
 
 // ServiceFromContext extracts the NetworkService from the request context.
 // Returns nil if the service is not present in the context.
-func ServiceFromContext(r *http.Request) *application.NetworkService {
-	if svc, ok := r.Context().Value(svcContextKey).(*application.NetworkService); ok {
+func ServiceFromContext(ctx context.Context) *application.NetworkService {
+	if svc, ok := ctx.Value(svcContextKey).(*application.NetworkService); ok {
 		return svc
 	}
 	return nil
 }
 
 // NewMux builds the HTTP mux with all middleware and routes configured.
-func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, mcpHandler http.Handler) *http.ServeMux {
+// Returns the mux and a stop function for background goroutines (e.g. rate limiter eviction).
+func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, mcpHandler http.Handler) (*http.ServeMux, func()) {
 	injectClientMW := injectClientMiddleware(cfg.NetBoxURL, sharedHTTPClient)
-	rateLimitMW, _ := RateLimitMiddleware(RateLimiterConfig{
+	rateLimitMW, stopRateLimit := RateLimitMiddleware(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(cfg.RateLimitGlobal),
 		GlobalBurst:    cfg.RateLimitGlobal * 2,
 		PerClientLimit: rate.Limit(cfg.RateLimitPerClient),
@@ -33,12 +34,14 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 	})
 
 	handler := RecoveryMiddleware(
-		MetricsMiddleware(metrics)(
-			rateLimitMW(
-				BodyLimitMiddleware(DefaultMaxRequestBodySize)(
-					LoggingMiddleware(
-						TokenMiddleware(
-							injectClientMW(mcpHandler),
+		SecurityHeadersMiddleware(
+			MetricsMiddleware(metrics)(
+				rateLimitMW(
+					BodyLimitMiddleware(DefaultMaxRequestBodySize)(
+						LoggingMiddleware(
+							TokenMiddleware(
+								injectClientMW(mcpHandler),
+							),
 						),
 					),
 				),
@@ -54,7 +57,7 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 	})
 	mux.Handle("/mcp", handler)
 
-	return mux
+	return mux, stopRateLimit
 }
 
 // injectClientMiddleware creates a middleware that injects a per-request

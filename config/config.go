@@ -45,7 +45,11 @@ func validatePositiveInt(value interface{}) error {
 }
 
 func validateURLScheme(value interface{}) error {
-	u, err := url.Parse(value.(string))
+	s, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("must be a string")
+	}
+	u, err := url.Parse(s)
 	if err != nil {
 		return err
 	}
@@ -56,7 +60,11 @@ func validateURLScheme(value interface{}) error {
 }
 
 func validateURLHost(value interface{}) error {
-	u, err := url.Parse(value.(string))
+	s, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("must be a string")
+	}
+	u, err := url.Parse(s)
 	if err != nil {
 		return err
 	}

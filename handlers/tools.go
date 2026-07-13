@@ -30,7 +30,7 @@ type DevicesInput struct {
 	Role         string `json:"role,omitempty" jsonschema:"filter by device role (slug)"`
 	Manufacturer string `json:"manufacturer,omitempty" jsonschema:"filter by manufacturer (slug)"`
 	DeviceType   string `json:"device_type,omitempty" jsonschema:"filter by device type slug (e.g. c-1250)"`
-	Status       string `json:"status,omitempty" jsonschema:"status: active, offine, planned, staged, failed, inventory, decommissioning"`
+	Status       string `json:"status,omitempty" jsonschema:"status: active, offline, planned, staged, failed, inventory, decommissioning"`
 	Name         string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
 	Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Rack         string `json:"rack,omitempty" jsonschema:"filter by rack (name)"`
@@ -85,7 +85,7 @@ type VirtualMachinesInput struct {
 	Cluster      string `json:"cluster,omitempty" jsonschema:"filter by cluster (name)"`
 	ClusterGroup string `json:"cluster_group,omitempty" jsonschema:"filter by cluster group (slug)"`
 	Role         string `json:"role,omitempty" jsonschema:"filter by VM role (slug)"`
-	Status       string `json:"status,omitempty" jsonschema:"status: active, staged, offine, decommissioning"`
+	Status       string `json:"status,omitempty" jsonschema:"status: active, staged, offline, decommissioning"`
 	Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Name         string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
 	Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
@@ -111,7 +111,7 @@ type CircuitsInput struct {
 	Provider    string `json:"provider,omitempty" jsonschema:"filter by provider (slug)"`
 	CircuitType string `json:"circuit_type,omitempty" jsonschema:"filter by circuit type (slug)"`
 	Site        string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-	Status      string `json:"status,omitempty" jsonschema:"status: active, planned, offine, decommissioning"`
+	Status      string `json:"status,omitempty" jsonschema:"status: active, planned, offline, decommissioning"`
 	Tenant      string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Page        int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize    int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
@@ -161,6 +161,19 @@ func addIntParam(m map[string]string, key string, value int) {
 	}
 }
 
+var errServiceNotAvailable = fmt.Errorf("service not available in request context")
+
+// resolveService returns the service from the request context if available,
+// falling back to the captured service parameter. This allows per-request
+// service injection (with per-request tokens) while preserving backward
+// compatibility with tests that pass a service directly.
+func resolveService(ctx context.Context, svc *application.NetworkService) *application.NetworkService {
+	if s := ServiceFromContext(ctx); s != nil {
+		return s
+	}
+	return svc
+}
+
 // — handler factories —
 
 type SitesOutput struct {
@@ -172,13 +185,18 @@ type SitesOutput struct {
 
 func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SitesInput, SitesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in SitesInput) (*mcp.CallToolResult, SitesOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, SitesOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "region", in.Region)
 		addParam(params, "status", in.Status)
 		addParam(params, "tenant", in.Tenant)
 
-		resp, err := svc.ListSites(ctx, params)
+		resp, err := s.ListSites(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, SitesOutput{}, fmt.Errorf("list sites: %w", err)
 		}
@@ -196,6 +214,11 @@ type DevicesOutput struct {
 
 func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DevicesInput, DevicesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in DevicesInput) (*mcp.CallToolResult, DevicesOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, DevicesOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "site", in.Site)
@@ -208,7 +231,7 @@ func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[De
 		addParam(params, "rack", in.Rack)
 		addParam(params, "cluster", in.Cluster)
 
-		resp, err := svc.ListDevices(ctx, params)
+		resp, err := s.ListDevices(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, DevicesOutput{}, fmt.Errorf("list devices: %w", err)
 		}
@@ -226,6 +249,11 @@ type IPAddressesOutput struct {
 
 func NewGetIPAddressesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[IPAddressesInput, IPAddressesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressesInput) (*mcp.CallToolResult, IPAddressesOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, IPAddressesOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "address", in.Address)
@@ -235,7 +263,7 @@ func NewGetIPAddressesHandler(svc *application.NetworkService) mcp.ToolHandlerFo
 		addParam(params, "role", in.Role)
 		addParam(params, "tenant", in.Tenant)
 
-		resp, err := svc.ListIPAddresses(ctx, params)
+		resp, err := s.ListIPAddresses(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, IPAddressesOutput{}, fmt.Errorf("list IP addresses: %w", err)
 		}
@@ -253,6 +281,11 @@ type PrefixesOutput struct {
 
 func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PrefixesInput, PrefixesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in PrefixesInput) (*mcp.CallToolResult, PrefixesOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, PrefixesOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "prefix", in.Prefix)
@@ -264,7 +297,7 @@ func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[P
 		addParam(params, "within", in.Within)
 		addIntParam(params, "family", in.Family)
 
-		resp, err := svc.ListPrefixes(ctx, params)
+		resp, err := s.ListPrefixes(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, PrefixesOutput{}, fmt.Errorf("list prefixes: %w", err)
 		}
@@ -282,6 +315,11 @@ type VLANsOutput struct {
 
 func NewGetVLANsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLANsInput, VLANsOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in VLANsInput) (*mcp.CallToolResult, VLANsOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VLANsOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "site", in.Site)
@@ -290,7 +328,7 @@ func NewGetVLANsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLAN
 		addParam(params, "tenant", in.Tenant)
 		addIntParam(params, "vid", in.VID)
 
-		resp, err := svc.ListVLANs(ctx, params)
+		resp, err := s.ListVLANs(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, VLANsOutput{}, fmt.Errorf("list VLANs: %w", err)
 		}
@@ -308,6 +346,11 @@ type VirtualMachinesOutput struct {
 
 func NewGetVirtualMachinesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VirtualMachinesInput, VirtualMachinesOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachinesInput) (*mcp.CallToolResult, VirtualMachinesOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachinesOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "cluster", in.Cluster)
@@ -318,7 +361,7 @@ func NewGetVirtualMachinesHandler(svc *application.NetworkService) mcp.ToolHandl
 		addParam(params, "name__ic", in.Name)
 		addParam(params, "site", in.Site)
 
-		resp, err := svc.ListVirtualMachines(ctx, params)
+		resp, err := s.ListVirtualMachines(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, VirtualMachinesOutput{}, fmt.Errorf("list VMs: %w", err)
 		}
@@ -336,6 +379,11 @@ type ClustersOutput struct {
 
 func NewGetClustersHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClustersInput, ClustersOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in ClustersInput) (*mcp.CallToolResult, ClustersOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ClustersOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "type", in.ClusterType)
@@ -344,7 +392,7 @@ func NewGetClustersHandler(svc *application.NetworkService) mcp.ToolHandlerFor[C
 		addParam(params, "tenant", in.Tenant)
 		addParam(params, "name__ic", in.Name)
 
-		resp, err := svc.ListClusters(ctx, params)
+		resp, err := s.ListClusters(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, ClustersOutput{}, fmt.Errorf("list clusters: %w", err)
 		}
@@ -362,6 +410,11 @@ type CircuitsOutput struct {
 
 func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitsInput, CircuitsOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitsInput) (*mcp.CallToolResult, CircuitsOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitsOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "provider", in.Provider)
@@ -370,7 +423,7 @@ func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[C
 		addParam(params, "status", in.Status)
 		addParam(params, "tenant", in.Tenant)
 
-		resp, err := svc.ListCircuits(ctx, params)
+		resp, err := s.ListCircuits(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, CircuitsOutput{}, fmt.Errorf("list circuits: %w", err)
 		}
@@ -385,6 +438,11 @@ type GetObjectOutput struct {
 
 func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor[GetObjectInput, GetObjectOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in GetObjectInput) (*mcp.CallToolResult, GetObjectOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, GetObjectOutput{}, errServiceNotAvailable
+		}
+
 		if in.ObjectType == "" {
 			return &mcp.CallToolResult{IsError: true}, GetObjectOutput{}, fmt.Errorf("object_type is required")
 		}
@@ -392,7 +450,7 @@ func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 			return &mcp.CallToolResult{IsError: true}, GetObjectOutput{}, fmt.Errorf("id must be a positive integer")
 		}
 
-		data, err := svc.GetObject(ctx, in.ObjectType, in.ID)
+		data, err := s.GetObject(ctx, in.ObjectType, in.ID)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, GetObjectOutput{}, fmt.Errorf("get object: %w", err)
 		}
@@ -410,6 +468,11 @@ type RacksOutput struct {
 
 func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RacksInput, RacksOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in RacksInput) (*mcp.CallToolResult, RacksOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, RacksOutput{}, errServiceNotAvailable
+		}
+
 		params := paginationParams(in.Page, in.PageSize)
 		addParam(params, "q", in.Q)
 		addParam(params, "site", in.Site)
@@ -417,7 +480,7 @@ func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Rack
 		addParam(params, "status", in.Status)
 		addParam(params, "tenant", in.Tenant)
 
-		resp, err := svc.ListRacks(ctx, params)
+		resp, err := s.ListRacks(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, RacksOutput{}, fmt.Errorf("list racks: %w", err)
 		}
