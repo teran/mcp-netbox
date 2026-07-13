@@ -19,16 +19,18 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 
 | Tool | Description |
 |------|-------------|
-| `get_sites` | List sites with optional filters |
-| `get_devices` | List devices with search/filters |
-| `get_ip_addresses` | Search IP addresses |
-| `get_prefixes` | Search IP prefixes |
-| `get_vlans` | List VLANs |
-| `get_virtual_machines` | List virtual machines |
-| `get_clusters` | List clusters |
-| `get_circuits` | List circuits |
-| `get_racks` | List racks |
+| `get_sites` | List sites with optional filters and free-text search |
+| `get_devices` | List devices with filters and free-text search |
+| `get_ip_addresses` | Search IP addresses with free-text search |
+| `get_prefixes` | Search IP prefixes with free-text search |
+| `get_vlans` | List VLANs with free-text search |
+| `get_virtual_machines` | List virtual machines with free-text search |
+| `get_clusters` | List clusters with free-text search |
+| `get_circuits` | List circuits with free-text search |
+| `get_racks` | List racks with free-text search |
 | `get_object_by_id` | Get any object by type and ID |
+
+> All list tools support a `q` parameter for free-text search across all fields.
 
 ## Configuration
 
@@ -41,30 +43,14 @@ All configuration is via environment variables:
 | `PROMETHEUS_METRICS_ADDR` | No | `:8081` | Prometheus `/metrics` endpoint |
 | `RATE_LIMIT_GLOBAL` | No | `100` | Global rate limit (requests/second) |
 | `RATE_LIMIT_PER_CLIENT` | No | `10` | Per-client IP rate limit |
-| `WRITE_TIMEOUT` | No | `300s` | HTTP write timeout (Go duration, e.g. 60s, 5m) |
+| `WRITE_TIMEOUT` | No | `300s` (5 minutes) | HTTP write timeout (Go duration, minimum 1s) |
 
 The NetBox API token is supplied per-request in the `Authorization` header as `Bearer <token>`. Both v1 (`Token <token>`) and v2 (`Bearer nbt_<key>.<token>`) tokens are supported.
 
 ## MCP Client Configuration
 
-For use with OpenCode or any MCP client:
-
-```json
-{
-  "mcp": {
-    "netbox": {
-      "type": "local",
-      "enabled": true,
-      "command": ["/path/to/mcp-netbox"],
-      "environment": {
-        "NETBOX_URL": "http://netbox:8000"
-      }
-    }
-  }
-}
-```
-
-For remote usage via SSE/Streamable HTTP:
+The server uses the **Streamable HTTP** MCP transport (remote mode).
+It does not support stdio/local mode. All clients must connect over HTTP.
 
 ```json
 {
@@ -109,6 +95,27 @@ golangci-lint run ./...
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/teran/mcp-netbox:latest .
 ```
+
+## Security
+
+- **Token handling**: The NetBox API token is passed per-request in the `Authorization` header. It is never stored on the server, written to logs, or persisted between requests.
+- **Read-only**: The server only exposes GET operations. No write access to NetBox.
+- **TLS**: Terminate TLS at a reverse proxy (nginx, Envoy) placed in front of the server.
+- **Rate limiting**: Built-in rate limiting prevents abuse (configurable via environment variables).
+
+## Troubleshooting
+
+### 401 Unauthorized
+The Authorization header is missing or malformed. Ensure you pass `Bearer <token>`.
+
+### 429 Too Many Requests
+Rate limit exceeded. Increase `RATE_LIMIT_GLOBAL` or `RATE_LIMIT_PER_CLIENT`, or wait before retrying.
+
+### Connection issues
+Verify `NETBOX_URL` is reachable from the server. Check `GET /healthz` endpoint.
+
+### No results returned
+Verify the API token has sufficient permissions in NetBox. Some filters may not match any objects.
 
 ## License
 

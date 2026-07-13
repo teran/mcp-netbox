@@ -33,8 +33,10 @@ This document describes the agents/assistants involved in the development and op
 | `handlers/metrics.go`                       | Prometheus metrics collectors + middleware + `WrapToolHandler` |
 | `handlers/tools.go`                         | MCP tool handler factories + I/O types          |
 | `handlers/registration.go`                  | Tool registration via `RegisterTools()`         |
+| `handlers/server.go`                        | HTTP mux builder, middleware chain assembly, service-per-request injection |
 | `application/service.go`                    | Business logic / use case layer                 |
 | `domain/`                                   | Domain models + repository interfaces (ports)   |
+| `domain/repository.go`                      | NetworkRepository interface (port), RawObject type for generic object retrieval |
 | `infrastructure/netbox/client.go`           | NetBox HTTP API client (adapters)               |
 | `infrastructure/netbox/models.go`           | JSON wire models + `toDomain()` conversion      |
 

@@ -27,6 +27,8 @@ This server exposes NetBox infrastructure data through the MCP protocol using **
                                                     └───────────────────────┘
 ```
 
+> **TLS termination** is expected to be handled by a reverse proxy (e.g., nginx, Envoy) placed in front of the MCP server. The server itself does not serve HTTPS directly.
+
 ## Technology Stack
 
 | Component         | Choice                                                          |
@@ -47,7 +49,7 @@ This server exposes NetBox infrastructure data through the MCP protocol using **
 | `PROMETHEUS_METRICS_ADDR` | No    | `:8081` | TCP address for the Prometheus `/metrics` endpoint |
 | `RATE_LIMIT_GLOBAL`    | No       | `100`   | Global rate limit (requests/second)  |
 | `RATE_LIMIT_PER_CLIENT`| No       | `10`    | Per-client IP rate limit (requests/second) |
-| `WRITE_TIMEOUT`        | No       | `300`   | HTTP write timeout in seconds (0 disables) |
+| `WRITE_TIMEOUT`        | No       | `300s`  | HTTP write timeout (Go duration format, e.g. `300s`). Minimum 1s. Note: 0 will fail validation; use a reverse proxy for no timeout. |
 
 The NetBox API token is **not** set via environment variables. It is supplied per-request in the `Authorization` header as `Bearer <token>`.
 
@@ -68,6 +70,7 @@ List sites in NetBox with optional filters.
 | `tenant`     | string | no       | Filter by tenant (slug or name)              |
 | `page`       | int    | no       | Page number (default: 1)                     |
 | `page_size`  | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of sites.
 
@@ -92,6 +95,7 @@ List devices in NetBox with optional filters.
 | `cluster`      | string | no       | Filter by cluster (name)                     |
 | `page`         | int    | no       | Page number (default: 1)                     |
 | `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of devices.
 
@@ -113,6 +117,7 @@ Search IP addresses in NetBox.
 | `tenant`       | string | no       | Filter by tenant (slug)                      |
 | `page`         | int    | no       | Page number (default: 1)                     |
 | `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of IP addresses.
 
@@ -136,6 +141,7 @@ Search IP prefixes in NetBox.
 | `family`     | int    | no       | Address family: 4 or 6                       |
 | `page`       | int    | no       | Page number (default: 1)                     |
 | `page_size`  | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of prefixes.
 
@@ -156,6 +162,7 @@ List VLANs in NetBox.
 | `vid`        | int    | no       | Filter by VLAN ID                            |
 | `page`       | int    | no       | Page number (default: 1)                     |
 | `page_size`  | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of VLANs.
 
@@ -178,6 +185,7 @@ List virtual machines in NetBox.
 | `site`         | string | no       | Filter by site (slug)                        |
 | `page`         | int    | no       | Page number (default: 1)                     |
 | `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of virtual machines.
 
@@ -198,6 +206,7 @@ List clusters in NetBox.
 | `name`         | string | no       | Filter by name (partial match with `__ic`)   |
 | `page`         | int    | no       | Page number (default: 1)                     |
 | `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of clusters.
 
@@ -218,6 +227,7 @@ List circuits in NetBox.
 | `tenant`       | string | no       | Filter by tenant (slug)                      |
 | `page`         | int    | no       | Page number (default: 1)                     |
 | `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of circuits.
 
@@ -252,25 +262,27 @@ List racks in NetBox.
 | `tenant`     | string | no       | Filter by tenant (slug)                      |
 | `page`       | int    | no       | Page number (default: 1)                     |
 | `page_size`  | int    | no       | Results per page (default: 25, max: 100)     |
+| `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of racks.
 
 ## Middleware Chain
 
-The server applies six middleware layers to every HTTP request, executed in this order (outermost first):
+The server applies seven middleware layers to every HTTP request, executed in this order (outermost first):
 
 1. **RecoveryMiddleware** — catches panics, returns 500
-2. **MetricsMiddleware** — tracks in-flight requests via gauge
-3. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
-4. **BodyLimitMiddleware** — 1 MB request body limit
-5. **LoggingMiddleware** — logs MCP method, duration, status, sizes (never logs token)
-6. **TokenMiddleware** — extracts token from `Authorization` header, stores in context
-7. **injectClientMiddleware** — creates NetBox API client with shared `http.Client`, stores services in context
+2. **SecurityHeadersMiddleware** — sets security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
+3. **MetricsMiddleware** — tracks in-flight requests via gauge
+4. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
+5. **BodyLimitMiddleware** — 1 MB request body limit
+6. **LoggingMiddleware** — logs MCP method, duration, status, sizes (never logs token)
+7. **TokenMiddleware** — extracts token from `Authorization` header, stores in context
+8. **injectClientMiddleware** — creates NetBox API client with shared `http.Client`, stores services in context
 
 ## Authentication Flow
 
 1. MCP Client sends POST to Streamable HTTP endpoint with `Authorization: Bearer <token>`
-2. Middleware chain extracts and validates the token
+2. Middleware chain extracts, validates format, and relays the token
 3. Token is stored in request context, passed to NetBox API client
 4. Tool handlers retrieve services from context and call NetBox API
 5. Token is never stored on server — exists only for request lifetime
@@ -283,6 +295,9 @@ The server applies six middleware layers to every HTTP request, executed in this
 |--------|-------|
 | 429 Too Many Requests | Rate limit exceeded |
 | 401 Unauthorized | Missing or malformed Authorization header |
+| 403 Forbidden | Token lacks permissions |
+| 413 Request Entity Too Large | Body exceeds 1 MB limit |
+| 500 Internal Server Error | Panic recovery |
 | 400 Bad Request | Batch request exceeds max size (100) |
 
 ### MCP Level (Tool Handlers)
@@ -292,6 +307,10 @@ The server applies six middleware layers to every HTTP request, executed in this
 | Resource not found | `isError: true` |
 | NetBox unavailable | `isError: true` |
 | Invalid token | `isError: true` |
+
+## Health Check
+
+`GET /healthz` — Returns `{"status":"ok"}` with HTTP 200. Used for liveness probes.
 
 ## Custom Metrics
 
