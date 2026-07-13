@@ -1,13 +1,8 @@
 package netbox
 
-// WireJSONPaginated is the raw JSON paginated response from NetBox API.
-type WireJSONPaginated[T any] struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
-	Results  []T    `json:"results"`
-}
-
+// Wire types mirror NetBox JSON API responses. The domain.PaginatedResponse
+// type is used for both deserialization and output — wire types are embedded
+// via type parameter instantiation (e.g. domain.PaginatedResponse[WireSite]).
 type (
 	WireSite struct {
 		ID              int         `json:"id"`

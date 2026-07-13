@@ -1,6 +1,10 @@
 // Package domain provides the core domain models and repository interfaces
-// for the NetBox MCP server. These types are free of external dependencies
-// and represent the pure business objects of the value chain.
+// for the NetBox MCP server.
+//
+// These types are free of external dependencies and represent the pure
+// business objects of the application. JSON struct tags are present for
+// serialization when returned as MCP tool output — encoding/json is a
+// Go standard library type and does not compromise domain purity.
 package domain
 
 // Site represents a NetBox site (physical location or data center).
@@ -21,9 +25,6 @@ type (
 		Tags            []Tag   `json:"tags,omitempty"`
 		Created         string  `json:"created"`
 		LastUpdated     string  `json:"last_updated"`
-		DeviceCount     int     `json:"device_count,omitempty"`
-		RackCount       int     `json:"rack_count,omitempty"`
-		PrefixCount     int     `json:"prefix_count,omitempty"`
 	}
 
 	Device struct {
@@ -120,19 +121,17 @@ type (
 	}
 
 	Cluster struct {
-		ID            int     `json:"id"`
-		Name          string  `json:"name"`
-		ClusterType   *Nested `json:"type"`
-		ClusterGroup  *Nested `json:"group"`
-		Site          *Nested `json:"site"`
-		Tenant        *Nested `json:"tenant"`
-		Description   string  `json:"description,omitempty"`
-		Comments      string  `json:"comments,omitempty"`
-		Tags          []Tag   `json:"tags,omitempty"`
-		Created       string  `json:"created"`
-		LastUpdated   string  `json:"last_updated"`
-		DeviceCount   int     `json:"device_count,omitempty"`
-		VMActiveCount int     `json:"vm_count,omitempty"`
+		ID           int     `json:"id"`
+		Name         string  `json:"name"`
+		ClusterType  *Nested `json:"type"`
+		ClusterGroup *Nested `json:"group"`
+		Site         *Nested `json:"site"`
+		Tenant       *Nested `json:"tenant"`
+		Description  string  `json:"description,omitempty"`
+		Comments     string  `json:"comments,omitempty"`
+		Tags         []Tag   `json:"tags,omitempty"`
+		Created      string  `json:"created"`
+		LastUpdated  string  `json:"last_updated"`
 	}
 
 	Circuit struct {
@@ -169,7 +168,6 @@ type (
 		Tags        []Tag   `json:"tags,omitempty"`
 		Created     string  `json:"created"`
 		LastUpdated string  `json:"last_updated"`
-		DeviceCount int     `json:"device_count,omitempty"`
 	}
 )
 

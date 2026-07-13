@@ -123,23 +123,11 @@ func (c *Client) ListSites(ctx context.Context, token string, params map[string]
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WireSite]
+	var wireResp domain.PaginatedResponse[WireSite]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal sites: %w", err)
 	}
-
-	sites := make([]domain.Site, len(wireResp.Results))
-	for i := range wireResp.Results {
-		sites[i] = wireSiteToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.Site]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  sites,
-	}, nil
+	return convertPaginated(&wireResp, wireSiteToDomain), nil
 }
 
 // ListDevices returns a paginated list of devices.
@@ -148,23 +136,11 @@ func (c *Client) ListDevices(ctx context.Context, token string, params map[strin
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WireDevice]
+	var wireResp domain.PaginatedResponse[WireDevice]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal devices: %w", err)
 	}
-
-	devices := make([]domain.Device, len(wireResp.Results))
-	for i := range wireResp.Results {
-		devices[i] = wireDeviceToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.Device]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  devices,
-	}, nil
+	return convertPaginated(&wireResp, wireDeviceToDomain), nil
 }
 
 // ListIPAddresses returns a paginated list of IP addresses.
@@ -173,23 +149,11 @@ func (c *Client) ListIPAddresses(ctx context.Context, token string, params map[s
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WireIPAddress]
+	var wireResp domain.PaginatedResponse[WireIPAddress]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal IP addresses: %w", err)
 	}
-
-	ips := make([]domain.IPAddress, len(wireResp.Results))
-	for i := range wireResp.Results {
-		ips[i] = wireIPAddressToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.IPAddress]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  ips,
-	}, nil
+	return convertPaginated(&wireResp, wireIPAddressToDomain), nil
 }
 
 // ListPrefixes returns a paginated list of prefixes.
@@ -198,23 +162,11 @@ func (c *Client) ListPrefixes(ctx context.Context, token string, params map[stri
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WirePrefix]
+	var wireResp domain.PaginatedResponse[WirePrefix]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal prefixes: %w", err)
 	}
-
-	prefixes := make([]domain.Prefix, len(wireResp.Results))
-	for i := range wireResp.Results {
-		prefixes[i] = wirePrefixToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.Prefix]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  prefixes,
-	}, nil
+	return convertPaginated(&wireResp, wirePrefixToDomain), nil
 }
 
 // ListVLANs returns a paginated list of VLANs.
@@ -223,23 +175,11 @@ func (c *Client) ListVLANs(ctx context.Context, token string, params map[string]
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WireVLAN]
+	var wireResp domain.PaginatedResponse[WireVLAN]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal VLANs: %w", err)
 	}
-
-	vlans := make([]domain.VLAN, len(wireResp.Results))
-	for i := range wireResp.Results {
-		vlans[i] = wireVLANToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.VLAN]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  vlans,
-	}, nil
+	return convertPaginated(&wireResp, wireVLANToDomain), nil
 }
 
 // ListVirtualMachines returns a paginated list of virtual machines.
@@ -248,23 +188,11 @@ func (c *Client) ListVirtualMachines(ctx context.Context, token string, params m
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WireVirtualMachine]
+	var wireResp domain.PaginatedResponse[WireVirtualMachine]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal VMs: %w", err)
 	}
-
-	vms := make([]domain.VirtualMachine, len(wireResp.Results))
-	for i := range wireResp.Results {
-		vms[i] = wireVirtualMachineToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.VirtualMachine]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  vms,
-	}, nil
+	return convertPaginated(&wireResp, wireVirtualMachineToDomain), nil
 }
 
 // ListClusters returns a paginated list of clusters.
@@ -273,23 +201,11 @@ func (c *Client) ListClusters(ctx context.Context, token string, params map[stri
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WireCluster]
+	var wireResp domain.PaginatedResponse[WireCluster]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal clusters: %w", err)
 	}
-
-	clusters := make([]domain.Cluster, len(wireResp.Results))
-	for i := range wireResp.Results {
-		clusters[i] = wireClusterToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.Cluster]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  clusters,
-	}, nil
+	return convertPaginated(&wireResp, wireClusterToDomain), nil
 }
 
 // ListCircuits returns a paginated list of circuits.
@@ -298,23 +214,11 @@ func (c *Client) ListCircuits(ctx context.Context, token string, params map[stri
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WireCircuit]
+	var wireResp domain.PaginatedResponse[WireCircuit]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal circuits: %w", err)
 	}
-
-	circuits := make([]domain.Circuit, len(wireResp.Results))
-	for i := range wireResp.Results {
-		circuits[i] = wireCircuitToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.Circuit]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  circuits,
-	}, nil
+	return convertPaginated(&wireResp, wireCircuitToDomain), nil
 }
 
 // ListRacks returns a paginated list of racks.
@@ -323,23 +227,11 @@ func (c *Client) ListRacks(ctx context.Context, token string, params map[string]
 	if err != nil {
 		return nil, err
 	}
-
-	var wireResp WireJSONPaginated[WireRack]
+	var wireResp domain.PaginatedResponse[WireRack]
 	if err := json.Unmarshal(raw, &wireResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal racks: %w", err)
 	}
-
-	racks := make([]domain.Rack, len(wireResp.Results))
-	for i := range wireResp.Results {
-		racks[i] = wireRackToDomain(wireResp.Results[i])
-	}
-
-	return &domain.PaginatedResponse[domain.Rack]{
-		Count:    wireResp.Count,
-		Next:     wireResp.Next,
-		Previous: wireResp.Previous,
-		Results:  racks,
-	}, nil
+	return convertPaginated(&wireResp, wireRackToDomain), nil
 }
 
 // GetObject retrieves a single object by its type and ID.
@@ -356,6 +248,20 @@ func (c *Client) GetObject(ctx context.Context, token, objectType string, id int
 	}
 
 	return domain.RawObject(body), nil
+}
+
+// convertPaginated converts a paginated response from wire type W to domain type D.
+func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
+	results := make([]D, len(resp.Results))
+	for i, w := range resp.Results {
+		results[i] = convert(w)
+	}
+	return &domain.PaginatedResponse[D]{
+		Count:    resp.Count,
+		Next:     resp.Next,
+		Previous: resp.Previous,
+		Results:  results,
+	}
 }
 
 // Ensure Client implements domain.NetworkRepository.

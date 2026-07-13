@@ -13,118 +13,126 @@ import (
 
 // — input/output types —
 
-type (
-	SitesInput struct {
-		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		Region   string `json:"region,omitempty" jsonschema:"filter by region (slug or name)"`
-		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, planned, etc.)"`
-		Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug or name)"`
-		Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
+// SitesInput represents the input fields for the get_sites tool.
+type SitesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Region   string `json:"region,omitempty" jsonschema:"filter by region (slug or name)"`
+	Status   string `json:"status,omitempty" jsonschema:"status: active, planned, staged, retired, decommissioning"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug or name)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
-	DevicesInput struct {
-		Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-		Role         string `json:"role,omitempty" jsonschema:"filter by device role (slug)"`
-		Manufacturer string `json:"manufacturer,omitempty" jsonschema:"filter by manufacturer (slug)"`
-		DeviceType   string `json:"device_type,omitempty" jsonschema:"filter by device type slug (e.g. c-1250)"`
-		Status       string `json:"status,omitempty" jsonschema:"filter by status (active, planned, etc.)"`
-		Name         string `json:"name,omitempty" jsonschema:"filter by name (partial match)"`
-		Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
-		Rack         string `json:"rack,omitempty" jsonschema:"filter by rack (name)"`
-		Cluster      string `json:"cluster,omitempty" jsonschema:"filter by cluster (name)"`
-		Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
+// DevicesInput represents the input fields for the get_devices tool.
+type DevicesInput struct {
+	Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Role         string `json:"role,omitempty" jsonschema:"filter by device role (slug)"`
+	Manufacturer string `json:"manufacturer,omitempty" jsonschema:"filter by manufacturer (slug)"`
+	DeviceType   string `json:"device_type,omitempty" jsonschema:"filter by device type slug (e.g. c-1250)"`
+	Status       string `json:"status,omitempty" jsonschema:"status: active, offine, planned, staged, failed, inventory, decommissioning"`
+	Name         string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
+	Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Rack         string `json:"rack,omitempty" jsonschema:"filter by rack (name)"`
+	Cluster      string `json:"cluster,omitempty" jsonschema:"filter by cluster (name)"`
+	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
-	IPAddressesInput struct {
-		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		Address  string `json:"address,omitempty" jsonschema:"filter by address (e.g. 192.168.1.0/24)"`
-		Device   string `json:"device,omitempty" jsonschema:"filter by assigned device name"`
-		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, reserved, etc.)"`
-		VRF      string `json:"vrf,omitempty" jsonschema:"filter by VRF (rd or name)"`
-		Role     string `json:"role,omitempty" jsonschema:"filter by role (loopback, etc.)"`
-		Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
-		Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
+// IPAddressesInput represents the input fields for the get_ip_addresses tool.
+type IPAddressesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Address  string `json:"address,omitempty" jsonschema:"filter by address (e.g. 192.168.1.0/24)"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by assigned device name"`
+	Status   string `json:"status,omitempty" jsonschema:"status: active, reserved, deprecated, dhcp, slaac"`
+	VRF      string `json:"vrf,omitempty" jsonschema:"filter by VRF (rd or name)"`
+	Role     string `json:"role,omitempty" jsonschema:"filter by role (loopback, etc.)"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
-	PrefixesInput struct {
-		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		Prefix   string `json:"prefix,omitempty" jsonschema:"filter by prefix (e.g. 10.0.0.0/8)"`
-		Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-		VRF      string `json:"vrf,omitempty" jsonschema:"filter by VRF (rd or name)"`
-		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, container, etc.)"`
-		Role     string `json:"role,omitempty" jsonschema:"filter by role (slug)"`
-		Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
-		Within   string `json:"within,omitempty" jsonschema:"find prefixes within a given prefix"`
-		Family   int    `json:"family,omitempty" jsonschema:"address family: 4 or 6"`
-		Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
+// PrefixesInput represents the input fields for the get_prefixes tool.
+type PrefixesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Prefix   string `json:"prefix,omitempty" jsonschema:"filter by prefix (e.g. 10.0.0.0/8)"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	VRF      string `json:"vrf,omitempty" jsonschema:"filter by VRF (rd or name)"`
+	Status   string `json:"status,omitempty" jsonschema:"status: active, container, reserved, deprecated"`
+	Role     string `json:"role,omitempty" jsonschema:"filter by role (slug)"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Within   string `json:"within,omitempty" jsonschema:"find prefixes within a given prefix"`
+	Family   int    `json:"family,omitempty" jsonschema:"address family: 4 or 6"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
-	VLANsInput struct {
-		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-		Group    string `json:"group,omitempty" jsonschema:"filter by VLAN group (slug)"`
-		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, reserved, etc.)"`
-		Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
-		VID      int    `json:"vid,omitempty" jsonschema:"filter by VLAN ID"`
-		Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
+// VLANsInput represents the input fields for the get_vlans tool.
+type VLANsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Group    string `json:"group,omitempty" jsonschema:"filter by VLAN group (slug)"`
+	Status   string `json:"status,omitempty" jsonschema:"status: active, reserved, deprecated"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	VID      int    `json:"vid,omitempty" jsonschema:"filter by VLAN ID"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
-	VirtualMachinesInput struct {
-		Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		Cluster      string `json:"cluster,omitempty" jsonschema:"filter by cluster (name)"`
-		ClusterGroup string `json:"cluster_group,omitempty" jsonschema:"filter by cluster group (slug)"`
-		Role         string `json:"role,omitempty" jsonschema:"filter by VM role (slug)"`
-		Status       string `json:"status,omitempty" jsonschema:"filter by status (active, staged, etc.)"`
-		Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
-		Name         string `json:"name,omitempty" jsonschema:"filter by name (partial match)"`
-		Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-		Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
+// VirtualMachinesInput represents the input fields for the get_virtual_machines tool.
+type VirtualMachinesInput struct {
+	Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Cluster      string `json:"cluster,omitempty" jsonschema:"filter by cluster (name)"`
+	ClusterGroup string `json:"cluster_group,omitempty" jsonschema:"filter by cluster group (slug)"`
+	Role         string `json:"role,omitempty" jsonschema:"filter by VM role (slug)"`
+	Status       string `json:"status,omitempty" jsonschema:"status: active, staged, offine, decommissioning"`
+	Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Name         string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
+	Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
-	ClustersInput struct {
-		Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		ClusterType  string `json:"cluster_type,omitempty" jsonschema:"filter by cluster type (slug)"`
-		ClusterGroup string `json:"cluster_group,omitempty" jsonschema:"filter by cluster group (slug)"`
-		Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-		Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
-		Name         string `json:"name,omitempty" jsonschema:"filter by name (partial match)"`
-		Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
+// ClustersInput represents the input fields for the get_clusters tool.
+type ClustersInput struct {
+	Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	ClusterType  string `json:"cluster_type,omitempty" jsonschema:"filter by cluster type (slug)"`
+	ClusterGroup string `json:"cluster_group,omitempty" jsonschema:"filter by cluster group (slug)"`
+	Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Name         string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
+	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
-	CircuitsInput struct {
-		Q           string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		Provider    string `json:"provider,omitempty" jsonschema:"filter by provider (slug)"`
-		CircuitType string `json:"circuit_type,omitempty" jsonschema:"filter by circuit type (slug)"`
-		Site        string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-		Status      string `json:"status,omitempty" jsonschema:"filter by status (active, planned, etc.)"`
-		Tenant      string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
-		Page        int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize    int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
+// CircuitsInput represents the input fields for the get_circuits tool.
+type CircuitsInput struct {
+	Q           string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Provider    string `json:"provider,omitempty" jsonschema:"filter by provider (slug)"`
+	CircuitType string `json:"circuit_type,omitempty" jsonschema:"filter by circuit type (slug)"`
+	Site        string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Status      string `json:"status,omitempty" jsonschema:"status: active, planned, offine, decommissioning"`
+	Tenant      string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Page        int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize    int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
-	GetObjectInput struct {
-		ObjectType string `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable,required"`
-		ID         int    `json:"id" jsonschema:"numeric ID of the object,required"`
-	}
+// GetObjectInput represents the input fields for the get_object_by_id tool.
+type GetObjectInput struct {
+	ObjectType string `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable,required"`
+	ID         int    `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
+}
 
-	RacksInput struct {
-		Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-		Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-		Location string `json:"location,omitempty" jsonschema:"filter by location (slug)"`
-		Status   string `json:"status,omitempty" jsonschema:"filter by status (active, planned, etc.)"`
-		Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
-		Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-		PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
-	}
-)
+// RacksInput represents the input fields for the get_racks tool.
+type RacksInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Location string `json:"location,omitempty" jsonschema:"filter by location (slug)"`
+	Status   string `json:"status,omitempty" jsonschema:"status: active, planned, reserved, available"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
 
 // — helpers —
 
