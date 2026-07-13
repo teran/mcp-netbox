@@ -9,6 +9,7 @@ type (
 		URL             string      `json:"url"`
 		Name            string      `json:"name"`
 		Slug            string      `json:"slug"`
+		Display         string      `json:"display,omitempty"`
 		Status          *WireLabel  `json:"status"`
 		Region          *WireNested `json:"region"`
 		Tenant          *WireNested `json:"tenant"`
@@ -27,6 +28,7 @@ type (
 		ID          int         `json:"id"`
 		URL         string      `json:"url"`
 		Name        string      `json:"name"`
+		Display     string      `json:"display,omitempty"`
 		DeviceType  *WireNested `json:"device_type"`
 		Role        *WireNested `json:"role"`
 		Tenant      *WireNested `json:"tenant"`
@@ -49,6 +51,7 @@ type (
 		ID                 int              `json:"id"`
 		URL                string           `json:"url"`
 		Address            string           `json:"address"`
+		Display            string           `json:"display,omitempty"`
 		VRF                *WireNested      `json:"vrf"`
 		Tenant             *WireNested      `json:"tenant"`
 		Status             *WireLabel       `json:"status"`
@@ -68,6 +71,7 @@ type (
 		ID          int         `json:"id"`
 		URL         string      `json:"url"`
 		Prefix      string      `json:"prefix"`
+		Display     string      `json:"display,omitempty"`
 		Site        *WireNested `json:"site"`
 		VRF         *WireNested `json:"vrf"`
 		Tenant      *WireNested `json:"tenant"`
@@ -92,6 +96,7 @@ type (
 		Group       *WireNested `json:"group"`
 		VID         int         `json:"vid"`
 		Name        string      `json:"name"`
+		Display     string      `json:"display,omitempty"`
 		Tenant      *WireNested `json:"tenant"`
 		Status      *WireLabel  `json:"status"`
 		Role        *WireNested `json:"role"`
@@ -106,6 +111,7 @@ type (
 		ID          int         `json:"id"`
 		URL         string      `json:"url"`
 		Name        string      `json:"name"`
+		Display     string      `json:"display,omitempty"`
 		Cluster     *WireNested `json:"cluster"`
 		Role        *WireNested `json:"role"`
 		Tenant      *WireNested `json:"tenant"`
@@ -125,6 +131,7 @@ type (
 		ID           int         `json:"id"`
 		URL          string      `json:"url"`
 		Name         string      `json:"name"`
+		Display      string      `json:"display,omitempty"`
 		ClusterType  *WireNested `json:"type"`
 		ClusterGroup *WireNested `json:"group"`
 		Site         *WireNested `json:"site"`
@@ -140,6 +147,7 @@ type (
 		ID          int         `json:"id"`
 		URL         string      `json:"url"`
 		CID         string      `json:"cid"`
+		Display     string      `json:"display,omitempty"`
 		Provider    *WireNested `json:"provider"`
 		CircuitType *WireNested `json:"circuit_type"`
 		Tenant      *WireNested `json:"tenant"`
@@ -157,6 +165,7 @@ type (
 		ID          int         `json:"id"`
 		URL         string      `json:"url"`
 		Name        string      `json:"name"`
+		Display     string      `json:"display,omitempty"`
 		FacilityID  string      `json:"facility_id,omitempty"`
 		Site        *WireNested `json:"site"`
 		Location    *WireNested `json:"location"`

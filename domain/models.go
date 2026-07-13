@@ -13,6 +13,7 @@ type (
 		ID              int     `json:"id"`
 		Name            string  `json:"name"`
 		Slug            string  `json:"slug"`
+		Display         string  `json:"display,omitempty"`
 		Status          *Label  `json:"status"`
 		Region          *Nested `json:"region"`
 		Tenant          *Nested `json:"tenant"`
@@ -30,6 +31,7 @@ type (
 	Device struct {
 		ID          int     `json:"id"`
 		Name        string  `json:"name"`
+		Display     string  `json:"display,omitempty"`
 		DeviceType  *Nested `json:"device_type"`
 		Role        *Nested `json:"role"`
 		Tenant      *Nested `json:"tenant"`
@@ -51,6 +53,7 @@ type (
 	IPAddress struct {
 		ID                 int             `json:"id"`
 		Address            string          `json:"address"`
+		Display            string          `json:"display,omitempty"`
 		VRF                *Nested         `json:"vrf"`
 		Tenant             *Nested         `json:"tenant"`
 		Status             *Label          `json:"status"`
@@ -69,6 +72,7 @@ type (
 	Prefix struct {
 		ID          int     `json:"id"`
 		Prefix      string  `json:"prefix"`
+		Display     string  `json:"display,omitempty"`
 		Site        *Nested `json:"site"`
 		VRF         *Nested `json:"vrf"`
 		Tenant      *Nested `json:"tenant"`
@@ -92,6 +96,7 @@ type (
 		Group       *Nested `json:"group"`
 		VID         int     `json:"vid"`
 		Name        string  `json:"name"`
+		Display     string  `json:"display,omitempty"`
 		Tenant      *Nested `json:"tenant"`
 		Status      *Label  `json:"status"`
 		Role        *Nested `json:"role"`
@@ -105,6 +110,7 @@ type (
 	VirtualMachine struct {
 		ID          int     `json:"id"`
 		Name        string  `json:"name"`
+		Display     string  `json:"display,omitempty"`
 		Cluster     *Nested `json:"cluster"`
 		Role        *Nested `json:"role"`
 		Tenant      *Nested `json:"tenant"`
@@ -123,6 +129,7 @@ type (
 	Cluster struct {
 		ID           int     `json:"id"`
 		Name         string  `json:"name"`
+		Display      string  `json:"display,omitempty"`
 		ClusterType  *Nested `json:"type"`
 		ClusterGroup *Nested `json:"group"`
 		Site         *Nested `json:"site"`
@@ -137,6 +144,7 @@ type (
 	Circuit struct {
 		ID          int     `json:"id"`
 		CID         string  `json:"cid"`
+		Display     string  `json:"display,omitempty"`
 		Provider    *Nested `json:"provider"`
 		CircuitType *Nested `json:"circuit_type"`
 		Tenant      *Nested `json:"tenant"`
@@ -153,6 +161,7 @@ type (
 	Rack struct {
 		ID          int     `json:"id"`
 		Name        string  `json:"name"`
+		Display     string  `json:"display,omitempty"`
 		FacilityID  string  `json:"facility_id,omitempty"`
 		Site        *Nested `json:"site"`
 		Location    *Nested `json:"location"`
