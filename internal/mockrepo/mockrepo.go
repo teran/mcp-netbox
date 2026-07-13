@@ -11,16 +11,20 @@ import (
 // MockRepo is a configurable mock implementation of domain.NetworkRepository.
 // Each method can be set independently via function fields.
 type MockRepo struct {
-	ListSitesFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error)
-	ListDevicesFunc         func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error)
-	ListIPAddressesFunc     func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error)
-	ListPrefixesFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error)
-	ListVLANsFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error)
-	ListVirtualMachinesFunc func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error)
-	ListClustersFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error)
-	ListCircuitsFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error)
-	ListRacksFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error)
-	GetObjectFunc           func(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error)
+	ListSitesFunc               func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error)
+	ListDevicesFunc             func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error)
+	ListIPAddressesFunc         func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error)
+	ListPrefixesFunc            func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error)
+	ListVLANsFunc               func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error)
+	ListVirtualMachinesFunc     func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error)
+	ListClustersFunc            func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error)
+	ListCircuitsFunc            func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error)
+	ListCircuitTerminationsFunc func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error)
+	ListCablesFunc              func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error)
+	ListRacksFunc               func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error)
+	ListInterfacesFunc          func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error)
+	ListVMInterfacesFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error)
+	GetObjectFunc               func(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error)
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -55,8 +59,24 @@ func (m *MockRepo) ListCircuits(ctx context.Context, token string, params map[st
 	return m.ListCircuitsFunc(ctx, token, params)
 }
 
+func (m *MockRepo) ListCircuitTerminations(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+	return m.ListCircuitTerminationsFunc(ctx, token, params)
+}
+
+func (m *MockRepo) ListCables(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+	return m.ListCablesFunc(ctx, token, params)
+}
+
 func (m *MockRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 	return m.ListRacksFunc(ctx, token, params)
+}
+
+func (m *MockRepo) ListInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+	return m.ListInterfacesFunc(ctx, token, params)
+}
+
+func (m *MockRepo) ListVMInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+	return m.ListVMInterfacesFunc(ctx, token, params)
 }
 
 func (m *MockRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
@@ -99,8 +119,24 @@ func (r *NilRepo) ListCircuits(ctx context.Context, token string, params map[str
 	return &domain.PaginatedResponse[domain.Circuit]{Count: 0, Results: []domain.Circuit{}}, nil
 }
 
+func (r *NilRepo) ListCircuitTerminations(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+	return &domain.PaginatedResponse[domain.CircuitTermination]{Count: 0, Results: []domain.CircuitTermination{}}, nil
+}
+
+func (r *NilRepo) ListCables(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+	return &domain.PaginatedResponse[domain.Cable]{Count: 0, Results: []domain.Cable{}}, nil
+}
+
 func (r *NilRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 	return &domain.PaginatedResponse[domain.Rack]{Count: 0, Results: []domain.Rack{}}, nil
+}
+
+func (r *NilRepo) ListInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+	return &domain.PaginatedResponse[domain.Interface]{Count: 0, Results: []domain.Interface{}}, nil
+}
+
+func (r *NilRepo) ListVMInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+	return &domain.PaginatedResponse[domain.VMInterface]{Count: 0, Results: []domain.VMInterface{}}, nil
 }
 
 func (r *NilRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {

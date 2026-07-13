@@ -158,6 +158,35 @@ type (
 		CommitRate  int     `json:"commit_rate,omitempty"`
 	}
 
+	CircuitTermination struct {
+		ID            int     `json:"id"`
+		Display       string  `json:"display,omitempty"`
+		Circuit       *Nested `json:"circuit"`
+		TermSide      string  `json:"term_side"`
+		Site          *Nested `json:"site"`
+		Speed         int     `json:"speed,omitempty"`
+		UpstreamSpeed int     `json:"upstream_speed,omitempty"`
+		Description   string  `json:"description,omitempty"`
+		Tags          []Tag   `json:"tags,omitempty"`
+		Created       string  `json:"created"`
+		LastUpdated   string  `json:"last_updated"`
+	}
+
+	Cable struct {
+		ID          int     `json:"id"`
+		Display     string  `json:"display,omitempty"`
+		Type        *Label  `json:"type"`
+		Status      *Label  `json:"status"`
+		Label       string  `json:"label,omitempty"`
+		Color       string  `json:"color,omitempty"`
+		Length      float64 `json:"length,omitempty"`
+		LengthUnit  *Label  `json:"length_unit,omitempty"`
+		Description string  `json:"description,omitempty"`
+		Tags        []Tag   `json:"tags,omitempty"`
+		Created     string  `json:"created"`
+		LastUpdated string  `json:"last_updated"`
+	}
+
 	Rack struct {
 		ID          int     `json:"id"`
 		Name        string  `json:"name"`
@@ -177,6 +206,36 @@ type (
 		Tags        []Tag   `json:"tags,omitempty"`
 		Created     string  `json:"created"`
 		LastUpdated string  `json:"last_updated"`
+	}
+
+	Interface struct {
+		ID          int     `json:"id"`
+		Name        string  `json:"name"`
+		Display     string  `json:"display,omitempty"`
+		Device      *Nested `json:"device"`
+		Type        *Label  `json:"type"`
+		Enabled     bool    `json:"enabled"`
+		MTU         int     `json:"mtu,omitempty"`
+		MACAddress  string  `json:"mac_address,omitempty"`
+		Speed       int     `json:"speed,omitempty"`
+		Description string  `json:"description,omitempty"`
+		Tags        []Tag   `json:"tags,omitempty"`
+		Created     string  `json:"created"`
+		LastUpdated string  `json:"last_updated"`
+	}
+
+	VMInterface struct {
+		ID              int     `json:"id"`
+		Name            string  `json:"name"`
+		Display         string  `json:"display,omitempty"`
+		VirtualMachine  *Nested `json:"virtual_machine"`
+		Enabled         bool    `json:"enabled"`
+		MTU             int     `json:"mtu,omitempty"`
+		MACAddress      string  `json:"mac_address,omitempty"`
+		Description     string  `json:"description,omitempty"`
+		Tags            []Tag   `json:"tags,omitempty"`
+		Created         string  `json:"created"`
+		LastUpdated     string  `json:"last_updated"`
 	}
 )
 

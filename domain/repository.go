@@ -22,5 +22,9 @@ type NetworkRepository interface {
 	ListClusters(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Cluster], error)
 	ListCircuits(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Circuit], error)
 	ListRacks(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Rack], error)
+	ListInterfaces(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Interface], error)
+	ListVMInterfaces(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[VMInterface], error)
+	ListCircuitTerminations(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[CircuitTermination], error)
+	ListCables(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Cable], error)
 	GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (RawObject, error)
 }

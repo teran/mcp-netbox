@@ -35,7 +35,10 @@ var objectTypeToEndpoint = map[string]string{
 	"vlan_group":      "/api/ipam/vlan-groups/",
 	"role":            "/api/ipam/roles/",
 	"contact":         "/api/tenancy/contacts/",
-	"cable":           "/api/dcim/cables/",
+	"cable":            "/api/dcim/cables/",
+	"interface":        "/api/dcim/interfaces/",
+	"vm_interface":         "/api/virtualization/interfaces/",
+	"circuit_termination":  "/api/circuits/circuit-terminations/",
 }
 
 // Client is an HTTP client for the NetBox API.
@@ -221,6 +224,32 @@ func (c *Client) ListCircuits(ctx context.Context, token string, params map[stri
 	return convertPaginated(&wireResp, wireCircuitToDomain), nil
 }
 
+// ListCircuitTerminations returns a paginated list of circuit terminations.
+func (c *Client) ListCircuitTerminations(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+	raw, err := c.get(ctx, token, "/api/circuits/circuit-terminations/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireCircuitTermination]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal circuit terminations: %w", err)
+	}
+	return convertPaginated(&wireResp, wireCircuitTerminationToDomain), nil
+}
+
+// ListCables returns a paginated list of cables.
+func (c *Client) ListCables(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+	raw, err := c.get(ctx, token, "/api/dcim/cables/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireCable]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal cables: %w", err)
+	}
+	return convertPaginated(&wireResp, wireCableToDomain), nil
+}
+
 // ListRacks returns a paginated list of racks.
 func (c *Client) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 	raw, err := c.get(ctx, token, "/api/dcim/racks/", params)
@@ -232,6 +261,32 @@ func (c *Client) ListRacks(ctx context.Context, token string, params map[string]
 		return nil, fmt.Errorf("failed to unmarshal racks: %w", err)
 	}
 	return convertPaginated(&wireResp, wireRackToDomain), nil
+}
+
+// ListInterfaces returns a paginated list of device interfaces.
+func (c *Client) ListInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+	raw, err := c.get(ctx, token, "/api/dcim/interfaces/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireInterface]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal interfaces: %w", err)
+	}
+	return convertPaginated(&wireResp, wireInterfaceToDomain), nil
+}
+
+// ListVMInterfaces returns a paginated list of VM interfaces.
+func (c *Client) ListVMInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+	raw, err := c.get(ctx, token, "/api/virtualization/interfaces/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireVMInterface]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal VM interfaces: %w", err)
+	}
+	return convertPaginated(&wireResp, wireVMInterfaceToDomain), nil
 }
 
 // GetObject retrieves a single object by its type and ID.
@@ -380,8 +435,41 @@ func wireIPAddressToDomain(w WireIPAddress) domain.IPAddress {
 		Description:        w.Description,
 		Comments:           w.Comments,
 		Tags:               wireTagsToDomain(w.Tags),
-		Created:            w.Created,
-		LastUpdated:        w.LastUpdated,
+		Created:     w.Created,
+		LastUpdated: w.LastUpdated,
+	}
+}
+
+func wireCircuitTerminationToDomain(w WireCircuitTermination) domain.CircuitTermination {
+	return domain.CircuitTermination{
+		ID:            w.ID,
+		Display:       w.Display,
+		Circuit:       wireNestedToDomain(w.Circuit),
+		TermSide:      w.TermSide,
+		Site:          wireNestedToDomain(w.Site),
+		Speed:         w.Speed,
+		UpstreamSpeed: w.UpstreamSpeed,
+		Description:   w.Description,
+		Tags:          wireTagsToDomain(w.Tags),
+		Created:       w.Created,
+		LastUpdated:   w.LastUpdated,
+	}
+}
+
+func wireCableToDomain(w WireCable) domain.Cable {
+	return domain.Cable{
+		ID:          w.ID,
+		Display:     w.Display,
+		Type:        wireLabelToDomain(w.Type),
+		Status:      wireLabelToDomain(w.Status),
+		Label:       w.Label,
+		Color:       w.Color,
+		Length:      w.Length,
+		LengthUnit:  wireLabelToDomain(w.LengthUnit),
+		Description: w.Description,
+		Tags:        wireTagsToDomain(w.Tags),
+		Created:     w.Created,
+		LastUpdated: w.LastUpdated,
 	}
 }
 
@@ -488,6 +576,40 @@ func wireCircuitToDomain(w WireCircuit) domain.Circuit {
 		LastUpdated: w.LastUpdated,
 		InstallDate: w.InstallDate,
 		CommitRate:  w.CommitRate,
+	}
+}
+
+func wireInterfaceToDomain(w WireInterface) domain.Interface {
+	return domain.Interface{
+		ID:          w.ID,
+		Name:        w.Name,
+		Display:     w.Display,
+		Device:      wireNestedToDomain(w.Device),
+		Type:        wireLabelToDomain(w.Type),
+		Enabled:     w.Enabled,
+		MTU:         w.MTU,
+		MACAddress:  w.MACAddress,
+		Speed:       w.Speed,
+		Description: w.Description,
+		Tags:        wireTagsToDomain(w.Tags),
+		Created:     w.Created,
+		LastUpdated: w.LastUpdated,
+	}
+}
+
+func wireVMInterfaceToDomain(w WireVMInterface) domain.VMInterface {
+	return domain.VMInterface{
+		ID:              w.ID,
+		Name:            w.Name,
+		Display:         w.Display,
+		VirtualMachine:  wireNestedToDomain(w.VirtualMachine),
+		Enabled:         w.Enabled,
+		MTU:             w.MTU,
+		MACAddress:      w.MACAddress,
+		Description:     w.Description,
+		Tags:            wireTagsToDomain(w.Tags),
+		Created:         w.Created,
+		LastUpdated:     w.LastUpdated,
 	}
 }
 

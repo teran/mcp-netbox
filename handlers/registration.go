@@ -79,4 +79,32 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	}, WrapToolHandler[RacksInput, RacksOutput](metrics, "get_racks", func(ctx context.Context, req *mcp.CallToolRequest, in RacksInput) (*mcp.CallToolResult, RacksOutput, error) {
 		return NewGetRacksHandler(svc)(ctx, req, in)
 	}))
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_interfaces",
+		Description: "List device interfaces in NetBox with optional filters.",
+	}, WrapToolHandler[InterfacesInput, InterfacesOutput](metrics, "get_interfaces", func(ctx context.Context, req *mcp.CallToolRequest, in InterfacesInput) (*mcp.CallToolResult, InterfacesOutput, error) {
+		return NewGetInterfacesHandler(svc)(ctx, req, in)
+	}))
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_circuit_terminations",
+		Description: "List circuit terminations in NetBox with optional filters.",
+	}, WrapToolHandler[CircuitTerminationsInput, CircuitTerminationsOutput](metrics, "get_circuit_terminations", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationsInput) (*mcp.CallToolResult, CircuitTerminationsOutput, error) {
+		return NewGetCircuitTerminationsHandler(svc)(ctx, req, in)
+	}))
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_cables",
+		Description: "List cables in NetBox with optional filters.",
+	}, WrapToolHandler[CablesInput, CablesOutput](metrics, "get_cables", func(ctx context.Context, req *mcp.CallToolRequest, in CablesInput) (*mcp.CallToolResult, CablesOutput, error) {
+		return NewGetCablesHandler(svc)(ctx, req, in)
+	}))
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_racks",
+		Description: "List racks in NetBox.",
+	}, WrapToolHandler[RacksInput, RacksOutput](metrics, "get_racks", func(ctx context.Context, req *mcp.CallToolRequest, in RacksInput) (*mcp.CallToolResult, RacksOutput, error) {
+		return NewGetRacksHandler(svc)(ctx, req, in)
+	}))
 }

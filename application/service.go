@@ -88,10 +88,42 @@ func (s *NetworkService) ListCircuits(ctx context.Context, params map[string]str
 	return resp, nil
 }
 
+func (s *NetworkService) ListInterfaces(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+	resp, err := s.repo.ListInterfaces(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list interfaces: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListVMInterfaces(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+	resp, err := s.repo.ListVMInterfaces(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list VM interfaces: %w", err)
+	}
+	return resp, nil
+}
+
 func (s *NetworkService) ListRacks(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 	resp, err := s.repo.ListRacks(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list racks: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListCircuitTerminations(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+	resp, err := s.repo.ListCircuitTerminations(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list circuit terminations: %w", err)
+	}
+	return resp, nil
+}
+
+func (s *NetworkService) ListCables(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+	resp, err := s.repo.ListCables(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list cables: %w", err)
 	}
 	return resp, nil
 }

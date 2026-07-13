@@ -182,6 +182,69 @@ type (
 		Created     string      `json:"created"`
 		LastUpdated string      `json:"last_updated"`
 	}
+
+	WireCircuitTermination struct {
+		ID            int         `json:"id"`
+		URL           string      `json:"url"`
+		Display       string      `json:"display,omitempty"`
+		Circuit       *WireNested `json:"circuit"`
+		TermSide      string      `json:"term_side"`
+		Site          *WireNested `json:"site"`
+		Speed         int         `json:"speed,omitempty"`
+		UpstreamSpeed int         `json:"upstream_speed,omitempty"`
+		Description   string      `json:"description,omitempty"`
+		Tags          []WireTag   `json:"tags,omitempty"`
+		Created       string      `json:"created"`
+		LastUpdated   string      `json:"last_updated"`
+	}
+
+	WireCable struct {
+		ID          int         `json:"id"`
+		URL         string      `json:"url"`
+		Display     string      `json:"display,omitempty"`
+		Type        *WireLabel  `json:"type"`
+		Status      *WireLabel  `json:"status"`
+		Label       string      `json:"label,omitempty"`
+		Color       string      `json:"color,omitempty"`
+		Length      float64     `json:"length,omitempty"`
+		LengthUnit  *WireLabel  `json:"length_unit,omitempty"`
+		Description string      `json:"description,omitempty"`
+		Tags        []WireTag   `json:"tags,omitempty"`
+		Created     string      `json:"created"`
+		LastUpdated string      `json:"last_updated"`
+	}
+
+	WireInterface struct {
+		ID          int         `json:"id"`
+		URL         string      `json:"url"`
+		Name        string      `json:"name"`
+		Display     string      `json:"display,omitempty"`
+		Device      *WireNested `json:"device"`
+		Type        *WireLabel  `json:"type"`
+		Enabled     bool        `json:"enabled"`
+		MTU         int         `json:"mtu,omitempty"`
+		MACAddress  string      `json:"mac_address,omitempty"`
+		Speed       int         `json:"speed,omitempty"`
+		Description string      `json:"description,omitempty"`
+		Tags        []WireTag   `json:"tags,omitempty"`
+		Created     string      `json:"created"`
+		LastUpdated string      `json:"last_updated"`
+	}
+
+	WireVMInterface struct {
+		ID             int         `json:"id"`
+		URL            string      `json:"url"`
+		Name           string      `json:"name"`
+		Display        string      `json:"display,omitempty"`
+		VirtualMachine *WireNested `json:"virtual_machine"`
+		Enabled        bool        `json:"enabled"`
+		MTU            int         `json:"mtu,omitempty"`
+		MACAddress     string      `json:"mac_address,omitempty"`
+		Description    string      `json:"description,omitempty"`
+		Tags           []WireTag   `json:"tags,omitempty"`
+		Created        string      `json:"created"`
+		LastUpdated    string      `json:"last_updated"`
+	}
 )
 
 type (

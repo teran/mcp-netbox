@@ -19,6 +19,7 @@ type SitesInput struct {
 	Region   string `json:"region,omitempty" jsonschema:"filter by region (slug or name)"`
 	Status   string `json:"status,omitempty" jsonschema:"status: active, planned, staged, retired, decommissioning"`
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug or name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
@@ -35,6 +36,7 @@ type DevicesInput struct {
 	Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Rack         string `json:"rack,omitempty" jsonschema:"filter by rack (name)"`
 	Cluster      string `json:"cluster,omitempty" jsonschema:"filter by cluster (name)"`
+	Tag          string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
@@ -48,6 +50,7 @@ type IPAddressesInput struct {
 	VRF      string `json:"vrf,omitempty" jsonschema:"filter by VRF (rd or name)"`
 	Role     string `json:"role,omitempty" jsonschema:"filter by role (loopback, etc.)"`
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
@@ -61,6 +64,7 @@ type PrefixesInput struct {
 	Status   string `json:"status,omitempty" jsonschema:"status: active, container, reserved, deprecated"`
 	Role     string `json:"role,omitempty" jsonschema:"filter by role (slug)"`
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Within   string `json:"within,omitempty" jsonschema:"find prefixes within a given prefix"`
 	Family   int    `json:"family,omitempty" jsonschema:"address family: 4 or 6"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
@@ -74,6 +78,7 @@ type VLANsInput struct {
 	Group    string `json:"group,omitempty" jsonschema:"filter by VLAN group (slug)"`
 	Status   string `json:"status,omitempty" jsonschema:"status: active, reserved, deprecated"`
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	VID      int    `json:"vid,omitempty" jsonschema:"filter by VLAN ID"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
@@ -89,6 +94,7 @@ type VirtualMachinesInput struct {
 	Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Name         string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
 	Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Tag          string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
@@ -101,6 +107,7 @@ type ClustersInput struct {
 	Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
 	Tenant       string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Name         string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
+	Tag          string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
@@ -113,14 +120,61 @@ type CircuitsInput struct {
 	Site        string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
 	Status      string `json:"status,omitempty" jsonschema:"status: active, planned, offline, decommissioning"`
 	Tenant      string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag         string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page        int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize    int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
 type GetObjectInput struct {
-	ObjectType string `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable,required"`
+	ObjectType string `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, circuit_termination,required"`
 	ID         int    `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
+}
+
+// InterfacesInput represents the input fields for the get_interfaces tool.
+type InterfacesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Type     string `json:"type,omitempty" jsonschema:"filter by interface type (slug)"`
+	Enabled  *bool  `json:"enabled,omitempty" jsonschema:"filter by enabled status"`
+	Name     string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
+
+// VMInterfacesInput represents the input fields for the get_vm_interfaces tool.
+type VMInterfacesInput struct {
+	Q              string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	VirtualMachine string `json:"virtual_machine,omitempty" jsonschema:"filter by virtual machine (name)"`
+	Name           string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
+	Tag            string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page           int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize       int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
+
+// CircuitTerminationsInput represents the input fields for the get_circuit_terminations tool.
+type CircuitTerminationsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Circuit  string `json:"circuit,omitempty" jsonschema:"filter by circuit (ID or CID)"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	TermSide string `json:"term_side,omitempty" jsonschema:"filter by termination side: A or Z"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+}
+
+// CablesInput represents the input fields for the get_cables tool.
+type CablesInput struct {
+	Q       string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Type    string `json:"type,omitempty" jsonschema:"filter by cable type (slug)"`
+	Status  string `json:"status,omitempty" jsonschema:"filter by cable status: connected, planned, decommissioning"`
+	Site    string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Tag     string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Color   string `json:"color,omitempty" jsonschema:"filter by color (slug)"`
+	Label   string `json:"label,omitempty" jsonschema:"filter by label (case-insensitive partial match)"`
+	Page    int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int   `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
 
 // RacksInput represents the input fields for the get_racks tool.
@@ -130,6 +184,7 @@ type RacksInput struct {
 	Location string `json:"location,omitempty" jsonschema:"filter by location (slug)"`
 	Status   string `json:"status,omitempty" jsonschema:"status: active, planned, reserved, available"`
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
@@ -195,6 +250,7 @@ func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Site
 		addParam(params, "region", in.Region)
 		addParam(params, "status", in.Status)
 		addParam(params, "tenant", in.Tenant)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListSites(ctx, params)
 		if err != nil {
@@ -230,6 +286,7 @@ func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[De
 		addParam(params, "tenant", in.Tenant)
 		addParam(params, "rack", in.Rack)
 		addParam(params, "cluster", in.Cluster)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListDevices(ctx, params)
 		if err != nil {
@@ -262,6 +319,7 @@ func NewGetIPAddressesHandler(svc *application.NetworkService) mcp.ToolHandlerFo
 		addParam(params, "vrf", in.VRF)
 		addParam(params, "role", in.Role)
 		addParam(params, "tenant", in.Tenant)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListIPAddresses(ctx, params)
 		if err != nil {
@@ -296,6 +354,7 @@ func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[P
 		addParam(params, "tenant", in.Tenant)
 		addParam(params, "within", in.Within)
 		addIntParam(params, "family", in.Family)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListPrefixes(ctx, params)
 		if err != nil {
@@ -327,6 +386,7 @@ func NewGetVLANsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLAN
 		addParam(params, "status", in.Status)
 		addParam(params, "tenant", in.Tenant)
 		addIntParam(params, "vid", in.VID)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListVLANs(ctx, params)
 		if err != nil {
@@ -360,6 +420,7 @@ func NewGetVirtualMachinesHandler(svc *application.NetworkService) mcp.ToolHandl
 		addParam(params, "tenant", in.Tenant)
 		addParam(params, "name__ic", in.Name)
 		addParam(params, "site", in.Site)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListVirtualMachines(ctx, params)
 		if err != nil {
@@ -391,6 +452,7 @@ func NewGetClustersHandler(svc *application.NetworkService) mcp.ToolHandlerFor[C
 		addParam(params, "site", in.Site)
 		addParam(params, "tenant", in.Tenant)
 		addParam(params, "name__ic", in.Name)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListClusters(ctx, params)
 		if err != nil {
@@ -422,6 +484,7 @@ func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[C
 		addParam(params, "site", in.Site)
 		addParam(params, "status", in.Status)
 		addParam(params, "tenant", in.Tenant)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListCircuits(ctx, params)
 		if err != nil {
@@ -459,6 +522,68 @@ func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 	}
 }
 
+type CircuitTerminationsOutput struct {
+	Count    int                        `json:"count"`
+	Next     string                     `json:"next"`
+	Previous string                     `json:"previous"`
+	Results  []domain.CircuitTermination `json:"results"`
+}
+
+func NewGetCircuitTerminationsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTerminationsInput, CircuitTerminationsOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationsInput) (*mcp.CallToolResult, CircuitTerminationsOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTerminationsOutput{}, errServiceNotAvailable
+		}
+
+		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
+		addParam(params, "circuit", in.Circuit)
+		addParam(params, "site", in.Site)
+		addParam(params, "tag", in.Tag)
+		addParam(params, "term_side", in.TermSide)
+
+		resp, err := s.ListCircuitTerminations(ctx, params)
+		if err != nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTerminationsOutput{}, fmt.Errorf("list circuit terminations: %w", err)
+		}
+
+		return &mcp.CallToolResult{}, CircuitTerminationsOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
+	}
+}
+
+type CablesOutput struct {
+	Count    int          `json:"count"`
+	Next     string       `json:"next"`
+	Previous string       `json:"previous"`
+	Results  []domain.Cable `json:"results"`
+}
+
+func NewGetCablesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CablesInput, CablesOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CablesInput) (*mcp.CallToolResult, CablesOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CablesOutput{}, errServiceNotAvailable
+		}
+
+		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
+		addParam(params, "type", in.Type)
+		addParam(params, "status", in.Status)
+		addParam(params, "site", in.Site)
+		addParam(params, "tag", in.Tag)
+		addParam(params, "color", in.Color)
+		addParam(params, "label__ic", in.Label)
+
+		resp, err := s.ListCables(ctx, params)
+		if err != nil {
+			return &mcp.CallToolResult{IsError: true}, CablesOutput{}, fmt.Errorf("list cables: %w", err)
+		}
+
+		return &mcp.CallToolResult{}, CablesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
+	}
+}
+
 type RacksOutput struct {
 	Count    int           `json:"count"`
 	Next     string        `json:"next"`
@@ -479,6 +604,7 @@ func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Rack
 		addParam(params, "location", in.Location)
 		addParam(params, "status", in.Status)
 		addParam(params, "tenant", in.Tenant)
+		addParam(params, "tag", in.Tag)
 
 		resp, err := s.ListRacks(ctx, params)
 		if err != nil {
@@ -486,5 +612,67 @@ func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Rack
 		}
 
 		return &mcp.CallToolResult{}, RacksOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
+	}
+}
+
+type InterfacesOutput struct {
+	Count    int                `json:"count"`
+	Next     string             `json:"next"`
+	Previous string             `json:"previous"`
+	Results  []domain.Interface `json:"results"`
+}
+
+func NewGetInterfacesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[InterfacesInput, InterfacesOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in InterfacesInput) (*mcp.CallToolResult, InterfacesOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, InterfacesOutput{}, errServiceNotAvailable
+		}
+
+		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
+		addParam(params, "device", in.Device)
+		addParam(params, "type", in.Type)
+		addParam(params, "name__ic", in.Name)
+		addParam(params, "tag", in.Tag)
+		if in.Enabled != nil {
+			addParam(params, "enabled", fmt.Sprintf("%t", *in.Enabled))
+		}
+
+		resp, err := s.ListInterfaces(ctx, params)
+		if err != nil {
+			return &mcp.CallToolResult{IsError: true}, InterfacesOutput{}, fmt.Errorf("list interfaces: %w", err)
+		}
+
+		return &mcp.CallToolResult{}, InterfacesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
+	}
+}
+
+type VMInterfacesOutput struct {
+	Count    int                  `json:"count"`
+	Next     string               `json:"next"`
+	Previous string               `json:"previous"`
+	Results  []domain.VMInterface `json:"results"`
+}
+
+func NewGetVMInterfacesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VMInterfacesInput, VMInterfacesOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfacesInput) (*mcp.CallToolResult, VMInterfacesOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VMInterfacesOutput{}, errServiceNotAvailable
+		}
+
+		params := paginationParams(in.Page, in.PageSize)
+		addParam(params, "q", in.Q)
+		addParam(params, "virtual_machine", in.VirtualMachine)
+		addParam(params, "name__ic", in.Name)
+		addParam(params, "tag", in.Tag)
+
+		resp, err := s.ListVMInterfaces(ctx, params)
+		if err != nil {
+			return &mcp.CallToolResult{IsError: true}, VMInterfacesOutput{}, fmt.Errorf("list VM interfaces: %w", err)
+		}
+
+		return &mcp.CallToolResult{}, VMInterfacesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }

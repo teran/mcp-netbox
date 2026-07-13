@@ -38,6 +38,18 @@ func (s *stubRepo) ListCircuits(ctx context.Context, token string, params map[st
 func (s *stubRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
 	return nil, errors.New("not implemented")
 }
+func (s *stubRepo) ListCircuitTerminations(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListCables(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+	return nil, errors.New("not implemented")
+}
+func (s *stubRepo) ListVMInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+	return nil, errors.New("not implemented")
+}
 func (s *stubRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
 	return nil, errors.New("not implemented")
 }
