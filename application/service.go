@@ -12,7 +12,7 @@ import (
 // repository calls with the user's token.
 type NetworkService struct {
 	repo  domain.NetworkRepository
-	token string
+	token *Token
 }
 
 // NewNetworkService creates a new NetworkService backed by the given repository,
@@ -20,12 +20,12 @@ type NetworkService struct {
 func NewNetworkService(repo domain.NetworkRepository, token string) *NetworkService {
 	return &NetworkService{
 		repo:  repo,
-		token: token,
+		token: NewToken(token),
 	}
 }
 
 func (s *NetworkService) ListSites(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
-	resp, err := s.repo.ListSites(ctx, s.token, params)
+	resp, err := s.repo.ListSites(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list sites: %w", err)
 	}
@@ -33,7 +33,7 @@ func (s *NetworkService) ListSites(ctx context.Context, params map[string]string
 }
 
 func (s *NetworkService) ListDevices(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
-	resp, err := s.repo.ListDevices(ctx, s.token, params)
+	resp, err := s.repo.ListDevices(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list devices: %w", err)
 	}
@@ -41,7 +41,7 @@ func (s *NetworkService) ListDevices(ctx context.Context, params map[string]stri
 }
 
 func (s *NetworkService) ListIPAddresses(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
-	resp, err := s.repo.ListIPAddresses(ctx, s.token, params)
+	resp, err := s.repo.ListIPAddresses(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list IP addresses: %w", err)
 	}
@@ -49,7 +49,7 @@ func (s *NetworkService) ListIPAddresses(ctx context.Context, params map[string]
 }
 
 func (s *NetworkService) ListPrefixes(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
-	resp, err := s.repo.ListPrefixes(ctx, s.token, params)
+	resp, err := s.repo.ListPrefixes(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list prefixes: %w", err)
 	}
@@ -57,7 +57,7 @@ func (s *NetworkService) ListPrefixes(ctx context.Context, params map[string]str
 }
 
 func (s *NetworkService) ListVLANs(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
-	resp, err := s.repo.ListVLANs(ctx, s.token, params)
+	resp, err := s.repo.ListVLANs(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list VLANs: %w", err)
 	}
@@ -65,7 +65,7 @@ func (s *NetworkService) ListVLANs(ctx context.Context, params map[string]string
 }
 
 func (s *NetworkService) ListVirtualMachines(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
-	resp, err := s.repo.ListVirtualMachines(ctx, s.token, params)
+	resp, err := s.repo.ListVirtualMachines(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list virtual machines: %w", err)
 	}
@@ -73,7 +73,7 @@ func (s *NetworkService) ListVirtualMachines(ctx context.Context, params map[str
 }
 
 func (s *NetworkService) ListClusters(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
-	resp, err := s.repo.ListClusters(ctx, s.token, params)
+	resp, err := s.repo.ListClusters(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list clusters: %w", err)
 	}
@@ -81,7 +81,7 @@ func (s *NetworkService) ListClusters(ctx context.Context, params map[string]str
 }
 
 func (s *NetworkService) ListCircuits(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
-	resp, err := s.repo.ListCircuits(ctx, s.token, params)
+	resp, err := s.repo.ListCircuits(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list circuits: %w", err)
 	}
@@ -89,7 +89,7 @@ func (s *NetworkService) ListCircuits(ctx context.Context, params map[string]str
 }
 
 func (s *NetworkService) ListRacks(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
-	resp, err := s.repo.ListRacks(ctx, s.token, params)
+	resp, err := s.repo.ListRacks(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list racks: %w", err)
 	}
@@ -97,7 +97,7 @@ func (s *NetworkService) ListRacks(ctx context.Context, params map[string]string
 }
 
 func (s *NetworkService) GetObject(ctx context.Context, objectType string, id int) (domain.RawObject, error) {
-	resp, err := s.repo.GetObject(ctx, s.token, objectType, id, nil)
+	resp, err := s.repo.GetObject(ctx, s.token.Value(), objectType, id, nil)
 	if err != nil {
 		return nil, fmt.Errorf("get object: %w", err)
 	}
