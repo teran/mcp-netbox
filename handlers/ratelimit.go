@@ -4,8 +4,10 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/netip"
 	"sync"
 	"time"
+	"strings"
 
 	"golang.org/x/time/rate"
 )
@@ -97,11 +99,11 @@ func (rl *rateLimiter) evictStaleClients() {
 }
 
 // RateLimitMiddleware returns a middleware and a stop function for the rate limiter.
-func RateLimitMiddleware(cfg RateLimiterConfig) (func(http.Handler) http.Handler, func()) {
+func RateLimitMiddleware(cfg RateLimiterConfig, trustedProxy string) (func(http.Handler) http.Handler, func()) {
 	rl := NewRateLimiter(cfg)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			clientIP := extractClientIP(r)
+			clientIP := extractClientIP(r, trustedProxy)
 			if !rl.Allow(clientIP) {
 				slog.Warn("rate limit exceeded", "client_ip", SanitizeLog(clientIP))
 				w.Header().Set("Retry-After", "1")
@@ -113,13 +115,58 @@ func RateLimitMiddleware(cfg RateLimiterConfig) (func(http.Handler) http.Handler
 	}, rl.Stop
 }
 
-func extractClientIP(r *http.Request) string {
-	// Only use RemoteAddr to prevent IP spoofing via X-Forwarded-For / X-Client-IP headers.
-	// If running behind a reverse proxy, ensure the proxy sets X-Envoy-External-Address
-	// or use a trusted header via configuration.
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
+func extractClientIP(r *http.Request, trustedProxy string) string {
+	proxyPrefix := parseTrustedProxy(trustedProxy)
+	if proxyPrefix == nil {
+		// No trusted proxy configured — use RemoteAddr only (secure default).
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			return r.RemoteAddr
+		}
+		return host
+	}
+
+	// Check if the connecting IP is from a trusted proxy
+	remoteIPStr, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr
 	}
-	return host
+	remoteIP, err := netip.ParseAddr(remoteIPStr)
+	if err != nil {
+		return remoteIPStr
+	}
+
+	if proxyPrefix.Contains(remoteIP) {
+		// Trusted proxy — extract first IP from X-Forwarded-For
+		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+			if firstIP := extractFirstIP(xff); firstIP != "" {
+				return firstIP
+			}
+		}
+	}
+
+	return remoteIPStr
+}
+
+func extractFirstIP(xff string) string {
+	if xff == "" {
+		return ""
+	}
+	parts := strings.Split(xff, ",")
+	ip := strings.TrimSpace(parts[0])
+	if _, err := netip.ParseAddr(ip); err != nil {
+		return ""
+	}
+	return ip
+}
+
+func parseTrustedProxy(cidr string) *netip.Prefix {
+	if cidr == "" {
+		return nil
+	}
+	prefix, err := netip.ParsePrefix(cidr)
+	if err != nil {
+		return nil
+	}
+	return &prefix
 }

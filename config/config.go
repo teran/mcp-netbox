@@ -17,6 +17,7 @@ type Config struct {
 	PrometheusMetricsAddr string        `envconfig:"PROMETHEUS_METRICS_ADDR" default:":8081"`
 	RateLimitGlobal       int           `envconfig:"RATE_LIMIT_GLOBAL" default:"100"`
 	RateLimitPerClient    int           `envconfig:"RATE_LIMIT_PER_CLIENT" default:"10"`
+	TrustedProxy          string        `envconfig:"TRUSTED_PROXY" default:""`
 	WriteTimeout          time.Duration `envconfig:"WRITE_TIMEOUT" default:"60s"`
 }
 

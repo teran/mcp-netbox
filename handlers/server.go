@@ -31,7 +31,7 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 		GlobalBurst:    cfg.RateLimitGlobal * 2,
 		PerClientLimit: rate.Limit(cfg.RateLimitPerClient),
 		PerClientBurst: cfg.RateLimitPerClient * 2,
-	})
+	}, cfg.TrustedProxy)
 
 	handler := RecoveryMiddleware(
 		SecurityHeadersMiddleware(

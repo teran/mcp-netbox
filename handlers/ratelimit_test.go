@@ -15,15 +15,22 @@ func TestExtractClientIP(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name     string
-		headers  map[string]string
-		remote   string
-		expected string
+		name         string
+		headers      map[string]string
+		remote       string
+		trustedProxy string
+		expected     string
 	}{
-		{"RemoteAddr parsed", nil, "10.0.0.2:56789", "10.0.0.2"},
-		{"RemoteAddr no port", nil, "10.0.0.3", "10.0.0.3"},
-		{"X-Forwarded-For overridden by RemoteAddr", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "10.0.0.4:12345", "10.0.0.4"},
-		{"X-Client-IP overridden by RemoteAddr", map[string]string{"X-Client-IP": "10.0.0.1"}, "10.0.0.5:12345", "10.0.0.5"},
+		{"RemoteAddr parsed", nil, "10.0.0.2:56789", "", "10.0.0.2"},
+		{"RemoteAddr no port", nil, "10.0.0.3", "", "10.0.0.3"},
+		{"X-Forwarded-For overridden by RemoteAddr", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "10.0.0.4:12345", "", "10.0.0.4"},
+		{"X-Client-IP overridden by RemoteAddr", map[string]string{"X-Client-IP": "10.0.0.1"}, "10.0.0.5:12345", "", "10.0.0.5"},
+		{"trusted proxy X-Forwarded-For", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "10.0.0.1:12345", "10.0.0.0/8", "192.168.1.1"},
+		{"trusted proxy invalid IP in X-Forwarded-For", map[string]string{"X-Forwarded-For": "invalid-ip"}, "10.0.0.1:12345", "10.0.0.0/8", "10.0.0.1"},
+		{"trusted proxy no X-Forwarded-For", nil, "10.0.0.1:12345", "10.0.0.0/8", "10.0.0.1"},
+		{"trusted proxy non-matching remote", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "192.168.1.1:12345", "10.0.0.0/8", "192.168.1.1"},
+		{"trusted proxy empty string", map[string]string{"X-Forwarded-For": "10.0.0.2"}, "10.0.0.1:12345", "", "10.0.0.1"},
+		{"trusted proxy invalid CIDR", map[string]string{"X-Forwarded-For": "10.0.0.2"}, "10.0.0.1:12345", "not-a-cidr", "10.0.0.1"},
 	}
 
 	for _, tc := range tests {
@@ -34,7 +41,7 @@ func TestExtractClientIP(t *testing.T) {
 			}
 			req.RemoteAddr = tc.remote
 
-			got := extractClientIP(req)
+			got := extractClientIP(req, tc.trustedProxy)
 			if got != tc.expected {
 				t.Errorf("extractClientIP() = %q, want %q", got, tc.expected)
 			}
@@ -170,7 +177,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 			GlobalBurst:    2000,
 			PerClientLimit: rate.Limit(1000),
 			PerClientBurst: 2000,
-		})
+		}, "")
 		defer stop()
 
 		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -193,7 +200,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 			GlobalBurst:    1,
 			PerClientLimit: rate.Limit(1000),
 			PerClientBurst: 2000,
-		})
+		}, "")
 		defer stop()
 
 		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
