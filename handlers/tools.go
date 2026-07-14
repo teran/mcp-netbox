@@ -166,15 +166,15 @@ type CircuitTerminationsInput struct {
 
 // CablesInput represents the input fields for the get_cables tool.
 type CablesInput struct {
-	Q       string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
-	Type    string `json:"type,omitempty" jsonschema:"filter by cable type (slug)"`
-	Status  string `json:"status,omitempty" jsonschema:"filter by cable status: connected, planned, decommissioning"`
-	Site    string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
-	Tag     string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
-	Color   string `json:"color,omitempty" jsonschema:"filter by color (slug)"`
-	Label   string `json:"label,omitempty" jsonschema:"filter by label (case-insensitive partial match)"`
-	Page    int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int   `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Type     string `json:"type,omitempty" jsonschema:"filter by cable type (slug)"`
+	Status   string `json:"status,omitempty" jsonschema:"filter by cable status: connected, planned, decommissioning"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Color    string `json:"color,omitempty" jsonschema:"filter by color (slug)"`
+	Label    string `json:"label,omitempty" jsonschema:"filter by label (case-insensitive partial match)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
 
 // RacksInput represents the input fields for the get_racks tool.
@@ -523,9 +523,9 @@ func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 }
 
 type CircuitTerminationsOutput struct {
-	Count    int                        `json:"count"`
-	Next     string                     `json:"next"`
-	Previous string                     `json:"previous"`
+	Count    int                         `json:"count"`
+	Next     string                      `json:"next"`
+	Previous string                      `json:"previous"`
 	Results  []domain.CircuitTermination `json:"results"`
 }
 
@@ -553,9 +553,9 @@ func NewGetCircuitTerminationsHandler(svc *application.NetworkService) mcp.ToolH
 }
 
 type CablesOutput struct {
-	Count    int          `json:"count"`
-	Next     string       `json:"next"`
-	Previous string       `json:"previous"`
+	Count    int            `json:"count"`
+	Next     string         `json:"next"`
+	Previous string         `json:"previous"`
 	Results  []domain.Cable `json:"results"`
 }
 

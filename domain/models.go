@@ -225,17 +225,17 @@ type (
 	}
 
 	VMInterface struct {
-		ID              int     `json:"id"`
-		Name            string  `json:"name"`
-		Display         string  `json:"display,omitempty"`
-		VirtualMachine  *Nested `json:"virtual_machine"`
-		Enabled         bool    `json:"enabled"`
-		MTU             int     `json:"mtu,omitempty"`
-		MACAddress      string  `json:"mac_address,omitempty"`
-		Description     string  `json:"description,omitempty"`
-		Tags            []Tag   `json:"tags,omitempty"`
-		Created         string  `json:"created"`
-		LastUpdated     string  `json:"last_updated"`
+		ID             int     `json:"id"`
+		Name           string  `json:"name"`
+		Display        string  `json:"display,omitempty"`
+		VirtualMachine *Nested `json:"virtual_machine"`
+		Enabled        bool    `json:"enabled"`
+		MTU            int     `json:"mtu,omitempty"`
+		MACAddress     string  `json:"mac_address,omitempty"`
+		Description    string  `json:"description,omitempty"`
+		Tags           []Tag   `json:"tags,omitempty"`
+		Created        string  `json:"created"`
+		LastUpdated    string  `json:"last_updated"`
 	}
 )
 

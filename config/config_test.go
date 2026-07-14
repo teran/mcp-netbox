@@ -91,9 +91,9 @@ func TestValidateConfig(t *testing.T) {
 
 	t.Run("valid config", func(t *testing.T) {
 		cfg := Config{
-			NetBoxURL:             "http://netbox:8000",
-			RateLimitGlobal:       100,
-			RateLimitPerClient:    10,
+			NetBoxURL:          "http://netbox:8000",
+			RateLimitGlobal:    100,
+			RateLimitPerClient: 10,
 		}
 		if err := cfg.validate(); err != nil {
 			t.Errorf("validate() = %v, want nil", err)
@@ -111,9 +111,9 @@ func TestValidateConfig(t *testing.T) {
 
 	t.Run("zero rate limit fails validation", func(t *testing.T) {
 		cfg := Config{
-			NetBoxURL:             "http://netbox:8000",
-			RateLimitGlobal:       0,
-			RateLimitPerClient:    1,
+			NetBoxURL:          "http://netbox:8000",
+			RateLimitGlobal:    0,
+			RateLimitPerClient: 1,
 		}
 		if err := cfg.validate(); err == nil {
 			t.Error("validate() = nil, want error for zero rate limit")

@@ -5,9 +5,9 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"strings"
 	"sync"
 	"time"
-	"strings"
 
 	"golang.org/x/time/rate"
 )

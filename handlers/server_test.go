@@ -47,7 +47,7 @@ func TestServiceFromContext(t *testing.T) {
 		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
 		defer stop()
 
-		req := httptest.NewRequest(http.MethodGet, "/mcp", http.NoBody)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
 		req.Header.Set("Authorization", "Bearer test-token")
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, req)
@@ -85,7 +85,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
 		defer stop()
 
-		req := httptest.NewRequest(http.MethodGet, "/mcp", http.NoBody)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
 		req.Header.Set("Authorization", "Bearer some-valid-token")
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, req)
@@ -113,7 +113,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, unreachable)
 		defer stop()
 
-		req := httptest.NewRequest(http.MethodGet, "/mcp", http.NoBody)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
 		// No Authorization header set
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, req)
@@ -138,7 +138,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, unreachable)
 		defer stop()
 
-		req := httptest.NewRequest(http.MethodGet, "/mcp", http.NoBody)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
 		req.Header.Set("Authorization", "Bearer ")
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, req)
@@ -170,7 +170,7 @@ func TestNewMux(t *testing.T) {
 		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
 		defer stop()
 
-		req := httptest.NewRequest(http.MethodGet, "/healthz", http.NoBody)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/healthz", http.NoBody)
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, req)
 
@@ -199,7 +199,7 @@ func TestNewMux(t *testing.T) {
 		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
 		defer stop()
 
-		req := httptest.NewRequest(http.MethodGet, "/nonexistent", http.NoBody)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/nonexistent", http.NoBody)
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, req)
 
@@ -224,7 +224,7 @@ func TestNewMux(t *testing.T) {
 		stop()
 
 		// The mux should still work after stopping the rate limiter.
-		req := httptest.NewRequest(http.MethodGet, "/healthz", http.NoBody)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/healthz", http.NoBody)
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, req)
 

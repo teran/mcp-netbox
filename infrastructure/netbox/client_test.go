@@ -1,6 +1,7 @@
 package netbox
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -907,11 +908,8 @@ func TestDoRequest_WithBodyLimit(t *testing.T) {
 
 	// Generate a payload larger than 10 MB.
 	size := 11 * 1024 * 1024
-	largeBody := make([]byte, size)
-	for i := range largeBody {
-		largeBody[i] = 'x'
-	}
-	largeBody = append([]byte(`{"data":"`), largeBody...)
+	largeBody := []byte(`{"data":"`)
+	largeBody = append(largeBody, bytes.Repeat([]byte("x"), size)...)
 	largeBody = append(largeBody, `"}`...)
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
