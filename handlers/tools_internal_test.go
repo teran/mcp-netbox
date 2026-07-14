@@ -87,10 +87,10 @@ func TestPaginationParams(t *testing.T) {
 		}
 	})
 
-	t.Run("pageSize capped at 100", func(t *testing.T) {
-		params := paginationParams(1, 200)
-		if params["limit"] != "100" {
-			t.Errorf("limit = %q, want %q", params["limit"], "100")
+	t.Run("pageSize capped at 1000", func(t *testing.T) {
+		params := paginationParams(1, 2000)
+		if params["limit"] != "1000" {
+			t.Errorf("limit = %q, want %q", params["limit"], "1000")
 		}
 	})
 

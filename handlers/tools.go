@@ -11,7 +11,7 @@ import (
 	"github.com/teran/mcp-netbox/domain"
 )
 
-// — input/output types —
+// — input types —
 
 // SitesInput represents the input fields for the get_sites tool.
 type SitesInput struct {
@@ -127,8 +127,9 @@ type CircuitsInput struct {
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
 type GetObjectInput struct {
-	ObjectType string `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination,required"`
-	ID         int    `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
+	ObjectType string            `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination,required"`
+	ID         int               `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
+	Params     map[string]string `json:"params,omitempty" jsonschema:"additional query parameters to pass to NetBox (optional)"`
 }
 
 // InterfacesInput represents the input fields for the get_interfaces tool.
@@ -189,7 +190,26 @@ type RacksInput struct {
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
 }
 
+// — output types —
+
+// PaginatedOutput is a generic paginated response used by all list-oriented tools.
+type PaginatedOutput[D any] struct {
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
+	Results  []D    `json:"results"`
+}
+
+// GetObjectOutput represents the output for the get_object_by_id tool.
+type GetObjectOutput struct {
+	Data domain.RawObject `json:"data"`
+}
+
 // — helpers —
+
+// maxPageSize is the maximum allowed page size for paginated requests.
+// Increased from 100 to 1000 for better AI assistant UX (fewer pagination rounds).
+const maxPageSize = 1000
 
 func paginationParams(page, pageSize int) map[string]string {
 	params := make(map[string]string)
@@ -200,7 +220,7 @@ func paginationParams(page, pageSize int) map[string]string {
 		pageSize = 25
 	}
 	params["offset"] = strconv.Itoa((page - 1) * pageSize)
-	params["limit"] = strconv.Itoa(min(pageSize, 100))
+	params["limit"] = strconv.Itoa(min(pageSize, maxPageSize))
 	return params
 }
 
@@ -229,276 +249,327 @@ func resolveService(ctx context.Context, svc *application.NetworkService) *appli
 	return svc
 }
 
+// — generic list handler —
+
+// listHandlerConfig configures a generic list-oriented MCP tool handler.
+type listHandlerConfig[I, D any] struct {
+	svc         *application.NetworkService
+	listFunc    func(context.Context, map[string]string) (*domain.PaginatedResponse[D], error)
+	buildParams func(I) map[string]string
+	errorLabel  string
+}
+
+// newListHandler creates a generic MCP tool handler for list-type tools.
+// It replaces the repetitive boilerplate found in all NewGetXxxHandler functions.
+func newListHandler[I, D any](cfg listHandlerConfig[I, D]) mcp.ToolHandlerFor[I, PaginatedOutput[D]] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in I) (*mcp.CallToolResult, PaginatedOutput[D], error) {
+		s := resolveService(ctx, cfg.svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, PaginatedOutput[D]{}, errServiceNotAvailable
+		}
+
+		params := cfg.buildParams(in)
+		resp, err := cfg.listFunc(ctx, params)
+		if err != nil {
+			return &mcp.CallToolResult{IsError: true}, PaginatedOutput[D]{}, fmt.Errorf("%s: %w", cfg.errorLabel, err)
+		}
+
+		return &mcp.CallToolResult{}, PaginatedOutput[D]{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
+	}
+}
+
 // — handler factories —
 
-type SitesOutput struct {
-	Count    int           `json:"count"`
-	Next     string        `json:"next"`
-	Previous string        `json:"previous"`
-	Results  []domain.Site `json:"results"`
+// NewGetSitesHandler creates a handler for the get_sites tool.
+func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SitesInput, PaginatedOutput[domain.Site]] {
+	return newListHandler(listHandlerConfig[SitesInput, domain.Site]{
+		svc:      svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+			return resolveService(ctx, svc).ListSites(ctx, params)
+		},
+		buildParams: func(in SitesInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "region", in.Region)
+			addParam(params, "status", in.Status)
+			addParam(params, "tenant", in.Tenant)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list sites",
+	})
 }
 
-func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SitesInput, SitesOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in SitesInput) (*mcp.CallToolResult, SitesOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, SitesOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "region", in.Region)
-		addParam(params, "status", in.Status)
-		addParam(params, "tenant", in.Tenant)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListSites(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, SitesOutput{}, fmt.Errorf("list sites: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, SitesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
+// NewGetDevicesHandler creates a handler for the get_devices tool.
+func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DevicesInput, PaginatedOutput[domain.Device]] {
+	return newListHandler(listHandlerConfig[DevicesInput, domain.Device]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+			return resolveService(ctx, svc).ListDevices(ctx, params)
+		},
+		buildParams: func(in DevicesInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "site", in.Site)
+			addParam(params, "role", in.Role)
+			addParam(params, "manufacturer", in.Manufacturer)
+			addParam(params, "device_type", in.DeviceType)
+			addParam(params, "status", in.Status)
+			addParam(params, "name__ic", in.Name)
+			addParam(params, "tenant", in.Tenant)
+			addParam(params, "rack", in.Rack)
+			addParam(params, "cluster", in.Cluster)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list devices",
+	})
 }
 
-type DevicesOutput struct {
-	Count    int             `json:"count"`
-	Next     string          `json:"next"`
-	Previous string          `json:"previous"`
-	Results  []domain.Device `json:"results"`
+// NewGetIPAddressesHandler creates a handler for the get_ip_addresses tool.
+func NewGetIPAddressesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[IPAddressesInput, PaginatedOutput[domain.IPAddress]] {
+	return newListHandler(listHandlerConfig[IPAddressesInput, domain.IPAddress]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+			return resolveService(ctx, svc).ListIPAddresses(ctx, params)
+		},
+		buildParams: func(in IPAddressesInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "address", in.Address)
+			addParam(params, "device", in.Device)
+			addParam(params, "status", in.Status)
+			addParam(params, "vrf", in.VRF)
+			addParam(params, "role", in.Role)
+			addParam(params, "tenant", in.Tenant)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list IP addresses",
+	})
 }
 
-func NewGetDevicesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DevicesInput, DevicesOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in DevicesInput) (*mcp.CallToolResult, DevicesOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, DevicesOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "site", in.Site)
-		addParam(params, "role", in.Role)
-		addParam(params, "manufacturer", in.Manufacturer)
-		addParam(params, "device_type", in.DeviceType)
-		addParam(params, "status", in.Status)
-		addParam(params, "name__ic", in.Name)
-		addParam(params, "tenant", in.Tenant)
-		addParam(params, "rack", in.Rack)
-		addParam(params, "cluster", in.Cluster)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListDevices(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, DevicesOutput{}, fmt.Errorf("list devices: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, DevicesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
+// NewGetPrefixesHandler creates a handler for the get_prefixes tool.
+func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PrefixesInput, PaginatedOutput[domain.Prefix]] {
+	return newListHandler(listHandlerConfig[PrefixesInput, domain.Prefix]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+			return resolveService(ctx, svc).ListPrefixes(ctx, params)
+		},
+		buildParams: func(in PrefixesInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "prefix", in.Prefix)
+			addParam(params, "site", in.Site)
+			addParam(params, "vrf", in.VRF)
+			addParam(params, "status", in.Status)
+			addParam(params, "role", in.Role)
+			addParam(params, "tenant", in.Tenant)
+			addParam(params, "within", in.Within)
+			addIntParam(params, "family", in.Family)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list prefixes",
+	})
 }
 
-type IPAddressesOutput struct {
-	Count    int                `json:"count"`
-	Next     string             `json:"next"`
-	Previous string             `json:"previous"`
-	Results  []domain.IPAddress `json:"results"`
+// NewGetVLANsHandler creates a handler for the get_vlans tool.
+func NewGetVLANsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLANsInput, PaginatedOutput[domain.VLAN]] {
+	return newListHandler(listHandlerConfig[VLANsInput, domain.VLAN]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+			return resolveService(ctx, svc).ListVLANs(ctx, params)
+		},
+		buildParams: func(in VLANsInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "site", in.Site)
+			addParam(params, "group", in.Group)
+			addParam(params, "status", in.Status)
+			addParam(params, "tenant", in.Tenant)
+			addIntParam(params, "vid", in.VID)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list VLANs",
+	})
 }
 
-func NewGetIPAddressesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[IPAddressesInput, IPAddressesOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressesInput) (*mcp.CallToolResult, IPAddressesOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, IPAddressesOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "address", in.Address)
-		addParam(params, "device", in.Device)
-		addParam(params, "status", in.Status)
-		addParam(params, "vrf", in.VRF)
-		addParam(params, "role", in.Role)
-		addParam(params, "tenant", in.Tenant)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListIPAddresses(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, IPAddressesOutput{}, fmt.Errorf("list IP addresses: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, IPAddressesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
+// NewGetVirtualMachinesHandler creates a handler for the get_virtual_machines tool.
+func NewGetVirtualMachinesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VirtualMachinesInput, PaginatedOutput[domain.VirtualMachine]] {
+	return newListHandler(listHandlerConfig[VirtualMachinesInput, domain.VirtualMachine]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+			return resolveService(ctx, svc).ListVirtualMachines(ctx, params)
+		},
+		buildParams: func(in VirtualMachinesInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "cluster", in.Cluster)
+			addParam(params, "cluster_group", in.ClusterGroup)
+			addParam(params, "role", in.Role)
+			addParam(params, "status", in.Status)
+			addParam(params, "tenant", in.Tenant)
+			addParam(params, "name__ic", in.Name)
+			addParam(params, "site", in.Site)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list VMs",
+	})
 }
 
-type PrefixesOutput struct {
-	Count    int             `json:"count"`
-	Next     string          `json:"next"`
-	Previous string          `json:"previous"`
-	Results  []domain.Prefix `json:"results"`
+// NewGetClustersHandler creates a handler for the get_clusters tool.
+func NewGetClustersHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClustersInput, PaginatedOutput[domain.Cluster]] {
+	return newListHandler(listHandlerConfig[ClustersInput, domain.Cluster]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+			return resolveService(ctx, svc).ListClusters(ctx, params)
+		},
+		buildParams: func(in ClustersInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "type", in.ClusterType)
+			addParam(params, "group", in.ClusterGroup)
+			addParam(params, "site", in.Site)
+			addParam(params, "tenant", in.Tenant)
+			addParam(params, "name__ic", in.Name)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list clusters",
+	})
 }
 
-func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PrefixesInput, PrefixesOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in PrefixesInput) (*mcp.CallToolResult, PrefixesOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, PrefixesOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "prefix", in.Prefix)
-		addParam(params, "site", in.Site)
-		addParam(params, "vrf", in.VRF)
-		addParam(params, "status", in.Status)
-		addParam(params, "role", in.Role)
-		addParam(params, "tenant", in.Tenant)
-		addParam(params, "within", in.Within)
-		addIntParam(params, "family", in.Family)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListPrefixes(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, PrefixesOutput{}, fmt.Errorf("list prefixes: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, PrefixesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
+// NewGetCircuitsHandler creates a handler for the get_circuits tool.
+func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitsInput, PaginatedOutput[domain.Circuit]] {
+	return newListHandler(listHandlerConfig[CircuitsInput, domain.Circuit]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+			return resolveService(ctx, svc).ListCircuits(ctx, params)
+		},
+		buildParams: func(in CircuitsInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "provider", in.Provider)
+			addParam(params, "type", in.CircuitType)
+			addParam(params, "site", in.Site)
+			addParam(params, "status", in.Status)
+			addParam(params, "tenant", in.Tenant)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list circuits",
+	})
 }
 
-type VLANsOutput struct {
-	Count    int           `json:"count"`
-	Next     string        `json:"next"`
-	Previous string        `json:"previous"`
-	Results  []domain.VLAN `json:"results"`
+// NewGetRacksHandler creates a handler for the get_racks tool.
+func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RacksInput, PaginatedOutput[domain.Rack]] {
+	return newListHandler(listHandlerConfig[RacksInput, domain.Rack]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+			return resolveService(ctx, svc).ListRacks(ctx, params)
+		},
+		buildParams: func(in RacksInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "site", in.Site)
+			addParam(params, "location", in.Location)
+			addParam(params, "status", in.Status)
+			addParam(params, "tenant", in.Tenant)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list racks",
+	})
 }
 
-func NewGetVLANsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLANsInput, VLANsOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in VLANsInput) (*mcp.CallToolResult, VLANsOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, VLANsOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "site", in.Site)
-		addParam(params, "group", in.Group)
-		addParam(params, "status", in.Status)
-		addParam(params, "tenant", in.Tenant)
-		addIntParam(params, "vid", in.VID)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListVLANs(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, VLANsOutput{}, fmt.Errorf("list VLANs: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, VLANsOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
+// NewGetInterfacesHandler creates a handler for the get_interfaces tool.
+func NewGetInterfacesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[InterfacesInput, PaginatedOutput[domain.Interface]] {
+	return newListHandler(listHandlerConfig[InterfacesInput, domain.Interface]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+			return resolveService(ctx, svc).ListInterfaces(ctx, params)
+		},
+		buildParams: func(in InterfacesInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "device", in.Device)
+			addParam(params, "type", in.Type)
+			addParam(params, "name__ic", in.Name)
+			addParam(params, "tag", in.Tag)
+			if in.Enabled != nil {
+				addParam(params, "enabled", fmt.Sprintf("%t", *in.Enabled))
+			}
+			return params
+		},
+		errorLabel: "list interfaces",
+	})
 }
 
-type VirtualMachinesOutput struct {
-	Count    int                     `json:"count"`
-	Next     string                  `json:"next"`
-	Previous string                  `json:"previous"`
-	Results  []domain.VirtualMachine `json:"results"`
+// NewGetVMInterfacesHandler creates a handler for the get_vm_interfaces tool.
+func NewGetVMInterfacesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VMInterfacesInput, PaginatedOutput[domain.VMInterface]] {
+	return newListHandler(listHandlerConfig[VMInterfacesInput, domain.VMInterface]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+			return resolveService(ctx, svc).ListVMInterfaces(ctx, params)
+		},
+		buildParams: func(in VMInterfacesInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "virtual_machine", in.VirtualMachine)
+			addParam(params, "name__ic", in.Name)
+			addParam(params, "tag", in.Tag)
+			return params
+		},
+		errorLabel: "list VM interfaces",
+	})
 }
 
-func NewGetVirtualMachinesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VirtualMachinesInput, VirtualMachinesOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachinesInput) (*mcp.CallToolResult, VirtualMachinesOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, VirtualMachinesOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "cluster", in.Cluster)
-		addParam(params, "cluster_group", in.ClusterGroup)
-		addParam(params, "role", in.Role)
-		addParam(params, "status", in.Status)
-		addParam(params, "tenant", in.Tenant)
-		addParam(params, "name__ic", in.Name)
-		addParam(params, "site", in.Site)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListVirtualMachines(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, VirtualMachinesOutput{}, fmt.Errorf("list VMs: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, VirtualMachinesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
+// NewGetCircuitTerminationsHandler creates a handler for the get_circuit_terminations tool.
+func NewGetCircuitTerminationsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTerminationsInput, PaginatedOutput[domain.CircuitTermination]] {
+	return newListHandler(listHandlerConfig[CircuitTerminationsInput, domain.CircuitTermination]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+			return resolveService(ctx, svc).ListCircuitTerminations(ctx, params)
+		},
+		buildParams: func(in CircuitTerminationsInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "circuit", in.Circuit)
+			addParam(params, "site", in.Site)
+			addParam(params, "tag", in.Tag)
+			addParam(params, "term_side", in.TermSide)
+			return params
+		},
+		errorLabel: "list circuit terminations",
+	})
 }
 
-type ClustersOutput struct {
-	Count    int              `json:"count"`
-	Next     string           `json:"next"`
-	Previous string           `json:"previous"`
-	Results  []domain.Cluster `json:"results"`
+// NewGetCablesHandler creates a handler for the get_cables tool.
+func NewGetCablesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CablesInput, PaginatedOutput[domain.Cable]] {
+	return newListHandler(listHandlerConfig[CablesInput, domain.Cable]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+			return resolveService(ctx, svc).ListCables(ctx, params)
+		},
+		buildParams: func(in CablesInput) map[string]string {
+			params := paginationParams(in.Page, in.PageSize)
+			addParam(params, "q", in.Q)
+			addParam(params, "type", in.Type)
+			addParam(params, "status", in.Status)
+			addParam(params, "site", in.Site)
+			addParam(params, "tag", in.Tag)
+			addParam(params, "color", in.Color)
+			addParam(params, "label__ic", in.Label)
+			return params
+		},
+		errorLabel: "list cables",
+	})
 }
 
-func NewGetClustersHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClustersInput, ClustersOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in ClustersInput) (*mcp.CallToolResult, ClustersOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, ClustersOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "type", in.ClusterType)
-		addParam(params, "group", in.ClusterGroup)
-		addParam(params, "site", in.Site)
-		addParam(params, "tenant", in.Tenant)
-		addParam(params, "name__ic", in.Name)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListClusters(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, ClustersOutput{}, fmt.Errorf("list clusters: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, ClustersOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
-}
-
-type CircuitsOutput struct {
-	Count    int              `json:"count"`
-	Next     string           `json:"next"`
-	Previous string           `json:"previous"`
-	Results  []domain.Circuit `json:"results"`
-}
-
-func NewGetCircuitsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitsInput, CircuitsOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitsInput) (*mcp.CallToolResult, CircuitsOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, CircuitsOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "provider", in.Provider)
-		addParam(params, "type", in.CircuitType)
-		addParam(params, "site", in.Site)
-		addParam(params, "status", in.Status)
-		addParam(params, "tenant", in.Tenant)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListCircuits(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, CircuitsOutput{}, fmt.Errorf("list circuits: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, CircuitsOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
-}
-
-type GetObjectOutput struct {
-	Data domain.RawObject `json:"data"`
-}
-
+// NewGetObjectByIDHandler creates a handler for the get_object_by_id tool.
 func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor[GetObjectInput, GetObjectOutput] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, in GetObjectInput) (*mcp.CallToolResult, GetObjectOutput, error) {
 		s := resolveService(ctx, svc)
@@ -513,166 +584,11 @@ func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 			return &mcp.CallToolResult{IsError: true}, GetObjectOutput{}, fmt.Errorf("id must be a positive integer")
 		}
 
-		data, err := s.GetObject(ctx, in.ObjectType, in.ID)
+		data, err := s.GetObject(ctx, in.ObjectType, in.ID, in.Params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, GetObjectOutput{}, fmt.Errorf("get object: %w", err)
 		}
 
 		return &mcp.CallToolResult{}, GetObjectOutput{Data: data}, nil
-	}
-}
-
-type CircuitTerminationsOutput struct {
-	Count    int                         `json:"count"`
-	Next     string                      `json:"next"`
-	Previous string                      `json:"previous"`
-	Results  []domain.CircuitTermination `json:"results"`
-}
-
-func NewGetCircuitTerminationsHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTerminationsInput, CircuitTerminationsOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationsInput) (*mcp.CallToolResult, CircuitTerminationsOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, CircuitTerminationsOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "circuit", in.Circuit)
-		addParam(params, "site", in.Site)
-		addParam(params, "tag", in.Tag)
-		addParam(params, "term_side", in.TermSide)
-
-		resp, err := s.ListCircuitTerminations(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, CircuitTerminationsOutput{}, fmt.Errorf("list circuit terminations: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, CircuitTerminationsOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
-}
-
-type CablesOutput struct {
-	Count    int            `json:"count"`
-	Next     string         `json:"next"`
-	Previous string         `json:"previous"`
-	Results  []domain.Cable `json:"results"`
-}
-
-func NewGetCablesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CablesInput, CablesOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in CablesInput) (*mcp.CallToolResult, CablesOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, CablesOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "type", in.Type)
-		addParam(params, "status", in.Status)
-		addParam(params, "site", in.Site)
-		addParam(params, "tag", in.Tag)
-		addParam(params, "color", in.Color)
-		addParam(params, "label__ic", in.Label)
-
-		resp, err := s.ListCables(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, CablesOutput{}, fmt.Errorf("list cables: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, CablesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
-}
-
-type RacksOutput struct {
-	Count    int           `json:"count"`
-	Next     string        `json:"next"`
-	Previous string        `json:"previous"`
-	Results  []domain.Rack `json:"results"`
-}
-
-func NewGetRacksHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RacksInput, RacksOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in RacksInput) (*mcp.CallToolResult, RacksOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, RacksOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "site", in.Site)
-		addParam(params, "location", in.Location)
-		addParam(params, "status", in.Status)
-		addParam(params, "tenant", in.Tenant)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListRacks(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, RacksOutput{}, fmt.Errorf("list racks: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, RacksOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
-}
-
-type InterfacesOutput struct {
-	Count    int                `json:"count"`
-	Next     string             `json:"next"`
-	Previous string             `json:"previous"`
-	Results  []domain.Interface `json:"results"`
-}
-
-func NewGetInterfacesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[InterfacesInput, InterfacesOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in InterfacesInput) (*mcp.CallToolResult, InterfacesOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, InterfacesOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "device", in.Device)
-		addParam(params, "type", in.Type)
-		addParam(params, "name__ic", in.Name)
-		addParam(params, "tag", in.Tag)
-		if in.Enabled != nil {
-			addParam(params, "enabled", fmt.Sprintf("%t", *in.Enabled))
-		}
-
-		resp, err := s.ListInterfaces(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, InterfacesOutput{}, fmt.Errorf("list interfaces: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, InterfacesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
-	}
-}
-
-type VMInterfacesOutput struct {
-	Count    int                  `json:"count"`
-	Next     string               `json:"next"`
-	Previous string               `json:"previous"`
-	Results  []domain.VMInterface `json:"results"`
-}
-
-func NewGetVMInterfacesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VMInterfacesInput, VMInterfacesOutput] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfacesInput) (*mcp.CallToolResult, VMInterfacesOutput, error) {
-		s := resolveService(ctx, svc)
-		if s == nil {
-			return &mcp.CallToolResult{IsError: true}, VMInterfacesOutput{}, errServiceNotAvailable
-		}
-
-		params := paginationParams(in.Page, in.PageSize)
-		addParam(params, "q", in.Q)
-		addParam(params, "virtual_machine", in.VirtualMachine)
-		addParam(params, "name__ic", in.Name)
-		addParam(params, "tag", in.Tag)
-
-		resp, err := s.ListVMInterfaces(ctx, params)
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, VMInterfacesOutput{}, fmt.Errorf("list VM interfaces: %w", err)
-		}
-
-		return &mcp.CallToolResult{}, VMInterfacesOutput{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil
 	}
 }

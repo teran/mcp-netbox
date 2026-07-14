@@ -44,7 +44,7 @@ func TestServiceFromContext(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
+		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, mcpHandler)
 		defer stop()
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
@@ -82,7 +82,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
+		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, mcpHandler)
 		defer stop()
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
@@ -110,7 +110,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 			t.Error("downstream handler should not be reached when token is missing")
 		})
 
-		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, unreachable)
+		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, unreachable)
 		defer stop()
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
@@ -135,7 +135,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 			t.Error("downstream handler should not be reached")
 		})
 
-		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, unreachable)
+		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, unreachable)
 		defer stop()
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
@@ -167,7 +167,7 @@ func TestNewMux(t *testing.T) {
 			t.Error("MCP handler should not be called for /healthz")
 		})
 
-		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
+		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, mcpHandler)
 		defer stop()
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/healthz", http.NoBody)
@@ -196,7 +196,7 @@ func TestNewMux(t *testing.T) {
 			t.Error("MCP handler should not be called for unknown routes")
 		})
 
-		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
+		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, mcpHandler)
 		defer stop()
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/nonexistent", http.NoBody)
@@ -219,7 +219,7 @@ func TestNewMux(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, mcpHandler)
+		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, mcpHandler)
 		// Stopping should not panic and should clean up the rate limiter goroutine.
 		stop()
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/teran/mcp-netbox/application"
 	"github.com/teran/mcp-netbox/config"
+	"github.com/teran/mcp-netbox/infrastructure/circuitbreaker"
 	infra "github.com/teran/mcp-netbox/infrastructure/netbox"
 )
 
@@ -24,7 +25,7 @@ func ServiceFromContext(ctx context.Context) *application.NetworkService {
 
 // NewMux builds the HTTP mux with all middleware and routes configured.
 // Returns the mux and a stop function for background goroutines (e.g. rate limiter eviction).
-func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, mcpHandler http.Handler) (*http.ServeMux, func()) {
+func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, cb *circuitbreaker.Breaker, mcpHandler http.Handler) (*http.ServeMux, func()) {
 	injectClientMW := injectClientMiddleware(cfg.NetBoxURL, sharedHTTPClient)
 	rateLimitMW, stopRateLimit := RateLimitMiddleware(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(cfg.RateLimitGlobal),
@@ -56,6 +57,19 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"status":"ok"}`))
+	})
+	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		status := http.StatusOK
+		body := `{"status":"ok"}`
+		if cb != nil && cb.State() == circuitbreaker.StateOpen {
+			status = http.StatusServiceUnavailable
+			body = `{"status":"degraded","circuit_breaker":"open"}`
+		}
+
+		w.WriteHeader(status)
+		_, _ = w.Write([]byte(body))
 	})
 	mux.Handle("/mcp", handler)
 

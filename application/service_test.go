@@ -432,7 +432,7 @@ func TestNetworkService_GetObject(t *testing.T) {
 				return domain.RawObject(fmt.Sprintf(`{"id":%d,"name":"%s"}`, id, objectType)), nil
 			},
 		})
-		resp, err := svc.GetObject(context.Background(), "site", 1)
+		resp, err := svc.GetObject(context.Background(), "site", 1, nil)
 		if err != nil {
 			t.Fatalf("GetObject() returned error: %v", err)
 		}
@@ -447,7 +447,7 @@ func TestNetworkService_GetObject(t *testing.T) {
 				return nil, errors.New("repo error")
 			},
 		})
-		_, err := svc.GetObject(context.Background(), "site", 1)
+		_, err := svc.GetObject(context.Background(), "site", 1, nil)
 		if err == nil {
 			t.Fatal("Expected error, got nil")
 		}

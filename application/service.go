@@ -128,8 +128,8 @@ func (s *NetworkService) ListCables(ctx context.Context, params map[string]strin
 	return resp, nil
 }
 
-func (s *NetworkService) GetObject(ctx context.Context, objectType string, id int) (domain.RawObject, error) {
-	resp, err := s.repo.GetObject(ctx, s.token.Value(), objectType, id, nil)
+func (s *NetworkService) GetObject(ctx context.Context, objectType string, id int, params map[string]string) (domain.RawObject, error) {
+	resp, err := s.repo.GetObject(ctx, s.token.Value(), objectType, id, params)
 	if err != nil {
 		return nil, fmt.Errorf("get object: %w", err)
 	}
