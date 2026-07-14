@@ -35,12 +35,14 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 
 	handler := RecoveryMiddleware(
 		SecurityHeadersMiddleware(
-			rateLimitMW(
-				MetricsMiddleware(metrics)(
-					BodyLimitMiddleware(DefaultMaxRequestBodySize)(
-						LoggingMiddleware(
-							TokenMiddleware(
-								injectClientMW(mcpHandler),
+			HostValidationMiddleware(
+				rateLimitMW(
+					MetricsMiddleware(metrics)(
+						BodyLimitMiddleware(DefaultMaxRequestBodySize)(
+							LoggingMiddleware(
+								TokenMiddleware(
+									injectClientMW(mcpHandler),
+								),
 							),
 						),
 					),

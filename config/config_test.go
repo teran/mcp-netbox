@@ -86,6 +86,45 @@ func TestValidatePositiveInt(t *testing.T) {
 	}
 }
 
+func TestValidateURLNotPrivate(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		input     interface{}
+		wantError bool
+	}{
+		{"public IP", "http://8.8.8.8:8000", false},
+		{"public IP (cloudflare)", "http://1.1.1.1", false},
+		{"hostname", "http://netbox.example.com", false},
+		{"hostname with path", "https://netbox.internal/api", false},
+		{"loopback IPv4", "http://127.0.0.1:8000", true},
+		{"loopback IPv6", "http://[::1]:8000", true},
+		{"private IPv4 (10.x)", "http://10.0.0.1:8000", true},
+		{"private IPv4 (172.16.x)", "http://172.16.0.1:8000", true},
+		{"private IPv4 (192.168.x)", "http://192.168.1.1:8000", true},
+		{"link-local IPv4", "http://169.254.1.1:8000", true},
+		{"link-local IPv6", "http://[fe80::1]:8000", true},
+		{"unspecified IPv4", "http://0.0.0.0:8000", true},
+		{"unspecified IPv6", "http://[::]:8000", true},
+		{"non-string input", 123, true},
+		{"non-string input (nil)", nil, true},
+		{"invalid URL", "://invalid", true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validateURLNotPrivate(tc.input)
+			if tc.wantError && err == nil {
+				t.Errorf("validateURLNotPrivate(%v) = nil, want error", tc.input)
+			}
+			if !tc.wantError && err != nil {
+				t.Errorf("validateURLNotPrivate(%v) = %v, want nil", tc.input, err)
+			}
+		})
+	}
+}
+
 func TestValidateConfig(t *testing.T) {
 	t.Parallel()
 

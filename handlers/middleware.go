@@ -170,6 +170,17 @@ func SecurityHeadersMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// HostValidationMiddleware rejects requests with empty or malformed Host headers.
+func HostValidationMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Host == "" {
+			http.Error(w, `{"error":"host header is required"}`, http.StatusBadRequest)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 // RecoveryMiddleware catches panics in downstream handlers and returns 500.
 func RecoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -494,9 +494,4 @@ func TestGetObjectByIDHandler(t *testing.T) {
 	})
 }
 
-func TestPaginationParams(t *testing.T) {
-	t.Parallel()
 
-	// Test from internal_test.go would go here
-	// For now, the handlers package test aligns with tool usage
-}

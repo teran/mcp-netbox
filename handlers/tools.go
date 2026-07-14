@@ -127,7 +127,7 @@ type CircuitsInput struct {
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
 type GetObjectInput struct {
-	ObjectType string `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, circuit_termination,required"`
+	ObjectType string `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination,required"`
 	ID         int    `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
 }
 
