@@ -203,8 +203,8 @@ func TestCheckBatchSize(t *testing.T) {
 	}
 
 	// Test invalid JSON body
-	if err := checkBatchSize([]byte("[")); err != nil {
-		t.Logf("checkBatchSize(invalid JSON) = %v", err)
+	if err := checkBatchSize([]byte("[")); err == nil {
+		t.Error("checkBatchSize(invalid JSON) = nil, want error")
 	}
 }
 
@@ -242,8 +242,8 @@ func TestLoggingResponseWriter(t *testing.T) {
 		if lrw.statusCode != http.StatusTeapot {
 			t.Errorf("statusCode = %d, want %d", lrw.statusCode, http.StatusTeapot)
 		}
-		if lrw.bodySize != 5 {
-			t.Errorf("bodySize = %d, want %d", lrw.bodySize, 5)
+		if lrw.bodySize.Load() != 5 {
+			t.Errorf("bodySize = %d, want %d", lrw.bodySize.Load(), 5)
 		}
 		if n != 5 {
 			t.Errorf("Write returned %d, want %d", n, 5)
@@ -369,6 +369,43 @@ func TestTokenMiddleware(t *testing.T) {
 
 		if rec.Code != http.StatusUnauthorized {
 			t.Errorf("status = %d, want %d", rec.Code, http.StatusUnauthorized)
+		}
+	})
+}
+
+func TestHostValidationMiddleware(t *testing.T) {
+	t.Parallel()
+
+	t.Run("empty host returns 400", func(t *testing.T) {
+		handler := HostValidationMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			t.Error("handler should not be called when host is empty")
+		}))
+
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+		req.Host = "" // Ensure empty host
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusBadRequest {
+			t.Errorf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+		}
+	})
+
+	t.Run("non-empty host passes through", func(t *testing.T) {
+		handler := HostValidationMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Host != "example.com" {
+				t.Errorf("Host = %q, want %q", r.Host, "example.com")
+			}
+			w.WriteHeader(http.StatusOK)
+		}))
+
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+		req.Host = "example.com"
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
 		}
 	})
 }

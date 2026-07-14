@@ -2,11 +2,11 @@
 // client for the NetBox REST API.
 //
 // It provides:
-// - Typed list methods for all NetBox entities (sites, devices, IPs, etc.)
-// - A generic GetObject method that dynamically routes to the correct endpoint
-//   based on a configurable object type-to-endpoint mapping
-// - Wire-to-domain model conversion functions for each entity type
-// - HTTP error handling with specific errors for 401, 403, 404, and 429 responses
+//   - Typed list methods for all NetBox entities (sites, devices, IPs, etc.)
+//   - A generic GetObject method that dynamically routes to the correct endpoint
+//     based on a configurable object type-to-endpoint mapping
+//   - Wire-to-domain model conversion functions for each entity type
+//   - HTTP error handling with specific errors for 401, 403, 404, and 429 responses
 package netbox
 
 import (
@@ -320,6 +320,9 @@ func (c *Client) GetObject(ctx context.Context, token, objectType string, id int
 
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
+	if resp == nil {
+		return nil
+	}
 	results := make([]D, len(resp.Results))
 	for i, w := range resp.Results {
 		results[i] = convert(w)
@@ -391,6 +394,7 @@ func wireSiteToDomain(w WireSite) domain.Site {
 		ShippingAddress: w.ShippingAddress,
 		Comments:        w.Comments,
 		Tags:            wireTagsToDomain(w.Tags),
+		CustomFields:    w.CustomFields,
 		Created:         w.Created,
 		LastUpdated:     w.LastUpdated,
 	}
@@ -398,25 +402,26 @@ func wireSiteToDomain(w WireSite) domain.Site {
 
 func wireDeviceToDomain(w WireDevice) domain.Device {
 	return domain.Device{
-		ID:          w.ID,
-		Name:        w.Name,
-		Display:     w.Display,
-		DeviceType:  wireNestedToDomain(w.DeviceType),
-		Role:        wireNestedToDomain(w.Role),
-		Tenant:      wireNestedToDomain(w.Tenant),
-		Platform:    wireNestedToDomain(w.Platform),
-		Serial:      w.Serial,
-		AssetTag:    w.AssetTag,
-		Site:        wireNestedToDomain(w.Site),
-		Rack:        wireNestedToDomain(w.Rack),
-		Position:    w.Position,
-		Face:        wireLabelToDomain(w.Face),
-		Status:      wireLabelToDomain(w.Status),
-		Cluster:     wireNestedToDomain(w.Cluster),
-		Comments:    w.Comments,
-		Tags:        wireTagsToDomain(w.Tags),
-		Created:     w.Created,
-		LastUpdated: w.LastUpdated,
+		ID:           w.ID,
+		Name:         w.Name,
+		Display:      w.Display,
+		DeviceType:   wireNestedToDomain(w.DeviceType),
+		Role:         wireNestedToDomain(w.Role),
+		Tenant:       wireNestedToDomain(w.Tenant),
+		Platform:     wireNestedToDomain(w.Platform),
+		Serial:       w.Serial,
+		AssetTag:     w.AssetTag,
+		Site:         wireNestedToDomain(w.Site),
+		Rack:         wireNestedToDomain(w.Rack),
+		Position:     w.Position,
+		Face:         wireLabelToDomain(w.Face),
+		Status:       wireLabelToDomain(w.Status),
+		Cluster:      wireNestedToDomain(w.Cluster),
+		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
 	}
 }
 
@@ -448,6 +453,7 @@ func wireIPAddressToDomain(w WireIPAddress) domain.IPAddress {
 		Description:        w.Description,
 		Comments:           w.Comments,
 		Tags:               wireTagsToDomain(w.Tags),
+		CustomFields:       w.CustomFields,
 		Created:            w.Created,
 		LastUpdated:        w.LastUpdated,
 	}
@@ -464,6 +470,7 @@ func wireCircuitTerminationToDomain(w WireCircuitTermination) domain.CircuitTerm
 		UpstreamSpeed: w.UpstreamSpeed,
 		Description:   w.Description,
 		Tags:          wireTagsToDomain(w.Tags),
+		CustomFields:  w.CustomFields,
 		Created:       w.Created,
 		LastUpdated:   w.LastUpdated,
 	}
@@ -471,18 +478,19 @@ func wireCircuitTerminationToDomain(w WireCircuitTermination) domain.CircuitTerm
 
 func wireCableToDomain(w WireCable) domain.Cable {
 	return domain.Cable{
-		ID:          w.ID,
-		Display:     w.Display,
-		Type:        wireLabelToDomain(w.Type),
-		Status:      wireLabelToDomain(w.Status),
-		Label:       w.Label,
-		Color:       w.Color,
-		Length:      w.Length,
-		LengthUnit:  wireLabelToDomain(w.LengthUnit),
-		Description: w.Description,
-		Tags:        wireTagsToDomain(w.Tags),
-		Created:     w.Created,
-		LastUpdated: w.LastUpdated,
+		ID:           w.ID,
+		Display:      w.Display,
+		Type:         wireLabelToDomain(w.Type),
+		Status:       wireLabelToDomain(w.Status),
+		Label:        w.Label,
+		Color:        w.Color,
+		Length:       w.Length,
+		LengthUnit:   wireLabelToDomain(w.LengthUnit),
+		Description:  w.Description,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
 	}
 }
 
@@ -495,64 +503,67 @@ func wirePrefixToDomain(w WirePrefix) domain.Prefix {
 		}
 	}
 	return domain.Prefix{
-		ID:          w.ID,
-		Prefix:      w.Prefix,
-		Display:     w.Display,
-		Site:        wireNestedToDomain(w.Site),
-		VRF:         wireNestedToDomain(w.VRF),
-		Tenant:      wireNestedToDomain(w.Tenant),
-		VLAN:        wireNestedToDomain(w.VLAN),
-		Status:      wireLabelToDomain(w.Status),
-		Role:        wireNestedToDomain(w.Role),
-		IsPool:      w.IsPool,
-		Description: w.Description,
-		Comments:    w.Comments,
-		Tags:        wireTagsToDomain(w.Tags),
-		Created:     w.Created,
-		LastUpdated: w.LastUpdated,
-		Children:    w.Children,
-		Depth:       w.Depth,
-		Family:      family,
+		ID:           w.ID,
+		Prefix:       w.Prefix,
+		Display:      w.Display,
+		Site:         wireNestedToDomain(w.Site),
+		VRF:          wireNestedToDomain(w.VRF),
+		Tenant:       wireNestedToDomain(w.Tenant),
+		VLAN:         wireNestedToDomain(w.VLAN),
+		Status:       wireLabelToDomain(w.Status),
+		Role:         wireNestedToDomain(w.Role),
+		IsPool:       w.IsPool,
+		Description:  w.Description,
+		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+		Children:     w.Children,
+		Depth:        w.Depth,
+		Family:       family,
 	}
 }
 
 func wireVLANToDomain(w WireVLAN) domain.VLAN {
 	return domain.VLAN{
-		ID:          w.ID,
-		Site:        wireNestedToDomain(w.Site),
-		Group:       wireNestedToDomain(w.Group),
-		VID:         w.VID,
-		Name:        w.Name,
-		Display:     w.Display,
-		Tenant:      wireNestedToDomain(w.Tenant),
-		Status:      wireLabelToDomain(w.Status),
-		Role:        wireNestedToDomain(w.Role),
-		Description: w.Description,
-		Comments:    w.Comments,
-		Tags:        wireTagsToDomain(w.Tags),
-		Created:     w.Created,
-		LastUpdated: w.LastUpdated,
+		ID:           w.ID,
+		Site:         wireNestedToDomain(w.Site),
+		Group:        wireNestedToDomain(w.Group),
+		VID:          w.VID,
+		Name:         w.Name,
+		Display:      w.Display,
+		Tenant:       wireNestedToDomain(w.Tenant),
+		Status:       wireLabelToDomain(w.Status),
+		Role:         wireNestedToDomain(w.Role),
+		Description:  w.Description,
+		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
 	}
 }
 
 func wireVirtualMachineToDomain(w WireVirtualMachine) domain.VirtualMachine {
 	return domain.VirtualMachine{
-		ID:          w.ID,
-		Name:        w.Name,
-		Display:     w.Display,
-		Cluster:     wireNestedToDomain(w.Cluster),
-		Role:        wireNestedToDomain(w.Role),
-		Tenant:      wireNestedToDomain(w.Tenant),
-		Platform:    wireNestedToDomain(w.Platform),
-		Status:      wireLabelToDomain(w.Status),
-		Site:        wireNestedToDomain(w.Site),
-		VCPUs:       w.VCPUs,
-		Memory:      w.Memory,
-		Disk:        w.Disk,
-		Comments:    w.Comments,
-		Tags:        wireTagsToDomain(w.Tags),
-		Created:     w.Created,
-		LastUpdated: w.LastUpdated,
+		ID:           w.ID,
+		Name:         w.Name,
+		Display:      w.Display,
+		Cluster:      wireNestedToDomain(w.Cluster),
+		Role:         wireNestedToDomain(w.Role),
+		Tenant:       wireNestedToDomain(w.Tenant),
+		Platform:     wireNestedToDomain(w.Platform),
+		Status:       wireLabelToDomain(w.Status),
+		Site:         wireNestedToDomain(w.Site),
+		VCPUs:        w.VCPUs,
+		Memory:       w.Memory,
+		Disk:         w.Disk,
+		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
 	}
 }
 
@@ -568,6 +579,7 @@ func wireClusterToDomain(w WireCluster) domain.Cluster {
 		Description:  w.Description,
 		Comments:     w.Comments,
 		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
 		Created:      w.Created,
 		LastUpdated:  w.LastUpdated,
 	}
@@ -575,38 +587,40 @@ func wireClusterToDomain(w WireCluster) domain.Cluster {
 
 func wireCircuitToDomain(w WireCircuit) domain.Circuit {
 	return domain.Circuit{
-		ID:          w.ID,
-		CID:         w.CID,
-		Display:     w.Display,
-		Provider:    wireNestedToDomain(w.Provider),
-		CircuitType: wireNestedToDomain(w.CircuitType),
-		Tenant:      wireNestedToDomain(w.Tenant),
-		Status:      wireLabelToDomain(w.Status),
-		Description: w.Description,
-		Comments:    w.Comments,
-		Tags:        wireTagsToDomain(w.Tags),
-		Created:     w.Created,
-		LastUpdated: w.LastUpdated,
-		InstallDate: w.InstallDate,
-		CommitRate:  w.CommitRate,
+		ID:           w.ID,
+		CID:          w.CID,
+		Display:      w.Display,
+		Provider:     wireNestedToDomain(w.Provider),
+		CircuitType:  wireNestedToDomain(w.CircuitType),
+		Tenant:       wireNestedToDomain(w.Tenant),
+		Status:       wireLabelToDomain(w.Status),
+		Description:  w.Description,
+		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+		InstallDate:  w.InstallDate,
+		CommitRate:   w.CommitRate,
 	}
 }
 
 func wireInterfaceToDomain(w WireInterface) domain.Interface {
 	return domain.Interface{
-		ID:          w.ID,
-		Name:        w.Name,
-		Display:     w.Display,
-		Device:      wireNestedToDomain(w.Device),
-		Type:        wireLabelToDomain(w.Type),
-		Enabled:     w.Enabled,
-		MTU:         w.MTU,
-		MACAddress:  w.MACAddress,
-		Speed:       w.Speed,
-		Description: w.Description,
-		Tags:        wireTagsToDomain(w.Tags),
-		Created:     w.Created,
-		LastUpdated: w.LastUpdated,
+		ID:           w.ID,
+		Name:         w.Name,
+		Display:      w.Display,
+		Device:       wireNestedToDomain(w.Device),
+		Type:         wireLabelToDomain(w.Type),
+		Enabled:      w.Enabled,
+		MTU:          w.MTU,
+		MACAddress:   w.MACAddress,
+		Speed:        w.Speed,
+		Description:  w.Description,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
 	}
 }
 
@@ -621,6 +635,7 @@ func wireVMInterfaceToDomain(w WireVMInterface) domain.VMInterface {
 		MACAddress:     w.MACAddress,
 		Description:    w.Description,
 		Tags:           wireTagsToDomain(w.Tags),
+		CustomFields:   w.CustomFields,
 		Created:        w.Created,
 		LastUpdated:    w.LastUpdated,
 	}
@@ -628,23 +643,24 @@ func wireVMInterfaceToDomain(w WireVMInterface) domain.VMInterface {
 
 func wireRackToDomain(w WireRack) domain.Rack {
 	return domain.Rack{
-		ID:          w.ID,
-		Name:        w.Name,
-		Display:     w.Display,
-		FacilityID:  w.FacilityID,
-		Site:        wireNestedToDomain(w.Site),
-		Location:    wireNestedToDomain(w.Location),
-		Tenant:      wireNestedToDomain(w.Tenant),
-		Status:      wireLabelToDomain(w.Status),
-		Role:        wireNestedToDomain(w.Role),
-		Serial:      w.Serial,
-		AssetTag:    w.AssetTag,
-		Type:        wireLabelToDomain(w.Type),
-		Width:       w.Width,
-		UHeight:     w.UHeight,
-		Comments:    w.Comments,
-		Tags:        wireTagsToDomain(w.Tags),
-		Created:     w.Created,
-		LastUpdated: w.LastUpdated,
+		ID:           w.ID,
+		Name:         w.Name,
+		Display:      w.Display,
+		FacilityID:   w.FacilityID,
+		Site:         wireNestedToDomain(w.Site),
+		Location:     wireNestedToDomain(w.Location),
+		Tenant:       wireNestedToDomain(w.Tenant),
+		Status:       wireLabelToDomain(w.Status),
+		Role:         wireNestedToDomain(w.Role),
+		Serial:       w.Serial,
+		AssetTag:     w.AssetTag,
+		Type:         wireLabelToDomain(w.Type),
+		Width:        w.Width,
+		UHeight:      w.UHeight,
+		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
 	}
 }

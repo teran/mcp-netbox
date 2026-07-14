@@ -3,6 +3,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/url"
@@ -21,6 +22,7 @@ type Config struct {
 	RateLimitPerClient    int           `envconfig:"RATE_LIMIT_PER_CLIENT" default:"10"`
 	TrustedProxy          string        `envconfig:"TRUSTED_PROXY" default:""`
 	WriteTimeout          time.Duration `envconfig:"WRITE_TIMEOUT" default:"300s"`
+	AllowPrivateNetBox    bool          `envconfig:"ALLOW_PRIVATE_NETBOX" default:"false"`
 }
 
 func (c Config) validate() error {
@@ -29,7 +31,7 @@ func (c Config) validate() error {
 			validation.Required,
 			validation.By(validateURLScheme),
 			validation.By(validateURLHost),
-			validation.By(validateURLNotPrivate),
+			validation.By(validateURLNotPrivate(c.AllowPrivateNetBox)),
 		),
 		validation.Field(&c.RateLimitGlobal, validation.By(validatePositiveInt)),
 		validation.Field(&c.RateLimitPerClient, validation.By(validatePositiveInt)),
@@ -78,7 +80,16 @@ func validateURLHost(value interface{}) error {
 	return nil
 }
 
-func validateURLNotPrivate(value interface{}) error {
+func validateURLNotPrivate(allowPrivate bool) validation.RuleFunc {
+	return func(value interface{}) error {
+		if allowPrivate {
+			return nil
+		}
+		return validateURLNotPrivateCheck(value)
+	}
+}
+
+func validateURLNotPrivateCheck(value interface{}) error {
 	s, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("must be a string")
@@ -95,9 +106,19 @@ func validateURLNotPrivate(value interface{}) error {
 	// Try to parse as IP address
 	ip := net.ParseIP(host)
 	if ip == nil {
-		// Hostname, not an IP — skip IP validation.
-		// DNS-based validation would require resolution at config time,
-		// which is too heavy and could fail due to transient network issues.
+		// Hostname — resolve DNS to check for private IPs.
+		// This prevents SSRF bypass where a hostname resolves to a private IP.
+		ips, err := net.DefaultResolver.LookupNetIP(context.Background(), "ip", host)
+		if err != nil {
+			// DNS resolution failed — log and accept the hostname.
+			// Transient DNS failures should not block startup.
+			return nil
+		}
+		for _, resolvedIP := range ips {
+			if resolvedIP.IsLoopback() || resolvedIP.IsPrivate() || resolvedIP.IsLinkLocalUnicast() || resolvedIP.IsLinkLocalMulticast() || resolvedIP.IsUnspecified() {
+				return fmt.Errorf("hostname %q resolves to private/reserved IP %q (set ALLOW_PRIVATE_NETBOX=true to bypass)", host, resolvedIP)
+			}
+		}
 		return nil
 	}
 

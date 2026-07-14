@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strings"
+	"sync/atomic"
 	"time"
 	"unicode"
 
@@ -116,7 +117,7 @@ type loggingResponseWriter struct {
 	http.ResponseWriter
 
 	statusCode int
-	bodySize   int
+	bodySize   atomic.Int64
 }
 
 func (lrw *loggingResponseWriter) WriteHeader(code int) {
@@ -126,7 +127,7 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 
 func (lrw *loggingResponseWriter) Write(b []byte) (int, error) {
 	n, err := lrw.ResponseWriter.Write(b)
-	lrw.bodySize += n
+	lrw.bodySize.Add(int64(n))
 	return n, err
 }
 
@@ -234,7 +235,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			"method", toolName,
 			"duration", duration,
 			"req_size", len(body),
-			"resp_size", lrw.bodySize,
+			"resp_size", lrw.bodySize.Load(),
 			"status", lrw.statusCode,
 		)
 	})

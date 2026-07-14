@@ -53,12 +53,12 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 	)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /healthz", RecoveryMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"status":"ok"}`))
-	})
-	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, r *http.Request) {
+	})))
+	mux.Handle("GET /readyz", RecoveryMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		status := http.StatusOK
@@ -70,7 +70,7 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 
 		w.WriteHeader(status)
 		_, _ = w.Write([]byte(body))
-	})
+	})))
 	mux.Handle("/mcp", handler)
 
 	return mux, stopRateLimit

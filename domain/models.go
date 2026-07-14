@@ -10,44 +10,46 @@ package domain
 // Site represents a NetBox site (physical location or data center).
 type (
 	Site struct {
-		ID              int     `json:"id"`
-		Name            string  `json:"name"`
-		Slug            string  `json:"slug"`
-		Display         string  `json:"display,omitempty"`
-		Status          *Label  `json:"status"`
-		Region          *Nested `json:"region"`
-		Tenant          *Nested `json:"tenant"`
-		Facility        string  `json:"facility,omitempty"`
-		TimeZone        string  `json:"time_zone,omitempty"`
-		Description     string  `json:"description,omitempty"`
-		PhysicalAddress string  `json:"physical_address,omitempty"`
-		ShippingAddress string  `json:"shipping_address,omitempty"`
-		Comments        string  `json:"comments,omitempty"`
-		Tags            []Tag   `json:"tags,omitempty"`
-		Created         string  `json:"created"`
-		LastUpdated     string  `json:"last_updated"`
+		ID              int            `json:"id"`
+		Name            string         `json:"name"`
+		Slug            string         `json:"slug"`
+		Display         string         `json:"display,omitempty"`
+		Status          *Label         `json:"status"`
+		Region          *Nested        `json:"region"`
+		Tenant          *Nested        `json:"tenant"`
+		Facility        string         `json:"facility,omitempty"`
+		TimeZone        string         `json:"time_zone,omitempty"`
+		Description     string         `json:"description,omitempty"`
+		PhysicalAddress string         `json:"physical_address,omitempty"`
+		ShippingAddress string         `json:"shipping_address,omitempty"`
+		Comments        string         `json:"comments,omitempty"`
+		Tags            []Tag          `json:"tags,omitempty"`
+		CustomFields    map[string]any `json:"custom_fields,omitempty"`
+		Created         string         `json:"created"`
+		LastUpdated     string         `json:"last_updated"`
 	}
 
 	Device struct {
-		ID          int     `json:"id"`
-		Name        string  `json:"name"`
-		Display     string  `json:"display,omitempty"`
-		DeviceType  *Nested `json:"device_type"`
-		Role        *Nested `json:"role"`
-		Tenant      *Nested `json:"tenant"`
-		Platform    *Nested `json:"platform"`
-		Serial      string  `json:"serial,omitempty"`
-		AssetTag    string  `json:"asset_tag,omitempty"`
-		Site        *Nested `json:"site"`
-		Rack        *Nested `json:"rack"`
-		Position    float64 `json:"position,omitempty"`
-		Face        *Label  `json:"face"`
-		Status      *Label  `json:"status"`
-		Cluster     *Nested `json:"cluster"`
-		Comments    string  `json:"comments,omitempty"`
-		Tags        []Tag   `json:"tags,omitempty"`
-		Created     string  `json:"created"`
-		LastUpdated string  `json:"last_updated"`
+		ID           int            `json:"id"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		DeviceType   *Nested        `json:"device_type"`
+		Role         *Nested        `json:"role"`
+		Tenant       *Nested        `json:"tenant"`
+		Platform     *Nested        `json:"platform"`
+		Serial       string         `json:"serial,omitempty"`
+		AssetTag     string         `json:"asset_tag,omitempty"`
+		Site         *Nested        `json:"site"`
+		Rack         *Nested        `json:"rack"`
+		Position     float64        `json:"position,omitempty"`
+		Face         *Label         `json:"face"`
+		Status       *Label         `json:"status"`
+		Cluster      *Nested        `json:"cluster"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 
 	IPAddress struct {
@@ -65,177 +67,188 @@ type (
 		Description        string          `json:"description,omitempty"`
 		Comments           string          `json:"comments,omitempty"`
 		Tags               []Tag           `json:"tags,omitempty"`
+		CustomFields       map[string]any  `json:"custom_fields,omitempty"`
 		Created            string          `json:"created"`
 		LastUpdated        string          `json:"last_updated"`
 	}
 
 	Prefix struct {
-		ID          int     `json:"id"`
-		Prefix      string  `json:"prefix"`
-		Display     string  `json:"display,omitempty"`
-		Site        *Nested `json:"site"`
-		VRF         *Nested `json:"vrf"`
-		Tenant      *Nested `json:"tenant"`
-		VLAN        *Nested `json:"vlan"`
-		Status      *Label  `json:"status"`
-		Role        *Nested `json:"role"`
-		IsPool      bool    `json:"is_pool"`
-		Description string  `json:"description,omitempty"`
-		Comments    string  `json:"comments,omitempty"`
-		Tags        []Tag   `json:"tags,omitempty"`
-		Created     string  `json:"created"`
-		LastUpdated string  `json:"last_updated"`
-		Children    int     `json:"children"`
-		Depth       int     `json:"_depth"`
-		Family      *Family `json:"family"`
+		ID           int            `json:"id"`
+		Prefix       string         `json:"prefix"`
+		Display      string         `json:"display,omitempty"`
+		Site         *Nested        `json:"site"`
+		VRF          *Nested        `json:"vrf"`
+		Tenant       *Nested        `json:"tenant"`
+		VLAN         *Nested        `json:"vlan"`
+		Status       *Label         `json:"status"`
+		Role         *Nested        `json:"role"`
+		IsPool       bool           `json:"is_pool"`
+		Description  string         `json:"description,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+		Children     int            `json:"children"`
+		Depth        int            `json:"_depth"`
+		Family       *Family        `json:"family"`
 	}
 
 	VLAN struct {
-		ID          int     `json:"id"`
-		Site        *Nested `json:"site"`
-		Group       *Nested `json:"group"`
-		VID         int     `json:"vid"`
-		Name        string  `json:"name"`
-		Display     string  `json:"display,omitempty"`
-		Tenant      *Nested `json:"tenant"`
-		Status      *Label  `json:"status"`
-		Role        *Nested `json:"role"`
-		Description string  `json:"description,omitempty"`
-		Comments    string  `json:"comments,omitempty"`
-		Tags        []Tag   `json:"tags,omitempty"`
-		Created     string  `json:"created"`
-		LastUpdated string  `json:"last_updated"`
+		ID           int            `json:"id"`
+		Site         *Nested        `json:"site"`
+		Group        *Nested        `json:"group"`
+		VID          int            `json:"vid"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Tenant       *Nested        `json:"tenant"`
+		Status       *Label         `json:"status"`
+		Role         *Nested        `json:"role"`
+		Description  string         `json:"description,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 
 	VirtualMachine struct {
-		ID          int     `json:"id"`
-		Name        string  `json:"name"`
-		Display     string  `json:"display,omitempty"`
-		Cluster     *Nested `json:"cluster"`
-		Role        *Nested `json:"role"`
-		Tenant      *Nested `json:"tenant"`
-		Platform    *Nested `json:"platform"`
-		Status      *Label  `json:"status"`
-		Site        *Nested `json:"site"`
-		VCPUs       float64 `json:"vcpus,omitempty"`
-		Memory      int     `json:"memory,omitempty"`
-		Disk        int     `json:"disk,omitempty"`
-		Comments    string  `json:"comments,omitempty"`
-		Tags        []Tag   `json:"tags,omitempty"`
-		Created     string  `json:"created"`
-		LastUpdated string  `json:"last_updated"`
+		ID           int            `json:"id"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Cluster      *Nested        `json:"cluster"`
+		Role         *Nested        `json:"role"`
+		Tenant       *Nested        `json:"tenant"`
+		Platform     *Nested        `json:"platform"`
+		Status       *Label         `json:"status"`
+		Site         *Nested        `json:"site"`
+		VCPUs        float64        `json:"vcpus,omitempty"`
+		Memory       int            `json:"memory,omitempty"`
+		Disk         int            `json:"disk,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 
 	Cluster struct {
-		ID           int     `json:"id"`
-		Name         string  `json:"name"`
-		Display      string  `json:"display,omitempty"`
-		ClusterType  *Nested `json:"type"`
-		ClusterGroup *Nested `json:"group"`
-		Site         *Nested `json:"site"`
-		Tenant       *Nested `json:"tenant"`
-		Description  string  `json:"description,omitempty"`
-		Comments     string  `json:"comments,omitempty"`
-		Tags         []Tag   `json:"tags,omitempty"`
-		Created      string  `json:"created"`
-		LastUpdated  string  `json:"last_updated"`
+		ID           int            `json:"id"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		ClusterType  *Nested        `json:"type"`
+		ClusterGroup *Nested        `json:"group"`
+		Site         *Nested        `json:"site"`
+		Tenant       *Nested        `json:"tenant"`
+		Description  string         `json:"description,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 
 	Circuit struct {
-		ID          int     `json:"id"`
-		CID         string  `json:"cid"`
-		Display     string  `json:"display,omitempty"`
-		Provider    *Nested `json:"provider"`
-		CircuitType *Nested `json:"circuit_type"`
-		Tenant      *Nested `json:"tenant"`
-		Status      *Label  `json:"status"`
-		Description string  `json:"description,omitempty"`
-		Comments    string  `json:"comments,omitempty"`
-		Tags        []Tag   `json:"tags,omitempty"`
-		Created     string  `json:"created"`
-		LastUpdated string  `json:"last_updated"`
-		InstallDate string  `json:"install_date,omitempty"`
-		CommitRate  int     `json:"commit_rate,omitempty"`
+		ID           int            `json:"id"`
+		CID          string         `json:"cid"`
+		Display      string         `json:"display,omitempty"`
+		Provider     *Nested        `json:"provider"`
+		CircuitType  *Nested        `json:"circuit_type"`
+		Tenant       *Nested        `json:"tenant"`
+		Status       *Label         `json:"status"`
+		Description  string         `json:"description,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+		InstallDate  string         `json:"install_date,omitempty"`
+		CommitRate   int            `json:"commit_rate,omitempty"`
 	}
 
 	CircuitTermination struct {
-		ID            int     `json:"id"`
-		Display       string  `json:"display,omitempty"`
-		Circuit       *Nested `json:"circuit"`
-		TermSide      string  `json:"term_side"`
-		Site          *Nested `json:"site"`
-		Speed         int     `json:"speed,omitempty"`
-		UpstreamSpeed int     `json:"upstream_speed,omitempty"`
-		Description   string  `json:"description,omitempty"`
-		Tags          []Tag   `json:"tags,omitempty"`
-		Created       string  `json:"created"`
-		LastUpdated   string  `json:"last_updated"`
+		ID            int            `json:"id"`
+		Display       string         `json:"display,omitempty"`
+		Circuit       *Nested        `json:"circuit"`
+		TermSide      string         `json:"term_side"`
+		Site          *Nested        `json:"site"`
+		Speed         int            `json:"speed,omitempty"`
+		UpstreamSpeed int            `json:"upstream_speed,omitempty"`
+		Description   string         `json:"description,omitempty"`
+		Tags          []Tag          `json:"tags,omitempty"`
+		CustomFields  map[string]any `json:"custom_fields,omitempty"`
+		Created       string         `json:"created"`
+		LastUpdated   string         `json:"last_updated"`
 	}
 
 	Cable struct {
-		ID          int     `json:"id"`
-		Display     string  `json:"display,omitempty"`
-		Type        *Label  `json:"type"`
-		Status      *Label  `json:"status"`
-		Label       string  `json:"label,omitempty"`
-		Color       string  `json:"color,omitempty"`
-		Length      float64 `json:"length,omitempty"`
-		LengthUnit  *Label  `json:"length_unit,omitempty"`
-		Description string  `json:"description,omitempty"`
-		Tags        []Tag   `json:"tags,omitempty"`
-		Created     string  `json:"created"`
-		LastUpdated string  `json:"last_updated"`
+		ID           int            `json:"id"`
+		Display      string         `json:"display,omitempty"`
+		Type         *Label         `json:"type"`
+		Status       *Label         `json:"status"`
+		Label        string         `json:"label,omitempty"`
+		Color        string         `json:"color,omitempty"`
+		Length       float64        `json:"length,omitempty"`
+		LengthUnit   *Label         `json:"length_unit,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 
 	Rack struct {
-		ID          int     `json:"id"`
-		Name        string  `json:"name"`
-		Display     string  `json:"display,omitempty"`
-		FacilityID  string  `json:"facility_id,omitempty"`
-		Site        *Nested `json:"site"`
-		Location    *Nested `json:"location"`
-		Tenant      *Nested `json:"tenant"`
-		Status      *Label  `json:"status"`
-		Role        *Nested `json:"role"`
-		Serial      string  `json:"serial,omitempty"`
-		AssetTag    string  `json:"asset_tag,omitempty"`
-		Type        *Label  `json:"type"`
-		Width       int     `json:"width,omitempty"`
-		UHeight     int     `json:"u_height,omitempty"`
-		Comments    string  `json:"comments,omitempty"`
-		Tags        []Tag   `json:"tags,omitempty"`
-		Created     string  `json:"created"`
-		LastUpdated string  `json:"last_updated"`
+		ID           int            `json:"id"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		FacilityID   string         `json:"facility_id,omitempty"`
+		Site         *Nested        `json:"site"`
+		Location     *Nested        `json:"location"`
+		Tenant       *Nested        `json:"tenant"`
+		Status       *Label         `json:"status"`
+		Role         *Nested        `json:"role"`
+		Serial       string         `json:"serial,omitempty"`
+		AssetTag     string         `json:"asset_tag,omitempty"`
+		Type         *Label         `json:"type"`
+		Width        int            `json:"width,omitempty"`
+		UHeight      int            `json:"u_height,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 
 	Interface struct {
-		ID          int     `json:"id"`
-		Name        string  `json:"name"`
-		Display     string  `json:"display,omitempty"`
-		Device      *Nested `json:"device"`
-		Type        *Label  `json:"type"`
-		Enabled     bool    `json:"enabled"`
-		MTU         int     `json:"mtu,omitempty"`
-		MACAddress  string  `json:"mac_address,omitempty"`
-		Speed       int     `json:"speed,omitempty"`
-		Description string  `json:"description,omitempty"`
-		Tags        []Tag   `json:"tags,omitempty"`
-		Created     string  `json:"created"`
-		LastUpdated string  `json:"last_updated"`
+		ID           int            `json:"id"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *Nested        `json:"device"`
+		Type         *Label         `json:"type"`
+		Enabled      bool           `json:"enabled"`
+		MTU          int            `json:"mtu,omitempty"`
+		MACAddress   string         `json:"mac_address,omitempty"`
+		Speed        int            `json:"speed,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 
 	VMInterface struct {
-		ID             int     `json:"id"`
-		Name           string  `json:"name"`
-		Display        string  `json:"display,omitempty"`
-		VirtualMachine *Nested `json:"virtual_machine"`
-		Enabled        bool    `json:"enabled"`
-		MTU            int     `json:"mtu,omitempty"`
-		MACAddress     string  `json:"mac_address,omitempty"`
-		Description    string  `json:"description,omitempty"`
-		Tags           []Tag   `json:"tags,omitempty"`
-		Created        string  `json:"created"`
-		LastUpdated    string  `json:"last_updated"`
+		ID             int            `json:"id"`
+		Name           string         `json:"name"`
+		Display        string         `json:"display,omitempty"`
+		VirtualMachine *Nested        `json:"virtual_machine"`
+		Enabled        bool           `json:"enabled"`
+		MTU            int            `json:"mtu,omitempty"`
+		MACAddress     string         `json:"mac_address,omitempty"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []Tag          `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
 	}
 )
 

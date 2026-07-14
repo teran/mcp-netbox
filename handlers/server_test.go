@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -220,8 +221,23 @@ func TestNewMux(t *testing.T) {
 		})
 
 		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, mcpHandler)
-		// Stopping should not panic and should clean up the rate limiter goroutine.
-		stop()
+
+		// Signal that the goroutine should have been stopped.
+		done := make(chan struct{})
+		go func() {
+			// We can't directly observe the evictExpired goroutine, but we can
+			// verify that stop() does not block indefinitely and the mux still
+			// serves requests afterwards.
+			stop()
+			close(done)
+		}()
+
+		select {
+		case <-done:
+			// stop() returned — goroutine was cleaned up.
+		case <-time.After(5 * time.Second):
+			t.Fatal("stop() did not return within 5 seconds — goroutine may leak")
+		}
 
 		// The mux should still work after stopping the rate limiter.
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/healthz", http.NoBody)

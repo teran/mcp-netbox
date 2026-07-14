@@ -89,6 +89,9 @@ func TestValidatePositiveInt(t *testing.T) {
 func TestValidateURLNotPrivate(t *testing.T) {
 	t.Parallel()
 
+	// Use the strict (non-allow) variant for all tests.
+	strictValidator := validateURLNotPrivate(false)
+
 	tests := []struct {
 		name      string
 		input     interface{}
@@ -114,7 +117,7 @@ func TestValidateURLNotPrivate(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := validateURLNotPrivate(tc.input)
+			err := strictValidator(tc.input)
 			if tc.wantError && err == nil {
 				t.Errorf("validateURLNotPrivate(%v) = nil, want error", tc.input)
 			}
@@ -123,6 +126,21 @@ func TestValidateURLNotPrivate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestValidateURLNotPrivate_AllowPrivate(t *testing.T) {
+	t.Parallel()
+
+	allowValidator := validateURLNotPrivate(true)
+
+	t.Run("bypasses validation when allowPrivate=true", func(t *testing.T) {
+		if err := allowValidator("http://127.0.0.1:8000"); err != nil {
+			t.Errorf("allowValidator(loopback) = %v, want nil", err)
+		}
+		if err := allowValidator("http://192.168.1.1:8000"); err != nil {
+			t.Errorf("allowValidator(private) = %v, want nil", err)
+		}
+	})
 }
 
 func TestValidateConfig(t *testing.T) {
