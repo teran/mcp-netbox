@@ -344,6 +344,274 @@ func TestClient_ListCircuits(t *testing.T) {
 	})
 }
 
+func TestClient_ListInterfaces(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/api/dcim/interfaces/" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{
+				"count": 2,
+				"next": null,
+				"previous": null,
+				"results": [
+					{
+						"id": 1,
+						"name": "ge-0/0/0",
+						"device": {"id": 1, "name": "router1", "url": "", "slug": "router1"},
+						"type": {"value": "1000base-t", "label": "1000BASE-T"},
+						"enabled": true,
+						"mtu": 1500,
+						"mac_address": "aa:bb:cc:dd:ee:ff",
+						"speed": 1000000,
+						"description": "uplink",
+						"tags": [],
+						"created": "",
+						"last_updated": ""
+					},
+					{
+						"id": 2,
+						"name": "ge-0/0/1",
+						"device": {"id": 1, "name": "router1", "url": "", "slug": "router1"},
+						"type": {"value": "1000base-t", "label": "1000BASE-T"},
+						"enabled": false,
+						"description": "",
+						"tags": [],
+						"created": "",
+						"last_updated": ""
+					}
+				]
+			}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		resp, err := client.ListInterfaces(context.Background(), "token", nil)
+		if err != nil {
+			t.Fatalf("ListInterfaces() returned error: %v", err)
+		}
+		if resp.Count != 2 {
+			t.Errorf("Count = %d, want %d", resp.Count, 2)
+		}
+		if len(resp.Results) != 2 {
+			t.Fatalf("len(Results) = %d, want %d", len(resp.Results), 2)
+		}
+		if resp.Results[0].Name != "ge-0/0/0" {
+			t.Errorf("Results[0].Name = %q, want %q", resp.Results[0].Name, "ge-0/0/0")
+		}
+		if !resp.Results[0].Enabled {
+			t.Error("Results[0].Enabled = false, want true")
+		}
+		if resp.Results[0].Device.Name != "router1" {
+			t.Errorf("Results[0].Device.Name = %q, want %q", resp.Results[0].Device.Name, "router1")
+		}
+		if resp.Results[1].Enabled {
+			t.Error("Results[1].Enabled = true, want false")
+		}
+	})
+}
+
+func TestClient_ListVMInterfaces(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/api/virtualization/interfaces/" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{
+				"count": 2,
+				"next": null,
+				"previous": null,
+				"results": [
+					{
+						"id": 1,
+						"name": "eth0",
+						"virtual_machine": {"id": 1, "name": "web-01", "url": "", "slug": "web-01"},
+						"enabled": true,
+						"mtu": 1500,
+						"mac_address": "11:22:33:44:55:66",
+						"description": "primary",
+						"tags": [],
+						"created": "",
+						"last_updated": ""
+					},
+					{
+						"id": 2,
+						"name": "eth1",
+						"virtual_machine": {"id": 1, "name": "web-01", "url": "", "slug": "web-01"},
+						"enabled": false,
+						"description": "",
+						"tags": [],
+						"created": "",
+						"last_updated": ""
+					}
+				]
+			}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		resp, err := client.ListVMInterfaces(context.Background(), "token", nil)
+		if err != nil {
+			t.Fatalf("ListVMInterfaces() returned error: %v", err)
+		}
+		if resp.Count != 2 {
+			t.Errorf("Count = %d, want %d", resp.Count, 2)
+		}
+		if len(resp.Results) != 2 {
+			t.Fatalf("len(Results) = %d, want %d", len(resp.Results), 2)
+		}
+		if resp.Results[0].Name != "eth0" {
+			t.Errorf("Results[0].Name = %q, want %q", resp.Results[0].Name, "eth0")
+		}
+		if resp.Results[0].VirtualMachine.Name != "web-01" {
+			t.Errorf("Results[0].VirtualMachine.Name = %q, want %q", resp.Results[0].VirtualMachine.Name, "web-01")
+		}
+		if resp.Results[0].MTU != 1500 {
+			t.Errorf("Results[0].MTU = %d, want %d", resp.Results[0].MTU, 1500)
+		}
+	})
+}
+
+func TestClient_ListCircuitTerminations(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/api/circuits/circuit-terminations/" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{
+				"count": 2,
+				"next": null,
+				"previous": null,
+				"results": [
+					{
+						"id": 1,
+						"circuit": {"id": 1, "name": "CIR-001", "url": "", "slug": "cir-001"},
+						"term_side": "A",
+						"site": {"id": 1, "name": "DC1", "url": "", "slug": "dc1"},
+						"speed": 10000000,
+						"upstream_speed": 10000000,
+						"description": "primary termination",
+						"tags": [],
+						"created": "",
+						"last_updated": ""
+					},
+					{
+						"id": 2,
+						"circuit": {"id": 1, "name": "CIR-001", "url": "", "slug": "cir-001"},
+						"term_side": "Z",
+						"site": {"id": 2, "name": "DC2", "url": "", "slug": "dc2"},
+						"description": "",
+						"tags": [],
+						"created": "",
+						"last_updated": ""
+					}
+				]
+			}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		resp, err := client.ListCircuitTerminations(context.Background(), "token", nil)
+		if err != nil {
+			t.Fatalf("ListCircuitTerminations() returned error: %v", err)
+		}
+		if resp.Count != 2 {
+			t.Errorf("Count = %d, want %d", resp.Count, 2)
+		}
+		if len(resp.Results) != 2 {
+			t.Fatalf("len(Results) = %d, want %d", len(resp.Results), 2)
+		}
+		if resp.Results[0].TermSide != "A" {
+			t.Errorf("Results[0].TermSide = %q, want %q", resp.Results[0].TermSide, "A")
+		}
+		if resp.Results[1].TermSide != "Z" {
+			t.Errorf("Results[1].TermSide = %q, want %q", resp.Results[1].TermSide, "Z")
+		}
+		if resp.Results[0].Circuit.Name != "CIR-001" {
+			t.Errorf("Results[0].Circuit.Name = %q, want %q", resp.Results[0].Circuit.Name, "CIR-001")
+		}
+	})
+}
+
+func TestClient_ListCables(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/api/dcim/cables/" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{
+				"count": 2,
+				"next": null,
+				"previous": null,
+				"results": [
+					{
+						"id": 1,
+						"type": {"value": "cat6a", "label": "CAT6a"},
+						"status": {"value": "connected", "label": "Connected"},
+						"label": "link-01",
+						"color": "blue",
+						"length": 10.5,
+						"length_unit": {"value": "m", "label": "Meters"},
+						"description": "server uplink",
+						"tags": [{"id": 1, "name": "prod", "slug": "prod", "url": ""}],
+						"created": "",
+						"last_updated": ""
+					},
+					{
+						"id": 2,
+						"type": null,
+						"status": {"value": "planned", "label": "Planned"},
+						"label": "",
+						"color": "",
+						"description": "",
+						"tags": [],
+						"created": "",
+						"last_updated": ""
+					}
+				]
+			}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		resp, err := client.ListCables(context.Background(), "token", nil)
+		if err != nil {
+			t.Fatalf("ListCables() returned error: %v", err)
+		}
+		if resp.Count != 2 {
+			t.Errorf("Count = %d, want %d", resp.Count, 2)
+		}
+		if len(resp.Results) != 2 {
+			t.Fatalf("len(Results) = %d, want %d", len(resp.Results), 2)
+		}
+		if resp.Results[0].Label != "link-01" {
+			t.Errorf("Results[0].Label = %q, want %q", resp.Results[0].Label, "link-01")
+		}
+		if resp.Results[0].Type.Value != "cat6a" {
+			t.Errorf("Results[0].Type.Value = %q, want %q", resp.Results[0].Type.Value, "cat6a")
+		}
+		if resp.Results[1].Type != nil {
+			t.Errorf("Results[1].Type = %+v, want nil", resp.Results[1].Type)
+		}
+	})
+}
+
 func TestClient_ListRacks(t *testing.T) {
 	t.Parallel()
 
@@ -565,6 +833,107 @@ func TestConversionFunctions_NilSafety(t *testing.T) {
 			t.Error("expected nil")
 		}
 	})
+}
+
+func TestWireInterfaceToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireInterface{
+		ID:      1,
+		Name:    "ge-0/0/0",
+		Device:  &WireNested{ID: 1, Name: "router1", Slug: "router1", URL: ""},
+		Type:    &WireLabel{Value: "1000base-t", Label: "1000BASE-T"},
+		Enabled: true,
+		MTU:     1500,
+	}
+	d := wireInterfaceToDomain(w)
+	if d.Name != "ge-0/0/0" {
+		t.Errorf("Name = %q, want %q", d.Name, "ge-0/0/0")
+	}
+	if !d.Enabled {
+		t.Error("Enabled = false, want true")
+	}
+	if d.Device.Name != "router1" {
+		t.Errorf("Device.Name = %q, want %q", d.Device.Name, "router1")
+	}
+}
+
+func TestWireVMInterfaceToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireVMInterface{
+		ID:             1,
+		Name:           "eth0",
+		VirtualMachine: &WireNested{ID: 1, Name: "web-01", Slug: "web-01", URL: ""},
+		Enabled:        true,
+	}
+	d := wireVMInterfaceToDomain(w)
+	if d.Name != "eth0" {
+		t.Errorf("Name = %q, want %q", d.Name, "eth0")
+	}
+	if d.VirtualMachine.Name != "web-01" {
+		t.Errorf("VirtualMachine.Name = %q, want %q", d.VirtualMachine.Name, "web-01")
+	}
+}
+
+func TestWireCircuitTerminationToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireCircuitTermination{
+		ID:       1,
+		Circuit:  &WireNested{ID: 1, Name: "CIR-001", Slug: "cir-001", URL: ""},
+		TermSide: "A",
+		Site:     &WireNested{ID: 1, Name: "DC1", Slug: "dc1", URL: ""},
+		Speed:    10000000,
+	}
+	d := wireCircuitTerminationToDomain(w)
+	if d.TermSide != "A" {
+		t.Errorf("TermSide = %q, want %q", d.TermSide, "A")
+	}
+	if d.Circuit.Name != "CIR-001" {
+		t.Errorf("Circuit.Name = %q, want %q", d.Circuit.Name, "CIR-001")
+	}
+}
+
+func TestWireCableToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireCable{
+		ID:     1,
+		Type:   &WireLabel{Value: "cat6a", Label: "CAT6a"},
+		Status: &WireLabel{Value: "connected", Label: "Connected"},
+		Label:  "link-01",
+		Color:  "blue",
+		Length: 10.5,
+	}
+	d := wireCableToDomain(w)
+	if d.Label != "link-01" {
+		t.Errorf("Label = %q, want %q", d.Label, "link-01")
+	}
+	if d.Type.Value != "cat6a" {
+		t.Errorf("Type.Value = %q, want %q", d.Type.Value, "cat6a")
+	}
+	if d.Status.Value != "connected" {
+		t.Errorf("Status.Value = %q, want %q", d.Status.Value, "connected")
+	}
+}
+
+func TestWireCableToDomain_NilTypeAndStatus(t *testing.T) {
+	t.Parallel()
+
+	w := WireCable{
+		ID:     1,
+		Type:   nil,
+		Status: nil,
+		Tags:   nil,
+	}
+	d := wireCableToDomain(w)
+	if d.Type != nil {
+		t.Errorf("Type = %+v, want nil", d.Type)
+	}
+	if d.Status != nil {
+		t.Errorf("Status = %+v, want nil", d.Status)
+	}
 }
 
 func TestConversionFunctions_Populated(t *testing.T) {
@@ -1007,6 +1376,130 @@ func TestConvertPaginated_Empty(t *testing.T) {
 	if len(converted.Results) != 0 {
 		t.Errorf("len(Results) = %d, want %d", len(converted.Results), 0)
 	}
+}
+
+func TestClient_ListInterfaces_Errors(t *testing.T) {
+	t.Parallel()
+
+	t.Run("not_found", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListInterfaces(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+
+	t.Run("invalid_json", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{invalid`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListInterfaces(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
+func TestClient_ListVMInterfaces_Errors(t *testing.T) {
+	t.Parallel()
+
+	t.Run("not_found", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListVMInterfaces(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+
+	t.Run("invalid_json", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{invalid`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListVMInterfaces(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
+func TestClient_ListCircuitTerminations_Errors(t *testing.T) {
+	t.Parallel()
+
+	t.Run("not_found", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListCircuitTerminations(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+
+	t.Run("invalid_json", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{invalid`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListCircuitTerminations(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
+func TestClient_ListCables_Errors(t *testing.T) {
+	t.Parallel()
+
+	t.Run("not_found", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListCables(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+
+	t.Run("invalid_json", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{invalid`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListCables(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
 }
 
 // contains is a helper to check substring presence.

@@ -299,6 +299,130 @@ func TestNetworkService_ListRacks(t *testing.T) {
 	})
 }
 
+func TestNetworkService_ListInterfaces(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+				return &domain.PaginatedResponse[domain.Interface]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListInterfaces(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListInterfaces() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
+	})
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListInterfaces(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
+func TestNetworkService_ListVMInterfaces(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListVMInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+				return &domain.PaginatedResponse[domain.VMInterface]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListVMInterfaces(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListVMInterfaces() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
+	})
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListVMInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListVMInterfaces(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
+func TestNetworkService_ListCircuitTerminations(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListCircuitTerminationsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+				return &domain.PaginatedResponse[domain.CircuitTermination]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListCircuitTerminations(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListCircuitTerminations() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
+	})
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListCircuitTerminationsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListCircuitTerminations(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
+func TestNetworkService_ListCables(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListCablesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+				return &domain.PaginatedResponse[domain.Cable]{Count: 0}, nil
+			},
+		})
+		resp, err := svc.ListCables(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListCables() returned error: %v", err)
+		}
+		if resp.Count != 0 {
+			t.Errorf("Count = %d, want %d", resp.Count, 0)
+		}
+	})
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListCablesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListCables(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
 func TestNetworkService_GetObject(t *testing.T) {
 	t.Parallel()
 

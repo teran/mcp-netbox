@@ -227,6 +227,129 @@ func TestRack_ZeroValues(t *testing.T) {
 	}
 }
 
+func TestInterface_Populate(t *testing.T) {
+	iface := Interface{
+		ID:         1,
+		Name:       "ge-0/0/0",
+		Device:     &Nested{ID: 1, Name: "router1"},
+		Type:       &Label{Value: "1000base-t", Label: "1000BASE-T"},
+		Enabled:    true,
+		MTU:        1500,
+		MACAddress: "aa:bb:cc:dd:ee:ff",
+		Speed:      1000000,
+	}
+	if iface.Name != "ge-0/0/0" {
+		t.Errorf("Name = %q, want %q", iface.Name, "ge-0/0/0")
+	}
+	if iface.Device.Name != "router1" {
+		t.Errorf("Device.Name = %q, want %q", iface.Device.Name, "router1")
+	}
+	if iface.Type.Value != "1000base-t" {
+		t.Errorf("Type.Value = %q, want %q", iface.Type.Value, "1000base-t")
+	}
+	if !iface.Enabled {
+		t.Error("Enabled = false, want true")
+	}
+}
+
+func TestInterface_ZeroValues(t *testing.T) {
+	var iface Interface
+	if iface.ID != 0 {
+		t.Errorf("ID = %d, want 0", iface.ID)
+	}
+	if iface.Enabled {
+		t.Error("Enabled = true, want false")
+	}
+}
+
+func TestVMInterface_Populate(t *testing.T) {
+	vmi := VMInterface{
+		ID:             1,
+		Name:           "eth0",
+		VirtualMachine: &Nested{ID: 1, Name: "web-01"},
+		Enabled:        true,
+		MTU:            1500,
+		MACAddress:     "11:22:33:44:55:66",
+	}
+	if vmi.Name != "eth0" {
+		t.Errorf("Name = %q, want %q", vmi.Name, "eth0")
+	}
+	if vmi.VirtualMachine.Name != "web-01" {
+		t.Errorf("VirtualMachine.Name = %q, want %q", vmi.VirtualMachine.Name, "web-01")
+	}
+	if !vmi.Enabled {
+		t.Error("Enabled = false, want true")
+	}
+}
+
+func TestVMInterface_ZeroValues(t *testing.T) {
+	var vmi VMInterface
+	if vmi.MTU != 0 {
+		t.Errorf("MTU = %d, want 0", vmi.MTU)
+	}
+}
+
+func TestCircuitTermination_Populate(t *testing.T) {
+	ct := CircuitTermination{
+		ID:            1,
+		Circuit:       &Nested{ID: 1, Name: "CIR-001"},
+		TermSide:      "A",
+		Site:          &Nested{ID: 1, Name: "DC1"},
+		Speed:         10000000,
+		UpstreamSpeed: 10000000,
+	}
+	if ct.TermSide != "A" {
+		t.Errorf("TermSide = %q, want %q", ct.TermSide, "A")
+	}
+	if ct.Circuit.Name != "CIR-001" {
+		t.Errorf("Circuit.Name = %q, want %q", ct.Circuit.Name, "CIR-001")
+	}
+	if ct.Speed != 10000000 {
+		t.Errorf("Speed = %d, want %d", ct.Speed, 10000000)
+	}
+}
+
+func TestCircuitTermination_ZeroValues(t *testing.T) {
+	var ct CircuitTermination
+	if ct.TermSide != "" {
+		t.Errorf("TermSide = %q, want empty", ct.TermSide)
+	}
+}
+
+func TestCable_Populate(t *testing.T) {
+	c := Cable{
+		ID:         1,
+		Type:       &Label{Value: "cat6a", Label: "CAT6a"},
+		Status:     &Label{Value: "connected", Label: "Connected"},
+		Label:      "link-01",
+		Color:      "blue",
+		Length:     10.5,
+		LengthUnit: &Label{Value: "m", Label: "Meters"},
+	}
+	if c.Label != "link-01" {
+		t.Errorf("Label = %q, want %q", c.Label, "link-01")
+	}
+	if c.Type.Value != "cat6a" {
+		t.Errorf("Type.Value = %q, want %q", c.Type.Value, "cat6a")
+	}
+	if c.Status.Value != "connected" {
+		t.Errorf("Status.Value = %q, want %q", c.Status.Value, "connected")
+	}
+	if c.Length != 10.5 {
+		t.Errorf("Length = %f, want %f", c.Length, 10.5)
+	}
+}
+
+func TestCable_ZeroValues(t *testing.T) {
+	var c Cable
+	if c.Label != "" {
+		t.Errorf("Label = %q, want empty", c.Label)
+	}
+	if c.Type != nil {
+		t.Errorf("Type = %+v, want nil", c.Type)
+	}
+}
+
 func TestNested_Populate(t *testing.T) {
 	n := Nested{
 		ID:   1,
