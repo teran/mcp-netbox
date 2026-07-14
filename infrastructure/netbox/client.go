@@ -1,3 +1,12 @@
+// Package netbox implements the domain.NetworkRepository interface as an HTTP
+// client for the NetBox REST API.
+//
+// It provides:
+// - Typed list methods for all NetBox entities (sites, devices, IPs, etc.)
+// - A generic GetObject method that dynamically routes to the correct endpoint
+//   based on a configurable object type-to-endpoint mapping
+// - Wire-to-domain model conversion functions for each entity type
+// - HTTP error handling with specific errors for 401, 403, 404, and 429 responses
 package netbox
 
 import (

@@ -1,3 +1,11 @@
+// Package domain provides the core domain models, repository interfaces (ports),
+// and generic types for the NetBox MCP server.
+//
+// This package is free of external dependencies and defines:
+// - Domain models for all NetBox entity types (Site, Device, IPAddress, etc.)
+// - The NetworkRepository interface (port) that infrastructure adapters implement
+// - Generic PaginatedResponse[T] for typed paginated API results
+// - RawObject type for generic object retrieval via get_object_by_id
 package domain
 
 import (

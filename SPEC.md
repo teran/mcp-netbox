@@ -44,11 +44,12 @@ This server exposes NetBox infrastructure data through the MCP protocol using **
 
 | Variable               | Required | Default | Description                          |
 |------------------------|----------|---------|--------------------------------------|
-| `NETBOX_URL`           | Yes      | —       | Base URL of the NetBox instance (e.g. `http://netbox:8000`) |
+| `NETBOX_URL`           | Yes      | —       | Base URL of the NetBox instance (e.g. `http://netbox:8000`). Must be a valid HTTP(S) URL. Loopback, private, and link-local IP addresses are rejected for SSRF protection. |
 | `LISTEN_ADDR`          | No       | `:8080` | TCP address to listen on             |
 | `PROMETHEUS_METRICS_ADDR` | No    | `:8081` | TCP address for the Prometheus `/metrics` endpoint |
 | `RATE_LIMIT_GLOBAL`    | No       | `100`   | Global rate limit (requests/second)  |
 | `RATE_LIMIT_PER_CLIENT`| No       | `10`    | Per-client IP rate limit (requests/second) |
+| `TRUSTED_PROXY`        | No       | `""`    | CIDR prefix for the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server uses the first IP from `X-Forwarded-For` for rate limiting instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT`        | No       | `300s`  | HTTP write timeout (Go duration format, e.g. `300s`). Minimum 1s. Note: 0 will fail validation; use a reverse proxy for no timeout. |
 
 The NetBox API token is **not** set via environment variables. It is supplied per-request in the `Authorization` header as `Bearer <token>`.
@@ -68,8 +69,9 @@ List sites in NetBox with optional filters.
 | `region`     | string | no       | Filter by region (slug or name)              |
 | `status`     | string | no       | Filter by status (active, planned, etc.)     |
 | `tenant`     | string | no       | Filter by tenant (slug or name)              |
+| `tag`        | string | no       | Filter by tag (slug)                         |
 | `page`       | int    | no       | Page number (default: 1)                     |
-| `page_size`  | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of sites.
@@ -93,8 +95,9 @@ List devices in NetBox with optional filters.
 | `tenant`       | string | no       | Filter by tenant (slug)                      |
 | `rack`         | string | no       | Filter by rack (name)                        |
 | `cluster`      | string | no       | Filter by cluster (name)                     |
+| `tag`          | string | no       | Filter by tag (slug)                         |
 | `page`         | int    | no       | Page number (default: 1)                     |
-| `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`    | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of devices.
@@ -115,8 +118,9 @@ Search IP addresses in NetBox.
 | `vrf`          | string | no       | Filter by VRF (rd or name)                   |
 | `role`         | string | no       | Filter by role (loopback, etc.)              |
 | `tenant`       | string | no       | Filter by tenant (slug)                      |
+| `tag`          | string | no       | Filter by tag (slug)                         |
 | `page`         | int    | no       | Page number (default: 1)                     |
-| `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`    | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of IP addresses.
@@ -139,8 +143,9 @@ Search IP prefixes in NetBox.
 | `tenant`     | string | no       | Filter by tenant (slug)                      |
 | `within`     | string | no       | Find prefixes within a given prefix          |
 | `family`     | int    | no       | Address family: 4 or 6                       |
+| `tag`        | string | no       | Filter by tag (slug)                         |
 | `page`       | int    | no       | Page number (default: 1)                     |
-| `page_size`  | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of prefixes.
@@ -160,8 +165,9 @@ List VLANs in NetBox.
 | `status`     | string | no       | Filter by status (active, reserved, etc.)    |
 | `tenant`     | string | no       | Filter by tenant (slug)                      |
 | `vid`        | int    | no       | Filter by VLAN ID                            |
+| `tag`        | string | no       | Filter by tag (slug)                         |
 | `page`       | int    | no       | Page number (default: 1)                     |
-| `page_size`  | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of VLANs.
@@ -183,8 +189,9 @@ List virtual machines in NetBox.
 | `tenant`       | string | no       | Filter by tenant (slug)                      |
 | `name`         | string | no       | Filter by name (partial match with `__ic`)   |
 | `site`         | string | no       | Filter by site (slug)                        |
+| `tag`          | string | no       | Filter by tag (slug)                         |
 | `page`         | int    | no       | Page number (default: 1)                     |
-| `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`    | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of virtual machines.
@@ -204,8 +211,9 @@ List clusters in NetBox.
 | `site`         | string | no       | Filter by site (slug)                        |
 | `tenant`       | string | no       | Filter by tenant (slug)                      |
 | `name`         | string | no       | Filter by name (partial match with `__ic`)   |
+| `tag`          | string | no       | Filter by tag (slug)                         |
 | `page`         | int    | no       | Page number (default: 1)                     |
-| `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`    | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of clusters.
@@ -225,8 +233,9 @@ List circuits in NetBox.
 | `site`         | string | no       | Filter by site (slug)                        |
 | `status`       | string | no       | Filter by status (active, planned, etc.)     |
 | `tenant`       | string | no       | Filter by tenant (slug)                      |
+| `tag`          | string | no       | Filter by tag (slug)                         |
 | `page`         | int    | no       | Page number (default: 1)                     |
-| `page_size`    | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`    | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of circuits.
@@ -241,7 +250,9 @@ Retrieve any NetBox object by its type and numeric ID.
 
 | Parameter    | Type   | Required | Description                                    |
 |--------------|--------|----------|------------------------------------------------|
-| `object_type`| string | yes      | Object type. One of: `site`, `device`, `prefix`, `ip_address`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `provider`, `tenant`, `rack`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`, `cable` |
+| `object_type`| string | yes      | Object type. One of: `site`, `device`, `prefix`, `ip_address`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `provider`, `tenant`, `rack`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`, `cable`, `interface`, `vm_interface`, `circuit_termination` |
+| `id`         | int    | yes      | Numeric ID of the object                       |
+| `params`     | map    | no       | Additional query parameters to pass to NetBox (optional) |
 | `id`         | int    | yes      | Numeric ID of the object                       |
 
 **Output**: Full object detail.
@@ -260,24 +271,108 @@ List racks in NetBox.
 | `location`   | string | no       | Filter by location (slug)                    |
 | `status`     | string | no       | Filter by status (active, planned, etc.)     |
 | `tenant`     | string | no       | Filter by tenant (slug)                      |
+| `tag`        | string | no       | Filter by tag (slug)                         |
 | `page`       | int    | no       | Page number (default: 1)                     |
-| `page_size`  | int    | no       | Results per page (default: 25, max: 100)     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of racks.
 
+---
+
+### 11. `get_interfaces`
+
+List device interfaces in NetBox. Includes physical interfaces of devices (switches, routers, servers).
+
+**Input**:
+
+| Parameter    | Type   | Required | Description                                  |
+|--------------|--------|----------|----------------------------------------------|
+| `device`     | string | no       | Filter by device (name)                      |
+| `type`       | string | no       | Filter by interface type (slug)              |
+| `enabled`    | bool   | no       | Filter by enabled status (true/false)        |
+| `name`       | string | no       | Filter by name (case-insensitive partial match) |
+| `tag`        | string | no       | Filter by tag (slug)                         |
+| `page`       | int    | no       | Page number (default: 1)                     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 10000)     |
+| `q`          | string | no       | Free-text search across all fields           |
+
+**Output**: Paginated list of interfaces.
+
+---
+
+### 12. `get_vm_interfaces`
+
+List VM interfaces in NetBox. These are virtual NICs attached to virtual machines.
+
+**Input**:
+
+| Parameter        | Type   | Required | Description                                  |
+|------------------|--------|----------|----------------------------------------------|
+| `virtual_machine`| string | no       | Filter by virtual machine (name)             |
+| `name`           | string | no       | Filter by name (case-insensitive partial match) |
+| `tag`            | string | no       | Filter by tag (slug)                         |
+| `page`           | int    | no       | Page number (default: 1)                     |
+| `page_size`      | int    | no       | Results per page (default: 25, max: 10000)     |
+| `q`              | string | no       | Free-text search across all fields           |
+
+**Output**: Paginated list of VM interfaces.
+
+---
+
+### 13. `get_circuit_terminations`
+
+List circuit terminations in NetBox. A termination represents one end of a circuit at a site.
+
+**Input**:
+
+| Parameter    | Type   | Required | Description                                  |
+|--------------|--------|----------|----------------------------------------------|
+| `circuit`    | string | no       | Filter by circuit (ID or CID)                |
+| `site`       | string | no       | Filter by site (slug)                        |
+| `term_side`  | string | no       | Filter by termination side (`A` or `Z`)      |
+| `tag`        | string | no       | Filter by tag (slug)                         |
+| `page`       | int    | no       | Page number (default: 1)                     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 10000)     |
+| `q`          | string | no       | Free-text search across all fields           |
+
+**Output**: Paginated list of circuit terminations.
+
+---
+
+### 14. `get_cables`
+
+List cables in NetBox with optional filters.
+
+**Input**:
+
+| Parameter    | Type   | Required | Description                                  |
+|--------------|--------|----------|----------------------------------------------|
+| `type`       | string | no       | Filter by cable type (slug)                  |
+| `status`     | string | no       | Filter by status (connected, planned, decommissioning) |
+| `site`       | string | no       | Filter by site (slug)                        |
+| `color`      | string | no       | Filter by color (slug)                       |
+| `label`      | string | no       | Filter by label (case-insensitive partial match) |
+| `tag`        | string | no       | Filter by tag (slug)                         |
+| `page`       | int    | no       | Page number (default: 1)                     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 10000)     |
+| `q`          | string | no       | Free-text search across all fields           |
+
+**Output**: Paginated list of cables.
+
 ## Middleware Chain
 
-The server applies seven middleware layers to every HTTP request, executed in this order (outermost first):
+The server applies eight middleware layers to every HTTP request, executed in this order (outermost first):
 
 1. **RecoveryMiddleware** — catches panics, returns 500
 2. **SecurityHeadersMiddleware** — sets security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
-3. **MetricsMiddleware** — tracks in-flight requests via gauge
+3. **HostValidationMiddleware** — rejects requests with empty or malformed `Host` headers
 4. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
-5. **BodyLimitMiddleware** — 1 MB request body limit
-6. **LoggingMiddleware** — logs MCP method, duration, status, sizes (never logs token)
-7. **TokenMiddleware** — extracts token from `Authorization` header, stores in context
-8. **injectClientMiddleware** — creates NetBox API client with shared `http.Client`, stores services in context
+5. **MetricsMiddleware** — tracks in-flight requests via gauge (only approved requests)
+6. **BodyLimitMiddleware** — 1 MB request body limit
+7. **LoggingMiddleware** — logs MCP method, duration, status, sizes (never logs token)
+8. **TokenMiddleware** — extracts token from `Authorization` header, stores as `*application.Token` in context (safe redaction via String/GoString/MarshalJSON)
+9. **injectClientMiddleware** — creates NetBox API client with per-request token, stores service in context
 
 ## Authentication Flow
 

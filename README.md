@@ -9,11 +9,12 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 - **Read-only** — only exposes `GET` operations. No create, update, or delete capabilities.
 - **Remote (HTTP) transport** — uses MCP Streamable HTTP protocol.
 - **Per-request token authentication** — the NetBox API token is passed in the `Authorization` header of each MCP request. No server-side token storage.
-- **Comprehensive NetBox coverage** — sites, devices, IP addresses, prefixes, VLANs, VMs, clusters, circuits, racks, and generic `get_object_by_id`.
+- **Comprehensive NetBox coverage** — sites, devices, IP addresses, prefixes, VLANs, VMs, clusters, circuits, racks, cables, interfaces, circuit terminations, and generic `get_object_by_id`.
 - **Prometheus metrics** — on a separate HTTP server (default `:8081`).
 - **Rate limiting** — configurable global and per-client rate limits.
-- **Health endpoint** — `GET /healthz` returns `{"status":"ok"}`.
-- **Pagination** — all list tools support `page` and `page_size` parameters with `next`/`previous` navigation URLs.
+- **Circuit breaker** — protects NetBox from cascading failures when the upstream is unreachable.
+- **Health endpoints** — `GET /healthz` (liveness), `GET /readyz` (readiness with circuit breaker status).
+- **Pagination** — all list tools support `page` and `page_size` parameters (max 1000) with `next`/`previous` navigation URLs.
 
 ## Tools
 
@@ -28,9 +29,13 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 | `get_clusters` | List clusters with free-text search |
 | `get_circuits` | List circuits with free-text search |
 | `get_racks` | List racks with free-text search |
-| `get_object_by_id` | Get any object by type and ID |
+| `get_interfaces` | List device interfaces with filters (device, type, enabled, name) |
+| `get_vm_interfaces` | List VM interfaces with filters (virtual machine, name) |
+| `get_circuit_terminations` | List circuit terminations with filters (circuit, site, term_side) |
+| `get_cables` | List cables with filters (type, status, site, color, label) |
+| `get_object_by_id` | Get any object by type and ID (25+ supported types) |
 
-> All list tools support a `q` parameter for free-text search across all fields.
+> All list tools support a `q` parameter for free-text search across all fields and a `tag` parameter for tag-based filtering.
 
 ## Configuration
 
@@ -43,6 +48,7 @@ All configuration is via environment variables:
 | `PROMETHEUS_METRICS_ADDR` | No | `:8081` | Prometheus `/metrics` endpoint |
 | `RATE_LIMIT_GLOBAL` | No | `100` | Global rate limit (requests/second) |
 | `RATE_LIMIT_PER_CLIENT` | No | `10` | Per-client IP rate limit |
+| `TRUSTED_PROXY` | No | `""` | CIDR prefix of the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server extracts the client IP from the `X-Forwarded-For` header instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT` | No | `300s` (5 minutes) | HTTP write timeout (Go duration, minimum 1s) |
 
 The NetBox API token is supplied per-request in the `Authorization` header as `Bearer <token>`. Both v1 (`Token <token>`) and v2 (`Bearer nbt_<key>.<token>`) tokens are supported.
@@ -102,14 +108,23 @@ docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/teran/mcp-netb
 - **Read-only**: The server only exposes GET operations. No write access to NetBox.
 - **TLS**: Terminate TLS at a reverse proxy (nginx, Envoy) placed in front of the server.
 - **Rate limiting**: Built-in rate limiting prevents abuse (configurable via environment variables).
+- **Circuit breaker**: Built-in circuit breaker prevents cascading failures when NetBox is unreachable. After 5 consecutive transport-level failures, the circuit opens for 30 seconds.
+- **Host validation**: Requests with empty or malformed `Host` headers are rejected.
+- **SSRF protection**: The `NETBOX_URL` configuration is validated to reject loopback, private, and link-local IP addresses.
 
 ## Troubleshooting
 
 ### 401 Unauthorized
 The Authorization header is missing or malformed. Ensure you pass `Bearer <token>`.
 
+### 403 Forbidden
+The provided token lacks permissions for the requested resource. Verify the token's permissions in NetBox.
+
 ### 429 Too Many Requests
 Rate limit exceeded. Increase `RATE_LIMIT_GLOBAL` or `RATE_LIMIT_PER_CLIENT`, or wait before retrying.
+
+### 503 Service Unavailable (readiness)
+The circuit breaker is open — NetBox is unreachable. The server will automatically retry after 30 seconds.
 
 ### Connection issues
 Verify `NETBOX_URL` is reachable from the server. Check `GET /healthz` endpoint.

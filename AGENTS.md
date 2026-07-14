@@ -42,18 +42,22 @@ This document describes the agents/assistants involved in the development and op
 
 ## Tool-to-Agent Mapping
 
-| MCP Tool               | Agent Role | NetBox Endpoint                           |
-|------------------------|------------|-------------------------------------------|
-| `get_sites`            | MCP Server | `GET /api/dcim/sites/`                    |
-| `get_devices`          | MCP Server | `GET /api/dcim/devices/`                  |
-| `get_ip_addresses`     | MCP Server | `GET /api/ipam/ip-addresses/`             |
-| `get_prefixes`         | MCP Server | `GET /api/ipam/prefixes/`                 |
-| `get_vlans`            | MCP Server | `GET /api/ipam/vlans/`                    |
-| `get_virtual_machines` | MCP Server | `GET /api/virtualization/virtual-machines/` |
-| `get_clusters`         | MCP Server | `GET /api/virtualization/clusters/`       |
-| `get_circuits`         | MCP Server | `GET /api/circuits/circuits/`             |
-| `get_object_by_id`     | MCP Server | `GET /api/*/<type>/<id>/`                 |
-| `get_racks`            | MCP Server | `GET /api/dcim/racks/`                    |
+| MCP Tool                   | Agent Role | NetBox Endpoint                                   |
+|----------------------------|------------|---------------------------------------------------|
+| `get_sites`                | MCP Server | `GET /api/dcim/sites/`                            |
+| `get_devices`              | MCP Server | `GET /api/dcim/devices/`                          |
+| `get_ip_addresses`         | MCP Server | `GET /api/ipam/ip-addresses/`                     |
+| `get_prefixes`             | MCP Server | `GET /api/ipam/prefixes/`                         |
+| `get_vlans`                | MCP Server | `GET /api/ipam/vlans/`                            |
+| `get_virtual_machines`     | MCP Server | `GET /api/virtualization/virtual-machines/`       |
+| `get_clusters`             | MCP Server | `GET /api/virtualization/clusters/`               |
+| `get_circuits`             | MCP Server | `GET /api/circuits/circuits/`                     |
+| `get_racks`                | MCP Server | `GET /api/dcim/racks/`                            |
+| `get_interfaces`           | MCP Server | `GET /api/dcim/interfaces/`                       |
+| `get_vm_interfaces`        | MCP Server | `GET /api/virtualization/interfaces/`             |
+| `get_circuit_terminations` | MCP Server | `GET /api/circuits/circuit-terminations/`         |
+| `get_cables`               | MCP Server | `GET /api/dcim/cables/`                           |
+| `get_object_by_id`         | MCP Server | `GET /api/*/<type>/<id>/`                         |
 
 ## Metrics
 
