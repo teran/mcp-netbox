@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/teran/mcp-netbox/application"
 )
 
 func TestSanitizeLog(t *testing.T) {
@@ -17,7 +19,7 @@ func TestSanitizeLog(t *testing.T) {
 		expected string
 	}{
 		{"hello", "hello"},
-		{"hello\nworld", "hello\nworld"},
+		{"hello\nworld", "helloworld"},
 		{"hello\tworld", "hello\tworld"},
 		{"hello\x00world", "helloworld"},
 		{"hello\x1fworld", "helloworld"},
@@ -254,9 +256,12 @@ func TestTokenMiddleware(t *testing.T) {
 
 	t.Run("valid bearer token", func(t *testing.T) {
 		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := r.Context().Value(TokenContextKey).(string)
-			if token != "test-token" {
-				t.Errorf("token = %q, want %q", token, "test-token")
+			token := r.Context().Value(TokenContextKey).(*application.Token)
+			if token == nil {
+				t.Fatal("token is nil")
+			}
+			if token.Value() != "test-token" {
+				t.Errorf("token = %q, want %q", token.Value(), "test-token")
 			}
 			w.WriteHeader(http.StatusOK)
 		}))
@@ -273,9 +278,12 @@ func TestTokenMiddleware(t *testing.T) {
 
 	t.Run("valid token scheme", func(t *testing.T) {
 		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := r.Context().Value(TokenContextKey).(string)
-			if token != "tok-value" {
-				t.Errorf("token = %q, want %q", token, "tok-value")
+			token := r.Context().Value(TokenContextKey).(*application.Token)
+			if token == nil {
+				t.Fatal("token is nil")
+			}
+			if token.Value() != "tok-value" {
+				t.Errorf("token = %q, want %q", token.Value(), "tok-value")
 			}
 			w.WriteHeader(http.StatusOK)
 		}))

@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/teran/mcp-netbox/application"
 )
 
 // ContextKey is an unexported type for context value keys.
@@ -23,7 +25,8 @@ const (
 	TokenContextKey ContextKey = "netbox_token"
 
 	// MaxTokenLength is the maximum allowed length for the Authorization token.
-	MaxTokenLength = 512
+	// Increased to 4096 to support NetBox v2 tokens (nbt_<key>.<token>).
+	MaxTokenLength = 4096
 )
 
 var ErrTokenRequired = errors.New("authorization token is required")
@@ -62,7 +65,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), TokenContextKey, token)
+		ctx := context.WithValue(r.Context(), TokenContextKey, application.NewToken(token))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -79,7 +82,7 @@ func checkBatchSize(body []byte) error {
 
 	var batch []json.RawMessage
 	if err := json.Unmarshal(body, &batch); err != nil {
-		return nil
+		return fmt.Errorf("invalid batch request: %w", err)
 	}
 	if len(batch) > MaxBatchSize {
 		return fmt.Errorf("batch request exceeds maximum size of %d", MaxBatchSize)
@@ -148,7 +151,7 @@ func mcpRequestMethod(body []byte) string {
 // SanitizeLog removes control characters from a string for safe logging.
 func SanitizeLog(s string) string {
 	return strings.Map(func(r rune) rune {
-		if unicode.IsControl(r) && r != '\n' && r != '\t' {
+		if unicode.IsControl(r) && r != '\t' {
 			return -1
 		}
 		return r

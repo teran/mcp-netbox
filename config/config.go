@@ -4,7 +4,9 @@ package config
 
 import (
 	"fmt"
+	"net"
 	"net/url"
+	"strings"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -18,7 +20,7 @@ type Config struct {
 	RateLimitGlobal       int           `envconfig:"RATE_LIMIT_GLOBAL" default:"100"`
 	RateLimitPerClient    int           `envconfig:"RATE_LIMIT_PER_CLIENT" default:"10"`
 	TrustedProxy          string        `envconfig:"TRUSTED_PROXY" default:""`
-	WriteTimeout          time.Duration `envconfig:"WRITE_TIMEOUT" default:"60s"`
+	WriteTimeout          time.Duration `envconfig:"WRITE_TIMEOUT" default:"300s"`
 }
 
 func (c Config) validate() error {
@@ -27,6 +29,7 @@ func (c Config) validate() error {
 			validation.Required,
 			validation.By(validateURLScheme),
 			validation.By(validateURLHost),
+			validation.By(validateURLNotPrivate),
 		),
 		validation.Field(&c.RateLimitGlobal, validation.By(validatePositiveInt)),
 		validation.Field(&c.RateLimitPerClient, validation.By(validatePositiveInt)),
@@ -72,6 +75,45 @@ func validateURLHost(value interface{}) error {
 	if u.Host == "" {
 		return fmt.Errorf("must include a host (e.g. http://netbox:8000)")
 	}
+	return nil
+}
+
+func validateURLNotPrivate(value interface{}) error {
+	s, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("must be a string")
+	}
+	u, err := url.Parse(s)
+	if err != nil {
+		return err
+	}
+
+	host := u.Hostname()
+	// Strip IPv6 brackets if present
+	host = strings.Trim(host, "[]")
+
+	// Try to parse as IP address
+	ip := net.ParseIP(host)
+	if ip == nil {
+		// Hostname, not an IP — skip IP validation.
+		// DNS-based validation would require resolution at config time,
+		// which is too heavy and could fail due to transient network issues.
+		return nil
+	}
+
+	if ip.IsLoopback() {
+		return fmt.Errorf("must not be a loopback address (got %q)", host)
+	}
+	if ip.IsPrivate() {
+		return fmt.Errorf("must not be a private IP address (got %q)", host)
+	}
+	if ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+		return fmt.Errorf("must not be a link-local address (got %q)", host)
+	}
+	if ip.IsUnspecified() {
+		return fmt.Errorf("must not be an unspecified address (got %q)", host)
+	}
+
 	return nil
 }
 

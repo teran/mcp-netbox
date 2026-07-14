@@ -102,9 +102,9 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	}))
 
 	mcp.AddTool(s, &mcp.Tool{
-		Name:        "get_racks",
-		Description: "List racks in NetBox.",
-	}, WrapToolHandler[RacksInput, RacksOutput](metrics, "get_racks", func(ctx context.Context, req *mcp.CallToolRequest, in RacksInput) (*mcp.CallToolResult, RacksOutput, error) {
-		return NewGetRacksHandler(svc)(ctx, req, in)
+		Name:        "get_vm_interfaces",
+		Description: "List VM interfaces in NetBox with optional filters.",
+	}, WrapToolHandler[VMInterfacesInput, VMInterfacesOutput](metrics, "get_vm_interfaces", func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfacesInput) (*mcp.CallToolResult, VMInterfacesOutput, error) {
+		return NewGetVMInterfacesHandler(svc)(ctx, req, in)
 	}))
 }

@@ -35,8 +35,8 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 
 	handler := RecoveryMiddleware(
 		SecurityHeadersMiddleware(
-			MetricsMiddleware(metrics)(
-				rateLimitMW(
+			rateLimitMW(
+				MetricsMiddleware(metrics)(
 					BodyLimitMiddleware(DefaultMaxRequestBodySize)(
 						LoggingMiddleware(
 							TokenMiddleware(
@@ -65,14 +65,14 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 func injectClientMiddleware(netboxURL string, httpClient *http.Client) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token, ok := r.Context().Value(TokenContextKey).(string)
-			if !ok || token == "" {
+			t, ok := r.Context().Value(TokenContextKey).(*application.Token)
+			if !ok || t == nil || t.Value() == "" {
 				http.Error(w, `{"error":"authorization token missing from context"}`, http.StatusUnauthorized)
 				return
 			}
 
 			netboxClient := infra.NewClient(netboxURL, httpClient)
-			svc := application.NewNetworkService(netboxClient, token)
+			svc := application.NewNetworkService(netboxClient, t.Value())
 
 			ctx := context.WithValue(r.Context(), svcContextKey, svc)
 			next.ServeHTTP(w, r.WithContext(ctx))
