@@ -18,12 +18,13 @@ import (
 	"github.com/teran/mcp-netbox/application"
 )
 
-// ContextKey is an unexported type for context value keys.
-type ContextKey string
+// contextKey is an unexported type for context value keys.
+// Using an unexported type prevents context-key collisions from other packages.
+type contextKey string
 
 const (
-	// TokenContextKey is the context key storing the NetBox API token.
-	TokenContextKey ContextKey = "netbox_token"
+	// tokenContextKey is the context key storing the NetBox API token.
+	tokenContextKey contextKey = "netbox_token"
 
 	// MaxTokenLength is the maximum allowed length for the Authorization token.
 	// Increased to 4096 to support NetBox v2 tokens (nbt_<key>.<token>).
@@ -66,7 +67,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), TokenContextKey, application.NewToken(token))
+		ctx := context.WithValue(r.Context(), tokenContextKey, application.NewToken(token))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -188,7 +189,9 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if rec := recover(); rec != nil {
 				slog.Error("panic recovered", "error", rec, "stack", string(debug.Stack()))
-				http.Error(w, `{"error":"internal server error"}`, http.StatusInternalServerError)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(`{"error":"internal server error"}`))
 			}
 		}()
 		next.ServeHTTP(w, r)

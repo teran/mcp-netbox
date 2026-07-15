@@ -49,6 +49,12 @@ func TestRecoveryMiddleware(t *testing.T) {
 	if rec.Code != http.StatusInternalServerError {
 		t.Errorf("status = %d, want %d", rec.Code, http.StatusInternalServerError)
 	}
+	if ct := rec.Header().Get("Content-Type"); ct != "application/json" {
+		t.Errorf("Content-Type = %q, want %q", ct, "application/json")
+	}
+	if body := rec.Body.String(); body != `{"error":"internal server error"}` {
+		t.Errorf("body = %q, want %q", body, `{"error":"internal server error"}`)
+	}
 }
 
 func TestBodyLimitMiddleware(t *testing.T) {
@@ -256,7 +262,7 @@ func TestTokenMiddleware(t *testing.T) {
 
 	t.Run("valid bearer token", func(t *testing.T) {
 		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := r.Context().Value(TokenContextKey).(*application.Token)
+			token := r.Context().Value(tokenContextKey).(*application.Token)
 			if token == nil {
 				t.Fatal("token is nil")
 			}
@@ -278,7 +284,7 @@ func TestTokenMiddleware(t *testing.T) {
 
 	t.Run("valid token scheme", func(t *testing.T) {
 		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := r.Context().Value(TokenContextKey).(*application.Token)
+			token := r.Context().Value(tokenContextKey).(*application.Token)
 			if token == nil {
 				t.Fatal("token is nil")
 			}

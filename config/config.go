@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/netip"
 	"net/url"
 	"strings"
 	"time"
@@ -13,6 +14,25 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/kelseyhightower/envconfig"
 )
+
+// IsPrivateAddr reports whether addr is a loopback, private, link-local, or
+// unspecified address. It uses netip.Addr which is the modern Go IP type.
+func IsPrivateAddr(addr netip.Addr) bool {
+	return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsLinkLocalMulticast() || addr.IsUnspecified()
+}
+
+// IsPrivateIP reports whether ip is a loopback, private, link-local, or
+// unspecified address.
+func IsPrivateIP(ip net.IP) bool {
+	if ip == nil {
+		return false
+	}
+	a, err := netip.ParseAddr(ip.String())
+	if err != nil {
+		return false
+	}
+	return IsPrivateAddr(a)
+}
 
 type Config struct {
 	NetBoxURL             string        `envconfig:"NETBOX_URL" required:"true"`
@@ -110,12 +130,12 @@ func validateURLNotPrivateCheck(value interface{}) error {
 		// This prevents SSRF bypass where a hostname resolves to a private IP.
 		ips, err := net.DefaultResolver.LookupNetIP(context.Background(), "ip", host)
 		if err != nil {
-			// DNS resolution failed — log and accept the hostname.
-			// Transient DNS failures should not block startup.
-			return nil
+			// DNS resolution failed — reject the hostname to prevent SSRF bypass.
+			// The operator must either fix DNS, use a literal IP, or set ALLOW_PRIVATE_NETBOX=true.
+			return fmt.Errorf("hostname %q DNS lookup failed (%w); set ALLOW_PRIVATE_NETBOX=true to bypass", host, err)
 		}
 		for _, resolvedIP := range ips {
-			if resolvedIP.IsLoopback() || resolvedIP.IsPrivate() || resolvedIP.IsLinkLocalUnicast() || resolvedIP.IsLinkLocalMulticast() || resolvedIP.IsUnspecified() {
+			if IsPrivateAddr(resolvedIP) {
 				return fmt.Errorf("hostname %q resolves to private/reserved IP %q (set ALLOW_PRIVATE_NETBOX=true to bypass)", host, resolvedIP)
 			}
 		}

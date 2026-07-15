@@ -11,6 +11,7 @@ package domain
 type (
 	Site struct {
 		ID              int            `json:"id"`
+		URL             string         `json:"url,omitempty"`
 		Name            string         `json:"name"`
 		Slug            string         `json:"slug"`
 		Display         string         `json:"display,omitempty"`
@@ -31,6 +32,7 @@ type (
 
 	Device struct {
 		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
 		Name         string         `json:"name"`
 		Display      string         `json:"display,omitempty"`
 		DeviceType   *Nested        `json:"device_type"`
@@ -54,6 +56,7 @@ type (
 
 	IPAddress struct {
 		ID                 int             `json:"id"`
+		URL                string          `json:"url,omitempty"`
 		Address            string          `json:"address"`
 		Display            string          `json:"display,omitempty"`
 		VRF                *Nested         `json:"vrf"`
@@ -74,6 +77,7 @@ type (
 
 	Prefix struct {
 		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
 		Prefix       string         `json:"prefix"`
 		Display      string         `json:"display,omitempty"`
 		Site         *Nested        `json:"site"`
@@ -96,6 +100,7 @@ type (
 
 	VLAN struct {
 		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
 		Site         *Nested        `json:"site"`
 		Group        *Nested        `json:"group"`
 		VID          int            `json:"vid"`
@@ -114,6 +119,7 @@ type (
 
 	VirtualMachine struct {
 		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
 		Name         string         `json:"name"`
 		Display      string         `json:"display,omitempty"`
 		Cluster      *Nested        `json:"cluster"`
@@ -134,6 +140,7 @@ type (
 
 	Cluster struct {
 		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
 		Name         string         `json:"name"`
 		Display      string         `json:"display,omitempty"`
 		ClusterType  *Nested        `json:"type"`
@@ -150,6 +157,7 @@ type (
 
 	Circuit struct {
 		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
 		CID          string         `json:"cid"`
 		Display      string         `json:"display,omitempty"`
 		Provider     *Nested        `json:"provider"`
@@ -168,6 +176,7 @@ type (
 
 	CircuitTermination struct {
 		ID            int            `json:"id"`
+		URL           string         `json:"url,omitempty"`
 		Display       string         `json:"display,omitempty"`
 		Circuit       *Nested        `json:"circuit"`
 		TermSide      string         `json:"term_side"`
@@ -182,23 +191,37 @@ type (
 	}
 
 	Cable struct {
-		ID           int            `json:"id"`
-		Display      string         `json:"display,omitempty"`
-		Type         *Label         `json:"type"`
-		Status       *Label         `json:"status"`
-		Label        string         `json:"label,omitempty"`
-		Color        string         `json:"color,omitempty"`
-		Length       float64        `json:"length,omitempty"`
-		LengthUnit   *Label         `json:"length_unit,omitempty"`
-		Description  string         `json:"description,omitempty"`
-		Tags         []Tag          `json:"tags,omitempty"`
-		CustomFields map[string]any `json:"custom_fields,omitempty"`
-		Created      string         `json:"created"`
-		LastUpdated  string         `json:"last_updated"`
+		ID            int               `json:"id"`
+		URL           string            `json:"url,omitempty"`
+		Display       string            `json:"display,omitempty"`
+		Type          *Label            `json:"type"`
+		Status        *Label            `json:"status"`
+		Label         string            `json:"label,omitempty"`
+		Color         string            `json:"color,omitempty"`
+		Length        float64           `json:"length,omitempty"`
+		LengthUnit    *Label            `json:"length_unit,omitempty"`
+		TerminationA  *CableTermination `json:"termination_a,omitempty"`
+		TerminationB  *CableTermination `json:"termination_b,omitempty"`
+		Description   string            `json:"description,omitempty"`
+		Tags          []Tag             `json:"tags,omitempty"`
+		CustomFields  map[string]any    `json:"custom_fields,omitempty"`
+		Created       string            `json:"created"`
+		LastUpdated   string            `json:"last_updated"`
+	}
+
+	// CableTermination represents one end of a cable connection — the type
+	// of the terminated object (e.g. "dcim.interface") and its raw data from
+	// the NetBox API.
+	CableTermination struct {
+		ID   int    `json:"id"`
+		URL  string `json:"url"`
+		Name string `json:"name"`
+		Type string `json:"_type"`
 	}
 
 	Rack struct {
 		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
 		Name         string         `json:"name"`
 		Display      string         `json:"display,omitempty"`
 		FacilityID   string         `json:"facility_id,omitempty"`
@@ -221,6 +244,7 @@ type (
 
 	Interface struct {
 		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
 		Name         string         `json:"name"`
 		Display      string         `json:"display,omitempty"`
 		Device       *Nested        `json:"device"`
@@ -238,6 +262,7 @@ type (
 
 	VMInterface struct {
 		ID             int            `json:"id"`
+		URL            string         `json:"url,omitempty"`
 		Name           string         `json:"name"`
 		Display        string         `json:"display,omitempty"`
 		VirtualMachine *Nested        `json:"virtual_machine"`

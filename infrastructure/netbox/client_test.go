@@ -936,6 +936,156 @@ func TestWireCableToDomain_NilTypeAndStatus(t *testing.T) {
 	}
 }
 
+func TestWireVLANToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireVLAN{
+		ID:   1,
+		VID:  100,
+		Name: "Prod-VLAN",
+		Status: &WireLabel{
+			Value: "active",
+			Label: "Active",
+		},
+		Site: &WireNested{ID: 1, Name: "DC-1", Slug: "dc-1", URL: ""},
+	}
+	d := wireVLANToDomain(w)
+	if d.VID != 100 {
+		t.Errorf("VID = %d, want %d", d.VID, 100)
+	}
+	if d.Name != "Prod-VLAN" {
+		t.Errorf("Name = %q, want %q", d.Name, "Prod-VLAN")
+	}
+	if d.Status.Value != "active" {
+		t.Errorf("Status.Value = %q, want %q", d.Status.Value, "active")
+	}
+	if d.Site.Name != "DC-1" {
+		t.Errorf("Site.Name = %q, want %q", d.Site.Name, "DC-1")
+	}
+}
+
+func TestWireVirtualMachineToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireVirtualMachine{
+		ID:   1,
+		Name: "web-01",
+		Status: &WireLabel{
+			Value: "active",
+			Label: "Active",
+		},
+		VCPUs:  4,
+		Memory: 8192,
+		Disk:   100,
+	}
+	d := wireVirtualMachineToDomain(w)
+	if d.Name != "web-01" {
+		t.Errorf("Name = %q, want %q", d.Name, "web-01")
+	}
+	if d.VCPUs != 4 {
+		t.Errorf("VCPUs = %f, want %f", d.VCPUs, 4.0)
+	}
+	if d.Memory != 8192 {
+		t.Errorf("Memory = %d, want %d", d.Memory, 8192)
+	}
+	if d.Disk != 100 {
+		t.Errorf("Disk = %d, want %d", d.Disk, 100)
+	}
+	if d.Status.Value != "active" {
+		t.Errorf("Status.Value = %q, want %q", d.Status.Value, "active")
+	}
+}
+
+func TestWireClusterToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireCluster{
+		ID:   1,
+		Name: "K8s-Prod",
+		ClusterType: &WireNested{
+			ID: 1, Name: "Kubernetes", Slug: "kubernetes", URL: "",
+		},
+		ClusterGroup: &WireNested{
+			ID: 2, Name: "Production", Slug: "production", URL: "",
+		},
+		Site: &WireNested{ID: 1, Name: "DC-1", Slug: "dc-1", URL: ""},
+	}
+	d := wireClusterToDomain(w)
+	if d.Name != "K8s-Prod" {
+		t.Errorf("Name = %q, want %q", d.Name, "K8s-Prod")
+	}
+	if d.ClusterType.Name != "Kubernetes" {
+		t.Errorf("ClusterType.Name = %q, want %q", d.ClusterType.Name, "Kubernetes")
+	}
+	if d.ClusterGroup.Name != "Production" {
+		t.Errorf("ClusterGroup.Name = %q, want %q", d.ClusterGroup.Name, "Production")
+	}
+	if d.Site.Name != "DC-1" {
+		t.Errorf("Site.Name = %q, want %q", d.Site.Name, "DC-1")
+	}
+}
+
+func TestWireCircuitToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireCircuit{
+		ID:  1,
+		CID: "CIR-001",
+		Provider: &WireNested{
+			ID: 1, Name: "Equinix", Slug: "equinix", URL: "",
+		},
+		CircuitType: &WireNested{
+			ID: 1, Name: "Dark Fiber", Slug: "dark-fiber", URL: "",
+		},
+		Status: &WireLabel{
+			Value: "active",
+			Label: "Active",
+		},
+	}
+	d := wireCircuitToDomain(w)
+	if d.CID != "CIR-001" {
+		t.Errorf("CID = %q, want %q", d.CID, "CIR-001")
+	}
+	if d.Provider.Name != "Equinix" {
+		t.Errorf("Provider.Name = %q, want %q", d.Provider.Name, "Equinix")
+	}
+	if d.CircuitType.Name != "Dark Fiber" {
+		t.Errorf("CircuitType.Name = %q, want %q", d.CircuitType.Name, "Dark Fiber")
+	}
+	if d.Status.Value != "active" {
+		t.Errorf("Status.Value = %q, want %q", d.Status.Value, "active")
+	}
+}
+
+func TestWireRackToDomain(t *testing.T) {
+	t.Parallel()
+
+	w := WireRack{
+		ID:         1,
+		Name:       "Rack-101",
+		FacilityID: "A1-01",
+		Site:       &WireNested{ID: 1, Name: "DC-1", Slug: "dc-1", URL: ""},
+		Width:      19,
+		UHeight:    42,
+	}
+	d := wireRackToDomain(w)
+	if d.Name != "Rack-101" {
+		t.Errorf("Name = %q, want %q", d.Name, "Rack-101")
+	}
+	if d.FacilityID != "A1-01" {
+		t.Errorf("FacilityID = %q, want %q", d.FacilityID, "A1-01")
+	}
+	if d.Site.Name != "DC-1" {
+		t.Errorf("Site.Name = %q, want %q", d.Site.Name, "DC-1")
+	}
+	if d.Width != 19 {
+		t.Errorf("Width = %d, want %d", d.Width, 19)
+	}
+	if d.UHeight != 42 {
+		t.Errorf("UHeight = %d, want %d", d.UHeight, 42)
+	}
+}
+
 func TestConversionFunctions_Populated(t *testing.T) {
 	t.Parallel()
 
@@ -1271,7 +1421,8 @@ func TestDoRequest_QueryParams(t *testing.T) {
 	}
 }
 
-// TestDoRequest_WithBodyLimit verifies that doRequest enforces a 10 MB body limit.
+// TestDoRequest_WithBodyLimit verifies that doRequest returns an error when
+// the response body exceeds 10 MB.
 func TestDoRequest_WithBodyLimit(t *testing.T) {
 	t.Parallel()
 
@@ -1288,12 +1439,12 @@ func TestDoRequest_WithBodyLimit(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, http.DefaultClient)
-	body, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
-	if err != nil {
-		t.Fatalf("doRequest() returned error: %v", err)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	if err == nil {
+		t.Fatal("Expected error due to body size limit, got nil")
 	}
-	if len(body) > 10*1024*1024 {
-		t.Errorf("body length = %d, expected at most %d (10 MB limit)", len(body), 10*1024*1024)
+	if !contains(err.Error(), "exceeds") && !contains(err.Error(), "truncation") {
+		t.Errorf("error = %q, want it to contain 'exceeds' or 'truncation'", err.Error())
 	}
 }
 

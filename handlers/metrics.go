@@ -49,7 +49,7 @@ func WrapToolHandler[I, O any](metrics *Metrics, toolName string, handler mcp.To
 
 		statusClass := "2xx"
 		if err != nil || (result != nil && result.IsError) {
-			statusClass = "4xx"
+			statusClass = "error"
 		}
 
 		metrics.toolRequestsTotal.WithLabelValues(toolName, statusClass).Inc()

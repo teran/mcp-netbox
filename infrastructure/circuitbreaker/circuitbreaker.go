@@ -122,6 +122,7 @@ func isConnectionError(err error) bool {
 // Use this as the Transport in an http.Client.
 type RoundTripper struct {
 	http.RoundTripper
+
 	breaker *Breaker
 }
 

@@ -12,7 +12,7 @@ import (
 	infra "github.com/teran/mcp-netbox/infrastructure/netbox"
 )
 
-const svcContextKey ContextKey = "netbox_service"
+const svcContextKey contextKey = "netbox_service"
 
 // ServiceFromContext extracts the NetworkService from the request context.
 // Returns nil if the service is not present in the context.
@@ -37,8 +37,8 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 	handler := RecoveryMiddleware(
 		SecurityHeadersMiddleware(
 			HostValidationMiddleware(
-				rateLimitMW(
-					MetricsMiddleware(metrics)(
+				MetricsMiddleware(metrics)(
+					rateLimitMW(
 						BodyLimitMiddleware(DefaultMaxRequestBodySize)(
 							LoggingMiddleware(
 								TokenMiddleware(
@@ -81,7 +81,7 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 func injectClientMiddleware(netboxURL string, httpClient *http.Client) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			t, ok := r.Context().Value(TokenContextKey).(*application.Token)
+			t, ok := r.Context().Value(tokenContextKey).(*application.Token)
 			if !ok || t == nil || t.Value() == "" {
 				http.Error(w, `{"error":"authorization token missing from context"}`, http.StatusUnauthorized)
 				return

@@ -15,7 +15,22 @@ import (
 
 // RawObject is a JSON-preserving type for generic object retrieval via get_object_by_id.
 // It preserves the exact JSON structure from NetBox, avoiding map[string]interface{} lossiness.
+//
+// It implements json.Marshaler and json.Unmarshaler by delegating to the
+// underlying json.RawMessage, ensuring correct JSON-in-JSON serialization
+// (rather than base64-encoded output) when used as a field in a struct.
 type RawObject json.RawMessage
+
+// MarshalJSON implements json.Marshaler so RawObject serialises as inline JSON
+// instead of a base64-encoded string.
+func (r RawObject) MarshalJSON() ([]byte, error) {
+	return json.RawMessage(r).MarshalJSON()
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (r *RawObject) UnmarshalJSON(b []byte) error {
+	return (*json.RawMessage)(r).UnmarshalJSON(b)
+}
 
 // NetworkRepository defines the port (interface) for NetBox data access.
 // Implementations provide CRUD operations for sites, devices, IP addresses,

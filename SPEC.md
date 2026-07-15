@@ -49,6 +49,7 @@ This server exposes NetBox infrastructure data through the MCP protocol using **
 | `PROMETHEUS_METRICS_ADDR` | No    | `:8081` | TCP address for the Prometheus `/metrics` endpoint |
 | `RATE_LIMIT_GLOBAL`    | No       | `100`   | Global rate limit (requests/second)  |
 | `RATE_LIMIT_PER_CLIENT`| No       | `10`    | Per-client IP rate limit (requests/second) |
+| `ALLOW_PRIVATE_NETBOX` | No       | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
 | `TRUSTED_PROXY`        | No       | `""`    | CIDR prefix for the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server uses the first IP from `X-Forwarded-For` for rate limiting instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT`        | No       | `300s`  | HTTP write timeout (Go duration format, e.g. `300s`). Minimum 1s. Note: 0 will fail validation; use a reverse proxy for no timeout. |
 
@@ -253,7 +254,6 @@ Retrieve any NetBox object by its type and numeric ID.
 | `object_type`| string | yes      | Object type. One of: `site`, `device`, `prefix`, `ip_address`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `provider`, `tenant`, `rack`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`, `cable`, `interface`, `vm_interface`, `circuit_termination` |
 | `id`         | int    | yes      | Numeric ID of the object                       |
 | `params`     | map    | no       | Additional query parameters to pass to NetBox (optional) |
-| `id`         | int    | yes      | Numeric ID of the object                       |
 
 **Output**: Full object detail.
 
@@ -294,7 +294,7 @@ List device interfaces in NetBox. Includes physical interfaces of devices (switc
 | `name`       | string | no       | Filter by name (case-insensitive partial match) |
 | `tag`        | string | no       | Filter by tag (slug)                         |
 | `page`       | int    | no       | Page number (default: 1)                     |
-| `page_size`  | int    | no       | Results per page (default: 25, max: 10000)     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of interfaces.
@@ -313,7 +313,7 @@ List VM interfaces in NetBox. These are virtual NICs attached to virtual machine
 | `name`           | string | no       | Filter by name (case-insensitive partial match) |
 | `tag`            | string | no       | Filter by tag (slug)                         |
 | `page`           | int    | no       | Page number (default: 1)                     |
-| `page_size`      | int    | no       | Results per page (default: 25, max: 10000)     |
+| `page_size`      | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`              | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of VM interfaces.
@@ -333,7 +333,7 @@ List circuit terminations in NetBox. A termination represents one end of a circu
 | `term_side`  | string | no       | Filter by termination side (`A` or `Z`)      |
 | `tag`        | string | no       | Filter by tag (slug)                         |
 | `page`       | int    | no       | Page number (default: 1)                     |
-| `page_size`  | int    | no       | Results per page (default: 25, max: 10000)     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of circuit terminations.
@@ -355,7 +355,7 @@ List cables in NetBox with optional filters.
 | `label`      | string | no       | Filter by label (case-insensitive partial match) |
 | `tag`        | string | no       | Filter by tag (slug)                         |
 | `page`       | int    | no       | Page number (default: 1)                     |
-| `page_size`  | int    | no       | Results per page (default: 25, max: 10000)     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of cables.
@@ -367,8 +367,8 @@ The server applies eight middleware layers to every HTTP request, executed in th
 1. **RecoveryMiddleware** — catches panics, returns 500
 2. **SecurityHeadersMiddleware** — sets security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
 3. **HostValidationMiddleware** — rejects requests with empty or malformed `Host` headers
-4. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
-5. **MetricsMiddleware** — tracks in-flight requests via gauge (only approved requests)
+4. **MetricsMiddleware** — tracks in-flight requests via gauge
+5. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
 6. **BodyLimitMiddleware** — 1 MB request body limit
 7. **LoggingMiddleware** — logs MCP method, duration, status, sizes (never logs token)
 8. **TokenMiddleware** — extracts token from `Authorization` header, stores as `*application.Token` in context (safe redaction via String/GoString/MarshalJSON)

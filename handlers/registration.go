@@ -1,10 +1,10 @@
 // Package handlers provides the HTTP transport layer for the MCP NetBox server.
 //
 // It implements the MCP Streamable HTTP protocol, including:
-// - Middleware chain: recovery, security headers, host validation, rate limiting,
-//   metrics, body limit, logging, token extraction, and service injection.
-// - Tool handler factories that translate MCP tool calls into NetBox API queries.
-// - Prometheus metrics collection for monitoring.
+//   - Middleware chain: recovery, security headers, host validation, rate limiting,
+//     metrics, body limit, logging, token extraction, and service injection.
+//   - Tool handler factories that translate MCP tool calls into NetBox API queries.
+//   - Prometheus metrics collection for monitoring.
 //
 // The middleware chain is assembled in NewMux() (server.go) and applies to
 // all requests on the /mcp path. The healthz and readyz endpoints bypass

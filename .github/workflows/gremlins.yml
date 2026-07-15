@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7.0.0 # SHA: 9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/setup-go@v6.5.0 # SHA: 924ae3a1cded613372ab5595356fb5720e22ba16
         with:
           go-version: "stable"
           cache: true
-      - uses: go-gremlins/gremlins-action@v1
+      - uses: go-gremlins/gremlins-action@v1.0.1 # SHA: e5dc59ad56bda9b70d8b64f9499c44d0fa318a08
         continue-on-error: true
         with:
           version: latest

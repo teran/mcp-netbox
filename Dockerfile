@@ -7,15 +7,19 @@
 
 FROM alpine:3.21 AS base
 RUN apk add --no-cache ca-certificates && \
-    echo 'nobody:x:65534:65534:nobody:/:/sbin/nologin' > /etc/passwd-minimal
+    echo 'nobody:x:65534:65534:nobody:/:/sbin/nologin' > /etc/passwd-minimal && \
+    wget --version > /dev/null 2>&1
 
-FROM scratch
+FROM base
 ARG TARGETARCH
 COPY --from=base /etc/passwd-minimal /etc/passwd
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY mcp-netbox-linux-${TARGETARCH} /mcp-netbox
 USER 65534:65534
 EXPOSE 8080
+EXPOSE 8081
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/healthz || exit 1
 ENTRYPOINT ["/mcp-netbox"]
 LABEL org.opencontainers.image.source="https://github.com/teran/mcp-netbox"
 LABEL org.opencontainers.image.description="Remote MCP server for NetBox"

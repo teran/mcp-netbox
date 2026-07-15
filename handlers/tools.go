@@ -22,7 +22,7 @@ type SitesInput struct {
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug or name)"`
 	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 1000)"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // DevicesInput represents the input fields for the get_devices tool.
@@ -39,7 +39,7 @@ type DevicesInput struct {
 	Cluster      string `json:"cluster,omitempty" jsonschema:"filter by cluster (name)"`
 	Tag          string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // IPAddressesInput represents the input fields for the get_ip_addresses tool.
@@ -53,7 +53,7 @@ type IPAddressesInput struct {
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 1000)"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // PrefixesInput represents the input fields for the get_prefixes tool.
@@ -67,9 +67,9 @@ type PrefixesInput struct {
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Within   string `json:"within,omitempty" jsonschema:"find prefixes within a given prefix"`
-	Family   int    `json:"family,omitempty" jsonschema:"address family: 4 or 6"`
+	Family   *int   `json:"family,omitempty" jsonschema:"address family: 4 or 6"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 1000)"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // VLANsInput represents the input fields for the get_vlans tool.
@@ -82,7 +82,7 @@ type VLANsInput struct {
 	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	VID      int    `json:"vid,omitempty" jsonschema:"filter by VLAN ID"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 1000)"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // VirtualMachinesInput represents the input fields for the get_virtual_machines tool.
@@ -97,7 +97,7 @@ type VirtualMachinesInput struct {
 	Site         string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
 	Tag          string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // ClustersInput represents the input fields for the get_clusters tool.
@@ -110,7 +110,7 @@ type ClustersInput struct {
 	Name         string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
 	Tag          string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // CircuitsInput represents the input fields for the get_circuits tool.
@@ -123,7 +123,7 @@ type CircuitsInput struct {
 	Tenant      string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Tag         string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page        int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize    int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+	PageSize    int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
@@ -142,7 +142,7 @@ type InterfacesInput struct {
 	Name     string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
 	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 1000)"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // VMInterfacesInput represents the input fields for the get_vm_interfaces tool.
@@ -152,7 +152,7 @@ type VMInterfacesInput struct {
 	Name           string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
 	Tag            string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page           int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize       int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 100)"`
+	PageSize       int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // CircuitTerminationsInput represents the input fields for the get_circuit_terminations tool.
@@ -163,7 +163,7 @@ type CircuitTerminationsInput struct {
 	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	TermSide string `json:"term_side,omitempty" jsonschema:"filter by termination side: A or Z"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 1000)"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // CablesInput represents the input fields for the get_cables tool.
@@ -176,7 +176,7 @@ type CablesInput struct {
 	Color    string `json:"color,omitempty" jsonschema:"filter by color (slug)"`
 	Label    string `json:"label,omitempty" jsonschema:"filter by label (case-insensitive partial match)"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 1000)"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // RacksInput represents the input fields for the get_racks tool.
@@ -188,7 +188,7 @@ type RacksInput struct {
 	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
 	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
 	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
-	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, max: 1000)"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
 // — output types —
@@ -367,7 +367,9 @@ func NewGetPrefixesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[P
 			addParam(params, "role", in.Role)
 			addParam(params, "tenant", in.Tenant)
 			addParam(params, "within", in.Within)
-			addIntParam(params, "family", in.Family)
+			if in.Family != nil {
+				addParam(params, "family", strconv.Itoa(*in.Family))
+			}
 			addParam(params, "tag", in.Tag)
 			return params
 		},

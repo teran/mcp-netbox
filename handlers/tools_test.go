@@ -493,5 +493,3 @@ func TestGetObjectByIDHandler(t *testing.T) {
 		}
 	})
 }
-
-

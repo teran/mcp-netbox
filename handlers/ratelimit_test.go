@@ -31,6 +31,10 @@ func TestExtractClientIP(t *testing.T) {
 		{"trusted proxy non-matching remote", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "192.168.1.1:12345", "10.0.0.0/8", "192.168.1.1"},
 		{"trusted proxy empty string", map[string]string{"X-Forwarded-For": "10.0.0.2"}, "10.0.0.1:12345", "", "10.0.0.1"},
 		{"trusted proxy invalid CIDR", map[string]string{"X-Forwarded-For": "10.0.0.2"}, "10.0.0.1:12345", "not-a-cidr", "10.0.0.1"},
+		{"IPv6 remote address", nil, "[2001:db8::1]:443", "", "2001:db8::1"},
+		{"IPv6 loopback", nil, "[::1]:8080", "", "::1"},
+		{"IPv6 with trusted proxy", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "[2001:db8::1]:443", "2001:db8::0/32", "192.168.1.1"},
+		{"IPv6 with trusted proxy no XFF", nil, "[2001:db8::1]:443", "2001:db8::0/32", "2001:db8::1"},
 	}
 
 	for _, tc := range tests {

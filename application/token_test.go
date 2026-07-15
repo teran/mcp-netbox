@@ -44,14 +44,14 @@ func TestTokenValue(t *testing.T) {
 func TestTokenString(t *testing.T) {
 	t.Parallel()
 
-	t.Run("redacts long token", func(t *testing.T) {
+	t.Run("redacts token completely", func(t *testing.T) {
 		tok := NewToken("abcdefgh12345678")
 		s := tok.String()
 		if s == "abcdefgh12345678" {
 			t.Error("String() returned raw token, expected redacted")
 		}
-		if len(s) < 10 || len(s) > 30 {
-			t.Errorf("String() length = %d, want reasonable redacted length", len(s))
+		if s != "***redacted***" {
+			t.Errorf("String() = %q, want %q", s, "***redacted***")
 		}
 	})
 

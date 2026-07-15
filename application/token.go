@@ -20,15 +20,12 @@ func NewToken(token string) *Token {
 	return &Token{value: token}
 }
 
-// String returns a redacted representation of the token.
+// String returns a fully redacted representation of the token.
 func (t *Token) String() string {
 	if t == nil {
 		return ""
 	}
-	if len(t.value) <= 8 {
-		return "***redacted***"
-	}
-	return t.value[:4] + "***redacted***" + t.value[len(t.value)-4:]
+	return "***redacted***"
 }
 
 // MarshalJSON implements json.Marshaler to prevent token leakage via JSON.

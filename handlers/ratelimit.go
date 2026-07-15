@@ -33,6 +33,7 @@ type rateLimiter struct {
 	clients map[string]*clientLimiter
 	mu      sync.Mutex
 	stopCh  chan struct{}
+	closeOnce sync.Once
 }
 
 func NewRateLimiter(config RateLimiterConfig) *rateLimiter {
@@ -47,7 +48,9 @@ func NewRateLimiter(config RateLimiterConfig) *rateLimiter {
 }
 
 func (rl *rateLimiter) Stop() {
-	close(rl.stopCh)
+	rl.closeOnce.Do(func() {
+		close(rl.stopCh)
+	})
 }
 
 func (rl *rateLimiter) Allow(clientIP string) bool {

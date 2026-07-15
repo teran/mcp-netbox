@@ -117,13 +117,14 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 	}
 
 	const maxBodySize = 10 * 1024 * 1024
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxBodySize))
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxBodySize+1))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	if len(body) >= maxBodySize {
-		slog.Warn("response body may be truncated", "size", len(body), "max", maxBodySize, "path", path)
+	if len(body) > maxBodySize {
+		body = body[:maxBodySize]
+		return nil, fmt.Errorf("response body exceeds %d bytes (got at least %d bytes), truncation detected", maxBodySize, len(body))
 	}
 
 	return body, nil
@@ -381,6 +382,7 @@ func wireTagsToDomain(tags []WireTag) []domain.Tag {
 func wireSiteToDomain(w WireSite) domain.Site {
 	return domain.Site{
 		ID:              w.ID,
+		URL:             w.URL,
 		Name:            w.Name,
 		Slug:            w.Slug,
 		Display:         w.Display,
@@ -403,6 +405,7 @@ func wireSiteToDomain(w WireSite) domain.Site {
 func wireDeviceToDomain(w WireDevice) domain.Device {
 	return domain.Device{
 		ID:           w.ID,
+		URL:          w.URL,
 		Name:         w.Name,
 		Display:      w.Display,
 		DeviceType:   wireNestedToDomain(w.DeviceType),
@@ -440,6 +443,7 @@ func wireAssignedObjToDomain(w *WireAssignedObj) *domain.AssignedObject {
 func wireIPAddressToDomain(w WireIPAddress) domain.IPAddress {
 	return domain.IPAddress{
 		ID:                 w.ID,
+		URL:                w.URL,
 		Address:            w.Address,
 		Display:            w.Display,
 		VRF:                wireNestedToDomain(w.VRF),
@@ -462,6 +466,7 @@ func wireIPAddressToDomain(w WireIPAddress) domain.IPAddress {
 func wireCircuitTerminationToDomain(w WireCircuitTermination) domain.CircuitTermination {
 	return domain.CircuitTermination{
 		ID:            w.ID,
+		URL:           w.URL,
 		Display:       w.Display,
 		Circuit:       wireNestedToDomain(w.Circuit),
 		TermSide:      w.TermSide,
@@ -479,6 +484,7 @@ func wireCircuitTerminationToDomain(w WireCircuitTermination) domain.CircuitTerm
 func wireCableToDomain(w WireCable) domain.Cable {
 	return domain.Cable{
 		ID:           w.ID,
+		URL:          w.URL,
 		Display:      w.Display,
 		Type:         wireLabelToDomain(w.Type),
 		Status:       wireLabelToDomain(w.Status),
@@ -486,11 +492,25 @@ func wireCableToDomain(w WireCable) domain.Cable {
 		Color:        w.Color,
 		Length:       w.Length,
 		LengthUnit:   wireLabelToDomain(w.LengthUnit),
+		TerminationA: wireCableTerminationToDomain(w.TerminationA),
+		TerminationB: wireCableTerminationToDomain(w.TerminationB),
 		Description:  w.Description,
 		Tags:         wireTagsToDomain(w.Tags),
 		CustomFields: w.CustomFields,
 		Created:      w.Created,
 		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func wireCableTerminationToDomain(w *WireCableTermination) *domain.CableTermination {
+	if w == nil {
+		return nil
+	}
+	return &domain.CableTermination{
+		ID:   w.ID,
+		URL:  w.URL,
+		Name: w.Name,
+		Type: w.Type,
 	}
 }
 
@@ -504,6 +524,7 @@ func wirePrefixToDomain(w WirePrefix) domain.Prefix {
 	}
 	return domain.Prefix{
 		ID:           w.ID,
+		URL:          w.URL,
 		Prefix:       w.Prefix,
 		Display:      w.Display,
 		Site:         wireNestedToDomain(w.Site),
@@ -528,6 +549,7 @@ func wirePrefixToDomain(w WirePrefix) domain.Prefix {
 func wireVLANToDomain(w WireVLAN) domain.VLAN {
 	return domain.VLAN{
 		ID:           w.ID,
+		URL:          w.URL,
 		Site:         wireNestedToDomain(w.Site),
 		Group:        wireNestedToDomain(w.Group),
 		VID:          w.VID,
@@ -548,6 +570,7 @@ func wireVLANToDomain(w WireVLAN) domain.VLAN {
 func wireVirtualMachineToDomain(w WireVirtualMachine) domain.VirtualMachine {
 	return domain.VirtualMachine{
 		ID:           w.ID,
+		URL:          w.URL,
 		Name:         w.Name,
 		Display:      w.Display,
 		Cluster:      wireNestedToDomain(w.Cluster),
@@ -570,6 +593,7 @@ func wireVirtualMachineToDomain(w WireVirtualMachine) domain.VirtualMachine {
 func wireClusterToDomain(w WireCluster) domain.Cluster {
 	return domain.Cluster{
 		ID:           w.ID,
+		URL:          w.URL,
 		Name:         w.Name,
 		Display:      w.Display,
 		ClusterType:  wireNestedToDomain(w.ClusterType),
@@ -588,6 +612,7 @@ func wireClusterToDomain(w WireCluster) domain.Cluster {
 func wireCircuitToDomain(w WireCircuit) domain.Circuit {
 	return domain.Circuit{
 		ID:           w.ID,
+		URL:          w.URL,
 		CID:          w.CID,
 		Display:      w.Display,
 		Provider:     wireNestedToDomain(w.Provider),
@@ -608,6 +633,7 @@ func wireCircuitToDomain(w WireCircuit) domain.Circuit {
 func wireInterfaceToDomain(w WireInterface) domain.Interface {
 	return domain.Interface{
 		ID:           w.ID,
+		URL:          w.URL,
 		Name:         w.Name,
 		Display:      w.Display,
 		Device:       wireNestedToDomain(w.Device),
@@ -627,6 +653,7 @@ func wireInterfaceToDomain(w WireInterface) domain.Interface {
 func wireVMInterfaceToDomain(w WireVMInterface) domain.VMInterface {
 	return domain.VMInterface{
 		ID:             w.ID,
+		URL:            w.URL,
 		Name:           w.Name,
 		Display:        w.Display,
 		VirtualMachine: wireNestedToDomain(w.VirtualMachine),
@@ -644,6 +671,7 @@ func wireVMInterfaceToDomain(w WireVMInterface) domain.VMInterface {
 func wireRackToDomain(w WireRack) domain.Rack {
 	return domain.Rack{
 		ID:           w.ID,
+		URL:          w.URL,
 		Name:         w.Name,
 		Display:      w.Display,
 		FacilityID:   w.FacilityID,

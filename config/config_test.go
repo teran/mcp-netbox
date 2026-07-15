@@ -99,8 +99,8 @@ func TestValidateURLNotPrivate(t *testing.T) {
 	}{
 		{"public IP", "http://8.8.8.8:8000", false},
 		{"public IP (cloudflare)", "http://1.1.1.1", false},
-		{"hostname", "http://netbox.example.com", false},
-		{"hostname with path", "https://netbox.internal/api", false},
+		{"hostname", "http://google.com", false},
+		{"hostname with path", "https://google.com/api", false},
 		{"loopback IPv4", "http://127.0.0.1:8000", true},
 		{"loopback IPv6", "http://[::1]:8000", true},
 		{"private IPv4 (10.x)", "http://10.0.0.1:8000", true},
@@ -148,7 +148,7 @@ func TestValidateConfig(t *testing.T) {
 
 	t.Run("valid config", func(t *testing.T) {
 		cfg := Config{
-			NetBoxURL:          "http://netbox:8000",
+			NetBoxURL:          "http://google.com",
 			RateLimitGlobal:    100,
 			RateLimitPerClient: 10,
 		}
