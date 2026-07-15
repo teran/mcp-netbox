@@ -8,6 +8,7 @@
 package circuitbreaker
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"sync"
@@ -110,11 +111,17 @@ func isConnectionError(err error) bool {
 	if err == nil {
 		return false
 	}
+
 	// Connection refused, DNS failures, timeouts, etc. typically manifest
 	// as http-level errors from the http.Client. Application-level errors
 	// (4xx/5xx responses) return nil error from RoundTrip — they come
 	// back as a non-nil Response with an error status code.
-	// So any non-nil error from RoundTrip is a transport failure.
+	// So any non-nil error from RoundTrip is a transport failure,
+	// except for context cancellation which is not a connection issue.
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return false
+	}
+
 	return true
 }
 

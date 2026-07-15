@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -273,6 +274,9 @@ func newListHandler[I, D any](cfg listHandlerConfig[I, D]) mcp.ToolHandlerFor[I,
 		resp, err := cfg.listFunc(ctx, params)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, PaginatedOutput[D]{}, fmt.Errorf("%s: %w", cfg.errorLabel, err)
+		}
+		if resp == nil {
+			return &mcp.CallToolResult{IsError: true}, PaginatedOutput[D]{}, fmt.Errorf("%s: %w", cfg.errorLabel, errors.New("received nil response from service"))
 		}
 
 		return &mcp.CallToolResult{}, PaginatedOutput[D]{Count: resp.Count, Next: resp.Next, Previous: resp.Previous, Results: resp.Results}, nil

@@ -37,8 +37,8 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 	handler := RecoveryMiddleware(
 		SecurityHeadersMiddleware(
 			HostValidationMiddleware(
-				MetricsMiddleware(metrics)(
-					rateLimitMW(
+				rateLimitMW(
+					MetricsMiddleware(metrics)(
 						BodyLimitMiddleware(DefaultMaxRequestBodySize)(
 							LoggingMiddleware(
 								TokenMiddleware(
