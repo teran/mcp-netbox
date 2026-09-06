@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"strings"
 	"context"
 	"encoding/json"
 	"io"
@@ -10,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -231,17 +231,17 @@ func TestNewPrivateIPCheckingDialer_AllowsPrivateWhenEnabled(t *testing.T) {
 func dialerRawConn(t *testing.T) syscall.RawConn {
 	t.Helper()
 
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	ln, err := net.Listen("tcp", "127.0.0.1:0") //nolint:noctx
 	if err != nil {
 		t.Fatalf("Listen error: %v", err)
 	}
-	defer ln.Close()
+	defer func() { _ = ln.Close() }()
 
-	conn, err := net.Dial("tcp", ln.Addr().String())
+	conn, err := net.Dial("tcp", ln.Addr().String()) //nolint:noctx
 	if err != nil {
 		t.Fatalf("Dial error: %v", err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	raw, err := conn.(*net.TCPConn).SyscallConn()
 	if err != nil {

@@ -34,8 +34,19 @@ func IsPrivateIP(ip net.IP) bool {
 	return IsPrivateAddr(a)
 }
 
+// Transport modes supported by the server. HTTP serves the MCP protocol over
+// Streamable HTTP (the token is taken from the per-request Authorization
+// header), while STDIO serves it over stdin/stdout (the token is taken from
+// the NETBOX_TOKEN environment variable).
+const (
+	TransportHTTP  = "http"
+	TransportStdio = "stdio"
+)
+
 type Config struct {
 	NetBoxURL             string        `envconfig:"NETBOX_URL" required:"true"`
+	NetBoxToken           string        `envconfig:"NETBOX_TOKEN" default:""`
+	Transport             string        `envconfig:"TRANSPORT" default:"http"`
 	ListenAddr            string        `envconfig:"LISTEN_ADDR" default:":8080"`
 	PrometheusMetricsAddr string        `envconfig:"PROMETHEUS_METRICS_ADDR" default:":8081"`
 	RateLimitGlobal       int           `envconfig:"RATE_LIMIT_GLOBAL" default:"100"`
@@ -53,10 +64,36 @@ func (c Config) validate() error {
 			validation.By(validateURLHost),
 			validation.By(validateURLNotPrivate(c.AllowPrivateNetBox)),
 		),
+		validation.Field(&c.Transport, validation.By(validateTransport(c.NetBoxToken))),
 		validation.Field(&c.RateLimitGlobal, validation.By(validatePositiveInt)),
 		validation.Field(&c.RateLimitPerClient, validation.By(validatePositiveInt)),
 		validation.Field(&c.WriteTimeout, validation.Min(time.Second)),
 	)
+}
+
+// validateTransport checks that the transport is one of the supported modes
+// and that a NETBOX_TOKEN is provided for the STDIO transport (which has no
+// HTTP Authorization header to carry it per request).
+func validateTransport(netboxToken string) validation.RuleFunc {
+	return func(value interface{}) error {
+		s, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("must be a string")
+		}
+		// The empty value means HTTP, which is the default and is what callers
+		// constructing config.Config directly (without envconfig defaults) get.
+		switch s {
+		case "", TransportHTTP:
+			return nil
+		case TransportStdio:
+			if strings.TrimSpace(netboxToken) == "" {
+				return fmt.Errorf("%s transport requires NETBOX_TOKEN to be set", TransportStdio)
+			}
+			return nil
+		default:
+			return fmt.Errorf("must be %q or %q (got %q)", TransportHTTP, TransportStdio, s)
+		}
+	}
 }
 
 func validatePositiveInt(value interface{}) error {

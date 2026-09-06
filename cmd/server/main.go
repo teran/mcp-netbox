@@ -16,9 +16,11 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/prometheus/client_golang/prometheus"
 
+	"github.com/teran/mcp-netbox/application"
 	"github.com/teran/mcp-netbox/config"
 	"github.com/teran/mcp-netbox/handlers"
 	"github.com/teran/mcp-netbox/infrastructure/circuitbreaker"
+	infra "github.com/teran/mcp-netbox/infrastructure/netbox"
 )
 
 // Build-time variables injected by goreleaser (via ldflags).
@@ -75,37 +77,70 @@ func newPrivateIPCheckingDialer(allowPrivate bool) *net.Dialer {
 	}
 }
 
+// Run starts the server using the configured transport.
+//
+//   - TransportHTTP: serves MCP over Streamable HTTP. The NetBox token is
+//     taken from the per-request Authorization: Bearer header and injected
+//     per request by the HTTP middleware chain.
+//   - TransportStdio: serves MCP over stdin/stdout (newline-delimited JSON).
+//     The NetBox token is taken from the NETBOX_TOKEN environment variable at
+//     startup and passed to a single shared NetworkService.
+//
+// The empty transport string is treated as HTTP for backward compatibility
+// with callers that construct config.Config directly.
 func Run(cfg config.Config) error {
-	dialer := newPrivateIPCheckingDialer(cfg.AllowPrivateNetBox)
-
-	cbTransport := circuitbreaker.NewRoundTripper(
-		&http.Transport{
-			MaxIdleConns:        100,
-			MaxIdleConnsPerHost: 100,
-			IdleConnTimeout:     90 * time.Second,
-			DisableCompression:  false,
-			DisableKeepAlives:   false,
-			DialContext:         dialer.DialContext,
-		},
-		circuitbreaker.DefaultConfig(),
-	)
-
-	sharedHTTPClient := &http.Client{
-		Timeout: 30 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-		Transport: cbTransport,
+	switch cfg.Transport {
+	case config.TransportStdio:
+		return runStdio(cfg)
+	case "", config.TransportHTTP:
+		return runHTTP(cfg)
+	default:
+		return fmt.Errorf("unsupported transport %q", cfg.Transport)
 	}
+}
 
-	srv := mcp.NewServer(&mcp.Implementation{
-		Name:    "mcp-netbox",
-		Version: version,
-	}, &mcp.ServerOptions{
-		Capabilities: &mcp.ServerCapabilities{
-			Tools: &mcp.ToolCapabilities{ListChanged: false},
-		},
-	})
+// runStdio runs the MCP server over stdin/stdout. Because there is no HTTP
+// Authorization header in this mode, the NetBox token must be provided via
+// the NETBOX_TOKEN environment variable and is used by a single shared
+// NetworkService for every tool call.
+func runStdio(cfg config.Config) error {
+	return runStdioWithTransport(cfg, &mcp.StdioTransport{})
+}
+
+// runStdioWithTransport is runStdio with an injectable transport, so that
+// tests can drive the stdio server in-process over an in-memory pipe.
+func runStdioWithTransport(cfg config.Config, transport mcp.Transport) error {
+	srv := newMCPServer()
+
+	httpClient, _ := newNetBoxHTTPClient(cfg)
+	netboxClient := infra.NewClient(cfg.NetBoxURL, httpClient)
+	svc := application.NewNetworkService(netboxClient, cfg.NetBoxToken)
+
+	// In stdio mode there is no HTTP middleware chain, so no per-request
+	// service injection. Register the shared service directly.
+	handlers.RegisterTools(srv, nil, svc)
+
+	slog.Info("starting stdio MCP server", "netbox_url", handlers.SanitizeLog(redactedURL(cfg.NetBoxURL)))
+
+	conn, err := srv.Connect(context.Background(), transport, nil)
+	if err != nil {
+		return fmt.Errorf("connect stdio transport: %w", err)
+	}
+	defer func() {
+		if err := conn.Close(); err != nil {
+			slog.Error("stdio transport close error", "error", err)
+		}
+	}()
+
+	return conn.Wait()
+}
+
+// runHTTP runs the MCP server over Streamable HTTP plus a Prometheus metrics
+// server. Tokens are read per request from the Authorization header.
+func runHTTP(cfg config.Config) error {
+	srv := newMCPServer()
+
+	sharedHTTPClient, breaker := newNetBoxHTTPClient(cfg)
 
 	promRegistry := prometheus.NewRegistry()
 	metrics := handlers.NewMetrics(promRegistry)
@@ -119,14 +154,14 @@ func Run(cfg config.Config) error {
 		},
 	)
 
-	// Register tools on the MCP server
+	// Register tools on the MCP server. The service is nil in HTTP mode; it is
+	// injected per request by the middleware chain using the request token.
 	handlers.RegisterTools(srv, metrics, nil)
 
-	mux, stopRateLimit := handlers.NewMux(cfg, metrics, sharedHTTPClient, cbTransport.Breaker(), mcpHandler)
+	mux, stopRateLimit := handlers.NewMux(cfg, metrics, sharedHTTPClient, breaker, mcpHandler)
 	defer stopRateLimit()
 
-	u, _ := url.Parse(cfg.NetBoxURL)
-	slog.Info("starting server", "netbox_url", handlers.SanitizeLog(u.Redacted()))
+	slog.Info("starting server", "netbox_url", handlers.SanitizeLog(redactedURL(cfg.NetBoxURL)))
 	slog.Info("build info", "version", version, "commit", commit, "date", date)
 
 	mainServer := &http.Server{
@@ -188,4 +223,54 @@ func Run(cfg config.Config) error {
 
 	slog.Info("server stopped gracefully")
 	return nil
+}
+
+// newMCPServer builds the shared MCP server with the configured capabilities
+// and instructions.
+func newMCPServer() *mcp.Server {
+	return mcp.NewServer(&mcp.Implementation{
+		Name:    "mcp-netbox",
+		Version: version,
+	}, &mcp.ServerOptions{
+		Capabilities: &mcp.ServerCapabilities{
+			Tools: &mcp.ToolCapabilities{ListChanged: false},
+		},
+	})
+}
+
+// newNetBoxHTTPClient builds the shared HTTP client used to talk to NetBox,
+// with DNS-rebinding protection and a circuit breaker transport. It returns
+// the client and the circuit breaker (used by the HTTP readyz endpoint).
+func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Breaker) {
+	dialer := newPrivateIPCheckingDialer(cfg.AllowPrivateNetBox)
+
+	cbTransport := circuitbreaker.NewRoundTripper(
+		&http.Transport{
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 100,
+			IdleConnTimeout:     90 * time.Second,
+			DisableCompression:  false,
+			DisableKeepAlives:   false,
+			DialContext:         dialer.DialContext,
+		},
+		circuitbreaker.DefaultConfig(),
+	)
+
+	return &http.Client{
+		Timeout: 30 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+		Transport: cbTransport,
+	}, cbTransport.Breaker()
+}
+
+// redactedURL returns the NetBox URL with any credentials redacted for safe
+// logging.
+func redactedURL(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return raw
+	}
+	return u.Redacted()
 }
