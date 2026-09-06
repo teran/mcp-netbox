@@ -1,6 +1,7 @@
 package circuitbreaker
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -137,5 +138,45 @@ func TestRoundTripper_HTTPErrorsDoNotTripBreaker(t *testing.T) {
 
 	if rt.Breaker().State() != StateClosed {
 		t.Errorf("breaker state = %d, want %d (HTTP errors should not trip)", rt.Breaker().State(), StateClosed)
+	}
+}
+
+func TestIsConnectionError(t *testing.T) {
+	t.Parallel()
+
+	if isConnectionError(nil) {
+		t.Error("isConnectionError(nil) = true, want false")
+	}
+	if isConnectionError(context.Canceled) {
+		t.Error("isConnectionError(context.Canceled) = true, want false")
+	}
+	if isConnectionError(context.DeadlineExceeded) {
+		t.Error("isConnectionError(context.DeadlineExceeded) = true, want false")
+	}
+	if !isConnectionError(errors.New("connection refused")) {
+		t.Error("isConnectionError(conn refused) = false, want true")
+	}
+}
+
+func TestRoundTripper_FailsFastWhenOpen(t *testing.T) {
+	b := &Breaker{
+		config: Config{FailureThreshold: 1, Timeout: 1 * time.Hour},
+		state:  StateOpen,
+	}
+	rt := NewRoundTripper(http.DefaultTransport, DefaultConfig())
+	rt.breaker = b
+
+	req, err := http.NewRequest(http.MethodGet, "http://example.com", nil)
+	if err != nil {
+		t.Fatalf("NewRequest error: %v", err)
+	}
+
+	// With an open circuit the inner transport must never be reached.
+	resp, err := rt.RoundTrip(req)
+	if err != ErrCircuitOpen {
+		t.Errorf("RoundTrip() err = %v, want %v", err, ErrCircuitOpen)
+	}
+	if resp != nil {
+		t.Errorf("RoundTrip() resp = %v, want nil", resp)
 	}
 }
