@@ -1667,3 +1667,71 @@ func containsStr(s, substr string) bool {
 	}
 	return false
 }
+
+// TestClient_ListMethods_Errors covers the get() and json.Unmarshal error paths
+// of the remaining list methods (Devices, IPAddresses, Prefixes, VLANs,
+// VirtualMachines, Clusters, Circuits, Racks) that lack dedicated error tests.
+func TestClient_ListMethods_Errors(t *testing.T) {
+	t.Parallel()
+
+	type methodCase struct {
+		name    string
+		call    func(*Client) error
+		path    string
+	}
+
+	cases := []methodCase{
+		{"devices", func(c *Client) error { _, err := c.ListDevices(context.Background(), "t", nil); return err }, "/api/dcim/devices/"},
+		{"ip_addresses", func(c *Client) error { _, err := c.ListIPAddresses(context.Background(), "t", nil); return err }, "/api/ipam/ip-addresses/"},
+		{"prefixes", func(c *Client) error { _, err := c.ListPrefixes(context.Background(), "t", nil); return err }, "/api/ipam/prefixes/"},
+		{"vlans", func(c *Client) error { _, err := c.ListVLANs(context.Background(), "t", nil); return err }, "/api/ipam/vlans/"},
+		{"virtual_machines", func(c *Client) error { _, err := c.ListVirtualMachines(context.Background(), "t", nil); return err }, "/api/virtualization/virtual-machines/"},
+		{"clusters", func(c *Client) error { _, err := c.ListClusters(context.Background(), "t", nil); return err }, "/api/virtualization/clusters/"},
+		{"circuits", func(c *Client) error { _, err := c.ListCircuits(context.Background(), "t", nil); return err }, "/api/circuits/circuits/"},
+		{"racks", func(c *Client) error { _, err := c.ListRacks(context.Background(), "t", nil); return err }, "/api/dcim/racks/"},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name+"/not_found", func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusNotFound)
+			}))
+			defer srv.Close()
+			if err := tc.call(NewClient(srv.URL, http.DefaultClient)); err == nil {
+				t.Error("expected error, got nil")
+			}
+		})
+		t.Run(tc.name+"/invalid_json", func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{invalid`))
+			}))
+			defer srv.Close()
+			if err := tc.call(NewClient(srv.URL, http.DefaultClient)); err == nil {
+				t.Error("expected error, got nil")
+			}
+		})
+	}
+}
+
+func TestConvertPaginated_Nil(t *testing.T) {
+	t.Parallel()
+
+	if got := convertPaginated[WireSite, domain.Site](nil, wireSiteToDomain); got != nil {
+		t.Errorf("convertPaginated(nil) = %v, want nil", got)
+	}
+}
+
+func TestWireCableTerminationToDomain_Populated(t *testing.T) {
+	t.Parallel()
+
+	w := &WireCableTermination{ID: 7, URL: "http://x/7/", Name: "A-end", Type: "dcim.interface"}
+	got := wireCableTerminationToDomain(w)
+	if got == nil {
+		t.Fatal("wireCableTerminationToDomain(non-nil) = nil, want populated")
+	}
+	if got.ID != 7 || got.Name != "A-end" || got.Type != "dcim.interface" {
+		t.Errorf("wireCableTerminationToDomain = %+v", got)
+	}
+}
