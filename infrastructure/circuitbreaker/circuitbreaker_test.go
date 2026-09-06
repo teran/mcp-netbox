@@ -160,8 +160,9 @@ func TestIsConnectionError(t *testing.T) {
 
 func TestRoundTripper_FailsFastWhenOpen(t *testing.T) {
 	b := &Breaker{
-		config: Config{FailureThreshold: 1, Timeout: 1 * time.Hour},
-		state:  StateOpen,
+		config:          Config{FailureThreshold: 1, Timeout: 1 * time.Hour},
+		state:           StateOpen,
+		lastFailureTime: time.Now(),
 	}
 	rt := NewRoundTripper(http.DefaultTransport, DefaultConfig())
 	rt.breaker = b
