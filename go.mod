@@ -1,6 +1,6 @@
 module github.com/teran/mcp-netbox
 
-go 1.26.5
+go 1.27.0
 
 require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
