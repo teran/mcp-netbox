@@ -34,4 +34,3 @@ mcp-netbox-linux-arm64
 .env
 .env.local
 *.env
-server
