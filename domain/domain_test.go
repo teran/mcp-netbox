@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 )
 
@@ -449,4 +450,70 @@ func TestNetworkRepositoryInterface(t *testing.T) {
 			t.Errorf("Results[0].Name = %q, want %q", resp.Results[0].Name, "Test")
 		}
 	})
+}
+
+func TestRawObject_MarshalJSON(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		in   RawObject
+		want string
+	}{
+		{"object", RawObject(`{"id":1,"name":"x"}`), `{"id":1,"name":"x"}`},
+		{"array", RawObject(`[1,2,3]`), `[1,2,3]`},
+		{"null", RawObject(`null`), `null`},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			b, err := json.Marshal(tc.in)
+			if err != nil {
+				t.Fatalf("MarshalJSON() error: %v", err)
+			}
+			if string(b) != tc.want {
+				t.Errorf("MarshalJSON() = %s, want %s", b, tc.want)
+			}
+		})
+	}
+}
+
+func TestRawObject_UnmarshalJSON(t *testing.T) {
+	t.Parallel()
+
+	t.Run("valid", func(t *testing.T) {
+		var out RawObject
+		if err := json.Unmarshal([]byte(`{"a":1}`), &out); err != nil {
+			t.Fatalf("UnmarshalJSON() error: %v", err)
+		}
+		if string(out) != `{"a":1}` {
+			t.Errorf("UnmarshalJSON() = %s, want %s", out, `{"a":1}`)
+		}
+	})
+
+	t.Run("invalid json returns error", func(t *testing.T) {
+		var out RawObject
+		if err := json.Unmarshal([]byte(`{invalid`), &out); err == nil {
+			t.Error("UnmarshalJSON() = nil, want error")
+		}
+	})
+}
+
+func TestRawObject_EmbeddedInStruct(t *testing.T) {
+	t.Parallel()
+
+	type wrapper struct {
+		Name string   `json:"name"`
+		Data RawObject `json:"data"`
+	}
+
+	w := wrapper{Name: "n", Data: RawObject(`{"x":1}`)}
+	b, err := json.Marshal(w)
+	if err != nil {
+		t.Fatalf("Marshal() error: %v", err)
+	}
+	// The raw object must be inlined as JSON, not base64.
+	if string(b) != `{"name":"n","data":{"x":1}}` {
+		t.Errorf("Marshal() = %s, want inlined JSON", b)
+	}
 }
