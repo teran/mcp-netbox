@@ -1,6 +1,8 @@
 package config
 
 import (
+	"net"
+	"net/netip"
 	"testing"
 )
 
@@ -17,6 +19,7 @@ func TestValidateURLScheme(t *testing.T) {
 		{"invalid scheme", "ftp://netbox:8000", true},
 		{"non-string input (int)", 123, true},
 		{"non-string input (nil)", nil, true},
+		{"invalid URL", "://invalid", true},
 	}
 
 	for _, tc := range tests {
@@ -44,6 +47,7 @@ func TestValidateURLHost(t *testing.T) {
 		{"empty host", "http://", true},
 		{"non-string input (int)", 456, true},
 		{"non-string input (nil)", nil, true},
+		{"invalid URL", "://invalid", true},
 	}
 
 	for _, tc := range tests {
@@ -176,4 +180,121 @@ func TestValidateConfig(t *testing.T) {
 			t.Error("validate() = nil, want error for zero rate limit")
 		}
 	})
+}
+
+func TestIsPrivateAddr(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		addr string
+		want bool
+	}{
+		{"loopback", "127.0.0.1", true},
+		{"loopback v6", "::1", true},
+		{"private 10", "10.0.0.1", true},
+		{"private 172", "172.16.0.1", true},
+		{"private 192.168", "192.168.1.1", true},
+		{"link-local unicast", "169.254.1.1", true},
+		{"link-local multicast", "ff02::1", true},
+		{"unspecified", "0.0.0.0", true},
+		{"unspecified v6", "::", true},
+		{"public", "8.8.8.8", false},
+		{"public v6", "2606:4700:4700::1111", false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			addr := mustParseAddr(t, tc.addr)
+			if got := IsPrivateAddr(addr); got != tc.want {
+				t.Errorf("IsPrivateAddr(%s) = %v, want %v", tc.addr, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestIsPrivateIP(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		ip   string // empty means nil IP
+		want bool
+	}{
+		{"nil", "", false},
+		{"loopback", "127.0.0.1", true},
+		{"private", "10.1.2.3", true},
+		{"public", "8.8.8.8", false},
+		{"invalid", "not-an-ip", false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var ip net.IP
+			if tc.ip != "" {
+				ip = net.ParseIP(tc.ip)
+			}
+			if got := IsPrivateIP(ip); got != tc.want {
+				t.Errorf("IsPrivateIP(%v) = %v, want %v", tc.ip, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestLoad(t *testing.T) {
+
+	t.Run("success", func(t *testing.T) {
+		t.Setenv("NETBOX_URL", "http://8.8.8.8")
+		t.Setenv("LISTEN_ADDR", ":9090")
+		t.Setenv("RATE_LIMIT_GLOBAL", "50")
+
+		cfg, err := Load()
+		if err != nil {
+			t.Fatalf("Load() error: %v", err)
+		}
+		if cfg.NetBoxURL != "http://8.8.8.8" {
+			t.Errorf("NetBoxURL = %q, want %q", cfg.NetBoxURL, "http://8.8.8.8")
+		}
+		if cfg.ListenAddr != ":9090" {
+			t.Errorf("ListenAddr = %q, want %q", cfg.ListenAddr, ":9090")
+		}
+		if cfg.RateLimitGlobal != 50 {
+			t.Errorf("RateLimitGlobal = %d, want 50", cfg.RateLimitGlobal)
+		}
+	})
+
+	t.Run("validation failure for private URL", func(t *testing.T) {
+		t.Setenv("NETBOX_URL", "http://127.0.0.1")
+		if _, err := Load(); err == nil {
+			t.Error("Load() = nil, want error for private URL")
+		}
+	})
+
+	t.Run("missing required URL", func(t *testing.T) {
+		t.Setenv("NETBOX_URL", "")
+		if _, err := Load(); err == nil {
+			t.Error("Load() = nil, want error for empty URL")
+		}
+	})
+}
+
+// mustParseAddr parses a string into a netip.Addr, failing the test on error.
+func mustParseAddr(t *testing.T, s string) netip.Addr {
+	t.Helper()
+	a, err := netip.ParseAddr(s)
+	if err != nil {
+		t.Fatalf("ParseAddr(%q) error: %v", s, err)
+	}
+	return a
+}
+
+func TestLoad_EnvconfigError(t *testing.T) {
+	// RATE_LIMIT_GLOBAL is an int field; a non-numeric value triggers an
+	// envconfig.Process error before validation runs.
+	t.Setenv("NETBOX_URL", "http://8.8.8.8")
+	t.Setenv("RATE_LIMIT_GLOBAL", "not-a-number")
+
+	if _, err := Load(); err == nil {
+		t.Error("Load() = nil, want error for invalid env value")
+	}
 }
