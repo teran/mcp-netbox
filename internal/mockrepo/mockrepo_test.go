@@ -1,0 +1,208 @@
+package mockrepo
+
+import (
+	"context"
+	"errors"
+	"testing"
+
+	"github.com/teran/mcp-netbox/domain"
+)
+
+// compile-time check that MockRepo and NilRepo satisfy the repository interface.
+var (
+	_ domain.NetworkRepository = (*MockRepo)(nil)
+	_ domain.NetworkRepository = (*NilRepo)(nil)
+)
+
+func TestMockRepo_AllMethods(t *testing.T) {
+	t.Parallel()
+
+	t.Run("ListSites", func(t *testing.T) {
+		got, err := (&MockRepo{ListSitesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+			return &domain.PaginatedResponse[domain.Site]{Count: 1}, nil
+		}}).ListSites(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListSites = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("ListDevices", func(t *testing.T) {
+		got, err := (&MockRepo{ListDevicesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+			return &domain.PaginatedResponse[domain.Device]{Count: 2}, nil
+		}}).ListDevices(context.Background(), "t", nil)
+		if err != nil || got.Count != 2 {
+			t.Errorf("ListDevices = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListIPAddresses", func(t *testing.T) {
+		got, err := (&MockRepo{ListIPAddressesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+			return &domain.PaginatedResponse[domain.IPAddress]{Count: 3}, nil
+		}}).ListIPAddresses(context.Background(), "t", nil)
+		if err != nil || got.Count != 3 {
+			t.Errorf("ListIPAddresses = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListPrefixes", func(t *testing.T) {
+		got, err := (&MockRepo{ListPrefixesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+			return &domain.PaginatedResponse[domain.Prefix]{Count: 4}, nil
+		}}).ListPrefixes(context.Background(), "t", nil)
+		if err != nil || got.Count != 4 {
+			t.Errorf("ListPrefixes = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListVLANs", func(t *testing.T) {
+		got, err := (&MockRepo{ListVLANsFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+			return &domain.PaginatedResponse[domain.VLAN]{Count: 5}, nil
+		}}).ListVLANs(context.Background(), "t", nil)
+		if err != nil || got.Count != 5 {
+			t.Errorf("ListVLANs = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListVirtualMachines", func(t *testing.T) {
+		got, err := (&MockRepo{ListVirtualMachinesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+			return &domain.PaginatedResponse[domain.VirtualMachine]{Count: 6}, nil
+		}}).ListVirtualMachines(context.Background(), "t", nil)
+		if err != nil || got.Count != 6 {
+			t.Errorf("ListVirtualMachines = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListClusters", func(t *testing.T) {
+		got, err := (&MockRepo{ListClustersFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+			return &domain.PaginatedResponse[domain.Cluster]{Count: 7}, nil
+		}}).ListClusters(context.Background(), "t", nil)
+		if err != nil || got.Count != 7 {
+			t.Errorf("ListClusters = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListCircuits", func(t *testing.T) {
+		got, err := (&MockRepo{ListCircuitsFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+			return &domain.PaginatedResponse[domain.Circuit]{Count: 8}, nil
+		}}).ListCircuits(context.Background(), "t", nil)
+		if err != nil || got.Count != 8 {
+			t.Errorf("ListCircuits = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListCircuitTerminations", func(t *testing.T) {
+		got, err := (&MockRepo{ListCircuitTerminationsFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+			return &domain.PaginatedResponse[domain.CircuitTermination]{Count: 9}, nil
+		}}).ListCircuitTerminations(context.Background(), "t", nil)
+		if err != nil || got.Count != 9 {
+			t.Errorf("ListCircuitTerminations = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListCables", func(t *testing.T) {
+		got, err := (&MockRepo{ListCablesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+			return &domain.PaginatedResponse[domain.Cable]{Count: 10}, nil
+		}}).ListCables(context.Background(), "t", nil)
+		if err != nil || got.Count != 10 {
+			t.Errorf("ListCables = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListRacks", func(t *testing.T) {
+		got, err := (&MockRepo{ListRacksFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+			return &domain.PaginatedResponse[domain.Rack]{Count: 11}, nil
+		}}).ListRacks(context.Background(), "t", nil)
+		if err != nil || got.Count != 11 {
+			t.Errorf("ListRacks = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListInterfaces", func(t *testing.T) {
+		got, err := (&MockRepo{ListInterfacesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+			return &domain.PaginatedResponse[domain.Interface]{Count: 12}, nil
+		}}).ListInterfaces(context.Background(), "t", nil)
+		if err != nil || got.Count != 12 {
+			t.Errorf("ListInterfaces = (%v, %v)", got, err)
+		}
+	})
+	t.Run("ListVMInterfaces", func(t *testing.T) {
+		got, err := (&MockRepo{ListVMInterfacesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+			return &domain.PaginatedResponse[domain.VMInterface]{Count: 13}, nil
+		}}).ListVMInterfaces(context.Background(), "t", nil)
+		if err != nil || got.Count != 13 {
+			t.Errorf("ListVMInterfaces = (%v, %v)", got, err)
+		}
+	})
+	t.Run("GetObject", func(t *testing.T) {
+		got, err := (&MockRepo{GetObjectFunc: func(context.Context, string, string, int, map[string]string) (domain.RawObject, error) {
+			return domain.RawObject(`{"id":1}`), nil
+		}}).GetObject(context.Background(), "t", "site", 1, nil)
+		if err != nil || string(got) != `{"id":1}` {
+			t.Errorf("GetObject = (%v, %v)", got, err)
+		}
+	})
+}
+
+func TestMockRepo_PropagatesError(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("boom")
+	_, err := (&MockRepo{ListSitesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+		return nil, wantErr
+	}}).ListSites(context.Background(), "t", nil)
+	if err != wantErr {
+		t.Errorf("ListSites err = %v, want %v", err, wantErr)
+	}
+}
+
+func TestNilRepo_AllMethods(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	repo := &NilRepo{}
+
+	assertEmpty := func(name string, count int, err error) {
+		t.Helper()
+		if err != nil {
+			t.Errorf("%s returned error: %v", name, err)
+		}
+		if count != 0 {
+			t.Errorf("%s count = %d, want 0", name, count)
+		}
+	}
+
+	if r, err := repo.ListSites(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListSites", r.Count, err)
+	}
+	if r, err := repo.ListDevices(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListDevices", r.Count, err)
+	}
+	if r, err := repo.ListIPAddresses(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListIPAddresses", r.Count, err)
+	}
+	if r, err := repo.ListPrefixes(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListPrefixes", r.Count, err)
+	}
+	if r, err := repo.ListVLANs(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListVLANs", r.Count, err)
+	}
+	if r, err := repo.ListVirtualMachines(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListVirtualMachines", r.Count, err)
+	}
+	if r, err := repo.ListClusters(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListClusters", r.Count, err)
+	}
+	if r, err := repo.ListCircuits(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListCircuits", r.Count, err)
+	}
+	if r, err := repo.ListCircuitTerminations(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListCircuitTerminations", r.Count, err)
+	}
+	if r, err := repo.ListCables(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListCables", r.Count, err)
+	}
+	if r, err := repo.ListRacks(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListRacks", r.Count, err)
+	}
+	if r, err := repo.ListInterfaces(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListInterfaces", r.Count, err)
+	}
+	if r, err := repo.ListVMInterfaces(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListVMInterfaces", r.Count, err)
+	}
+	obj, err := repo.GetObject(ctx, "t", "site", 1, nil)
+	if err != nil {
+		t.Errorf("GetObject returned error: %v", err)
+	}
+	if string(obj) != `{"id":1}` {
+		t.Errorf("GetObject = %s, want %s", obj, `{"id":1}`)
+	}
+}
