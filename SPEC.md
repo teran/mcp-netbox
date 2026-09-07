@@ -22,6 +22,31 @@ MCP servers choose between **STDIO** and **HTTP/SSE** transports based on the de
 
 The choice is driven by the task: NetBox is an infrastructure source of truth that is frequently shared and queried by many assistants, which favors the remote HTTP transport; but a local, single-tenant, zero-network-footprint mode (STDIO) is valuable for development and desktop use. Supporting both with one codebase (Hybrid) covers both without duplicating the tool surface. The transport is selected at startup via `TRANSPORT=stdio|http` (default `http`).
 
+## Auth Decision (OAuth2)
+
+**OAuth2 is NOT used.**
+
+The MCP spec's OAuth2 flow is designed for servers that own their own resource
+server and need to mint access tokens for end users. That does not apply here:
+`mcp-netbox` is a **stateless relay** in front of NetBox, which is itself the
+resource server and already implements its own authentication and authorization
+model (NetBox personal access tokens).
+
+Instead of OAuth2, the server relays an existing NetBox personal token to the
+NetBox REST API:
+
+- **HTTP transport**: the client supplies the token per request in the
+  `Authorization: Bearer <token>` header. The server extracts it, passes it
+  through to NetBox, and never validates or stores it.
+- **STDIO transport**: there is no HTTP header, so the token is provided once via
+  the `NETBOX_TOKEN` environment variable at startup and used by a single shared
+  NetBox client for the process lifetime.
+
+Authorization (which objects a token may read) is delegated entirely to NetBox.
+This server only relays the credential; it does not implement an authorization
+decision layer. This keeps the server simple (no OAuth2 machinery, token
+endpoints, or consent flow) and matches the existing NetBox security model.
+
 ## Architecture
 
 ```
