@@ -38,7 +38,7 @@ jobs:
           args: --config .golangci.yml
 
       - name: go-arch-lint
-        run: go run github.com/fe3dback/go-arch-lint/v2/cmd/arch-lint@latest check
+        run: go run github.com/fe3dback/go-arch-lint@latest check
 
       - name: Run tests
         run: go test -race -coverprofile=coverage.out -count=1 ./...
