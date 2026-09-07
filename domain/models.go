@@ -191,22 +191,22 @@ type (
 	}
 
 	Cable struct {
-		ID            int               `json:"id"`
-		URL           string            `json:"url,omitempty"`
-		Display       string            `json:"display,omitempty"`
-		Type          *Label            `json:"type"`
-		Status        *Label            `json:"status"`
-		Label         string            `json:"label,omitempty"`
-		Color         string            `json:"color,omitempty"`
-		Length        float64           `json:"length,omitempty"`
-		LengthUnit    *Label            `json:"length_unit,omitempty"`
-		TerminationA  *CableTermination `json:"termination_a,omitempty"`
-		TerminationB  *CableTermination `json:"termination_b,omitempty"`
-		Description   string            `json:"description,omitempty"`
-		Tags          []Tag             `json:"tags,omitempty"`
-		CustomFields  map[string]any    `json:"custom_fields,omitempty"`
-		Created       string            `json:"created"`
-		LastUpdated   string            `json:"last_updated"`
+		ID           int               `json:"id"`
+		URL          string            `json:"url,omitempty"`
+		Display      string            `json:"display,omitempty"`
+		Type         *Label            `json:"type"`
+		Status       *Label            `json:"status"`
+		Label        string            `json:"label,omitempty"`
+		Color        string            `json:"color,omitempty"`
+		Length       float64           `json:"length,omitempty"`
+		LengthUnit   *Label            `json:"length_unit,omitempty"`
+		TerminationA *CableTermination `json:"termination_a,omitempty"`
+		TerminationB *CableTermination `json:"termination_b,omitempty"`
+		Description  string            `json:"description,omitempty"`
+		Tags         []Tag             `json:"tags,omitempty"`
+		CustomFields map[string]any    `json:"custom_fields,omitempty"`
+		Created      string            `json:"created"`
+		LastUpdated  string            `json:"last_updated"`
 	}
 
 	// CableTermination represents one end of a cable connection — the type

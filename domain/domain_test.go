@@ -503,7 +503,7 @@ func TestRawObject_EmbeddedInStruct(t *testing.T) {
 	t.Parallel()
 
 	type wrapper struct {
-		Name string   `json:"name"`
+		Name string    `json:"name"`
 		Data RawObject `json:"data"`
 	}
 

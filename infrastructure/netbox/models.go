@@ -209,22 +209,22 @@ type (
 	}
 
 	WireCable struct {
-		ID              int                 `json:"id"`
-		URL             string              `json:"url"`
-		Display         string              `json:"display,omitempty"`
-		Type            *WireLabel          `json:"type"`
-		Status          *WireLabel          `json:"status"`
-		Label           string              `json:"label,omitempty"`
-		Color           string              `json:"color,omitempty"`
-		Length          float64             `json:"length,omitempty"`
-		LengthUnit      *WireLabel          `json:"length_unit,omitempty"`
-		TerminationA    *WireCableTermination `json:"termination_a,omitempty"`
-		TerminationB    *WireCableTermination `json:"termination_b,omitempty"`
-		Description     string              `json:"description,omitempty"`
-		Tags            []WireTag           `json:"tags,omitempty"`
-		CustomFields    map[string]any      `json:"custom_fields,omitempty"`
-		Created         string              `json:"created"`
-		LastUpdated     string              `json:"last_updated"`
+		ID           int                   `json:"id"`
+		URL          string                `json:"url"`
+		Display      string                `json:"display,omitempty"`
+		Type         *WireLabel            `json:"type"`
+		Status       *WireLabel            `json:"status"`
+		Label        string                `json:"label,omitempty"`
+		Color        string                `json:"color,omitempty"`
+		Length       float64               `json:"length,omitempty"`
+		LengthUnit   *WireLabel            `json:"length_unit,omitempty"`
+		TerminationA *WireCableTermination `json:"termination_a,omitempty"`
+		TerminationB *WireCableTermination `json:"termination_b,omitempty"`
+		Description  string                `json:"description,omitempty"`
+		Tags         []WireTag             `json:"tags,omitempty"`
+		CustomFields map[string]any        `json:"custom_fields,omitempty"`
+		Created      string                `json:"created"`
+		LastUpdated  string                `json:"last_updated"`
 	}
 
 	WireCableTermination struct {

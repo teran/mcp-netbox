@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/teran/mcp-netbox/application"
 	"github.com/teran/mcp-netbox/config"
 	"github.com/teran/mcp-netbox/domain"
-	"github.com/prometheus/client_golang/prometheus"
-
 	"github.com/teran/mcp-netbox/infrastructure/circuitbreaker"
 )
 

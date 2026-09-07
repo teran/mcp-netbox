@@ -242,7 +242,6 @@ func TestIsPrivateIP(t *testing.T) {
 }
 
 func TestLoad(t *testing.T) {
-
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("NETBOX_URL", "http://8.8.8.8")
 		t.Setenv("LISTEN_ADDR", ":9090")

@@ -1675,9 +1675,9 @@ func TestClient_ListMethods_Errors(t *testing.T) {
 	t.Parallel()
 
 	type methodCase struct {
-		name    string
-		call    func(*Client) error
-		path    string
+		name string
+		call func(*Client) error
+		path string
 	}
 
 	cases := []methodCase{
@@ -1692,7 +1692,7 @@ func TestClient_ListMethods_Errors(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		tc := tc
+
 		t.Run(tc.name+"/not_found", func(t *testing.T) {
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusNotFound)

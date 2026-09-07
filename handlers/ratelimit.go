@@ -23,8 +23,10 @@ type RateLimiterConfig struct {
 	PerClientBurst int
 }
 
-const cleanupInterval = 10 * time.Minute
-const clientTTL = 30 * time.Minute
+const (
+	cleanupInterval = 10 * time.Minute
+	clientTTL       = 30 * time.Minute
+)
 
 type rateLimiter struct {
 	config    RateLimiterConfig
