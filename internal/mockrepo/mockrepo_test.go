@@ -14,6 +14,7 @@ var (
 	_ domain.NetworkRepository = (*NilRepo)(nil)
 )
 
+//nolint:gocognit // exhaustive per-method table test over every repository method
 func TestMockRepo_AllMethods(t *testing.T) {
 	t.Parallel()
 
@@ -143,6 +144,7 @@ func TestMockRepo_PropagatesError(t *testing.T) {
 	}
 }
 
+//nolint:gocognit,gocyclo // exhaustive per-method table test over every repository method
 func TestNilRepo_AllMethods(t *testing.T) {
 	t.Parallel()
 
