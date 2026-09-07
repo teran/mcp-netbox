@@ -137,6 +137,24 @@ when `LOG_LEVEL` is set (L2).
 
 ## MCP Tools
 
+Every tool is registered with **Annotations** and per-tool **Instructions** metadata.
+
+The server-wide instructions (`ServerOptions.Instructions`) tell clients that
+the server is **read-only**, that all list tools are **paginated** (use `page`
+1-based and `page_size` max 1000, an empty array is not an error), that filters
+are **additive**, and that authentication is enforced entirely by NetBox (Bearer
+in HTTP, `NETBOX_TOKEN` env in STDIO).
+
+All 14 tools share the same annotations because they are all read-only queries
+against the closed NetBox inventory domain:
+
+- `readOnlyHint: true` — the tool never mutates state.
+- `destructiveHint: false` — the tool is not destructive.
+- `idempotentHint: true` — repeated identical calls return the same result.
+- `openWorldHint: false` — the tool operates on a closed domain (the configured NetBox instance).
+
+The per-tool `title` and `instructions` are listed under each tool below.
+
 ### 1. `get_sites`
 
 List sites in NetBox with optional filters.
@@ -154,6 +172,10 @@ List sites in NetBox with optional filters.
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of sites.
+
+**Annotations**: `title` — "List Sites"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Use `q` for free-text search, or filter by `region`, `status`, `tenant`, or `tag`. Results are paginated (`page`, `page_size` max 1000); an empty array means no sites match, not an error.
 
 ---
 
@@ -181,6 +203,10 @@ List devices in NetBox with optional filters.
 
 **Output**: Paginated list of devices.
 
+**Annotations**: `title` — "List Devices"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `site`, `role`, `manufacturer`, `device_type`, `status`, `name`, `tenant`, `rack`, `cluster`, or `tag`, or use `q` for free-text search. Paginated; an empty array means no devices match.
+
 ---
 
 ### 3. `get_ip_addresses`
@@ -203,6 +229,10 @@ Search IP addresses in NetBox.
 | `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of IP addresses.
+
+**Annotations**: `title` — "List IP Addresses"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `address` (e.g. `192.168.1.0/24`), assigned `device`, `status`, `vrf`, `role`, `tenant`, or `tag`, or use `q`. Paginated; an empty array means no addresses match.
 
 ---
 
@@ -229,6 +259,10 @@ Search IP prefixes in NetBox.
 
 **Output**: Paginated list of prefixes.
 
+**Annotations**: `title` — "List Prefixes"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `prefix` (e.g. `10.0.0.0/8`), `site`, `vrf`, `status`, `role`, `tenant`, `family`, or `tag`, or use `within` to find nested prefixes, or `q`. Paginated; an empty array means no prefixes match.
+
 ---
 
 ### 5. `get_vlans`
@@ -250,6 +284,10 @@ List VLANs in NetBox.
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of VLANs.
+
+**Annotations**: `title` — "List VLANs"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `site`, `group`, `status`, `tenant`, `tag`, or a specific VLAN ID (`vid`), or use `q`. Paginated; an empty array means no VLANs match.
 
 ---
 
@@ -275,6 +313,10 @@ List virtual machines in NetBox.
 
 **Output**: Paginated list of virtual machines.
 
+**Annotations**: `title` — "List Virtual Machines"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `cluster`, `cluster_group`, `role`, `status`, `tenant`, `name`, or `site`, or use `q`. Paginated; an empty array means no VMs match.
+
 ---
 
 ### 7. `get_clusters`
@@ -296,6 +338,10 @@ List clusters in NetBox.
 | `q`            | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of clusters.
+
+**Annotations**: `title` — "List Clusters"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `cluster_type`, `cluster_group`, `site`, `tenant`, or `name`, or use `q`. Paginated; an empty array means no clusters match.
 
 ---
 
@@ -319,6 +365,10 @@ List circuits in NetBox.
 
 **Output**: Paginated list of circuits.
 
+**Annotations**: `title` — "List Circuits"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `provider`, `circuit_type`, `site`, `status`, or `tenant`, or use `q`. Paginated; an empty array means no circuits match.
+
 ---
 
 ### 9. `get_object_by_id`
@@ -334,6 +384,10 @@ Retrieve any NetBox object by its type and numeric ID.
 | `params`     | map    | no       | Additional query parameters to pass to NetBox (optional) |
 
 **Output**: Full object detail.
+
+**Annotations**: `title` — "Get Object by ID"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: `object_type` is required (e.g. `site`, `device`, `prefix`, `ip_address`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `provider`, `tenant`, `rack`, `cable`, `interface`). Returns an error if the object does not exist or the token lacks permission.
 
 ---
 
@@ -356,6 +410,10 @@ List racks in NetBox.
 
 **Output**: Paginated list of racks.
 
+**Annotations**: `title` — "List Racks"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `site`, `location`, `status`, or `tenant`, or use `q`. Paginated; an empty array means no racks match.
+
 ---
 
 ### 11. `get_interfaces`
@@ -377,6 +435,10 @@ List device interfaces in NetBox. Includes physical interfaces of devices (switc
 
 **Output**: Paginated list of interfaces.
 
+**Annotations**: `title` — "List Interfaces"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `device`, `type`, `enabled`, or `name`, or use `q`. Paginated; an empty array means no interfaces match.
+
 ---
 
 ### 12. `get_vm_interfaces`
@@ -395,6 +457,10 @@ List VM interfaces in NetBox. These are virtual NICs attached to virtual machine
 | `q`              | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of VM interfaces.
+
+**Annotations**: `title` — "List VM Interfaces"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `virtual_machine`, `name`, or `tag`, or use `q`. Paginated; an empty array means no VM interfaces match.
 
 ---
 
@@ -415,6 +481,10 @@ List circuit terminations in NetBox. A termination represents one end of a circu
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of circuit terminations.
+
+**Annotations**: `title` — "List Circuit Terminations"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `circuit`, `site`, `term_side` (A or Z), or `tag`, or use `q`. Paginated; an empty array means no terminations match.
 
 ---
 
@@ -437,6 +507,10 @@ List cables in NetBox with optional filters.
 | `q`          | string | no       | Free-text search across all fields           |
 
 **Output**: Paginated list of cables.
+
+**Annotations**: `title` — "List Cables"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Filter by `type`, `status`, `site`, `color`, or `label`, or use `q`. Paginated; an empty array means no cables match.
 
 ## Middleware Chain
 
