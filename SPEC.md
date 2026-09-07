@@ -7,10 +7,20 @@ This server exposes NetBox infrastructure data through the MCP protocol using **
 
 ## Key Differentiators
 
-- **Remote (HTTP) transport** — uses MCP Streamable HTTP protocol; not stdio-bound.
-- **Token from request headers** — the NetBox API token is read from the `Authorization` header of each MCP request, not from an environment variable. This enables per-user authentication in multi-tenant setups.
+- **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected via the `TRANSPORT` env var (default `http`).
+- **Token from request headers (HTTP)** — the NetBox API token is read from the `Authorization` header of each MCP request, not from an environment variable. This enables per-user authentication in multi-tenant setups.
+- **Token from environment (STDIO)** — in STDIO mode the NetBox token is read once from `NETBOX_TOKEN` at startup (there is no HTTP header to carry it per request).
 - **Read-only** — only exposes `GET` operations against NetBox. No create, update, or delete capabilities.
 - **Transparent token relay** — the MCP server never inspects or validates the token; it passes it through to NetBox, which handles all authentication and authorization.
+
+## Transport Decision
+
+MCP servers choose between **STDIO** and **HTTP/SSE** transports based on the deployment task. `mcp-netbox` is a **Hybrid** server because the same tool surface serves two distinct use cases:
+
+- **HTTP/SSE (remote)** — the default. Streamable HTTP lets many AI assistants / MCP clients connect to a shared NetBox instance over the network, each authenticating with its **own** NetBox token via the `Authorization: Bearer` header (per-request, per-user auth in multi-tenant setups). This is the deployment shape that also requires a container image.
+- **STDIO (local)** — runs as a local child process of an MCP client (e.g. a desktop assistant or CLI). The client launches the server with `TRANSPORT=stdio` and passes the NetBox token via the `NETBOX_TOKEN` environment variable. Because there is no HTTP layer, per-request headers do not exist; a single shared token is used for the process lifetime.
+
+The choice is driven by the task: NetBox is an infrastructure source of truth that is frequently shared and queried by many assistants, which favors the remote HTTP transport; but a local, single-tenant, zero-network-footprint mode (STDIO) is valuable for development and desktop use. Supporting both with one codebase (Hybrid) covers both without duplicating the tool surface. The transport is selected at startup via `TRANSPORT=stdio|http` (default `http`).
 
 ## Architecture
 
