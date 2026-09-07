@@ -652,10 +652,22 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
 | `mcp_tool_duration_seconds` | Histogram | `{tool}` | Per-tool request duration |
 | `mcp_active_requests` | Gauge | — | Current in-flight requests |
 
+## Development Process / TDD
+
+Changes follow a **test-first (TDD)** workflow:
+
+- **`@qa` writes the tests first** using an **isolated context** (no access to
+  the shared implementation or production state).
+- **`@developer` writes the implementation** using an **isolated context**.
+
+This keeps tests independent from the implementation and prevents a shared
+context from biasing either role. The same workflow is documented for
+contributors (see `README.md` → Contributing / TDD).
+
 ## Development
 
 ### Prerequisites
-- Go 1.26+
+- Go **1.27+**
 - golangci-lint
 - goreleaser
 
@@ -667,9 +679,37 @@ goreleaser build --snapshot --clean
 ### Testing
 ```bash
 go test -race -coverprofile=coverage.out -count=1 ./...
+go tool cover -func=coverage.out   # total must be >= 95%
 ```
 
 ### Linting
 ```bash
-golangci-lint run ./...
+golangci-lint run ./...   # includes gosec, gofumpt, gci
+go-arch-lint check        # dependency rules (.go-arch-lint.yml)
+govulncheck ./...         # findings must be fixed
 ```
+
+### CI Gates
+CI enforces, and **fails the build** when any gate is not met:
+
+- **Coverage >= 95%** (C1/N6) — `go test -race` with a coverage threshold that
+  fails the build below 95%.
+- **Mutation testing (gremlins)** as a **hard gate** (C8/N19) — survivors fail
+  the build; it is not informational/continue-on-error.
+- **go-arch-lint** (C6) — dependency architecture is enforced.
+- **golangci-lint** (C2) with gofumpt/gci formatting.
+- **gosec** (C4) and **govulncheck** (C5) — findings are **fixed**, not
+  suppressed (S5).
+
+## Release & Container Images
+
+Because the server supports the **HTTP (remote)** transport it is classified as
+Hybrid, so a **container image is required** (R1/N17). CI/CD publishes a
+multi-arch image (`linux/amd64`, `linux/arm64`) to `ghcr.io/teran/mcp-netbox`
+on every commit to `master` and on every release tag.
+
+- **On each git tag `X`** (release): image tags `X`, `X-{ts}`, `X-{commit}`, `X-{commit}-{ts}` (R3).
+- **On each commit to `master`**: image tags `master-{commit}`, `master-{ts}`, `master-{commit}-{ts}` (R4).
+
+There is **no `latest` tag**; deployments pin an immutable commit/timestamp tag.
+The default branch is `master` (R2).
