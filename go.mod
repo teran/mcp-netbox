@@ -7,6 +7,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/modelcontextprotocol/go-sdk v1.7.0
 	github.com/prometheus/client_golang v1.23.2
+	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/time v0.15.0
 )
 

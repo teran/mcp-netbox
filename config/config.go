@@ -13,6 +13,7 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/sirupsen/logrus"
 )
 
 // IsPrivateAddr reports whether addr is a loopback, private, link-local, or
@@ -54,6 +55,9 @@ type Config struct {
 	TrustedProxy          string        `envconfig:"TRUSTED_PROXY" default:""`
 	WriteTimeout          time.Duration `envconfig:"WRITE_TIMEOUT" default:"300s"`
 	AllowPrivateNetBox    bool          `envconfig:"ALLOW_PRIVATE_NETBOX" default:"false"`
+	LogLevel              string        `envconfig:"LOG_LEVEL" default:""`
+	LogFormat             string        `envconfig:"LOG_FORMAT" default:"text"`
+	LogFilename           string        `envconfig:"LOG_FILENAME" default:"/tmp/mcp-netbox.log"`
 }
 
 func (c Config) validate() error {
@@ -68,7 +72,40 @@ func (c Config) validate() error {
 		validation.Field(&c.RateLimitGlobal, validation.By(validatePositiveInt)),
 		validation.Field(&c.RateLimitPerClient, validation.By(validatePositiveInt)),
 		validation.Field(&c.WriteTimeout, validation.Min(time.Second)),
+		validation.Field(&c.LogLevel, validation.By(validateLogLevel)),
+		validation.Field(&c.LogFormat, validation.By(validateLogFormat)),
 	)
+}
+
+// validateLogLevel checks that LOG_LEVEL, when set, is a valid logrus level.
+// An empty value means logging is disabled.
+func validateLogLevel(value interface{}) error {
+	s, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("must be a string")
+	}
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return nil
+	}
+	if _, err := logrus.ParseLevel(s); err != nil {
+		return fmt.Errorf("invalid log level %q (want one of trace, debug, info, warn, error, fatal, panic)", s)
+	}
+	return nil
+}
+
+// validateLogFormat checks that LOG_FORMAT is one of the supported formats.
+func validateLogFormat(value interface{}) error {
+	s, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("must be a string")
+	}
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "", "text", "json":
+		return nil
+	default:
+		return fmt.Errorf("invalid log format %q (want text or json)", s)
+	}
 }
 
 // validateTransport checks that the transport is one of the supported modes
