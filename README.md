@@ -75,8 +75,9 @@ The NetBox API token is supplied per-request in the `Authorization` header as `B
 
 ## MCP Client Configuration
 
-The server uses the **Streamable HTTP** MCP transport (remote mode).
-It does not support stdio/local mode. All clients must connect over HTTP.
+The server supports two transports, selected via `TRANSPORT`.
+
+### Remote (Streamable HTTP, default)
 
 ```json
 {
@@ -87,6 +88,27 @@ It does not support stdio/local mode. All clients must connect over HTTP.
       "url": "http://localhost:8080/mcp",
       "headers": {
         "Authorization": "Bearer <netbox-api-token>"
+      }
+    }
+  }
+}
+```
+
+### Local (stdio)
+
+Start the server with `TRANSPORT=stdio` and `NETBOX_TOKEN` set, then reference it
+as a stdio command:
+
+```json
+{
+  "mcpServers": {
+    "netbox": {
+      "type": "stdio",
+      "command": "mcp-netbox",
+      "env": {
+        "TRANSPORT": "stdio",
+        "NETBOX_URL": "http://netbox:8000",
+        "NETBOX_TOKEN": "<netbox-api-token>"
       }
     }
   }
