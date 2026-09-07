@@ -34,12 +34,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate image tag
+      - name: Generate image tags
         id: meta
         run: |
           TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
           SHORTCOMMIT=$(git rev-parse --short HEAD)
-          echo "tag=master-${TIMESTAMP}-${SHORTCOMMIT}" >> "$GITHUB_OUTPUT"
+          echo "tags=ghcr.io/${{ github.repository }}:master-${SHORTCOMMIT},ghcr.io/${{ github.repository }}:master-${TIMESTAMP},ghcr.io/${{ github.repository }}:master-${SHORTCOMMIT}-${TIMESTAMP}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4.4.0 # SHA: af1e73f918a031802d376d3c8bbc3fe56130a9b0
@@ -62,5 +62,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.tag }}
+          tags: ${{ steps.meta.outputs.tags }}
