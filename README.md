@@ -20,8 +20,9 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 ## Features
 
 - **Read-only** — only exposes `GET` operations. No create, update, or delete capabilities.
-- **Remote (HTTP) transport** — uses MCP Streamable HTTP protocol.
-- **Per-request token authentication** — the NetBox API token is passed in the `Authorization` header of each MCP request. No server-side token storage.
+- **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected via `TRANSPORT` (default `http`).
+- **Per-request token authentication (HTTP)** — the NetBox API token is passed in the `Authorization` header of each MCP request. No server-side token storage.
+- **Env-token authentication (STDIO)** — in STDIO mode the NetBox token is provided once via the `NETBOX_TOKEN` environment variable.
 - **Comprehensive NetBox coverage** — sites, devices, IP addresses, prefixes, VLANs, VMs, clusters, circuits, racks, cables, interfaces, circuit terminations, and generic `get_object_by_id`.
 - **Prometheus metrics** — on a separate HTTP server (default `:8081`).
 - **Rate limiting** — configurable global and per-client rate limits.
