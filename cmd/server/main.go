@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -15,12 +13,14 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/teran/mcp-netbox/application"
 	"github.com/teran/mcp-netbox/config"
 	"github.com/teran/mcp-netbox/handlers"
 	"github.com/teran/mcp-netbox/infrastructure/circuitbreaker"
 	infra "github.com/teran/mcp-netbox/infrastructure/netbox"
+	"github.com/teran/mcp-netbox/internal/logging"
 )
 
 // Build-time variables injected by goreleaser (via ldflags).
@@ -33,11 +33,11 @@ var (
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		logrus.Fatalf("Failed to load configuration: %v", err)
 	}
 
 	if err := Run(*cfg); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		logrus.Fatalf("Failed to start server: %v", err)
 	}
 }
 
@@ -89,11 +89,21 @@ func newPrivateIPCheckingDialer(allowPrivate bool) *net.Dialer {
 // The empty transport string is treated as HTTP for backward compatibility
 // with callers that construct config.Config directly.
 func Run(cfg config.Config) error {
+	logger, err := logging.Setup(cfg)
+	if err != nil {
+		return fmt.Errorf("setup logging: %w", err)
+	}
+
+	// Share the configured logger with the HTTP middleware and the NetBox
+	// client so that all logging honours LOG_LEVEL/LOG_FORMAT/LOG_FILENAME.
+	handlers.SetLogger(logger)
+	infra.SetLogger(logger)
+
 	switch cfg.Transport {
 	case config.TransportStdio:
-		return runStdio(cfg)
+		return runStdio(cfg, logger)
 	case "", config.TransportHTTP:
-		return runHTTP(cfg)
+		return runHTTP(cfg, logger)
 	default:
 		return fmt.Errorf("unsupported transport %q", cfg.Transport)
 	}
@@ -103,13 +113,13 @@ func Run(cfg config.Config) error {
 // Authorization header in this mode, the NetBox token must be provided via
 // the NETBOX_TOKEN environment variable and is used by a single shared
 // NetworkService for every tool call.
-func runStdio(cfg config.Config) error {
-	return runStdioWithTransport(cfg, &mcp.StdioTransport{})
+func runStdio(cfg config.Config, logger *logrus.Logger) error {
+	return runStdioWithTransport(cfg, logger, &mcp.StdioTransport{})
 }
 
 // runStdioWithTransport is runStdio with an injectable transport, so that
 // tests can drive the stdio server in-process over an in-memory pipe.
-func runStdioWithTransport(cfg config.Config, transport mcp.Transport) error {
+func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport mcp.Transport) error {
 	srv := newMCPServer()
 
 	httpClient, _ := newNetBoxHTTPClient(cfg)
@@ -120,7 +130,7 @@ func runStdioWithTransport(cfg config.Config, transport mcp.Transport) error {
 	// service injection. Register the shared service directly.
 	handlers.RegisterTools(srv, nil, svc)
 
-	slog.Info("starting stdio MCP server", "netbox_url", handlers.SanitizeLog(redactedURL(cfg.NetBoxURL)))
+	logger.WithField("netbox_url", handlers.SanitizeLog(redactedURL(cfg.NetBoxURL))).Info("starting stdio MCP server")
 
 	conn, err := srv.Connect(context.Background(), transport, nil)
 	if err != nil {
@@ -128,7 +138,7 @@ func runStdioWithTransport(cfg config.Config, transport mcp.Transport) error {
 	}
 	defer func() {
 		if err := conn.Close(); err != nil {
-			slog.Error("stdio transport close error", "error", err)
+			logger.WithError(err).Error("stdio transport close error")
 		}
 	}()
 
@@ -137,7 +147,7 @@ func runStdioWithTransport(cfg config.Config, transport mcp.Transport) error {
 
 // runHTTP runs the MCP server over Streamable HTTP plus a Prometheus metrics
 // server. Tokens are read per request from the Authorization header.
-func runHTTP(cfg config.Config) error {
+func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	srv := newMCPServer()
 
 	sharedHTTPClient, breaker := newNetBoxHTTPClient(cfg)
@@ -161,8 +171,8 @@ func runHTTP(cfg config.Config) error {
 	mux, stopRateLimit := handlers.NewMux(cfg, metrics, sharedHTTPClient, breaker, mcpHandler)
 	defer stopRateLimit()
 
-	slog.Info("starting server", "netbox_url", handlers.SanitizeLog(redactedURL(cfg.NetBoxURL)))
-	slog.Info("build info", "version", version, "commit", commit, "date", date)
+	logger.WithField("netbox_url", handlers.SanitizeLog(redactedURL(cfg.NetBoxURL))).Info("starting server")
+	logger.WithFields(logrus.Fields{"version": version, "commit": commit, "date": date}).Info("build info")
 
 	mainServer := &http.Server{
 		Addr:              cfg.ListenAddr,
@@ -192,13 +202,13 @@ func runHTTP(cfg config.Config) error {
 	// Start servers and wait for signal or error
 	errCh := make(chan error, 2)
 	go func() {
-		slog.Info("mcp server listening", "addr", handlers.SanitizeLog(cfg.ListenAddr))
+		logger.WithField("addr", handlers.SanitizeLog(cfg.ListenAddr)).Info("mcp server listening")
 		if err := mainServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errCh <- err
 		}
 	}()
 	go func() {
-		slog.Info("metrics server listening", "addr", handlers.SanitizeLog(cfg.PrometheusMetricsAddr))
+		logger.WithField("addr", handlers.SanitizeLog(cfg.PrometheusMetricsAddr)).Info("metrics server listening")
 		if err := metricsServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errCh <- err
 		}
@@ -206,22 +216,22 @@ func runHTTP(cfg config.Config) error {
 
 	select {
 	case sig := <-quit:
-		slog.Info("shutting down", "signal", sig)
+		logger.WithField("signal", sig.String()).Info("shutting down")
 	case err := <-errCh:
-		slog.Error("server error", "error", err)
+		logger.WithError(err).Error("server error")
 	}
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := mainServer.Shutdown(shutdownCtx); err != nil {
-		slog.Error("main server shutdown error", "error", err)
+		logger.WithError(err).Error("main server shutdown error")
 	}
 	if err := metricsServer.Shutdown(shutdownCtx); err != nil {
-		slog.Error("metrics server shutdown error", "error", err)
+		logger.WithError(err).Error("metrics server shutdown error")
 	}
 
-	slog.Info("server stopped gracefully")
+	logger.Info("server stopped gracefully")
 	return nil
 }
 

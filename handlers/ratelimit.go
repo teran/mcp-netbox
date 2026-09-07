@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net"
 	"net/http"
 	"net/netip"
@@ -28,11 +27,11 @@ const cleanupInterval = 10 * time.Minute
 const clientTTL = 30 * time.Minute
 
 type rateLimiter struct {
-	config  RateLimiterConfig
-	global  *rate.Limiter
-	clients map[string]*clientLimiter
-	mu      sync.Mutex
-	stopCh  chan struct{}
+	config    RateLimiterConfig
+	global    *rate.Limiter
+	clients   map[string]*clientLimiter
+	mu        sync.Mutex
+	stopCh    chan struct{}
 	closeOnce sync.Once
 }
 
@@ -108,7 +107,7 @@ func RateLimitMiddleware(cfg RateLimiterConfig, trustedProxy string) (func(http.
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			clientIP := extractClientIP(r, trustedProxy)
 			if !rl.Allow(clientIP) {
-				slog.Warn("rate limit exceeded", "client_ip", SanitizeLog(clientIP))
+				getLogger().WithField("client_ip", SanitizeLog(clientIP)).Warn("rate limit exceeded")
 				w.Header().Set("Retry-After", "1")
 				http.Error(w, `{"error":"rate limit exceeded"}`, http.StatusTooManyRequests)
 				return

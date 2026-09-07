@@ -10,6 +10,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/teran/mcp-netbox/config"
+	"github.com/teran/mcp-netbox/internal/logging"
 )
 
 // stdioSession drives a runStdio server over an in-memory pair of pipes.
@@ -103,9 +104,15 @@ func TestRunStdio_EndToEnd(t *testing.T) {
 	sess := newStdioSession()
 	defer sess.close()
 
+	cfg := testStdioConfig()
+	logger, err := logging.Setup(cfg)
+	if err != nil {
+		t.Fatalf("logging.Setup: %v", err)
+	}
+
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- runStdioWithTransport(testStdioConfig(), sess.transport())
+		errCh <- runStdioWithTransport(cfg, logger, sess.transport())
 	}()
 
 	// 1. initialize

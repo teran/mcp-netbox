@@ -7,13 +7,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"strings"
 	"sync/atomic"
 	"time"
 	"unicode"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/teran/mcp-netbox/application"
 )
@@ -188,7 +189,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rec := recover(); rec != nil {
-				slog.Error("panic recovered", "error", rec, "stack", string(debug.Stack()))
+				getLogger().WithError(fmt.Errorf("%v", rec)).WithField("stack", string(debug.Stack())).Error("panic recovered")
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusInternalServerError)
 				_, _ = w.Write([]byte(`{"error":"internal server error"}`))
@@ -232,14 +233,14 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		duration := time.Since(start)
 
-		slog.Info("mcp_request",
-			"http_method", r.Method,
-			"path", r.URL.Path,
-			"method", toolName,
-			"duration", duration,
-			"req_size", len(body),
-			"resp_size", lrw.bodySize.Load(),
-			"status", lrw.statusCode,
-		)
+		getLogger().WithFields(logrus.Fields{
+			"http_method": r.Method,
+			"path":        r.URL.Path,
+			"method":      toolName,
+			"duration":    duration,
+			"req_size":    len(body),
+			"resp_size":   lrw.bodySize.Load(),
+			"status":      lrw.statusCode,
+		}).Info("mcp_request")
 	})
 }

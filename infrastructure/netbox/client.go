@@ -14,7 +14,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -90,7 +89,7 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			slog.Warn("failed to close response body", "error", err)
+			getLogger().WithError(err).Warn("failed to close response body")
 		}
 	}()
 
