@@ -101,11 +101,15 @@ func TestRoundTripper_PassesThroughOnSuccess(t *testing.T) {
 	rt := NewRoundTripper(http.DefaultTransport, DefaultConfig())
 	client := &http.Client{Transport: rt}
 
-	resp, err := client.Get(srv.URL)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, srv.URL, nil)
+	if err != nil {
+		t.Fatalf("NewRequest error: %v", err)
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		t.Fatalf("GET failed: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusOK)
@@ -129,11 +133,15 @@ func TestRoundTripper_HTTPErrorsDoNotTripBreaker(t *testing.T) {
 
 	// HTTP 500 errors should NOT trip the circuit breaker
 	for range 5 {
-		resp, err := client.Get(srv.URL)
+		req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, srv.URL, nil)
+		if err != nil {
+			t.Fatalf("NewRequest error: %v", err)
+		}
+		resp, err := client.Do(req)
 		if err != nil {
 			t.Fatalf("GET failed: %v", err)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 
 	if rt.Breaker().State() != StateClosed {
@@ -167,13 +175,16 @@ func TestRoundTripper_FailsFastWhenOpen(t *testing.T) {
 	rt := NewRoundTripper(http.DefaultTransport, DefaultConfig())
 	rt.breaker = b
 
-	req, err := http.NewRequest(http.MethodGet, "http://example.com", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://example.com", nil)
 	if err != nil {
 		t.Fatalf("NewRequest error: %v", err)
 	}
 
 	// With an open circuit the inner transport must never be reached.
 	resp, err := rt.RoundTrip(req)
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
 	if err != ErrCircuitOpen {
 		t.Errorf("RoundTrip() err = %v, want %v", err, ErrCircuitOpen)
 	}
