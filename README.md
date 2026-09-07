@@ -15,7 +15,7 @@
 
 MCP (Model Context Protocol) server for [NetBox](https://netboxlabs.com/) — infrastructure source of truth.
 
-This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits data through the MCP protocol using **Streamable HTTP** transport (remote mode), allowing AI assistants to query your NetBox instance.
+This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits data through the MCP protocol using a **hybrid** transport — **Streamable HTTP** (remote) or **STDIO** (local) — allowing AI assistants to query your NetBox instance.
 
 ## Features
 
