@@ -79,7 +79,58 @@ transport (see [Logging](#logging)).
                                                     └───────────────────────┘
 ```
 
-> **TLS termination** is expected to be handled by a reverse proxy (e.g., nginx, Envoy) placed in front of the MCP server. The server itself does not serve HTTPS directly.
+> **TLS termination** is expected to be handled by a reverse proxy (e.g., nginx, Envoy) placed in front of the MCP server. The server itself does not serve HTTPS directly. This also applies to the HTTP/SSE transport: TLS is never implemented inside the server (N1).
+
+### Package Layout (Clean / DDD)
+
+The application follows Clean architecture with a strict dependency direction —
+inner layers depend on nothing internal, outer layers may depend inward:
+
+| Layer             | Package(s)                              | Responsibility                                      |
+|-------------------|-----------------------------------------|-----------------------------------------------------|
+| Composition root  | `cmd/server`                            | Entrypoint; builds config, wiring, HTTP/STDIO transport |
+| Infrastructure    | `infrastructure/netbox`, `infrastructure/circuitbreaker` | Adapters: NetBox REST client, circuit breaker transport |
+| Application       | `application`                           | Use cases / `NetworkService` business logic          |
+| Domain            | `domain`                                | Domain models + repository interfaces (ports)        |
+| Config            | `config`                                | Env loading + validation (envconfig + ozzo-validation) |
+| Logging           | `internal/logging`                      | logrus setup, channel-by-transport (L1–L4)           |
+| HTTP transport    | `handlers`                              | MCP tool handlers, middleware chain, metrics, registration |
+
+### Tool Registry
+
+All MCP tools are registered in **one place**: `handlers/registration.go`,
+via the `RegisterTools()` function. Each tool declaration pairs a `mcp.Tool`
+(name, description, annotations, instructions) with a wrapped handler
+(`WrapToolHandler`) that decodes the input, calls the appropriate
+`NetworkService` method, and formats the paginated output. In HTTP mode the
+service is injected per request by `injectClientMiddleware`; in STDIO mode a
+single shared service is passed directly to `RegisterTools`.
+
+### Dependency Boundaries
+
+Dependency rules are authored in `.go-arch-lint.yml` and enforced in CI by
+`go-arch-lint check` (C6). The direction is:
+
+```
+domain  ←  application  ←  infrastructure, config, internal/logging  ←  handlers  ←  cmd/server
+```
+
+`domain` never imports `application`, `handlers`, `infrastructure`, or
+`config`. Third-party (vendor) dependencies may be used by any component.
+Test files are excluded from architecture analysis.
+
+### Transport Wiring
+
+`cmd/server` reads `TRANSPORT` and dispatches at startup:
+
+- `http` → `runHTTP`: builds the Streamable HTTP handler (`/mcp`), the
+  Prometheus metrics server, and the full HTTP middleware chain; tokens are
+  injected per request.
+- `stdio` → `runStdio`: builds a single shared `NetworkService` from
+  `NETBOX_TOKEN`, registers it directly, and serves over stdin/stdout via the
+  SDK's `StdioTransport` (newline-delimited JSON).
+
+The MCP `Server` is shared; only the transport wiring differs.
 
 ## Technology Stack
 
