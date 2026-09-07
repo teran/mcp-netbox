@@ -85,11 +85,12 @@ transport (see [Logging](#logging)).
 
 | Component         | Choice                                                          |
 |-------------------|-----------------------------------------------------------------|
-| Language          | Go                                                              |
-| MCP SDK           | `github.com/modelcontextprotocol/go-sdk`                        |
-| Transport         | Streamable HTTP (MCP spec 2025-03-26+, remote-capable)          |
+| Language          | Go 1.27+                                                        |
+| MCP SDK           | `github.com/modelcontextprotocol/go-sdk` v1.7.0                 |
+| Transport         | Hybrid — Streamable HTTP (MCP spec 2025-03-26+) and STDIO, selected via `TRANSPORT` |
 | HTTP Router       | `net/http` standard library + middleware pattern                |
 | Tool Registration | `handlers/registration.go` — `RegisterTools()` function         |
+| Logging           | `github.com/sirupsen/logrus` — channel by transport, gated by `LOG_LEVEL` |
 | Metrics           | Prometheus (Go runtime + custom MCP metrics) on port 8081       |
 
 ## Configuration (Environment Variables)
@@ -97,17 +98,42 @@ transport (see [Logging](#logging)).
 | Variable               | Required | Default | Description                          |
 |------------------------|----------|---------|--------------------------------------|
 | `NETBOX_URL`           | Yes      | —       | Base URL of the NetBox instance (e.g. `http://netbox:8000`). Must be a valid HTTP(S) URL. Loopback, private, and link-local IP addresses are rejected for SSRF protection. |
-| `LISTEN_ADDR`          | No       | `:8080` | TCP address to listen on             |
-| `PROMETHEUS_METRICS_ADDR` | No    | `:8081` | TCP address for the Prometheus `/metrics` endpoint |
+| `NETBOX_TOKEN`         | STDIO only | `""` | NetBox API token for **STDIO** transport. Required when `TRANSPORT=stdio`. Ignored for HTTP. |
+| `TRANSPORT`            | No       | `http`  | MCP transport: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). |
+| `LISTEN_ADDR`          | No       | `:8080` | TCP address to listen on (HTTP transport) |
+| `PROMETHEUS_METRICS_ADDR` | No    | `:8081` | TCP address for the Prometheus `/metrics` endpoint (HTTP transport) |
 | `RATE_LIMIT_GLOBAL`    | No       | `100`   | Global rate limit (requests/second)  |
 | `RATE_LIMIT_PER_CLIENT`| No       | `10`    | Per-client IP rate limit (requests/second) |
 | `ALLOW_PRIVATE_NETBOX` | No       | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
 | `TRUSTED_PROXY`        | No       | `""`    | CIDR prefix for the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server uses the first IP from `X-Forwarded-For` for rate limiting instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT`        | No       | `300s`  | HTTP write timeout (Go duration format, e.g. `300s`). Minimum 1s. Note: 0 will fail validation; use a reverse proxy for no timeout. |
+| `LOG_LEVEL`            | No       | (unset) | Logrus level (`trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`). **Unset ⇒ logging disabled.** |
+| `LOG_FORMAT`           | No       | `text`  | Log format: `text` (logrus text, full absolute timestamp) or `json`. |
+| `LOG_FILENAME`         | No       | `/tmp/mcp-netbox.log` | Log file path for **STDIO** transport (chmod 600). Ignored for HTTP (logs go to stdout). |
 
-The NetBox API token is **not** set via environment variables. It is supplied per-request in the `Authorization` header as `Bearer <token>`.
+The NetBox API token is supplied per-request in the `Authorization` header as
+`Bearer <token>` in HTTP mode. In STDIO mode it is read from `NETBOX_TOKEN` at
+startup (there is no HTTP header to carry it per request).
 
-The MCP server listens on the `/mcp` HTTP path via the Streamable HTTP handler.
+The MCP server listens on the `/mcp` HTTP path via the Streamable HTTP handler
+when `TRANSPORT=http`.
+
+## Logging
+
+Logging uses **logrus** and is **disabled by default** — logs are emitted only
+when `LOG_LEVEL` is set (L2).
+
+- **Channel by transport (L1):**
+  - **HTTP** → **stdout** (12-factor style).
+  - **STDIO** → a log file, because stdout carries the MCP protocol itself and
+    must not be polluted with log lines. Default path `/tmp/mcp-netbox.log`,
+    created with mode `0600`.
+- **Path override (L3):** `LOG_FILENAME` changes the STDIO log file path.
+- **Format (L4):** `LOG_FORMAT` — default `text` (logrus text, full absolute
+  timestamp) or `json`.
+- **Secrets (L5):** tokens, passwords and credentials are **never** logged. The
+  token is redacted (see [Security](#security--secrets)) and URLs are logged via
+  `url.Redacted()`.
 
 ## MCP Tools
 
