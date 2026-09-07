@@ -115,6 +115,10 @@ as a stdio command:
 }
 ```
 
+## Requirements
+
+- Go **1.27+** (see `go.mod`).
+
 ## Building
 
 ```bash
@@ -140,8 +144,21 @@ golangci-lint run ./...
 
 ## Docker
 
+The CI/CD pipeline builds and publishes a multi-arch (`linux/amd64`, `linux/arm64`)
+image to `ghcr.io/teran/mcp-netbox`.
+
+Image tags:
+
+- On a git tag `X` (release): `X`, `X-{ts}`, `X-{commit}`, `X-{commit}-{ts}`.
+- On each commit to `master`: `master-{commit}`, `master-{ts}`, `master-{commit}-{ts}`.
+
+There is no `latest` tag; pin to an immutable tag (commit/timestamp) for
+reproducible deployments.
+
+To build locally:
+
 ```bash
-docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/teran/mcp-netbox:latest .
+docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/teran/mcp-netbox:<tag> .
 ```
 
 ## Security
