@@ -7,8 +7,7 @@
 
 FROM alpine:3.21 AS base
 RUN apk add --no-cache ca-certificates && \
-    echo 'nobody:x:65534:65534:nobody:/:/sbin/nologin' > /etc/passwd-minimal && \
-    wget --version > /dev/null 2>&1
+    echo 'nobody:x:65534:65534:nobody:/:/sbin/nologin' > /etc/passwd-minimal
 
 FROM base
 ARG TARGETARCH
