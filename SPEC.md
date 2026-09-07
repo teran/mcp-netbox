@@ -596,6 +596,29 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
 3. Every tool call uses the shared service; no per-request token handling
 4. The token is never logged
 
+## Security
+
+- **TLS (S1/N1):** TLS is **never** implemented inside the server. For the
+  HTTP/SSE transport it is always the reverse proxy's job (nginx, Caddy,
+  ingress). The server serves plain HTTP on its listener.
+- **Secret hygiene (S2/N2):** tools never leak tokens, passwords, or secrets in
+  outputs where avoidable. The NetBox token is never logged, and its type
+  implements safe redaction (`String`/`GoString`/`MarshalJSON`). URLs are logged
+  via `url.Redacted()` to strip any embedded credentials.
+- **Read-only ordering (S3):** all tools are grouped as **read** operations —
+  the server exposes only `GET` against NetBox and has no write/update/delete
+  capabilities. Tool metadata reflects this (`destructiveHint: false`).
+- **Security-scan findings (S5/N8):** findings from security scanners
+  (**gosec**, **govulncheck**) are **fixed rather than suppressed**. There are no
+  blanket suppressions or default excludes; any `//nolint` is narrowly scoped
+  and justified (best effort).
+- **SSRF / DNS-rebinding protection:** `NETBOX_URL` is validated to reject
+  loopback, private, and link-local IPs, and the HTTP client's dialer rejects
+  connections to reserved IPs at dial time to prevent DNS rebinding
+  (`ALLOW_PRIVATE_NETBOX` overrides for private networks).
+- **Rate limiting & body limit:** global/per-client rate limits and a 1 MB body
+  limit guard the HTTP listener against abuse.
+
 ## Error Handling
 
 ### HTTP Level (Middleware)
