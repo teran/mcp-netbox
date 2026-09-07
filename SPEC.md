@@ -47,6 +47,23 @@ This server only relays the credential; it does not implement an authorization
 decision layer. This keeps the server simple (no OAuth2 machinery, token
 endpoints, or consent flow) and matches the existing NetBox security model.
 
+## Deployment Type: Hybrid
+
+The server is classified as **Hybrid**: it can run as a **Remote (HTTP/SSE)**
+server and as a **Local (STDIO)** server. All deployment attributes follow from
+the transport it is launched with:
+
+| Aspect            | Remote (HTTP/SSE)                          | Local (STDIO)                         |
+|-------------------|---------------------------------------------|----------------------------------------|
+| **Auth**          | `Authorization: Bearer` header, per request | `NETBOX_TOKEN` env var, at startup     |
+| **Logging**       | stdout (12-factor)                          | log file (default `/tmp/mcp-netbox.log`, chmod 600) |
+| **Image**         | required and published by CI/CD             | not used                               |
+
+Because the HTTP transport is supported, a **container image is built and
+published** by CI/CD on every commit to `master` and on every release tag (see
+[Release & Container Images](#release--container-images)). Logging follows the
+transport (see [Logging](#logging)).
+
 ## Architecture
 
 ```
