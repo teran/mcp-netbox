@@ -512,9 +512,9 @@ List cables in NetBox with optional filters.
 
 **Instructions**: Filter by `type`, `status`, `site`, `color`, or `label`, or use `q`. Paginated; an empty array means no cables match.
 
-## Middleware Chain
+## Middleware Chain (HTTP transport)
 
-The server applies eight middleware layers to every HTTP request, executed in this order (outermost first):
+The server applies nine middleware layers to every HTTP request, executed in this order (outermost first):
 
 1. **RecoveryMiddleware** — catches panics, returns 500
 2. **SecurityHeadersMiddleware** — sets security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
@@ -526,13 +526,24 @@ The server applies eight middleware layers to every HTTP request, executed in th
 8. **TokenMiddleware** — extracts token from `Authorization` header, stores as `*application.Token` in context (safe redaction via String/GoString/MarshalJSON)
 9. **injectClientMiddleware** — creates NetBox API client with per-request token, stores service in context
 
+The middleware chain applies only to the **HTTP** transport. In **STDIO** mode there is no HTTP layer, so the middleware is skipped entirely: a single shared `NetworkService` is built once with the `NETBOX_TOKEN` from the environment and registered directly on the MCP server.
+
 ## Authentication Flow
 
-1. MCP Client sends POST to Streamable HTTP endpoint with `Authorization: Bearer <token>`
+### HTTP transport
+
+1. MCP Client sends POST to the Streamable HTTP endpoint with `Authorization: Bearer <token>`
 2. Middleware chain extracts, validates format, and relays the token
-3. Token is stored in request context, passed to NetBox API client
-4. Tool handlers retrieve services from context and call NetBox API
+3. Token is stored in request context, passed to the NetBox API client
+4. Tool handlers retrieve the per-request service from context and call the NetBox API
 5. Token is never stored on server — exists only for request lifetime
+
+### STDIO transport
+
+1. The server reads the token once from `NETBOX_TOKEN` at startup (required; validation fails if unset)
+2. A single shared `NetworkService` is created with that token
+3. Every tool call uses the shared service; no per-request token handling
+4. The token is never logged
 
 ## Error Handling
 
