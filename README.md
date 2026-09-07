@@ -58,15 +58,20 @@ All configuration is via environment variables:
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `NETBOX_URL` | Yes | — | Base URL of the NetBox instance |
-| `LISTEN_ADDR` | No | `:8080` | TCP address to listen on |
-| `PROMETHEUS_METRICS_ADDR` | No | `:8081` | Prometheus `/metrics` endpoint |
+| `NETBOX_TOKEN` | STDIO only | `""` | NetBox API token for **STDIO** transport. Required when `TRANSPORT=stdio` (there is no HTTP `Authorization` header in this mode). Ignored for HTTP. |
+| `TRANSPORT` | No | `http` | MCP transport: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). |
+| `LISTEN_ADDR` | No | `:8080` | TCP address to listen on (HTTP transport) |
+| `PROMETHEUS_METRICS_ADDR` | No | `:8081` | Prometheus `/metrics` endpoint (HTTP transport) |
 | `RATE_LIMIT_GLOBAL` | No | `100` | Global rate limit (requests/second) |
 | `RATE_LIMIT_PER_CLIENT` | No | `10` | Per-client IP rate limit |
 | `ALLOW_PRIVATE_NETBOX` | No | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
 | `TRUSTED_PROXY` | No | `""` | CIDR prefix of the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server extracts the client IP from the `X-Forwarded-For` header instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT` | No | `300s` (5 minutes) | HTTP write timeout (Go duration, minimum 1s). Note: 0 will fail validation; use a reverse proxy for no timeout. |
+| `LOG_LEVEL` | No | (unset) | Logrus level (`trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`). **Unset ⇒ logging disabled.** |
+| `LOG_FORMAT` | No | `text` | Log format: `text` (logrus text, full absolute timestamp) or `json`. |
+| `LOG_FILENAME` | No | `/tmp/mcp-netbox.log` | Log file path for **STDIO** transport (chmod 600). Ignored for HTTP (logs go to stdout, 12-factor). |
 
-The NetBox API token is supplied per-request in the `Authorization` header as `Bearer <token>`. Both v1 (`Token <token>`) and v2 (`Bearer nbt_<key>.<token>`) tokens are supported.
+The NetBox API token is supplied per-request in the `Authorization` header as `Bearer <token>` in HTTP mode. Both v1 (`Token <token>`) and v2 (`Bearer nbt_<key>.<token>`) tokens are supported. In STDIO mode the token is read from `NETBOX_TOKEN` at startup.
 
 ## MCP Client Configuration
 
