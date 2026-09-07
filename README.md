@@ -163,9 +163,11 @@ docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/teran/mcp-netb
 
 ## Security
 
-- **Token handling**: The NetBox API token is passed per-request in the `Authorization` header. It is never stored on the server, written to logs, or persisted between requests.
+- **Token handling (HTTP)**: The NetBox API token is passed per-request in the `Authorization` header. It is never stored on the server, written to logs, or persisted between requests.
+- **Token handling (STDIO)**: The NetBox API token is provided once via the `NETBOX_TOKEN` environment variable at startup and is never logged.
+- **No OAuth2**: This server uses NetBox personal access tokens directly (Bearer in HTTP, env in STDIO). OAuth2 is not used; authentication and authorization are delegated entirely to NetBox.
 - **Read-only**: The server only exposes GET operations. No write access to NetBox.
-- **TLS**: Terminate TLS at a reverse proxy (nginx, Envoy) placed in front of the server.
+- **TLS**: Terminate TLS at a reverse proxy (nginx, Envoy) placed in front of the HTTP/SSE listener. TLS is never implemented inside the server.
 - **Rate limiting**: Built-in rate limiting prevents abuse (configurable via environment variables).
 - **Circuit breaker**: Built-in circuit breaker prevents cascading failures when NetBox is unreachable. After 5 consecutive transport-level failures, the circuit opens for 30 seconds.
 - **Host validation**: Requests with empty or malformed `Host` headers are rejected.
