@@ -2,6 +2,17 @@
 
 # MCP NetBox
 
+[![CI](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml/badge.svg)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/teran/mcp-netbox)](https://github.com/teran/mcp-netbox/releases)
+[![License](https://img.shields.io/github/license/teran/mcp-netbox)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-Server-blue)](https://modelcontextprotocol.io)
+[![Go Reference](https://pkg.go.dev/badge/github.com/teran/mcp-netbox)](https://pkg.go.dev/github.com/teran/mcp-netbox)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/teran/mcp-netbox)](go.mod)
+[![Coverage](https://img.shields.io/endpoint?url=<coverage-badge-url>)](SPEC.md)
+[![gosec](https://img.shields.io/endpoint?url=<gosec-badge-url>)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
+[![govulncheck](https://img.shields.io/endpoint?url=<govulncheck-badge-url>)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
+[![gremlins](https://img.shields.io/endpoint?url=<gremlins-badge-url>)](https://github.com/teran/mcp-netbox/actions/workflows/gremlins.yml)
+
 MCP (Model Context Protocol) server for [NetBox](https://netboxlabs.com/) — infrastructure source of truth.
 
 This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits data through the MCP protocol using **Streamable HTTP** transport (remote mode), allowing AI assistants to query your NetBox instance.
