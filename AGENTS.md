@@ -14,8 +14,11 @@ This document describes the agents/assistants involved in the development and op
 ### MCP Server (`mcp-netbox`)
 - **Role**: Mediator between the AI assistant and NetBox.
 - **Scope**: Translates MCP tool invocations into NetBox REST API calls.
+- **Transport**: **Hybrid** — Streamable HTTP (remote) or STDIO (local), selected via `TRANSPORT` (default `http`).
 - **Responsible for**: Transparent token relay, request routing, response formatting.
+- **Token handling**: HTTP → per-request `Authorization: Bearer` header; STDIO → `NETBOX_TOKEN` env var at startup.
 - **Does not validate tokens** — authentication and authorization are delegated entirely to the NetBox backend.
+- **OAuth2** is not used; NetBox personal access tokens are relayed directly.
 
 ### NetBox
 - **Role**: Infrastructure source of truth backend.
@@ -26,19 +29,20 @@ This document describes the agents/assistants involved in the development and op
 
 | Package / File                              | Purpose                                         |
 |---------------------------------------------|-------------------------------------------------|
-| `cmd/server/main.go`                        | Entrypoint, HTTP server, middleware wiring      |
-| `config/config.go`                          | Configuration loading (`envconfig` + ozzo-validation) |
+| `cmd/server/main.go`                        | Entrypoint; HTTP/STDIO transport wiring, MCP server + instructions |
+| `config/config.go`                          | Configuration loading (`envconfig` + ozzo-validation); includes `TRANSPORT`, `NETBOX_TOKEN`, `LOG_*` |
 | `handlers/middleware.go`                    | Token extraction, body limit, logging, batch validation middleware |
 | `handlers/ratelimit.go`                     | Rate limiting middleware (global + per-client)  |
 | `handlers/metrics.go`                       | Prometheus metrics collectors + middleware + `WrapToolHandler` |
 | `handlers/tools.go`                         | MCP tool handler factories + I/O types          |
-| `handlers/registration.go`                  | Tool registration via `RegisterTools()`         |
+| `handlers/registration.go`                  | Tool registration via `RegisterTools()` (annotations + instructions) |
 | `handlers/server.go`                        | HTTP mux builder, middleware chain assembly, service-per-request injection |
 | `application/service.go`                    | Business logic / use case layer                 |
 | `domain/`                                   | Domain models + repository interfaces (ports)   |
 | `domain/repository.go`                      | NetworkRepository interface (port), RawObject type for generic object retrieval |
 | `infrastructure/netbox/client.go`           | NetBox HTTP API client (adapters)               |
 | `infrastructure/netbox/models.go`           | JSON wire models + `toDomain()` conversion      |
+| `internal/logging/logging.go`               | logrus setup: channel-by-transport, `LOG_LEVEL` gating, `LOG_FORMAT`/`LOG_FILENAME` |
 
 ## Tool-to-Agent Mapping
 
@@ -72,11 +76,19 @@ The server exposes Prometheus metrics on a separate HTTP server (default port `:
 
 ## CI Pipeline
 
-Every commit on any branch is checked by three workflows:
+Every commit on any branch is checked by the following CI gates (a failed gate
+blocks the build):
 
-1. **golangci-lint** — static analysis with `gosec` enabled.
-2. **go test** — unit tests with coverage profile (threshold: 85%).
-3. **gremlins unleash** — mutation testing (informational, does not block).
+1. **golangci-lint** — static analysis with `gosec`, gofumpt and gci formatting.
+2. **go test -race** — race-enabled unit tests with a **coverage gate of 95%**
+   (the build fails below it).
+3. **govulncheck** — dependency vulnerability audit; findings are **fixed**.
+4. **go-arch-lint** — dependency architecture rules (`.go-arch-lint.yml`).
+5. **gremlins** — mutation testing as a **hard gate** (survivors fail the
+   build; not informational).
+
+Additional workflows: `master.yml` and `release.yml` build & publish the Docker
+image with the documented tag scheme; `ci.yml` also runs a gitleaks secret scan.
 
 ## Development Agents
 
