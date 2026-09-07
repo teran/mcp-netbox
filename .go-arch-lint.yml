@@ -1,0 +1,82 @@
+# go-arch-lint dependency rules for mcp-netbox.
+#
+# Layout follows Clean/DDD:
+#
+#   domain (innermost, depends on nothing internal)
+#     ^
+#   application, infrastructure/netbox, infrastructure/circuitbreaker, config
+#     ^
+#   handlers (HTTP transport layer)
+#     ^
+#   cmd/server (entrypoint, may depend on everything)
+#
+# Reverse/side dependencies are forbidden: domain must never import
+# application, handlers, infrastructure, or config.
+version: 2
+
+# Only project component boundaries are enforced. Any component may freely
+# import third-party (vendor) libraries; the rules below govern dependencies
+# between our own packages only.
+allow:
+  depOnAnyVendor: true
+
+exclude:
+  - dist
+
+# Test files (including external test packages like package handlers_test that
+# self-import their own package) are excluded from architecture analysis.
+excludeFiles:
+  - ".*_test\\.go$"
+
+components:
+  domain:
+    in: domain
+  application:
+    in: application
+  config:
+    in: config
+  infrastructure/netbox:
+    in: infrastructure/netbox
+  infrastructure/circuitbreaker:
+    in: infrastructure/circuitbreaker
+  handlers:
+    in: handlers
+  internal/logging:
+    in: internal/logging
+  internal/mockrepo:
+    in: internal/mockrepo
+  cmd/server:
+    in: cmd/server
+
+deps:
+  # domain, config, and the circuit breaker depend only on stdlib/vendor code;
+  # they may not import any other project component.
+  domain:
+    anyVendorDeps: true
+  application:
+    mayDependOn:
+      - domain
+      - internal/mockrepo # test-only helper
+  config:
+    anyVendorDeps: true
+  infrastructure/netbox:
+    mayDependOn:
+      - domain
+  infrastructure/circuitbreaker:
+    anyVendorDeps: true
+  handlers:
+    mayDependOn:
+      - application
+      - config
+      - domain
+      - infrastructure/circuitbreaker
+      - infrastructure/netbox
+      - internal/mockrepo # test-only helper
+  internal/logging:
+    mayDependOn:
+      - config
+  internal/mockrepo:
+    mayDependOn:
+      - domain
+  cmd/server:
+    anyProjectDeps: true
