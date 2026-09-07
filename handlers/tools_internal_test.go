@@ -178,40 +178,36 @@ func TestGetObjectByID_CRLFSanitization(t *testing.T) {
 		svc := application.NewNetworkService(&stubRepo{}, "token")
 		handler := NewGetObjectByIDHandler(svc)
 
-		_, _, err := handler(context.Background(), nil, GetObjectInput{
+		// Should not panic or produce CRLF in the URL.
+		_, _, _ = handler(context.Background(), nil, GetObjectInput{
 			ObjectType: "site",
 			ID:         1,
 			Params: map[string]string{
 				"key\r\ninjected": "value",
 			},
 		})
-		// Should not panic or produce CRLF in the URL
-		if err == nil {
-			// stubRepo returns "not implemented", but CRLF should not cause a different error
-		}
 	})
 
 	t.Run("strips CRLF from param values", func(t *testing.T) {
 		svc := application.NewNetworkService(&stubRepo{}, "token")
 		handler := NewGetObjectByIDHandler(svc)
 
-		_, _, err := handler(context.Background(), nil, GetObjectInput{
+		// Should not panic or produce CRLF in the URL.
+		_, _, _ = handler(context.Background(), nil, GetObjectInput{
 			ObjectType: "site",
 			ID:         1,
 			Params: map[string]string{
 				"key": "value\r\ninjected",
 			},
 		})
-		if err == nil {
-			// stubRepo returns "not implemented", but CRLF should not cause a different error
-		}
 	})
 
 	t.Run("strips nested CRLF from multiple params", func(t *testing.T) {
 		svc := application.NewNetworkService(&stubRepo{}, "token")
 		handler := NewGetObjectByIDHandler(svc)
 
-		_, _, err := handler(context.Background(), nil, GetObjectInput{
+		// Should not panic or produce CRLF in the URL.
+		_, _, _ = handler(context.Background(), nil, GetObjectInput{
 			ObjectType: "site",
 			ID:         1,
 			Params: map[string]string{
@@ -220,23 +216,18 @@ func TestGetObjectByID_CRLFSanitization(t *testing.T) {
 				"clean_key": "clean_val",
 			},
 		})
-		if err == nil {
-			// stubRepo returns "not implemented", but CRLF should not cause a different error
-		}
 	})
 
 	t.Run("empty params map is handled gracefully", func(t *testing.T) {
 		svc := application.NewNetworkService(&stubRepo{}, "token")
 		handler := NewGetObjectByIDHandler(svc)
 
-		_, _, err := handler(context.Background(), nil, GetObjectInput{
+		// Nil params should not panic.
+		_, _, _ = handler(context.Background(), nil, GetObjectInput{
 			ObjectType: "site",
 			ID:         1,
 			Params:     nil,
 		})
-		if err == nil {
-			// stubRepo returns "not implemented", but nil params should not panic
-		}
 	})
 
 	t.Run("object_type validation before params processing", func(t *testing.T) {
