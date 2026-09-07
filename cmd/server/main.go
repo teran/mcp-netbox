@@ -235,6 +235,19 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	return nil
 }
 
+// serverInstructions are the general usage rules advertised to MCP clients.
+const serverInstructions = `This server provides READ-ONLY access to the NetBox inventory.
+
+- All tools are read-only and safe to call; none of them modify NetBox.
+- All list tools are paginated: use page (1-based) and page_size (max 1000)
+  to navigate results. An empty results array means no objects matched your
+  filters — it is not an error.
+- Filters are additive: provide only the fields relevant to your query.
+- Authentication: in HTTP/SSE mode the NetBox token is passed in the
+  Authorization: Bearer header. In STDIO mode it is provided via the
+  NETBOX_TOKEN environment variable at server startup. Authorization is
+  enforced entirely by NetBox; this server does not validate tokens.`
+
 // newMCPServer builds the shared MCP server with the configured capabilities
 // and instructions.
 func newMCPServer() *mcp.Server {
@@ -245,6 +258,7 @@ func newMCPServer() *mcp.Server {
 		Capabilities: &mcp.ServerCapabilities{
 			Tools: &mcp.ToolCapabilities{ListChanged: false},
 		},
+		Instructions: serverInstructions,
 	})
 }
 
