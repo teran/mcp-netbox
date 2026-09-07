@@ -31,7 +31,7 @@ func TestReadyz_Healthy(t *testing.T) {
 	}))
 	defer stop()
 
-	req := httptest.NewRequest(http.MethodGet, "/readyz", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/readyz", nil)
 	rr := httptest.NewRecorder()
 	mux.ServeHTTP(rr, req)
 
@@ -53,7 +53,7 @@ func TestReadyz_DegradedWhenCircuitOpen(t *testing.T) {
 	}))
 	defer stop()
 
-	req := httptest.NewRequest(http.MethodGet, "/readyz", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/readyz", nil)
 	rr := httptest.NewRecorder()
 	mux.ServeHTTP(rr, req)
 
@@ -74,8 +74,12 @@ func openCircuitBreaker(t *testing.T) *circuitbreaker.Breaker {
 		FailureThreshold: 1,
 		Timeout:          1 * time.Hour,
 	})
-	req := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
-	if _, err := rt.RoundTrip(req); err == nil {
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "http://example.com", nil)
+	resp, err := rt.RoundTrip(req)
+	if err == nil {
+		if resp != nil {
+			_ = resp.Body.Close()
+		}
 		t.Fatal("expected failing RoundTrip to return error")
 	}
 	if rt.Breaker().State() != circuitbreaker.StateOpen {
@@ -99,7 +103,7 @@ func TestHealthz_Endpoint(t *testing.T) {
 	}))
 	defer stop()
 
-	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/healthz", nil)
 	rr := httptest.NewRecorder()
 	mux.ServeHTTP(rr, req)
 
@@ -117,7 +121,7 @@ func TestInjectClientMiddleware_MissingToken(t *testing.T) {
 
 	mw := injectClientMiddleware("http://netbox.example.com", http.DefaultClient)
 	rr := httptest.NewRecorder()
-	mw(next).ServeHTTP(rr, httptest.NewRequest(http.MethodPost, "/mcp", nil))
+	mw(next).ServeHTTP(rr, httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/mcp", nil))
 
 	if rr.Code != http.StatusUnauthorized {
 		t.Errorf("status = %d, want %d", rr.Code, http.StatusUnauthorized)
@@ -137,7 +141,7 @@ func TestInjectClientMiddleware_WithToken(t *testing.T) {
 	mw := injectClientMiddleware("http://netbox.example.com", http.DefaultClient)
 	ctx := context.WithValue(context.Background(), tokenContextKey, application.NewToken("test-token"))
 	rr := httptest.NewRecorder()
-	mw(next).ServeHTTP(rr, httptest.NewRequest(http.MethodPost, "/mcp", nil).WithContext(ctx))
+	mw(next).ServeHTTP(rr, httptest.NewRequestWithContext(ctx, http.MethodPost, "/mcp", nil))
 
 	if rr.Code != http.StatusOK {
 		t.Errorf("status = %d, want %d", rr.Code, http.StatusOK)
@@ -187,6 +191,7 @@ func TestNewListHandler_NilResponse(t *testing.T) {
 	h := newListHandler[struct{}, domain.Site](listHandlerConfig[struct{}, domain.Site]{
 		svc: application.NewNetworkService(&stubRepo{}, "t"),
 		listFunc: func(context.Context, map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+			//nolint:nilnil // intentional: simulate a nil response with no error to exercise the guard
 			return nil, nil
 		},
 		buildParams: func(struct{}) map[string]string { return nil },
@@ -217,11 +222,11 @@ func TestBuildParams_Branches(t *testing.T) {
 	t.Run("prefixes family set", func(t *testing.T) {
 		four := 4
 		// Must not panic and must route the family param into buildParams.
-		NewGetPrefixesHandler(svc)(context.Background(), nil, PrefixesInput{Family: &four})
+		_, _, _ = NewGetPrefixesHandler(svc)(context.Background(), nil, PrefixesInput{Family: &four})
 	})
 
 	t.Run("interfaces enabled set", func(t *testing.T) {
 		enabled := true
-		NewGetInterfacesHandler(svc)(context.Background(), nil, InterfacesInput{Enabled: &enabled})
+		_, _, _ = NewGetInterfacesHandler(svc)(context.Background(), nil, InterfacesInput{Enabled: &enabled})
 	})
 }
