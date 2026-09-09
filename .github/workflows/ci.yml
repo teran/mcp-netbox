@@ -33,6 +33,11 @@ jobs:
           go-version-input: "1.27"
           check-latest: true
 
+      - name: gosec
+        # Static security analysis. gosec exits non-zero on any finding, so
+        # this step fails the build if a G* issue (e.g. G304) is introduced.
+        run: go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -fmt=text ./...
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9.3.0 # SHA: ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a
         with:
@@ -40,7 +45,9 @@ jobs:
           args: --config .golangci.yml
 
       - name: go-arch-lint
-        run: go run github.com/fe3dback/go-arch-lint@latest check
+        # Pinned to a fixed version for reproducible CI; v1.19.0 is compatible
+        # with .go-arch-lint.yml (version: 2).
+        run: go run github.com/fe3dback/go-arch-lint@v1.19.0 check
 
       - name: Run tests
         run: go test -race -coverprofile=coverage.out -count=1 ./...

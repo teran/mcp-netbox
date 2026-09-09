@@ -1,0 +1,31 @@
+# Gremlins mutation-testing thresholds (quality gates).
+#
+# IMPORTANT: thresholds must be set HERE (config file), NOT as --threshold-*
+# CLI flags. Due to a gremlins/viper bug, float CLI flags are bound as strings
+# (e.g. "100"), so the assess() gate's `.(float64)` type assertion fails and
+# silently returns 0 -> the threshold is ignored and the build never fails,
+# even at 100% surviving mutants. Config-file values are parsed by viper as real
+# floats, so they DO gate the exit code (verified: exit 10 on breach).
+#
+# Measured on the current codebase (gremlins v0.6.0, `gremlins unleash .`):
+#   Test efficacy:    100.00%  (Killed 23-47, Lived 0, Timed out 158-184)
+#   Mutator coverage: 82-91%   (5 mutants not covered)
+#
+# NOTE: gremlins' assess() gate uses a `<=` comparison (not `<`), so a threshold
+# equal to the achieved value FAILS. The clean run reports exactly 100.00%
+# efficacy, therefore `efficacy: 100` would fail the build even with zero
+# survivors.
+#
+#   efficacy: 99.99        -> the clean 100.00% passes (100 > 99.99), but ANY
+#                             surviving mutant drops efficacy far below 99.99%
+#                             (with ~200 covered mutants even one survivor gives
+#                             ~99.5%) and fails the build. This is the real hard
+#                             gate for C7/N15/N19.
+#   mutant-coverage: 75    -> below the observed ~82-91%, so the current code
+#                             passes with margin while still guarding against
+#                             large mutation-coverage regressions (new untested
+#                             branches).
+unleash:
+  threshold:
+    efficacy: 99.99
+    mutant-coverage: 75

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -79,16 +80,52 @@ func outputForTransport(cfg config.Config) (io.Writer, error) {
 		if filename == "" {
 			filename = DefaultLogFilename
 		}
-		//nolint:gosec // LOG_FILENAME is operator-controlled config, not untrusted input.
-		f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-		if err != nil {
-			return nil, fmt.Errorf("open log file %q: %w", filename, err)
-		}
-		if err := os.Chmod(filename, 0o600); err != nil {
-			return nil, fmt.Errorf("chmod log file %q: %w", filename, err)
-		}
-		return f, nil
+		return openLogFile(filename)
 	default: // "" and http
 		return os.Stdout, nil
 	}
+}
+
+// openLogFile opens (creating if needed) the log file for STDIO transport and
+// returns a writer that must not be closed by the caller.
+//
+// The path is canonicalized with filepath.Clean/Abs so a relative or sloppy
+// LOG_FILENAME cannot reference a different file than the operator intended.
+// Access is then scoped to the file's parent directory via os.Root (G304),
+// which never follows symlinks, and the opened handle is verified to be a
+// regular file so log output can never be redirected to a sensitive target.
+func openLogFile(filename string) (*os.File, error) {
+	path, err := filepath.Abs(filepath.Clean(filename))
+	if err != nil {
+		return nil, fmt.Errorf("resolve log path %q: %w", filename, err)
+	}
+
+	dir := filepath.Dir(path)
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return nil, fmt.Errorf("open log directory %q: %w", dir, err)
+	}
+	defer func() { _ = root.Close() }()
+
+	name := filepath.Base(path)
+	f, err := root.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		return nil, fmt.Errorf("open log file %q: %w", path, err)
+	}
+	if err := root.Chmod(name, 0o600); err != nil {
+		_ = f.Close()
+		return nil, fmt.Errorf("chmod log file %q: %w", path, err)
+	}
+
+	fi, err := f.Stat()
+	if err != nil {
+		_ = f.Close()
+		return nil, fmt.Errorf("stat log file %q: %w", path, err)
+	}
+	if !fi.Mode().IsRegular() {
+		_ = f.Close()
+		return nil, fmt.Errorf("log path %q is not a regular file", path)
+	}
+
+	return f, nil
 }

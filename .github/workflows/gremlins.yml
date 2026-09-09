@@ -16,8 +16,16 @@ jobs:
       - uses: go-gremlins/gremlins-action@v1.0.1 # SHA: e5dc59ad56bda9b70d8b64f9499c44d0fa318a08
         with:
           version: latest
+          # Thresholds (efficacy/mcover) live in .gremlins.yaml at the repo
+          # root, NOT as --threshold-* args: a gremlins/viper bug binds float
+          # CLI flags as strings, so they are silently ignored by assess() and
+          # the build would never fail even at 100% surviving mutants. The
+          # config file is parsed as real floats and DOES gate the exit code
+          # (the action fails the step on a non-zero exit).
+          #   efficacy:99.99  -> clean 100% passes; any surviving mutant fails.
+          #   mcover:75        -> current code passes (~82-91%) with margin.
+          # The positional must be "." (not "./...") — gremlins v0.6.0 does not
+          # expand "./..." and silently reports "No results to report".
           args: >-
-            --threshold-efficacy=0
-            --threshold-mcover=0
-            ./...
+            .
           workdir: .
