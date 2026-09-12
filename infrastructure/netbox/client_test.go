@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"resty.dev/v3"
+
 	"github.com/teran/mcp-netbox/domain"
 )
 
@@ -742,6 +744,46 @@ func TestClient_HTTPErrors(t *testing.T) {
 			t.Fatal("Expected error, got nil")
 		}
 	})
+}
+
+// TestNewClientUsesResty verifies the client is backed by a resty.Client and
+// that outbound requests forward the Accept/Authorization headers and query
+// parameters correctly through resty.
+func TestNewClientUsesResty(t *testing.T) {
+	t.Parallel()
+
+	client := NewClient("http://example.com", http.DefaultClient)
+	if client.client == nil {
+		t.Fatal("NewClient did not initialise the resty client")
+	}
+
+	var sawAccept, sawAuth, sawQuery bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawAccept = r.Header.Get("Accept") == "application/json"
+		sawAuth = r.Header.Get("Authorization") == "Bearer tok"
+		sawQuery = r.URL.Query().Get("name") == "site-a" && r.URL.Query().Get("status") == "active"
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"count":0,"results":[]}`))
+	}))
+	defer srv.Close()
+
+	rc := NewClient(srv.URL, http.DefaultClient)
+	if _, ok := interface{}(rc.client).(*resty.Client); !ok {
+		t.Fatalf("client is %T, want *resty.Client", rc.client)
+	}
+
+	if _, err := rc.ListSites(context.Background(), "tok", map[string]string{"name": "site-a", "status": "active"}); err != nil {
+		t.Fatalf("ListSites() returned error: %v", err)
+	}
+	if !sawAccept {
+		t.Error("Accept header was not forwarded")
+	}
+	if !sawAuth {
+		t.Error("Authorization header was not forwarded")
+	}
+	if !sawQuery {
+		t.Error("query params were not forwarded")
+	}
 }
 
 func TestDefaultLimit(t *testing.T) {

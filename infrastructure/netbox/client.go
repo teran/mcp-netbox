@@ -12,11 +12,13 @@ package netbox
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"resty.dev/v3"
 
 	"github.com/teran/mcp-netbox/domain"
 )
@@ -49,17 +51,24 @@ var objectTypeToEndpoint = map[string]string{
 	"circuit_termination": "/api/circuits/circuit-terminations/",
 }
 
+// maxBodySize is the maximum response body size accepted from NetBox. Larger
+// responses are rejected to bound memory usage.
+const maxBodySize = 10 * 1024 * 1024
+
 // Client is an HTTP client for the NetBox API.
 type Client struct {
-	baseURL    string
-	httpClient *http.Client
+	baseURL string
+	client  *resty.Client
 }
 
-// NewClient creates a new NetBox API client.
+// NewClient creates a new NetBox API client backed by resty. The supplied
+// *http.Client is wrapped via resty.NewWithClient so that its transport
+// (DNS-rebinding dialer + circuit breaker), timeout and redirect policy are
+// preserved.
 func NewClient(baseURL string, httpClient *http.Client) *Client {
 	return &Client{
-		baseURL:    strings.TrimSuffix(baseURL, "/"),
-		httpClient: httpClient,
+		baseURL: strings.TrimSuffix(baseURL, "/"),
+		client:  resty.NewWithClient(httpClient),
 	}
 }
 
@@ -69,64 +78,44 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 		return nil, fmt.Errorf("failed to parse URL: %w", err)
 	}
 
-	q := u.Query()
-	for k, v := range params {
-		q.Set(k, v)
-	}
-	u.RawQuery = q.Encode()
-
-	req, err := http.NewRequestWithContext(ctx, method, u.String(), http.NoBody)
+	resp, err := c.client.R().
+		SetContext(ctx).
+		SetResponseBodyLimit(maxBodySize).
+		SetResponseBodyUnlimitedReads(true).
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", "Bearer "+token).
+		SetQueryParams(params).
+		Execute(method, u.String())
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
+		if errors.Is(err, resty.ErrReadExceedsThresholdLimit) {
+			return nil, fmt.Errorf("response body exceeds %d bytes (got at least %d bytes), truncation detected", maxBodySize, maxBodySize)
+		}
 		return nil, fmt.Errorf("HTTP request failed: %w", err)
 	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			getLogger().WithError(err).Warn("failed to close response body")
-		}
-	}()
 
-	if resp.StatusCode == http.StatusUnauthorized {
+	if resp.StatusCode() == http.StatusUnauthorized {
 		return nil, fmt.Errorf("unauthorized: invalid token or insufficient permissions")
 	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp.StatusCode() == http.StatusNotFound {
 		return nil, fmt.Errorf("not found")
 	}
-	if resp.StatusCode == http.StatusForbidden {
+	if resp.StatusCode() == http.StatusForbidden {
 		return nil, fmt.Errorf("forbidden: token lacks required permissions")
 	}
 
-	if resp.StatusCode == http.StatusTooManyRequests {
-		retryAfter := resp.Header.Get("Retry-After")
+	if resp.StatusCode() == http.StatusTooManyRequests {
+		retryAfter := resp.Header().Get("Retry-After")
 		if retryAfter != "" {
 			return nil, fmt.Errorf("rate limited by NetBox: retry after %ss", retryAfter)
 		}
 		return nil, fmt.Errorf("rate limited by NetBox")
 	}
 
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("unexpected status %d from NetBox", resp.StatusCode)
+	if resp.StatusCode() < 200 || resp.StatusCode() >= 300 {
+		return nil, fmt.Errorf("unexpected status %d from NetBox", resp.StatusCode())
 	}
 
-	const maxBodySize = 10 * 1024 * 1024
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxBodySize+1))
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	if len(body) > maxBodySize {
-		body = body[:maxBodySize]
-		return nil, fmt.Errorf("response body exceeds %d bytes (got at least %d bytes), truncation detected", maxBodySize, len(body))
-	}
-
-	return body, nil
+	return resp.Bytes(), nil
 }
 
 func (c *Client) get(ctx context.Context, token, path string, params map[string]string) ([]byte, error) {
