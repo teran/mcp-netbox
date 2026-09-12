@@ -120,7 +120,7 @@ func runStdio(cfg config.Config, logger *logrus.Logger) error {
 // runStdioWithTransport is runStdio with an injectable transport, so that
 // tests can drive the stdio server in-process over an in-memory pipe.
 func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport mcp.Transport) error {
-	srv := newMCPServer()
+	srv := newMCPServer(logger)
 
 	httpClient, _ := newNetBoxHTTPClient(cfg)
 	netboxClient := infra.NewClient(cfg.NetBoxURL, httpClient)
@@ -148,7 +148,7 @@ func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport m
 // runHTTP runs the MCP server over Streamable HTTP plus a Prometheus metrics
 // server. Tokens are read per request from the Authorization header.
 func runHTTP(cfg config.Config, logger *logrus.Logger) error {
-	srv := newMCPServer()
+	srv := newMCPServer(logger)
 
 	sharedHTTPClient, breaker := newNetBoxHTTPClient(cfg)
 
@@ -248,9 +248,10 @@ const serverInstructions = `This server provides READ-ONLY access to the NetBox 
   NETBOX_TOKEN environment variable at server startup. Authorization is
   enforced entirely by NetBox; this server does not validate tokens.`
 
-// newMCPServer builds the shared MCP server with the configured capabilities
-// and instructions.
-func newMCPServer() *mcp.Server {
+// newMCPServer builds the shared MCP server with the configured capabilities,
+// instructions, and an SDK logger wired into the server's logrus logger so
+// SDK-level events are visible in the logs (L7/G10).
+func newMCPServer(logger *logrus.Logger) *mcp.Server {
 	return mcp.NewServer(&mcp.Implementation{
 		Name:    "mcp-netbox",
 		Version: version,
@@ -259,6 +260,7 @@ func newMCPServer() *mcp.Server {
 			Tools: &mcp.ToolCapabilities{ListChanged: false},
 		},
 		Instructions: serverInstructions,
+		Logger:       logging.NewSlogLogger(logger),
 	})
 }
 
