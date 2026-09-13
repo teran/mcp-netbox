@@ -39,6 +39,32 @@ func readOnlyTool(title string) *mcp.ToolAnnotations {
 	}
 }
 
+// writeTool returns tool annotations for a non-destructive write tool
+// (create/update). These are not idempotent by default (a create produces a new
+// object each call) and not read-only.
+func writeTool(title string) *mcp.ToolAnnotations {
+	return &mcp.ToolAnnotations{
+		Title:           title,
+		ReadOnlyHint:    false,
+		IdempotentHint:  false,
+		DestructiveHint: boolPtr(false),
+		OpenWorldHint:   boolPtr(false),
+	}
+}
+
+// destructiveTool returns tool annotations for a destructive tool (delete).
+// Deletion is idempotent (deleting a non-existent object is a no-op from the
+// caller's perspective) and flagged as destructive so clients can guard it.
+func destructiveTool(title string) *mcp.ToolAnnotations {
+	return &mcp.ToolAnnotations{
+		Title:           title,
+		ReadOnlyHint:    false,
+		IdempotentHint:  true,
+		DestructiveHint: boolPtr(true),
+		OpenWorldHint:   boolPtr(false),
+	}
+}
+
 // toolDefIndex returns a map of tool name -> definition for lookup during
 // registration, so each tool's Description carries its per-tool Instructions
 // (M4) through the SDK's only per-tool guidance channel.
@@ -61,6 +87,34 @@ func registerTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, name s
 		Name:        name,
 		Description: description,
 		Annotations: readOnlyTool(def.Title),
+	}, handler)
+}
+
+// registerWriteTool registers a non-destructive write tool with writeTool
+// annotations.
+func registerWriteTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, name string, handler mcp.ToolHandlerFor[I, O]) {
+	description := def.Description
+	if def.Instructions != "" {
+		description = description + "\n\nInstructions: " + def.Instructions
+	}
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        name,
+		Description: description,
+		Annotations: writeTool(def.Title),
+	}, handler)
+}
+
+// registerDeleteTool registers a destructive tool with destructiveTool
+// annotations.
+func registerDeleteTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, name string, handler mcp.ToolHandlerFor[I, O]) {
+	description := def.Description
+	if def.Instructions != "" {
+		description = description + "\n\nInstructions: " + def.Instructions
+	}
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        name,
+		Description: description,
+		Annotations: destructiveTool(def.Title),
 	}, handler)
 }
 
@@ -120,5 +174,17 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 
 	registerTool(s, toolDefIndex()["get_vm_interfaces"], metrics, "get_vm_interfaces", WrapToolHandler[VMInterfacesInput, PaginatedOutput[domain.VMInterface]](metrics, "get_vm_interfaces", func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfacesInput) (*mcp.CallToolResult, PaginatedOutput[domain.VMInterface], error) {
 		return NewGetVMInterfacesHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["create_site"], metrics, "create_site", WrapToolHandler[SiteCreateInput, SiteOutput](metrics, "create_site", func(ctx context.Context, req *mcp.CallToolRequest, in SiteCreateInput) (*mcp.CallToolResult, SiteOutput, error) {
+		return NewCreateSiteHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_site"], metrics, "update_site", WrapToolHandler[SiteUpdateInput, SiteOutput](metrics, "update_site", func(ctx context.Context, req *mcp.CallToolRequest, in SiteUpdateInput) (*mcp.CallToolResult, SiteOutput, error) {
+		return NewUpdateSiteHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_site"], metrics, "delete_site", WrapToolHandler[SiteDeleteInput, struct{}](metrics, "delete_site", func(ctx context.Context, req *mcp.CallToolRequest, in SiteDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteSiteHandler(svc)(ctx, req, in)
 	}))
 }

@@ -1312,7 +1312,7 @@ func TestDoRequest_Success(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, http.DefaultClient)
-	body, err := client.doRequest(context.Background(), "test-token", http.MethodGet, "/api/dcim/sites/", nil)
+	body, err := client.doRequest(context.Background(), "test-token", http.MethodGet, "/api/dcim/sites/", nil, nil)
 	if err != nil {
 		t.Fatalf("doRequest() returned error: %v", err)
 	}
@@ -1330,7 +1330,7 @@ func TestDoRequest_Unauthorized(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, http.DefaultClient)
-	_, err := client.doRequest(context.Background(), "bad-token", http.MethodGet, "/api/dcim/sites/", nil)
+	_, err := client.doRequest(context.Background(), "bad-token", http.MethodGet, "/api/dcim/sites/", nil, nil)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
@@ -1348,7 +1348,7 @@ func TestDoRequest_Forbidden(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, http.DefaultClient)
-	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
@@ -1366,7 +1366,7 @@ func TestDoRequest_NotFound(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, http.DefaultClient)
-	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
@@ -1386,7 +1386,7 @@ func TestDoRequest_RateLimited(t *testing.T) {
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+		_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil)
 		if err == nil {
 			t.Fatal("Expected error, got nil")
 		}
@@ -1404,7 +1404,7 @@ func TestDoRequest_RateLimited(t *testing.T) {
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+		_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil)
 		if err == nil {
 			t.Fatal("Expected error, got nil")
 		}
@@ -1424,7 +1424,7 @@ func TestDoRequest_UnexpectedStatus(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, http.DefaultClient)
-	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
@@ -1454,7 +1454,7 @@ func TestDoRequest_QueryParams(t *testing.T) {
 	body, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", map[string]string{
 		"name":   "test-site",
 		"status": "active",
-	})
+	}, nil)
 	if err != nil {
 		t.Fatalf("doRequest() returned error: %v", err)
 	}
@@ -1481,7 +1481,7 @@ func TestDoRequest_WithBodyLimit(t *testing.T) {
 	defer srv.Close()
 
 	client := NewClient(srv.URL, http.DefaultClient)
-	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil)
 	if err == nil {
 		t.Fatal("Expected error due to body size limit, got nil")
 	}

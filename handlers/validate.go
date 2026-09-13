@@ -1,0 +1,62 @@
+package handlers
+
+import (
+	"fmt"
+	"reflect"
+	"strings"
+)
+
+// validatePositiveID rejects non-positive identifiers for object-targeted tools.
+func validatePositiveID(id int) error {
+	if id <= 0 {
+		return fmt.Errorf("id must be a positive integer")
+	}
+	return nil
+}
+
+// sanitizeControl strips CR and LF control characters, preventing header/query
+// injection via crafted payload values.
+func sanitizeControl(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\r' || r == '\n' {
+			return -1
+		}
+		return r
+	}, s)
+}
+
+// sanitizeMapKeysValues applies sanitizeControl to every key and value of a
+// string map, returning a new map.
+func sanitizeMapKeysValues(m map[string]string) map[string]string {
+	if m == nil {
+		return nil
+	}
+	out := make(map[string]string, len(m))
+	for k, v := range m {
+		out[sanitizeControl(k)] = sanitizeControl(v)
+	}
+	return out
+}
+
+// sanitizeAllStrings recursively sanitizes every settable string field of a
+// struct value (including through pointers). It is applied to write payloads
+// before json.Marshal so CRLF never reaches the NetBox request body.
+func sanitizeAllStrings(v reflect.Value) {
+	if !v.IsValid() {
+		return
+	}
+	switch v.Kind() {
+	case reflect.Pointer:
+		if !v.IsNil() {
+			sanitizeAllStrings(v.Elem())
+		}
+	case reflect.Struct:
+		for i := range v.NumField() {
+			sanitizeAllStrings(v.Field(i))
+		}
+	case reflect.String:
+		if v.CanSet() {
+			v.SetString(sanitizeControl(v.String()))
+		}
+	}
+}

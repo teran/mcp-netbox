@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -192,6 +194,47 @@ type RacksInput struct {
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
+// SiteCreateInput represents the writable fields for creating a site.
+type SiteCreateInput struct {
+	Name            string         `json:"name" jsonschema:"site name (required)"`
+	Slug            string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"`
+	Status          *string        `json:"status,omitempty" jsonschema:"status: planned, staged, active, decommissioning, retired"`
+	Region          *int           `json:"region,omitempty" jsonschema:"region ID (from tenancy)"`
+	Tenant          *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Facility        *string        `json:"facility,omitempty" jsonschema:"local facility ID or description"`
+	TimeZone        *string        `json:"time_zone,omitempty" jsonschema:"IANA time zone, e.g. America/New_York"`
+	Description     *string        `json:"description,omitempty" jsonschema:"short description"`
+	PhysicalAddress *string        `json:"physical_address,omitempty" jsonschema:"physical address"`
+	ShippingAddress *string        `json:"shipping_address,omitempty" jsonschema:"shipping address"`
+	Comments        *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags            []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// SiteUpdateInput represents the writable fields for updating a site. All fields
+// are optional; only the explicitly provided ones are patched (PATCH merge).
+type SiteUpdateInput struct {
+	ID              int            `json:"id" jsonschema:"numeric ID of the site to update,required"`
+	Name            *string        `json:"name,omitempty" jsonschema:"site name"`
+	Slug            *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Status          *string        `json:"status,omitempty" jsonschema:"status: planned, staged, active, decommissioning, retired"`
+	Region          *int           `json:"region,omitempty" jsonschema:"region ID (from tenancy)"`
+	Tenant          *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Facility        *string        `json:"facility,omitempty" jsonschema:"local facility ID or description"`
+	TimeZone        *string        `json:"time_zone,omitempty" jsonschema:"IANA time zone, e.g. America/New_York"`
+	Description     *string        `json:"description,omitempty" jsonschema:"short description"`
+	PhysicalAddress *string        `json:"physical_address,omitempty" jsonschema:"physical address"`
+	ShippingAddress *string        `json:"shipping_address,omitempty" jsonschema:"shipping address"`
+	Comments        *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags            []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// SiteDeleteInput represents the input fields for deleting a site.
+type SiteDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the site to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -207,7 +250,79 @@ type GetObjectOutput struct {
 	Data domain.RawObject `json:"data"`
 }
 
-// — helpers —
+// SiteOutput represents the output for the create/update site tools.
+type SiteOutput struct {
+	Data domain.Site `json:"data"`
+}
+
+// — write helpers —
+
+// writeErrorResult converts an error into an MCP error result. A
+// domain.ValidationError is surfaced as IsError with the NetBox body delivered
+// via StructuredContent (not through the error string, so it never leaks into
+// logs); all other errors are returned as a plain error to be surfaced normally.
+func writeErrorResult(err error) (*mcp.CallToolResult, error) {
+	var ve *domain.ValidationError
+	if errors.As(err, &ve) {
+		return &mcp.CallToolResult{
+			IsError: true,
+			StructuredContent: map[string]any{
+				"validation_errors": json.RawMessage(ve.Body),
+			},
+		}, nil
+	}
+	return &mcp.CallToolResult{IsError: true}, err
+}
+
+// siteWriteFromCreate builds a domain.SiteWrite from a create input.
+func siteWriteFromCreate(in SiteCreateInput) domain.SiteWrite {
+	return domain.SiteWrite{
+		Name:            in.Name,
+		Slug:            strPtr(in.Slug),
+		Status:          in.Status,
+		Region:          in.Region,
+		Tenant:          in.Tenant,
+		Facility:        in.Facility,
+		TimeZone:        in.TimeZone,
+		Description:     in.Description,
+		PhysicalAddress: in.PhysicalAddress,
+		ShippingAddress: in.ShippingAddress,
+		Comments:        in.Comments,
+		Tags:            in.Tags,
+		CustomFields:    in.CustomFields,
+	}
+}
+
+// siteWriteFromUpdate builds a domain.SiteWrite from an update input, mapping
+// only the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func siteWriteFromUpdate(in SiteUpdateInput) domain.SiteWrite {
+	write := domain.SiteWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Slug = in.Slug
+	write.Status = in.Status
+	write.Region = in.Region
+	write.Tenant = in.Tenant
+	write.Facility = in.Facility
+	write.TimeZone = in.TimeZone
+	write.Description = in.Description
+	write.PhysicalAddress = in.PhysicalAddress
+	write.ShippingAddress = in.ShippingAddress
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+func strPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+// — handler factories —
 
 // maxPageSize is the maximum allowed page size for paginated requests.
 // Increased from 100 to 1000 for better AI assistant UX (fewer pagination rounds).
@@ -615,5 +730,70 @@ func NewGetObjectByIDHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 		}
 
 		return &mcp.CallToolResult{}, GetObjectOutput{Data: data}, nil
+	}
+}
+
+// NewCreateSiteHandler creates a handler for the create_site tool.
+func NewCreateSiteHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SiteCreateInput, SiteOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in SiteCreateInput) (*mcp.CallToolResult, SiteOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, SiteOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, SiteOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		site, err := s.CreateSite(ctx, siteWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, SiteOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, SiteOutput{Data: *site}, nil
+	}
+}
+
+// NewUpdateSiteHandler creates a handler for the update_site tool. It performs a
+// partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateSiteHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SiteUpdateInput, SiteOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in SiteUpdateInput) (*mcp.CallToolResult, SiteOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, SiteOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, SiteOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		site, err := s.UpdateSite(ctx, in.ID, siteWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, SiteOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, SiteOutput{Data: *site}, nil
+	}
+}
+
+// NewDeleteSiteHandler creates a handler for the delete_site tool.
+func NewDeleteSiteHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SiteDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in SiteDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteSite(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
 	}
 }

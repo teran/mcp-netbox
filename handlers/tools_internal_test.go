@@ -67,6 +67,18 @@ func (s *stubRepo) GetObject(ctx context.Context, token string, objectType strin
 	return nil, errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateSite(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateSite(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteSite(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

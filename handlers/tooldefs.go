@@ -103,5 +103,23 @@ func toolDefs() []toolDef {
 			Description:  "List VM interfaces in NetBox. Filter by virtual_machine, name, or tag, or use q for free-text search. Results are paginated: set page and page_size (max 1000). An empty results array means no VM interfaces match.",
 			Instructions: "Use to look up virtual machine interfaces.",
 		},
+		{
+			Name:         "create_site",
+			Title:        "Create Site",
+			Description:  "Create a new site in NetBox. name is required; all other fields are optional. Provide region/tenant as numeric IDs (look them up first), status as one of planned/staged/active/decommissioning/retired, and tags as a list of tag names. Returns the created site.",
+			Instructions: "Use only when the caller explicitly wants to create a site and provides a name. This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:         "update_site",
+			Title:        "Update Site",
+			Description:  "Partially update a site in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated site.",
+			Instructions: "Use to modify one or more fields of an existing site. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_site",
+			Title:        "Delete Site",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a site (and its dependent objects) from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the site, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

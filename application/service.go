@@ -135,3 +135,30 @@ func (s *NetworkService) GetObject(ctx context.Context, objectType string, id in
 	}
 	return resp, nil
 }
+
+// CreateSite relays a site create to the repository. ValidationError is wrapped
+// (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateSite(ctx context.Context, in domain.SiteWrite) (*domain.Site, error) {
+	resp, err := s.repo.CreateSite(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create site: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateSite relays a site update to the repository.
+func (s *NetworkService) UpdateSite(ctx context.Context, id int, in domain.SiteWrite) (*domain.Site, error) {
+	resp, err := s.repo.UpdateSite(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update site: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteSite relays a site delete to the repository.
+func (s *NetworkService) DeleteSite(ctx context.Context, id int) error {
+	if err := s.repo.DeleteSite(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete site: %w", err)
+	}
+	return nil
+}

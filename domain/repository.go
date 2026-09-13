@@ -50,4 +50,8 @@ type NetworkRepository interface {
 	ListCircuitTerminations(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[CircuitTermination], error)
 	ListCables(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Cable], error)
 	GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (RawObject, error)
+
+	CreateSite(ctx context.Context, token string, in SiteWrite) (*Site, error)
+	UpdateSite(ctx context.Context, token string, id int, in SiteWrite) (*Site, error)
+	DeleteSite(ctx context.Context, token string, id int) error
 }

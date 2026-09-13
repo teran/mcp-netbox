@@ -310,6 +310,29 @@ type (
 	}
 )
 
+// SiteWrite is the domain DTO for creating or updating a NetBox site. It
+// carries only the writable fields.
+//
+// Optional scalar fields are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty" (pointer to
+// ""). Name is a plain string because it is required on create; the omitempty
+// tag drops it from a PATCH body when not provided.
+type SiteWrite struct {
+	Name            string         `json:"name,omitempty"`
+	Slug            *string        `json:"slug,omitempty"`
+	Status          *string        `json:"status,omitempty"`
+	Region          *int           `json:"region,omitempty"`
+	Tenant          *int           `json:"tenant,omitempty"`
+	Facility        *string        `json:"facility,omitempty"`
+	TimeZone        *string        `json:"time_zone,omitempty"`
+	Description     *string        `json:"description,omitempty"`
+	PhysicalAddress *string        `json:"physical_address,omitempty"`
+	ShippingAddress *string        `json:"shipping_address,omitempty"`
+	Comments        *string        `json:"comments,omitempty"`
+	Tags            []string       `json:"tags,omitempty"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

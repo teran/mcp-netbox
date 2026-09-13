@@ -25,6 +25,9 @@ type MockRepo struct {
 	ListInterfacesFunc          func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error)
 	ListVMInterfacesFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error)
 	GetObjectFunc               func(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error)
+	CreateSiteFunc              func(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error)
+	UpdateSiteFunc              func(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error)
+	DeleteSiteFunc              func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -81,6 +84,18 @@ func (m *MockRepo) ListVMInterfaces(ctx context.Context, token string, params ma
 
 func (m *MockRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
 	return m.GetObjectFunc(ctx, token, objectType, id, params)
+}
+
+func (m *MockRepo) CreateSite(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error) {
+	return m.CreateSiteFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateSite(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error) {
+	return m.UpdateSiteFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteSite(ctx context.Context, token string, id int) error {
+	return m.DeleteSiteFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -141,4 +156,16 @@ func (r *NilRepo) ListVMInterfaces(ctx context.Context, token string, params map
 
 func (r *NilRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
 	return domain.RawObject(fmt.Sprintf(`{"id":%d}`, id)), nil
+}
+
+func (r *NilRepo) CreateSite(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error) {
+	return &domain.Site{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateSite(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error) {
+	return &domain.Site{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteSite(ctx context.Context, token string, id int) error {
+	return nil
 }

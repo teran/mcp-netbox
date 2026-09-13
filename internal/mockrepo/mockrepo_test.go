@@ -14,7 +14,7 @@ var (
 	_ domain.NetworkRepository = (*NilRepo)(nil)
 )
 
-//nolint:gocognit // exhaustive per-method table test over every repository method
+//nolint:gocognit,gocyclo // exhaustive per-method table test over every repository method
 func TestMockRepo_AllMethods(t *testing.T) {
 	t.Parallel()
 
@@ -130,6 +130,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("GetObject = (%v, %v)", got, err)
 		}
 	})
+	t.Run("CreateSite", func(t *testing.T) {
+		got, err := (&MockRepo{CreateSiteFunc: func(_ context.Context, _ string, in domain.SiteWrite) (*domain.Site, error) {
+			return &domain.Site{ID: 1, Name: in.Name}, nil
+		}}).CreateSite(context.Background(), "t", domain.SiteWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateSite = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateSite", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateSiteFunc: func(_ context.Context, _ string, id int, in domain.SiteWrite) (*domain.Site, error) {
+			return &domain.Site{ID: id, Name: in.Name}, nil
+		}}).UpdateSite(context.Background(), "t", 7, domain.SiteWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateSite = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteSite", func(t *testing.T) {
+		err := (&MockRepo{DeleteSiteFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteSite(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteSite = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -206,5 +233,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if string(obj) != `{"id":1}` {
 		t.Errorf("GetObject = %s, want %s", obj, `{"id":1}`)
+	}
+	if s, err := repo.CreateSite(ctx, "t", domain.SiteWrite{Name: "A"}); err != nil || s.Name != "A" {
+		t.Errorf("CreateSite = (%v, %v)", s, err)
+	}
+	if s, err := repo.UpdateSite(ctx, "t", 7, domain.SiteWrite{Name: "A"}); err != nil || s.ID != 7 {
+		t.Errorf("UpdateSite = (%v, %v)", s, err)
+	}
+	if err := repo.DeleteSite(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteSite = %v", err)
 	}
 }

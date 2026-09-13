@@ -453,3 +453,166 @@ func TestNetworkService_GetObject(t *testing.T) {
 		}
 	})
 }
+
+func TestNetworkService_CreateSite(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateSiteFunc: func(_ context.Context, token string, in domain.SiteWrite) (*domain.Site, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.Site{ID: 1, Name: in.Name}, nil
+			},
+		})
+		site, err := svc.CreateSite(context.Background(), domain.SiteWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateSite() returned error: %v", err)
+		}
+		if site.ID != 1 || site.Name != "A" {
+			t.Errorf("site = %+v, want id 1 name A", site)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateSiteFunc: func(_ context.Context, _ string, _ domain.SiteWrite) (*domain.Site, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateSite(context.Background(), domain.SiteWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+		if string(got.Body) != `{"name":["required"]}` {
+			t.Errorf("Body = %s, want original body", got.Body)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateSiteFunc: func(_ context.Context, _ string, _ domain.SiteWrite) (*domain.Site, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateSite(context.Background(), domain.SiteWrite{Name: "A"})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !containsService(err.Error(), "create site:") {
+			t.Errorf("err = %q, want it to contain 'create site:'", err.Error())
+		}
+	})
+}
+
+func TestNetworkService_UpdateSite(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateSiteFunc: func(_ context.Context, _ string, id int, in domain.SiteWrite) (*domain.Site, error) {
+				return &domain.Site{ID: id, Name: in.Name}, nil
+			},
+		})
+		site, err := svc.UpdateSite(context.Background(), 7, domain.SiteWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateSite() returned error: %v", err)
+		}
+		if site.ID != 7 || site.Name != "Renamed" {
+			t.Errorf("site = %+v, want id 7 name Renamed", site)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateSiteFunc: func(_ context.Context, _ string, _ int, _ domain.SiteWrite) (*domain.Site, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateSite(context.Background(), 7, domain.SiteWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateSiteFunc: func(_ context.Context, _ string, _ int, _ domain.SiteWrite) (*domain.Site, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateSite(context.Background(), 7, domain.SiteWrite{})
+		if err == nil || !containsService(err.Error(), "update site:") {
+			t.Errorf("err = %v, want it to contain 'update site:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteSite(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteSiteFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteSite(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteSite() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteSiteFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteSite(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteSiteFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteSite(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete site:") {
+			t.Errorf("err = %v, want it to contain 'delete site:'", err)
+		}
+	})
+}
+
+// containsService is a tiny substring helper scoped to this test package.
+func containsService(s, sub string) bool {
+	return len(s) >= len(sub) && indexOfService(s, sub) >= 0
+}
+
+func indexOfService(s, sub string) int {
+	for i := 0; i+len(sub) <= len(s); i++ {
+		if s[i:i+len(sub)] == sub {
+			return i
+		}
+	}
+	return -1
+}

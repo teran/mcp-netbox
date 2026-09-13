@@ -74,7 +74,7 @@ func NewClient(baseURL string, httpClient *http.Client) *Client {
 	}
 }
 
-func (c *Client) doRequest(ctx context.Context, token, method, path string, params map[string]string) ([]byte, error) {
+func (c *Client) doRequest(ctx context.Context, token, method, path string, params map[string]string, body []byte) ([]byte, error) {
 	u, err := url.Parse(c.baseURL + path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %w", err)
@@ -89,6 +89,10 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 		SetHeader("Accept", "application/json").
 		SetHeader("Authorization", "Bearer "+token).
 		SetQueryParams(params)
+
+	if body != nil {
+		req = req.SetBody(body).SetHeader("Content-Type", "application/json")
+	}
 
 	// Propagate the correlation ID to the upstream NetBox call so records on
 	// both sides of the wire can be matched (L9/G11).
@@ -138,10 +142,28 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 	}
 
 	if resp.StatusCode() < 200 || resp.StatusCode() >= 300 {
+		// Only read the body for 400 so we can surface the NetBox validation
+		// errors; the body is bounded by maxBodySize. Other unexpected statuses
+		// keep the generic message (matching read behaviour).
+		if resp.StatusCode() == http.StatusBadRequest {
+			return nil, &netboxError{StatusCode: resp.StatusCode(), Body: resp.Bytes()}
+		}
 		return nil, fmt.Errorf("unexpected status %d from NetBox", resp.StatusCode())
 	}
 
 	return resp.Bytes(), nil
+}
+
+// netboxError carries the HTTP status and bounded response body for an
+// unexpected non-2xx status. It lets write methods recover a 400 body (to build
+// a domain.ValidationError) while preserving the generic message for reads.
+type netboxError struct {
+	StatusCode int
+	Body       []byte
+}
+
+func (e *netboxError) Error() string {
+	return fmt.Sprintf("unexpected status %d from NetBox", e.StatusCode)
 }
 
 // statusCodeOf returns the HTTP status code of a resty response, or 0 when the
@@ -158,7 +180,51 @@ func statusCodeOf(resp *resty.Response) int {
 const requestIDHeader = "X-Request-ID"
 
 func (c *Client) get(ctx context.Context, token, path string, params map[string]string) ([]byte, error) {
-	return c.doRequest(ctx, token, http.MethodGet, path, params)
+	return c.doRequest(ctx, token, http.MethodGet, path, params, nil)
+}
+
+func (c *Client) post(ctx context.Context, token, path string, body []byte) ([]byte, error) {
+	return c.doRequest(ctx, token, http.MethodPost, path, nil, body)
+}
+
+func (c *Client) patch(ctx context.Context, token, path string, body []byte) ([]byte, error) {
+	return c.doRequest(ctx, token, http.MethodPatch, path, nil, body)
+}
+
+func (c *Client) delete(ctx context.Context, token, path string) ([]byte, error) {
+	return c.doRequest(ctx, token, http.MethodDelete, path, nil, nil)
+}
+
+// mapWriteStatus maps a write HTTP status to a result or error. 201/200 yield
+// the created/updated object body, 204 (delete) yields nil, and 400 yields a
+// domain.ValidationError carrying the NetBox body. 401/403/404/429 are handled
+// upstream by doRequest and never reach this function.
+func mapWriteStatus(code int, body []byte) (domain.RawObject, error) {
+	switch code {
+	case http.StatusCreated, http.StatusOK:
+		return domain.RawObject(body), nil
+	case http.StatusNoContent:
+		return nil, nil
+	case http.StatusBadRequest:
+		return nil, &domain.ValidationError{StatusCode: code, Body: body}
+	default:
+		return nil, fmt.Errorf("unexpected status %d from NetBox", code)
+	}
+}
+
+// doWrite performs a write request and maps the response status via
+// mapWriteStatus. Transport errors and 401/403/404/429 are returned as-is from
+// doRequest (not duplicated here); only a 400 body is recovered from the
+// netboxError returned by doRequest.
+func writeResult(successStatus int, body []byte, err error) (domain.RawObject, error) {
+	if err != nil {
+		var nb *netboxError
+		if errors.As(err, &nb) {
+			return mapWriteStatus(nb.StatusCode, nb.Body)
+		}
+		return nil, err
+	}
+	return mapWriteStatus(successStatus, body)
 }
 
 // ListSites returns a paginated list of sites.
@@ -346,6 +412,43 @@ func (c *Client) GetObject(ctx context.Context, token, objectType string, id int
 	return domain.RawObject(body), nil
 }
 
+// CreateSite creates a new site via POST /api/dcim/sites/.
+func (c *Client) CreateSite(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error) {
+	payload, err := json.Marshal(siteWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal site create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/sites/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalSite(raw)
+}
+
+// UpdateSite partially updates a site via PATCH /api/dcim/sites/<id>/.
+func (c *Client) UpdateSite(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error) {
+	payload, err := json.Marshal(siteWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal site update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/sites/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalSite(raw)
+}
+
+// DeleteSite deletes a site via DELETE /api/dcim/sites/<id>/.
+func (c *Client) DeleteSite(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/dcim/sites/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -367,6 +470,37 @@ func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(
 var _ domain.NetworkRepository = (*Client)(nil)
 
 // — conversion functions —
+
+// siteWriteToWire converts a domain write DTO to the wire request model. The
+// fields map one-to-one; nil pointers on the domain side remain nil on the wire
+// side so json.Marshal omits them (required for a partial PATCH body).
+func siteWriteToWire(in domain.SiteWrite) WireSiteWrite {
+	return WireSiteWrite{
+		Name:            in.Name,
+		Slug:            in.Slug,
+		Status:          in.Status,
+		Region:          in.Region,
+		Tenant:          in.Tenant,
+		Facility:        in.Facility,
+		TimeZone:        in.TimeZone,
+		Description:     in.Description,
+		PhysicalAddress: in.PhysicalAddress,
+		ShippingAddress: in.ShippingAddress,
+		Comments:        in.Comments,
+		Tags:            in.Tags,
+		CustomFields:    in.CustomFields,
+	}
+}
+
+// unmarshalSite decodes a site response body into a domain.Site.
+func unmarshalSite(raw domain.RawObject) (*domain.Site, error) {
+	var w WireSite
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal site: %w", err)
+	}
+	d := wireSiteToDomain(w)
+	return &d, nil
+}
 
 func wireNestedToDomain(w *WireNested) *domain.Nested {
 	if w == nil {

@@ -3,6 +3,25 @@ package netbox
 // Wire types mirror NetBox JSON API responses. The domain.PaginatedResponse
 // type is used for both deserialization and output — wire types are embedded
 // via type parameter instantiation (e.g. domain.PaginatedResponse[WireSite]).
+//
+// WireSiteWrite is the wire request model for site create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields.
+type WireSiteWrite struct {
+	Name            string         `json:"name,omitempty"`
+	Slug            *string        `json:"slug,omitempty"`
+	Status          *string        `json:"status,omitempty"`
+	Region          *int           `json:"region,omitempty"`
+	Tenant          *int           `json:"tenant,omitempty"`
+	Facility        *string        `json:"facility,omitempty"`
+	TimeZone        *string        `json:"time_zone,omitempty"`
+	Description     *string        `json:"description,omitempty"`
+	PhysicalAddress *string        `json:"physical_address,omitempty"`
+	ShippingAddress *string        `json:"shipping_address,omitempty"`
+	Comments        *string        `json:"comments,omitempty"`
+	Tags            []string       `json:"tags,omitempty"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`
