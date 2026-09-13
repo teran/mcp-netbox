@@ -150,6 +150,27 @@ type WireCircuitWrite struct {
 	CommitRate   *int           `json:"commit_rate,omitempty"`
 }
 
+// WireRackWrite is the wire request model for rack create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields.
+// References to related objects (site, location, tenant, role) are numeric IDs.
+type WireRackWrite struct {
+	Name         string         `json:"name,omitempty"`
+	FacilityID   *string        `json:"facility_id,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Location     *int           `json:"location,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Serial       *string        `json:"serial,omitempty"`
+	AssetTag     *string        `json:"asset_tag,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Width        *int           `json:"width,omitempty"`
+	UHeight      *int           `json:"u_height,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

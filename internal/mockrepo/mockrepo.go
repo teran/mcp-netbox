@@ -49,6 +49,9 @@ type MockRepo struct {
 	CreateCircuitFunc           func(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error)
 	UpdateCircuitFunc           func(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error)
 	DeleteCircuitFunc           func(ctx context.Context, token string, id int) error
+	CreateRackFunc              func(ctx context.Context, token string, in domain.RackWrite) (*domain.Rack, error)
+	UpdateRackFunc              func(ctx context.Context, token string, id int, in domain.RackWrite) (*domain.Rack, error)
+	DeleteRackFunc              func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -201,6 +204,18 @@ func (m *MockRepo) UpdateCircuit(ctx context.Context, token string, id int, in d
 
 func (m *MockRepo) DeleteCircuit(ctx context.Context, token string, id int) error {
 	return m.DeleteCircuitFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateRack(ctx context.Context, token string, in domain.RackWrite) (*domain.Rack, error) {
+	return m.CreateRackFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateRack(ctx context.Context, token string, id int, in domain.RackWrite) (*domain.Rack, error) {
+	return m.UpdateRackFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteRack(ctx context.Context, token string, id int) error {
+	return m.DeleteRackFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -356,5 +371,17 @@ func (r *NilRepo) UpdateCircuit(ctx context.Context, token string, id int, in do
 }
 
 func (r *NilRepo) DeleteCircuit(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateRack(ctx context.Context, token string, in domain.RackWrite) (*domain.Rack, error) {
+	return &domain.Rack{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateRack(ctx context.Context, token string, id int, in domain.RackWrite) (*domain.Rack, error) {
+	return &domain.Rack{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteRack(ctx context.Context, token string, id int) error {
 	return nil
 }

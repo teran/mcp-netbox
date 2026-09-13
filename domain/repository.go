@@ -82,4 +82,8 @@ type NetworkRepository interface {
 	CreateCircuit(ctx context.Context, token string, in CircuitWrite) (*Circuit, error)
 	UpdateCircuit(ctx context.Context, token string, id int, in CircuitWrite) (*Circuit, error)
 	DeleteCircuit(ctx context.Context, token string, id int) error
+
+	CreateRack(ctx context.Context, token string, in RackWrite) (*Rack, error)
+	UpdateRack(ctx context.Context, token string, id int, in RackWrite) (*Rack, error)
+	DeleteRack(ctx context.Context, token string, id int) error
 }

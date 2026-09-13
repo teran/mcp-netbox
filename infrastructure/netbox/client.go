@@ -713,6 +713,43 @@ func (c *Client) DeleteCircuit(ctx context.Context, token string, id int) error 
 	return mErr
 }
 
+// CreateRack creates a new rack via POST /api/dcim/racks/.
+func (c *Client) CreateRack(ctx context.Context, token string, in domain.RackWrite) (*domain.Rack, error) {
+	payload, err := json.Marshal(rackWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rack create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/racks/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalRack(raw)
+}
+
+// UpdateRack partially updates a rack via PATCH /api/dcim/racks/<id>/.
+func (c *Client) UpdateRack(ctx context.Context, token string, id int, in domain.RackWrite) (*domain.Rack, error) {
+	payload, err := json.Marshal(rackWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rack update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/racks/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalRack(raw)
+}
+
+// DeleteRack deletes a rack via DELETE /api/dcim/racks/<id>/.
+func (c *Client) DeleteRack(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/dcim/racks/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -981,6 +1018,39 @@ func unmarshalCircuit(raw domain.RawObject) (*domain.Circuit, error) {
 		return nil, fmt.Errorf("failed to unmarshal circuit: %w", err)
 	}
 	d := wireCircuitToDomain(w)
+	return &d, nil
+}
+
+// rackWriteToWire converts a domain rack write DTO to the wire request model.
+// The fields map one-to-one; nil pointers on the domain side remain nil on the
+// wire side so json.Marshal omits them (required for a partial PATCH body).
+func rackWriteToWire(in domain.RackWrite) WireRackWrite {
+	return WireRackWrite{
+		Name:         in.Name,
+		FacilityID:   in.FacilityID,
+		Site:         in.Site,
+		Location:     in.Location,
+		Tenant:       in.Tenant,
+		Status:       in.Status,
+		Role:         in.Role,
+		Serial:       in.Serial,
+		AssetTag:     in.AssetTag,
+		Type:         in.Type,
+		Width:        in.Width,
+		UHeight:      in.UHeight,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalRack decodes a rack response body into a domain.Rack.
+func unmarshalRack(raw domain.RawObject) (*domain.Rack, error) {
+	var w WireRack
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rack: %w", err)
+	}
+	d := wireRackToDomain(w)
 	return &d, nil
 }
 

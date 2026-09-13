@@ -1819,6 +1819,244 @@ func TestClient_WriteMarshalErrors(t *testing.T) {
 	if _, err := client.UpdateCircuit(ctx, "tok", 7, badCircuit); err == nil {
 		t.Error("UpdateCircuit: expected marshal error, got nil")
 	}
+
+	badRack := domain.RackWrite{Name: "R1", CustomFields: unmarshalableCustomFields()}
+	if _, err := client.CreateRack(ctx, "tok", badRack); err == nil {
+		t.Error("CreateRack: expected marshal error, got nil")
+	}
+	if _, err := client.UpdateRack(ctx, "tok", 7, badRack); err == nil {
+		t.Error("UpdateRack: expected marshal error, got nil")
+	}
+}
+
+func TestClient_CreateRack(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath, gotCT, gotAuth string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotCT = r.Header.Get("Content-Type")
+			gotAuth = r.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"id":1,"name":"R1","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		site := 2
+		rack, err := client.CreateRack(context.Background(), "tok", domain.RackWrite{Name: "R1", Site: &site})
+		if err != nil {
+			t.Fatalf("CreateRack() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPost {
+			t.Errorf("method = %q, want POST", gotMethod)
+		}
+		if gotPath != "/api/dcim/racks/" {
+			t.Errorf("path = %q, want /api/dcim/racks/", gotPath)
+		}
+		if gotCT != "application/json" {
+			t.Errorf("Content-Type = %q, want application/json", gotCT)
+		}
+		if gotAuth != "Bearer tok" {
+			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["name"] != "R1" {
+			t.Errorf("request body = %s, want name R1", gotBody)
+		}
+		if reqBody["site"] != float64(2) {
+			t.Errorf("request body = %s, want site 2", gotBody)
+		}
+		if rack.ID != 1 || rack.Name != "R1" {
+			t.Errorf("rack = %+v, want id 1 name R1", rack)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"name":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateRack(context.Background(), "tok", domain.RackWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if ve.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+
+	t.Run("not found 404", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateRack(context.Background(), "tok", domain.RackWrite{Name: "X"})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if errors.As(err, &ve) {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		}
+	})
+}
+
+func TestClient_UpdateRack(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success patch", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":7,"name":"R1","created":"","last_updated":""}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		u := 42
+		rack, err := client.UpdateRack(context.Background(), "tok", 7, domain.RackWrite{UHeight: &u})
+		if err != nil {
+			t.Fatalf("UpdateRack() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPatch {
+			t.Errorf("method = %q, want PATCH", gotMethod)
+		}
+		if gotPath != "/api/dcim/racks/7/" {
+			t.Errorf("path = %q, want /api/dcim/racks/7/", gotPath)
+		}
+		if rack.ID != 7 {
+			t.Errorf("rack = %+v, want id 7", rack)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["u_height"] != float64(42) {
+			t.Errorf("request body = %s, want u_height present", gotBody)
+		}
+		if _, ok := reqBody["name"]; ok {
+			t.Errorf("request body = %s, want name omitted (not provided)", gotBody)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"status":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.UpdateRack(context.Background(), "tok", 7, domain.RackWrite{Name: "X"})
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_DeleteRack(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success 204", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteRack(context.Background(), "tok", 3); err != nil {
+			t.Fatalf("DeleteRack() returned error: %v", err)
+		}
+		if gotMethod != http.MethodDelete {
+			t.Errorf("method = %q, want DELETE", gotMethod)
+		}
+		if gotPath != "/api/dcim/racks/3/" {
+			t.Errorf("path = %q, want /api/dcim/racks/3/", gotPath)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"detail":"Cannot delete object with dependent objects."}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		err := client.DeleteRack(context.Background(), "tok", 3)
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+
+	t.Run("not found 404", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteRack(context.Background(), "tok", 999); err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+}
+
+func TestRackWriteToWire(t *testing.T) {
+	t.Parallel()
+
+	site := 2
+	status := "active"
+	in := domain.RackWrite{Name: "R1", Site: &site, Status: &status}
+	w := rackWriteToWire(in)
+	if w.Name != "R1" || w.Site == nil || *w.Site != 2 || w.Status == nil || *w.Status != "active" {
+		t.Errorf("wire = %+v, want name R1 site 2 status active", w)
+	}
 }
 
 func ptrStr(s string) *string { return &s }

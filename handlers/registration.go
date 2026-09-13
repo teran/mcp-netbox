@@ -271,4 +271,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_circuit"], metrics, "delete_circuit", WrapToolHandler[CircuitDeleteInput, struct{}](metrics, "delete_circuit", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteCircuitHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_rack"], metrics, "create_rack", WrapToolHandler[RackCreateInput, RackOutput](metrics, "create_rack", func(ctx context.Context, req *mcp.CallToolRequest, in RackCreateInput) (*mcp.CallToolResult, RackOutput, error) {
+		return NewCreateRackHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_rack"], metrics, "update_rack", WrapToolHandler[RackUpdateInput, RackOutput](metrics, "update_rack", func(ctx context.Context, req *mcp.CallToolRequest, in RackUpdateInput) (*mcp.CallToolResult, RackOutput, error) {
+		return NewUpdateRackHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_rack"], metrics, "delete_rack", WrapToolHandler[RackDeleteInput, struct{}](metrics, "delete_rack", func(ctx context.Context, req *mcp.CallToolRequest, in RackDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteRackHandler(svc)(ctx, req, in)
+	}))
 }

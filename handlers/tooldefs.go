@@ -247,5 +247,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a circuit from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the circuit, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_rack",
+			Title:        "Create Rack",
+			Description:  "Create a new rack in NetBox. name is required; all other fields are optional. Provide site/location/tenant/role as numeric IDs (look them up first), status as one of reserved/available/planned/active/decommissioning, type as one of 2-post-frame/4-post-frame/4-post-cabinet/wall-frame/wall-cabinet, width in inches, u_height in rack units, and tags as a list of tag names. Returns the created rack.",
+			Instructions: "Use only when the caller explicitly wants to create a rack and provides a name. This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:         "update_rack",
+			Title:        "Update Rack",
+			Description:  "Partially update a rack in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated rack.",
+			Instructions: "Use to modify one or more fields of an existing rack. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_rack",
+			Title:        "Delete Rack",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a rack from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the rack, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

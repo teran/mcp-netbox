@@ -352,3 +352,30 @@ func (s *NetworkService) DeleteCircuit(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateRack relays a rack create to the repository. ValidationError is wrapped
+// (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateRack(ctx context.Context, in domain.RackWrite) (*domain.Rack, error) {
+	resp, err := s.repo.CreateRack(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create rack: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateRack relays a rack update to the repository.
+func (s *NetworkService) UpdateRack(ctx context.Context, id int, in domain.RackWrite) (*domain.Rack, error) {
+	resp, err := s.repo.UpdateRack(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update rack: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteRack relays a rack delete to the repository.
+func (s *NetworkService) DeleteRack(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRack(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete rack: %w", err)
+	}
+	return nil
+}

@@ -1616,6 +1616,149 @@ func TestNetworkService_DeleteCircuit(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreateRack(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackFunc: func(_ context.Context, token string, in domain.RackWrite) (*domain.Rack, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.Rack{ID: 1, Name: in.Name}, nil
+			},
+		})
+		rack, err := svc.CreateRack(context.Background(), domain.RackWrite{Name: "R1"})
+		if err != nil {
+			t.Fatalf("CreateRack() returned error: %v", err)
+		}
+		if rack.ID != 1 || rack.Name != "R1" {
+			t.Errorf("rack = %+v, want id 1 name R1", rack)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackFunc: func(_ context.Context, _ string, _ domain.RackWrite) (*domain.Rack, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateRack(context.Background(), domain.RackWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackFunc: func(_ context.Context, _ string, _ domain.RackWrite) (*domain.Rack, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateRack(context.Background(), domain.RackWrite{Name: "R1"})
+		if err == nil || !containsService(err.Error(), "create rack:") {
+			t.Errorf("err = %v, want it to contain 'create rack:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateRack(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRackFunc: func(_ context.Context, _ string, id int, in domain.RackWrite) (*domain.Rack, error) {
+				return &domain.Rack{ID: id, Name: in.Name}, nil
+			},
+		})
+		rack, err := svc.UpdateRack(context.Background(), 7, domain.RackWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateRack() returned error: %v", err)
+		}
+		if rack.ID != 7 {
+			t.Errorf("rack = %+v, want id 7", rack)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRackFunc: func(_ context.Context, _ string, _ int, _ domain.RackWrite) (*domain.Rack, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateRack(context.Background(), 7, domain.RackWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRackFunc: func(_ context.Context, _ string, _ int, _ domain.RackWrite) (*domain.Rack, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateRack(context.Background(), 7, domain.RackWrite{})
+		if err == nil || !containsService(err.Error(), "update rack:") {
+			t.Errorf("err = %v, want it to contain 'update rack:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteRack(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRackFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteRack(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteRack() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRackFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteRack(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRackFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteRack(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete rack:") {
+			t.Errorf("err = %v, want it to contain 'delete rack:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

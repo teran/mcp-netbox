@@ -319,6 +319,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteCluster = %v", err)
 		}
 	})
+	t.Run("CreateRack", func(t *testing.T) {
+		got, err := (&MockRepo{CreateRackFunc: func(_ context.Context, _ string, in domain.RackWrite) (*domain.Rack, error) {
+			return &domain.Rack{ID: 1, Name: in.Name}, nil
+		}}).CreateRack(context.Background(), "t", domain.RackWrite{Name: "R1"})
+		if err != nil || got == nil || got.Name != "R1" {
+			t.Errorf("CreateRack = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRack", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateRackFunc: func(_ context.Context, _ string, id int, in domain.RackWrite) (*domain.Rack, error) {
+			return &domain.Rack{ID: id, Name: in.Name}, nil
+		}}).UpdateRack(context.Background(), "t", 7, domain.RackWrite{Name: "R1"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRack = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRack", func(t *testing.T) {
+		err := (&MockRepo{DeleteRackFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteRack(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRack = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil

@@ -497,6 +497,33 @@ type CircuitWrite struct {
 	CommitRate   *int           `json:"commit_rate,omitempty"`
 }
 
+// RackWrite is the domain DTO for creating or updating a NetBox rack. It
+// carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty" (pointer to ""). References to related
+// objects (site, location, tenant, role) are their numeric NetBox IDs. Status
+// and type are choice-string values.
+type RackWrite struct {
+	Name         string         `json:"name,omitempty"`
+	FacilityID   *string        `json:"facility_id,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Location     *int           `json:"location,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Serial       *string        `json:"serial,omitempty"`
+	AssetTag     *string        `json:"asset_tag,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Width        *int           `json:"width,omitempty"`
+	UHeight      *int           `json:"u_height,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

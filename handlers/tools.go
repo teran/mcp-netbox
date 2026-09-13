@@ -517,6 +517,52 @@ type CircuitDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the circuit to delete,required"`
 }
 
+// RackCreateInput represents the writable fields for creating a rack.
+type RackCreateInput struct {
+	Name         string         `json:"name" jsonschema:"rack name (required)"`
+	FacilityID   *string        `json:"facility_id,omitempty" jsonschema:"facility-assigned ID"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Location     *int           `json:"location,omitempty" jsonschema:"location ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: reserved, available, planned, active, decommissioning"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID (look up first)"`
+	Serial       *string        `json:"serial,omitempty" jsonschema:"serial number"`
+	AssetTag     *string        `json:"asset_tag,omitempty" jsonschema:"unique asset tag"`
+	Type         *string        `json:"type,omitempty" jsonschema:"rack type: 2-post-frame, 4-post-frame, 4-post-cabinet, wall-frame, wall-cabinet"`
+	Width        *int           `json:"width,omitempty" jsonschema:"rail-to-rail width in inches: 10, 19, 21, 23"`
+	UHeight      *int           `json:"u_height,omitempty" jsonschema:"height in rack units"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RackUpdateInput represents the writable fields for updating a rack. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type RackUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the rack to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"rack name"`
+	FacilityID   *string        `json:"facility_id,omitempty" jsonschema:"facility-assigned ID"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Location     *int           `json:"location,omitempty" jsonschema:"location ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: reserved, available, planned, active, decommissioning"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID"`
+	Serial       *string        `json:"serial,omitempty" jsonschema:"serial number"`
+	AssetTag     *string        `json:"asset_tag,omitempty" jsonschema:"unique asset tag"`
+	Type         *string        `json:"type,omitempty" jsonschema:"rack type"`
+	Width        *int           `json:"width,omitempty" jsonschema:"rail-to-rail width in inches"`
+	UHeight      *int           `json:"u_height,omitempty" jsonschema:"height in rack units"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RackDeleteInput represents the input fields for deleting a rack.
+type RackDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the rack to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -571,6 +617,11 @@ type ClusterOutput struct {
 // CircuitOutput represents the output for the create/update circuit tools.
 type CircuitOutput struct {
 	Data domain.Circuit `json:"data"`
+}
+
+// RackOutput represents the output for the create/update rack tools.
+type RackOutput struct {
+	Data domain.Rack `json:"data"`
 }
 
 // — write helpers —
@@ -919,6 +970,51 @@ func circuitWriteFromUpdate(in CircuitUpdateInput) domain.CircuitWrite {
 	write.CustomFields = in.CustomFields
 	write.InstallDate = in.InstallDate
 	write.CommitRate = in.CommitRate
+	return write
+}
+
+// rackWriteFromCreate builds a domain.RackWrite from a create input.
+func rackWriteFromCreate(in RackCreateInput) domain.RackWrite {
+	return domain.RackWrite{
+		Name:         in.Name,
+		FacilityID:   in.FacilityID,
+		Site:         in.Site,
+		Location:     in.Location,
+		Tenant:       in.Tenant,
+		Status:       in.Status,
+		Role:         in.Role,
+		Serial:       in.Serial,
+		AssetTag:     in.AssetTag,
+		Type:         in.Type,
+		Width:        in.Width,
+		UHeight:      in.UHeight,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// rackWriteFromUpdate builds a domain.RackWrite from an update input, mapping
+// only the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func rackWriteFromUpdate(in RackUpdateInput) domain.RackWrite {
+	write := domain.RackWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.FacilityID = in.FacilityID
+	write.Site = in.Site
+	write.Location = in.Location
+	write.Tenant = in.Tenant
+	write.Status = in.Status
+	write.Role = in.Role
+	write.Serial = in.Serial
+	write.AssetTag = in.AssetTag
+	write.Type = in.Type
+	write.Width = in.Width
+	write.UHeight = in.UHeight
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
 	return write
 }
 
@@ -1860,6 +1956,71 @@ func NewDeleteCircuitHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 		}
 
 		if err := s.DeleteCircuit(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateRackHandler creates a handler for the create_rack tool.
+func NewCreateRackHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackCreateInput, RackOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in RackCreateInput) (*mcp.CallToolResult, RackOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, RackOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RackOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		rack, err := s.CreateRack(ctx, rackWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, RackOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackOutput{Data: *rack}, nil
+	}
+}
+
+// NewUpdateRackHandler creates a handler for the update_rack tool. It performs
+// a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRackHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackUpdateInput, RackOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in RackUpdateInput) (*mcp.CallToolResult, RackOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, RackOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RackOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		rack, err := s.UpdateRack(ctx, in.ID, rackWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, RackOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackOutput{Data: *rack}, nil
+	}
+}
+
+// NewDeleteRackHandler creates a handler for the delete_rack tool.
+func NewDeleteRackHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in RackDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteRack(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}
