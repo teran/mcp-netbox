@@ -406,3 +406,33 @@ func (s *NetworkService) DeleteInterface(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateCircuitTermination relays a circuit termination create to the
+// repository. ValidationError is wrapped (via %w) and left intact so callers
+// can recover it with errors.As.
+func (s *NetworkService) CreateCircuitTermination(ctx context.Context, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	resp, err := s.repo.CreateCircuitTermination(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create circuit termination: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateCircuitTermination relays a circuit termination update to the
+// repository.
+func (s *NetworkService) UpdateCircuitTermination(ctx context.Context, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	resp, err := s.repo.UpdateCircuitTermination(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update circuit termination: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteCircuitTermination relays a circuit termination delete to the
+// repository.
+func (s *NetworkService) DeleteCircuitTermination(ctx context.Context, id int) error {
+	if err := s.repo.DeleteCircuitTermination(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete circuit termination: %w", err)
+	}
+	return nil
+}

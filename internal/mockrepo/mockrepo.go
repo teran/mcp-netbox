@@ -11,50 +11,53 @@ import (
 // MockRepo is a configurable mock implementation of domain.NetworkRepository.
 // Each method can be set independently via function fields.
 type MockRepo struct {
-	ListSitesFunc               func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error)
-	ListDevicesFunc             func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error)
-	ListIPAddressesFunc         func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error)
-	ListPrefixesFunc            func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error)
-	ListVLANsFunc               func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error)
-	ListVirtualMachinesFunc     func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error)
-	ListClustersFunc            func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error)
-	ListCircuitsFunc            func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error)
-	ListCircuitTerminationsFunc func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error)
-	ListCablesFunc              func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error)
-	ListRacksFunc               func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error)
-	ListInterfacesFunc          func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error)
-	ListVMInterfacesFunc        func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error)
-	GetObjectFunc               func(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error)
-	CreateSiteFunc              func(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error)
-	UpdateSiteFunc              func(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error)
-	DeleteSiteFunc              func(ctx context.Context, token string, id int) error
-	CreateDeviceFunc            func(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error)
-	UpdateDeviceFunc            func(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error)
-	DeleteDeviceFunc            func(ctx context.Context, token string, id int) error
-	CreateIPAddressFunc         func(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error)
-	UpdateIPAddressFunc         func(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error)
-	DeleteIPAddressFunc         func(ctx context.Context, token string, id int) error
-	CreatePrefixFunc            func(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error)
-	UpdatePrefixFunc            func(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error)
-	DeletePrefixFunc            func(ctx context.Context, token string, id int) error
-	CreateVLANFunc              func(ctx context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error)
-	UpdateVLANFunc              func(ctx context.Context, token string, id int, in domain.VLANWrite) (*domain.VLAN, error)
-	DeleteVLANFunc              func(ctx context.Context, token string, id int) error
-	CreateVirtualMachineFunc    func(ctx context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error)
-	UpdateVirtualMachineFunc    func(ctx context.Context, token string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error)
-	DeleteVirtualMachineFunc    func(ctx context.Context, token string, id int) error
-	CreateClusterFunc           func(ctx context.Context, token string, in domain.ClusterWrite) (*domain.Cluster, error)
-	UpdateClusterFunc           func(ctx context.Context, token string, id int, in domain.ClusterWrite) (*domain.Cluster, error)
-	DeleteClusterFunc           func(ctx context.Context, token string, id int) error
-	CreateCircuitFunc           func(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error)
-	UpdateCircuitFunc           func(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error)
-	DeleteCircuitFunc           func(ctx context.Context, token string, id int) error
-	CreateRackFunc              func(ctx context.Context, token string, in domain.RackWrite) (*domain.Rack, error)
-	UpdateRackFunc              func(ctx context.Context, token string, id int, in domain.RackWrite) (*domain.Rack, error)
-	DeleteRackFunc              func(ctx context.Context, token string, id int) error
-	CreateInterfaceFunc         func(ctx context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error)
-	UpdateInterfaceFunc         func(ctx context.Context, token string, id int, in domain.InterfaceWrite) (*domain.Interface, error)
-	DeleteInterfaceFunc         func(ctx context.Context, token string, id int) error
+	ListSitesFunc                func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error)
+	ListDevicesFunc              func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error)
+	ListIPAddressesFunc          func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error)
+	ListPrefixesFunc             func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error)
+	ListVLANsFunc                func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error)
+	ListVirtualMachinesFunc      func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error)
+	ListClustersFunc             func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error)
+	ListCircuitsFunc             func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error)
+	ListCircuitTerminationsFunc  func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error)
+	ListCablesFunc               func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error)
+	ListRacksFunc                func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error)
+	ListInterfacesFunc           func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error)
+	ListVMInterfacesFunc         func(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error)
+	GetObjectFunc                func(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error)
+	CreateSiteFunc               func(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error)
+	UpdateSiteFunc               func(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error)
+	DeleteSiteFunc               func(ctx context.Context, token string, id int) error
+	CreateDeviceFunc             func(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error)
+	UpdateDeviceFunc             func(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error)
+	DeleteDeviceFunc             func(ctx context.Context, token string, id int) error
+	CreateIPAddressFunc          func(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error)
+	UpdateIPAddressFunc          func(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error)
+	DeleteIPAddressFunc          func(ctx context.Context, token string, id int) error
+	CreatePrefixFunc             func(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error)
+	UpdatePrefixFunc             func(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error)
+	DeletePrefixFunc             func(ctx context.Context, token string, id int) error
+	CreateVLANFunc               func(ctx context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error)
+	UpdateVLANFunc               func(ctx context.Context, token string, id int, in domain.VLANWrite) (*domain.VLAN, error)
+	DeleteVLANFunc               func(ctx context.Context, token string, id int) error
+	CreateVirtualMachineFunc     func(ctx context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error)
+	UpdateVirtualMachineFunc     func(ctx context.Context, token string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error)
+	DeleteVirtualMachineFunc     func(ctx context.Context, token string, id int) error
+	CreateClusterFunc            func(ctx context.Context, token string, in domain.ClusterWrite) (*domain.Cluster, error)
+	UpdateClusterFunc            func(ctx context.Context, token string, id int, in domain.ClusterWrite) (*domain.Cluster, error)
+	DeleteClusterFunc            func(ctx context.Context, token string, id int) error
+	CreateCircuitFunc            func(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error)
+	UpdateCircuitFunc            func(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error)
+	DeleteCircuitFunc            func(ctx context.Context, token string, id int) error
+	CreateRackFunc               func(ctx context.Context, token string, in domain.RackWrite) (*domain.Rack, error)
+	UpdateRackFunc               func(ctx context.Context, token string, id int, in domain.RackWrite) (*domain.Rack, error)
+	DeleteRackFunc               func(ctx context.Context, token string, id int) error
+	CreateInterfaceFunc          func(ctx context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error)
+	UpdateInterfaceFunc          func(ctx context.Context, token string, id int, in domain.InterfaceWrite) (*domain.Interface, error)
+	DeleteInterfaceFunc          func(ctx context.Context, token string, id int) error
+	CreateCircuitTerminationFunc func(ctx context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error)
+	UpdateCircuitTerminationFunc func(ctx context.Context, token string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error)
+	DeleteCircuitTerminationFunc func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -231,6 +234,18 @@ func (m *MockRepo) UpdateInterface(ctx context.Context, token string, id int, in
 
 func (m *MockRepo) DeleteInterface(ctx context.Context, token string, id int) error {
 	return m.DeleteInterfaceFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateCircuitTermination(ctx context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	return m.CreateCircuitTerminationFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateCircuitTermination(ctx context.Context, token string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	return m.UpdateCircuitTerminationFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteCircuitTermination(ctx context.Context, token string, id int) error {
+	return m.DeleteCircuitTerminationFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -410,5 +425,17 @@ func (r *NilRepo) UpdateInterface(ctx context.Context, token string, id int, in 
 }
 
 func (r *NilRepo) DeleteInterface(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateCircuitTermination(ctx context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	return &domain.CircuitTermination{ID: 1, TermSide: in.TermSide}, nil
+}
+
+func (r *NilRepo) UpdateCircuitTermination(ctx context.Context, token string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	return &domain.CircuitTermination{ID: id, TermSide: in.TermSide}, nil
+}
+
+func (r *NilRepo) DeleteCircuitTermination(ctx context.Context, token string, id int) error {
 	return nil
 }

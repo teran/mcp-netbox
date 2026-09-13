@@ -188,6 +188,21 @@ type WireInterfaceWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireCircuitTerminationWrite is the wire request model for circuit
+// termination create/update (POST/PATCH body). Its json tags intentionally
+// mirror NetBox's writable fields. Circuit and Site are numeric IDs; term_side
+// is A or Z.
+type WireCircuitTerminationWrite struct {
+	Circuit       *int           `json:"circuit,omitempty"`
+	TermSide      string         `json:"term_side,omitempty"`
+	Site          *int           `json:"site,omitempty"`
+	Speed         *int           `json:"speed,omitempty"`
+	UpstreamSpeed *int           `json:"upstream_speed,omitempty"`
+	Description   *string        `json:"description,omitempty"`
+	Tags          []string       `json:"tags,omitempty"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

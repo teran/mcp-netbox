@@ -1902,6 +1902,149 @@ func TestNetworkService_DeleteInterface(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreateCircuitTermination(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCircuitTerminationFunc: func(_ context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.CircuitTermination{ID: 1, TermSide: in.TermSide}, nil
+			},
+		})
+		ct, err := svc.CreateCircuitTermination(context.Background(), domain.CircuitTerminationWrite{TermSide: "A"})
+		if err != nil {
+			t.Fatalf("CreateCircuitTermination() returned error: %v", err)
+		}
+		if ct.ID != 1 || ct.TermSide != "A" {
+			t.Errorf("ct = %+v, want id 1 term_side A", ct)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"term_side":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCircuitTerminationFunc: func(_ context.Context, _ string, _ domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateCircuitTermination(context.Background(), domain.CircuitTerminationWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCircuitTerminationFunc: func(_ context.Context, _ string, _ domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateCircuitTermination(context.Background(), domain.CircuitTerminationWrite{TermSide: "A"})
+		if err == nil || !containsService(err.Error(), "create circuit termination:") {
+			t.Errorf("err = %v, want it to contain 'create circuit termination:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateCircuitTermination(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCircuitTerminationFunc: func(_ context.Context, _ string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+				return &domain.CircuitTermination{ID: id, TermSide: in.TermSide}, nil
+			},
+		})
+		ct, err := svc.UpdateCircuitTermination(context.Background(), 7, domain.CircuitTerminationWrite{TermSide: "Z"})
+		if err != nil {
+			t.Fatalf("UpdateCircuitTermination() returned error: %v", err)
+		}
+		if ct.ID != 7 {
+			t.Errorf("ct = %+v, want id 7", ct)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"site":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCircuitTerminationFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateCircuitTermination(context.Background(), 7, domain.CircuitTerminationWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCircuitTerminationFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateCircuitTermination(context.Background(), 7, domain.CircuitTerminationWrite{})
+		if err == nil || !containsService(err.Error(), "update circuit termination:") {
+			t.Errorf("err = %v, want it to contain 'update circuit termination:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteCircuitTermination(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCircuitTerminationFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteCircuitTermination(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteCircuitTermination() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCircuitTerminationFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteCircuitTermination(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCircuitTerminationFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteCircuitTermination(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete circuit termination:") {
+			t.Errorf("err = %v, want it to contain 'delete circuit termination:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

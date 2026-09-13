@@ -1835,6 +1835,250 @@ func TestClient_WriteMarshalErrors(t *testing.T) {
 	if _, err := client.UpdateInterface(ctx, "tok", 7, badInterface); err == nil {
 		t.Error("UpdateInterface: expected marshal error, got nil")
 	}
+
+	badCT := domain.CircuitTerminationWrite{TermSide: "A", CustomFields: unmarshalableCustomFields()}
+	if _, err := client.CreateCircuitTermination(ctx, "tok", badCT); err == nil {
+		t.Error("CreateCircuitTermination: expected marshal error, got nil")
+	}
+	if _, err := client.UpdateCircuitTermination(ctx, "tok", 7, badCT); err == nil {
+		t.Error("UpdateCircuitTermination: expected marshal error, got nil")
+	}
+}
+
+//nolint:gocognit // exhaustive per-path write test
+func TestClient_CreateCircuitTermination(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath, gotCT, gotAuth string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotCT = r.Header.Get("Content-Type")
+			gotAuth = r.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"id":1,"term_side":"A","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		circ := 2
+		site := 3
+		ct, err := client.CreateCircuitTermination(context.Background(), "tok", domain.CircuitTerminationWrite{TermSide: "A", Circuit: &circ, Site: &site})
+		if err != nil {
+			t.Fatalf("CreateCircuitTermination() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPost {
+			t.Errorf("method = %q, want POST", gotMethod)
+		}
+		if gotPath != "/api/circuits/circuit-terminations/" {
+			t.Errorf("path = %q, want /api/circuits/circuit-terminations/", gotPath)
+		}
+		if gotCT != "application/json" {
+			t.Errorf("Content-Type = %q, want application/json", gotCT)
+		}
+		if gotAuth != "Bearer tok" {
+			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["term_side"] != "A" {
+			t.Errorf("request body = %s, want term_side A", gotBody)
+		}
+		if reqBody["circuit"] != float64(2) {
+			t.Errorf("request body = %s, want circuit 2", gotBody)
+		}
+		if reqBody["site"] != float64(3) {
+			t.Errorf("request body = %s, want site 3", gotBody)
+		}
+		if ct.ID != 1 || ct.TermSide != "A" {
+			t.Errorf("ct = %+v, want id 1 term_side A", ct)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"term_side":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateCircuitTermination(context.Background(), "tok", domain.CircuitTerminationWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if ve.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+
+	t.Run("not found 404", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateCircuitTermination(context.Background(), "tok", domain.CircuitTerminationWrite{TermSide: "A"})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if errors.As(err, &ve) {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		}
+	})
+}
+
+func TestClient_UpdateCircuitTermination(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success patch", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":7,"term_side":"A","created":"","last_updated":""}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		speed := 1000000
+		ct, err := client.UpdateCircuitTermination(context.Background(), "tok", 7, domain.CircuitTerminationWrite{Speed: &speed})
+		if err != nil {
+			t.Fatalf("UpdateCircuitTermination() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPatch {
+			t.Errorf("method = %q, want PATCH", gotMethod)
+		}
+		if gotPath != "/api/circuits/circuit-terminations/7/" {
+			t.Errorf("path = %q, want /api/circuits/circuit-terminations/7/", gotPath)
+		}
+		if ct.ID != 7 {
+			t.Errorf("ct = %+v, want id 7", ct)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["speed"] != float64(1000000) {
+			t.Errorf("request body = %s, want speed present", gotBody)
+		}
+		if _, ok := reqBody["term_side"]; ok {
+			t.Errorf("request body = %s, want term_side omitted (not provided)", gotBody)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"site":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.UpdateCircuitTermination(context.Background(), "tok", 7, domain.CircuitTerminationWrite{TermSide: "A"})
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_DeleteCircuitTermination(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success 204", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteCircuitTermination(context.Background(), "tok", 3); err != nil {
+			t.Fatalf("DeleteCircuitTermination() returned error: %v", err)
+		}
+		if gotMethod != http.MethodDelete {
+			t.Errorf("method = %q, want DELETE", gotMethod)
+		}
+		if gotPath != "/api/circuits/circuit-terminations/3/" {
+			t.Errorf("path = %q, want /api/circuits/circuit-terminations/3/", gotPath)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"detail":"Cannot delete object with dependent objects."}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		err := client.DeleteCircuitTermination(context.Background(), "tok", 3)
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+
+	t.Run("not found 404", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteCircuitTermination(context.Background(), "tok", 999); err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+}
+
+func TestCircuitTerminationWriteToWire(t *testing.T) {
+	t.Parallel()
+
+	circ := 2
+	site := 3
+	speed := 1000000
+	in := domain.CircuitTerminationWrite{TermSide: "A", Circuit: &circ, Site: &site, Speed: &speed}
+	w := circuitTerminationWriteToWire(in)
+	if w.TermSide != "A" || w.Circuit == nil || *w.Circuit != 2 || w.Site == nil || *w.Site != 3 || w.Speed == nil || *w.Speed != 1000000 {
+		t.Errorf("wire = %+v, want term_side A circuit 2 site 3 speed 1000000", w)
+	}
 }
 
 //nolint:gocognit // exhaustive per-path write test

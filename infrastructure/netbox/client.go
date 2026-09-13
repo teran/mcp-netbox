@@ -787,6 +787,46 @@ func (c *Client) DeleteInterface(ctx context.Context, token string, id int) erro
 	return mErr
 }
 
+// CreateCircuitTermination creates a new circuit termination via POST
+// /api/circuits/circuit-terminations/.
+func (c *Client) CreateCircuitTermination(ctx context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	payload, err := json.Marshal(circuitTerminationWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit termination create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/circuit-terminations/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCircuitTermination(raw)
+}
+
+// UpdateCircuitTermination partially updates a circuit termination via PATCH
+// /api/circuits/circuit-terminations/<id>/.
+func (c *Client) UpdateCircuitTermination(ctx context.Context, token string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	payload, err := json.Marshal(circuitTerminationWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit termination update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/circuit-terminations/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCircuitTermination(raw)
+}
+
+// DeleteCircuitTermination deletes a circuit termination via DELETE
+// /api/circuits/circuit-terminations/<id>/.
+func (c *Client) DeleteCircuitTermination(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/circuits/circuit-terminations/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -1117,6 +1157,34 @@ func unmarshalInterface(raw domain.RawObject) (*domain.Interface, error) {
 		return nil, fmt.Errorf("failed to unmarshal interface: %w", err)
 	}
 	d := wireInterfaceToDomain(w)
+	return &d, nil
+}
+
+// circuitTerminationWriteToWire converts a domain circuit termination write DTO
+// to the wire request model. The fields map one-to-one; nil pointers on the
+// domain side remain nil on the wire side so json.Marshal omits them (required
+// for a partial PATCH body).
+func circuitTerminationWriteToWire(in domain.CircuitTerminationWrite) WireCircuitTerminationWrite {
+	return WireCircuitTerminationWrite{
+		Circuit:       in.Circuit,
+		TermSide:      in.TermSide,
+		Site:          in.Site,
+		Speed:         in.Speed,
+		UpstreamSpeed: in.UpstreamSpeed,
+		Description:   in.Description,
+		Tags:          in.Tags,
+		CustomFields:  in.CustomFields,
+	}
+}
+
+// unmarshalCircuitTermination decodes a circuit termination response body into a
+// domain.CircuitTermination.
+func unmarshalCircuitTermination(raw domain.RawObject) (*domain.CircuitTermination, error) {
+	var w WireCircuitTermination
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal circuit termination: %w", err)
+	}
+	d := wireCircuitTerminationToDomain(w)
 	return &d, nil
 }
 

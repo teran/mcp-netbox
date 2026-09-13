@@ -600,6 +600,40 @@ type InterfaceDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the interface to delete,required"`
 }
 
+// CircuitTerminationCreateInput represents the writable fields for creating a
+// circuit termination.
+type CircuitTerminationCreateInput struct {
+	Circuit       *int           `json:"circuit,omitempty" jsonschema:"circuit ID (required)"`
+	TermSide      string         `json:"term_side" jsonschema:"termination side, A or Z (required)"`
+	Site          *int           `json:"site,omitempty" jsonschema:"site ID (required)"`
+	Speed         *int           `json:"speed,omitempty" jsonschema:"termination speed in kbps"`
+	UpstreamSpeed *int           `json:"upstream_speed,omitempty" jsonschema:"upstream speed in kbps"`
+	Description   *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags          []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CircuitTerminationUpdateInput represents the writable fields for updating a
+// circuit termination. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type CircuitTerminationUpdateInput struct {
+	ID            int            `json:"id" jsonschema:"numeric ID of the circuit termination to update,required"`
+	Circuit       *int           `json:"circuit,omitempty" jsonschema:"circuit ID"`
+	TermSide      *string        `json:"term_side,omitempty" jsonschema:"termination side, A or Z"`
+	Site          *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Speed         *int           `json:"speed,omitempty" jsonschema:"termination speed in kbps"`
+	UpstreamSpeed *int           `json:"upstream_speed,omitempty" jsonschema:"upstream speed in kbps"`
+	Description   *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags          []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CircuitTerminationDeleteInput represents the input fields for deleting a
+// circuit termination.
+type CircuitTerminationDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the circuit termination to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -664,6 +698,12 @@ type RackOutput struct {
 // InterfaceOutput represents the output for the create/update interface tools.
 type InterfaceOutput struct {
 	Data domain.Interface `json:"data"`
+}
+
+// CircuitTerminationOutput represents the output for the create/update circuit
+// termination tools.
+type CircuitTerminationOutput struct {
+	Data domain.CircuitTermination `json:"data"`
 }
 
 // — write helpers —
@@ -1090,6 +1130,39 @@ func interfaceWriteFromUpdate(in InterfaceUpdateInput) domain.InterfaceWrite {
 	write.MTU = in.MTU
 	write.MACAddress = in.MACAddress
 	write.Speed = in.Speed
+	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// circuitTerminationWriteFromCreate builds a domain.CircuitTerminationWrite
+// from a create input.
+func circuitTerminationWriteFromCreate(in CircuitTerminationCreateInput) domain.CircuitTerminationWrite {
+	return domain.CircuitTerminationWrite{
+		Circuit:       in.Circuit,
+		TermSide:      in.TermSide,
+		Site:          in.Site,
+		Speed:         in.Speed,
+		UpstreamSpeed: in.UpstreamSpeed,
+		Description:   in.Description,
+		Tags:          in.Tags,
+		CustomFields:  in.CustomFields,
+	}
+}
+
+// circuitTerminationWriteFromUpdate builds a domain.CircuitTerminationWrite
+// from an update input, mapping only the explicitly-provided (non-nil) fields
+// so the PATCH body is minimal.
+func circuitTerminationWriteFromUpdate(in CircuitTerminationUpdateInput) domain.CircuitTerminationWrite {
+	write := domain.CircuitTerminationWrite{}
+	if in.TermSide != nil {
+		write.TermSide = *in.TermSide
+	}
+	write.Circuit = in.Circuit
+	write.Site = in.Site
+	write.Speed = in.Speed
+	write.UpstreamSpeed = in.UpstreamSpeed
 	write.Description = in.Description
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
@@ -2170,6 +2243,80 @@ func NewDeleteInterfaceHandler(svc *application.NetworkService) mcp.ToolHandlerF
 		}
 
 		if err := s.DeleteInterface(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateCircuitTerminationHandler creates a handler for the
+// create_circuit_termination tool.
+func NewCreateCircuitTerminationHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTerminationCreateInput, CircuitTerminationOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationCreateInput) (*mcp.CallToolResult, CircuitTerminationOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTerminationOutput{}, errServiceNotAvailable
+		}
+		if in.TermSide == "" {
+			return &mcp.CallToolResult{IsError: true}, CircuitTerminationOutput{}, fmt.Errorf("term_side is required")
+		}
+		if in.Circuit == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTerminationOutput{}, fmt.Errorf("circuit is required")
+		}
+		if in.Site == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTerminationOutput{}, fmt.Errorf("site is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		ct, err := s.CreateCircuitTermination(ctx, circuitTerminationWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, CircuitTerminationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitTerminationOutput{Data: *ct}, nil
+	}
+}
+
+// NewUpdateCircuitTerminationHandler creates a handler for the
+// update_circuit_termination tool. It performs a partial-merge PATCH using only
+// the explicitly provided fields.
+func NewUpdateCircuitTerminationHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTerminationUpdateInput, CircuitTerminationOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationUpdateInput) (*mcp.CallToolResult, CircuitTerminationOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTerminationOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTerminationOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		ct, err := s.UpdateCircuitTermination(ctx, in.ID, circuitTerminationWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, CircuitTerminationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitTerminationOutput{Data: *ct}, nil
+	}
+}
+
+// NewDeleteCircuitTerminationHandler creates a handler for the
+// delete_circuit_termination tool.
+func NewDeleteCircuitTerminationHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTerminationDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteCircuitTermination(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

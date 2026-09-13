@@ -283,5 +283,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a device interface from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the interface, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_circuit_termination",
+			Title:        "Create Circuit Termination",
+			Description:  "Create a new circuit termination in NetBox. circuit, term_side (A or Z) and site are required; all other fields are optional. Provide circuit and site as numeric IDs (look them up first), speed and upstream_speed in kbps, and tags as a list of tag names. Returns the created circuit termination.",
+			Instructions: "Use only when the caller explicitly wants to create a circuit termination and provides a circuit, a term_side and a site. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_circuit_termination",
+			Title:        "Update Circuit Termination",
+			Description:  "Partially update a circuit termination in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated circuit termination.",
+			Instructions: "Use to modify one or more fields of an existing circuit termination. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_circuit_termination",
+			Title:        "Delete Circuit Termination",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a circuit termination from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the circuit termination, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

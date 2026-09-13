@@ -295,4 +295,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_interface"], metrics, "delete_interface", WrapToolHandler[InterfaceDeleteInput, struct{}](metrics, "delete_interface", func(ctx context.Context, req *mcp.CallToolRequest, in InterfaceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteInterfaceHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_circuit_termination"], metrics, "create_circuit_termination", WrapToolHandler[CircuitTerminationCreateInput, CircuitTerminationOutput](metrics, "create_circuit_termination", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationCreateInput) (*mcp.CallToolResult, CircuitTerminationOutput, error) {
+		return NewCreateCircuitTerminationHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_circuit_termination"], metrics, "update_circuit_termination", WrapToolHandler[CircuitTerminationUpdateInput, CircuitTerminationOutput](metrics, "update_circuit_termination", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationUpdateInput) (*mcp.CallToolResult, CircuitTerminationOutput, error) {
+		return NewUpdateCircuitTerminationHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_circuit_termination"], metrics, "delete_circuit_termination", WrapToolHandler[CircuitTerminationDeleteInput, struct{}](metrics, "delete_circuit_termination", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteCircuitTerminationHandler(svc)(ctx, req, in)
+	}))
 }

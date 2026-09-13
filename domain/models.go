@@ -545,6 +545,25 @@ type InterfaceWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// CircuitTerminationWrite is the domain DTO for creating or updating a NetBox
+// circuit termination. It carries only the writable fields.
+//
+// TermSide is a plain string because it is required on create; the omitempty
+// tag drops it from a PATCH body when not provided. Circuit and Site are
+// required on create. Optional scalar fields are pointers so that a
+// partial-update (PATCH) can distinguish "not provided" (nil) from "explicitly
+// set to empty". Circuit and Site are numeric NetBox IDs.
+type CircuitTerminationWrite struct {
+	Circuit       *int           `json:"circuit,omitempty"`
+	TermSide      string         `json:"term_side,omitempty"`
+	Site          *int           `json:"site,omitempty"`
+	Speed         *int           `json:"speed,omitempty"`
+	UpstreamSpeed *int           `json:"upstream_speed,omitempty"`
+	Description   *string        `json:"description,omitempty"`
+	Tags          []string       `json:"tags,omitempty"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

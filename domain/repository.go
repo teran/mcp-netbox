@@ -90,4 +90,8 @@ type NetworkRepository interface {
 	CreateInterface(ctx context.Context, token string, in InterfaceWrite) (*Interface, error)
 	UpdateInterface(ctx context.Context, token string, id int, in InterfaceWrite) (*Interface, error)
 	DeleteInterface(ctx context.Context, token string, id int) error
+
+	CreateCircuitTermination(ctx context.Context, token string, in CircuitTerminationWrite) (*CircuitTermination, error)
+	UpdateCircuitTermination(ctx context.Context, token string, id int, in CircuitTerminationWrite) (*CircuitTermination, error)
+	DeleteCircuitTermination(ctx context.Context, token string, id int) error
 }

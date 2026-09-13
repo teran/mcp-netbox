@@ -373,6 +373,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteInterface = %v", err)
 		}
 	})
+	t.Run("CreateCircuitTermination", func(t *testing.T) {
+		got, err := (&MockRepo{CreateCircuitTerminationFunc: func(_ context.Context, _ string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+			return &domain.CircuitTermination{ID: 1, TermSide: in.TermSide}, nil
+		}}).CreateCircuitTermination(context.Background(), "t", domain.CircuitTerminationWrite{TermSide: "A"})
+		if err != nil || got == nil || got.TermSide != "A" {
+			t.Errorf("CreateCircuitTermination = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateCircuitTermination", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateCircuitTerminationFunc: func(_ context.Context, _ string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+			return &domain.CircuitTermination{ID: id, TermSide: in.TermSide}, nil
+		}}).UpdateCircuitTermination(context.Background(), "t", 7, domain.CircuitTerminationWrite{TermSide: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateCircuitTermination = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteCircuitTermination", func(t *testing.T) {
+		err := (&MockRepo{DeleteCircuitTerminationFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteCircuitTermination(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteCircuitTermination = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -566,5 +593,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteInterface(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteInterface = %v", err)
+	}
+	if ct, err := repo.CreateCircuitTermination(ctx, "t", domain.CircuitTerminationWrite{TermSide: "A"}); err != nil || ct.TermSide != "A" {
+		t.Errorf("CreateCircuitTermination = (%v, %v)", ct, err)
+	}
+	if ct, err := repo.UpdateCircuitTermination(ctx, "t", 7, domain.CircuitTerminationWrite{TermSide: "A"}); err != nil || ct.ID != 7 {
+		t.Errorf("UpdateCircuitTermination = (%v, %v)", ct, err)
+	}
+	if err := repo.DeleteCircuitTermination(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteCircuitTermination = %v", err)
 	}
 }

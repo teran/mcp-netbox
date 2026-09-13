@@ -187,6 +187,18 @@ func (s *stubRepo) DeleteInterface(ctx context.Context, token string, id int) er
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateCircuitTermination(ctx context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateCircuitTermination(ctx context.Context, token string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteCircuitTermination(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 
