@@ -453,6 +453,27 @@ type VirtualMachineWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// ClusterWrite is the domain DTO for creating or updating a NetBox cluster. It
+// carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. ClusterType (type) is required
+// on create. Optional scalar fields are pointers so that a partial-update
+// (PATCH) can distinguish "not provided" (nil) from "explicitly set to empty".
+// References to related objects (type, group, site, tenant) are their numeric
+// NetBox IDs.
+type ClusterWrite struct {
+	Name         string         `json:"name,omitempty"`
+	ClusterType  *int           `json:"type,omitempty"`
+	ClusterGroup *int           `json:"group,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

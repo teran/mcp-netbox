@@ -74,4 +74,8 @@ type NetworkRepository interface {
 	CreateVirtualMachine(ctx context.Context, token string, in VirtualMachineWrite) (*VirtualMachine, error)
 	UpdateVirtualMachine(ctx context.Context, token string, id int, in VirtualMachineWrite) (*VirtualMachine, error)
 	DeleteVirtualMachine(ctx context.Context, token string, id int) error
+
+	CreateCluster(ctx context.Context, token string, in ClusterWrite) (*Cluster, error)
+	UpdateCluster(ctx context.Context, token string, id int, in ClusterWrite) (*Cluster, error)
+	DeleteCluster(ctx context.Context, token string, id int) error
 }

@@ -298,3 +298,30 @@ func (s *NetworkService) DeleteVirtualMachine(ctx context.Context, id int) error
 	}
 	return nil
 }
+
+// CreateCluster relays a cluster create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateCluster(ctx context.Context, in domain.ClusterWrite) (*domain.Cluster, error) {
+	resp, err := s.repo.CreateCluster(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create cluster: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateCluster relays a cluster update to the repository.
+func (s *NetworkService) UpdateCluster(ctx context.Context, id int, in domain.ClusterWrite) (*domain.Cluster, error) {
+	resp, err := s.repo.UpdateCluster(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update cluster: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteCluster relays a cluster delete to the repository.
+func (s *NetworkService) DeleteCluster(ctx context.Context, id int) error {
+	if err := s.repo.DeleteCluster(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete cluster: %w", err)
+	}
+	return nil
+}

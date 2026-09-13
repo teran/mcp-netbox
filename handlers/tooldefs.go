@@ -211,5 +211,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a virtual machine from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the virtual machine, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_cluster",
+			Title:        "Create Cluster",
+			Description:  "Create a new cluster in NetBox. name and type (cluster type) are required; all other fields are optional. Provide type/group/site/tenant as numeric IDs (look them up first), and tags as a list of tag names. Returns the created cluster.",
+			Instructions: "Use only when the caller explicitly wants to create a cluster and provides a name and a cluster type. This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:         "update_cluster",
+			Title:        "Update Cluster",
+			Description:  "Partially update a cluster in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated cluster.",
+			Instructions: "Use to modify one or more fields of an existing cluster. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_cluster",
+			Title:        "Delete Cluster",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a cluster from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the cluster, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

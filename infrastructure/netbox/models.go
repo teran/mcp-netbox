@@ -116,6 +116,22 @@ type WireVirtualMachineWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireClusterWrite is the wire request model for cluster create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields. References to related objects (type, group, site, tenant) are numeric
+// IDs.
+type WireClusterWrite struct {
+	Name         string         `json:"name,omitempty"`
+	ClusterType  *int           `json:"type,omitempty"`
+	ClusterGroup *int           `json:"group,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

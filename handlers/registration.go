@@ -247,4 +247,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_virtual_machine"], metrics, "delete_virtual_machine", WrapToolHandler[VirtualMachineDeleteInput, struct{}](metrics, "delete_virtual_machine", func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachineDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteVirtualMachineHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_cluster"], metrics, "create_cluster", WrapToolHandler[ClusterCreateInput, ClusterOutput](metrics, "create_cluster", func(ctx context.Context, req *mcp.CallToolRequest, in ClusterCreateInput) (*mcp.CallToolResult, ClusterOutput, error) {
+		return NewCreateClusterHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_cluster"], metrics, "update_cluster", WrapToolHandler[ClusterUpdateInput, ClusterOutput](metrics, "update_cluster", func(ctx context.Context, req *mcp.CallToolRequest, in ClusterUpdateInput) (*mcp.CallToolResult, ClusterOutput, error) {
+		return NewUpdateClusterHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_cluster"], metrics, "delete_cluster", WrapToolHandler[ClusterDeleteInput, struct{}](metrics, "delete_cluster", func(ctx context.Context, req *mcp.CallToolRequest, in ClusterDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteClusterHandler(svc)(ctx, req, in)
+	}))
 }

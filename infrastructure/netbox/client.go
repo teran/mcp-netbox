@@ -638,6 +638,44 @@ func (c *Client) DeleteVirtualMachine(ctx context.Context, token string, id int)
 	return mErr
 }
 
+// CreateCluster creates a new cluster via POST /api/virtualization/clusters/.
+func (c *Client) CreateCluster(ctx context.Context, token string, in domain.ClusterWrite) (*domain.Cluster, error) {
+	payload, err := json.Marshal(clusterWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal cluster create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/virtualization/clusters/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCluster(raw)
+}
+
+// UpdateCluster partially updates a cluster via PATCH
+// /api/virtualization/clusters/<id>/.
+func (c *Client) UpdateCluster(ctx context.Context, token string, id int, in domain.ClusterWrite) (*domain.Cluster, error) {
+	payload, err := json.Marshal(clusterWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal cluster update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/virtualization/clusters/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCluster(raw)
+}
+
+// DeleteCluster deletes a cluster via DELETE /api/virtualization/clusters/<id>/.
+func (c *Client) DeleteCluster(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/virtualization/clusters/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -848,6 +886,34 @@ func unmarshalVirtualMachine(raw domain.RawObject) (*domain.VirtualMachine, erro
 		return nil, fmt.Errorf("failed to unmarshal virtual machine: %w", err)
 	}
 	d := wireVirtualMachineToDomain(w)
+	return &d, nil
+}
+
+// clusterWriteToWire converts a domain cluster write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func clusterWriteToWire(in domain.ClusterWrite) WireClusterWrite {
+	return WireClusterWrite{
+		Name:         in.Name,
+		ClusterType:  in.ClusterType,
+		ClusterGroup: in.ClusterGroup,
+		Site:         in.Site,
+		Tenant:       in.Tenant,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalCluster decodes a cluster response body into a domain.Cluster.
+func unmarshalCluster(raw domain.RawObject) (*domain.Cluster, error) {
+	var w WireCluster
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal cluster: %w", err)
+	}
+	d := wireClusterToDomain(w)
 	return &d, nil
 }
 

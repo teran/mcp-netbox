@@ -445,6 +445,40 @@ type VirtualMachineDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the virtual machine to delete,required"`
 }
 
+// ClusterCreateInput represents the writable fields for creating a cluster.
+type ClusterCreateInput struct {
+	Name         string         `json:"name" jsonschema:"cluster name (required)"`
+	ClusterType  *int           `json:"type,omitempty" jsonschema:"cluster type ID (required)"`
+	ClusterGroup *int           `json:"group,omitempty" jsonschema:"cluster group ID"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ClusterUpdateInput represents the writable fields for updating a cluster. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type ClusterUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the cluster to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"cluster name"`
+	ClusterType  *int           `json:"type,omitempty" jsonschema:"cluster type ID"`
+	ClusterGroup *int           `json:"group,omitempty" jsonschema:"cluster group ID"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ClusterDeleteInput represents the input fields for deleting a cluster.
+type ClusterDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the cluster to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -489,6 +523,11 @@ type VLANOutput struct {
 // machine tools.
 type VirtualMachineOutput struct {
 	Data domain.VirtualMachine `json:"data"`
+}
+
+// ClusterOutput represents the output for the create/update cluster tools.
+type ClusterOutput struct {
+	Data domain.Cluster `json:"data"`
 }
 
 // — write helpers —
@@ -762,6 +801,40 @@ func virtualMachineWriteFromUpdate(in VirtualMachineUpdateInput) domain.VirtualM
 	write.VCPUs = in.VCPUs
 	write.Memory = in.Memory
 	write.Disk = in.Disk
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// clusterWriteFromCreate builds a domain.ClusterWrite from a create input.
+func clusterWriteFromCreate(in ClusterCreateInput) domain.ClusterWrite {
+	return domain.ClusterWrite{
+		Name:         in.Name,
+		ClusterType:  in.ClusterType,
+		ClusterGroup: in.ClusterGroup,
+		Site:         in.Site,
+		Tenant:       in.Tenant,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// clusterWriteFromUpdate builds a domain.ClusterWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func clusterWriteFromUpdate(in ClusterUpdateInput) domain.ClusterWrite {
+	write := domain.ClusterWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.ClusterType = in.ClusterType
+	write.ClusterGroup = in.ClusterGroup
+	write.Site = in.Site
+	write.Tenant = in.Tenant
+	write.Description = in.Description
 	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
@@ -1567,6 +1640,74 @@ func NewDeleteVirtualMachineHandler(svc *application.NetworkService) mcp.ToolHan
 		}
 
 		if err := s.DeleteVirtualMachine(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateClusterHandler creates a handler for the create_cluster tool.
+func NewCreateClusterHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClusterCreateInput, ClusterOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ClusterCreateInput) (*mcp.CallToolResult, ClusterOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ClusterOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ClusterOutput{}, fmt.Errorf("name is required")
+		}
+		if in.ClusterType == nil {
+			return &mcp.CallToolResult{IsError: true}, ClusterOutput{}, fmt.Errorf("type (cluster type) is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		cluster, err := s.CreateCluster(ctx, clusterWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ClusterOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ClusterOutput{Data: *cluster}, nil
+	}
+}
+
+// NewUpdateClusterHandler creates a handler for the update_cluster tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateClusterHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClusterUpdateInput, ClusterOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ClusterUpdateInput) (*mcp.CallToolResult, ClusterOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ClusterOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ClusterOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		cluster, err := s.UpdateCluster(ctx, in.ID, clusterWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ClusterOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ClusterOutput{Data: *cluster}, nil
+	}
+}
+
+// NewDeleteClusterHandler creates a handler for the delete_cluster tool.
+func NewDeleteClusterHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClusterDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ClusterDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteCluster(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

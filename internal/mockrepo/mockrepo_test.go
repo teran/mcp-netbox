@@ -292,6 +292,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteVirtualMachine = %v", err)
 		}
 	})
+	t.Run("CreateCluster", func(t *testing.T) {
+		got, err := (&MockRepo{CreateClusterFunc: func(_ context.Context, _ string, in domain.ClusterWrite) (*domain.Cluster, error) {
+			return &domain.Cluster{ID: 1, Name: in.Name}, nil
+		}}).CreateCluster(context.Background(), "t", domain.ClusterWrite{Name: "prod"})
+		if err != nil || got == nil || got.Name != "prod" {
+			t.Errorf("CreateCluster = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateCluster", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateClusterFunc: func(_ context.Context, _ string, id int, in domain.ClusterWrite) (*domain.Cluster, error) {
+			return &domain.Cluster{ID: id, Name: in.Name}, nil
+		}}).UpdateCluster(context.Background(), "t", 7, domain.ClusterWrite{Name: "prod"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateCluster = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteCluster", func(t *testing.T) {
+		err := (&MockRepo{DeleteClusterFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteCluster(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteCluster = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -306,7 +333,7 @@ func TestMockRepo_PropagatesError(t *testing.T) {
 	}
 }
 
-//nolint:gocognit,gocyclo // exhaustive per-method table test over every repository method
+//nolint:gocognit,gocyclo,maintidx // exhaustive per-method table test over every repository method
 func TestNilRepo_AllMethods(t *testing.T) {
 	t.Parallel()
 
@@ -422,5 +449,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteVirtualMachine(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVirtualMachine = %v", err)
+	}
+	if c, err := repo.CreateCluster(ctx, "t", domain.ClusterWrite{Name: "prod"}); err != nil || c.Name != "prod" {
+		t.Errorf("CreateCluster = (%v, %v)", c, err)
+	}
+	if c, err := repo.UpdateCluster(ctx, "t", 7, domain.ClusterWrite{Name: "prod"}); err != nil || c.ID != 7 {
+		t.Errorf("UpdateCluster = (%v, %v)", c, err)
+	}
+	if err := repo.DeleteCluster(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteCluster = %v", err)
 	}
 }

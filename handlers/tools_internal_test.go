@@ -139,6 +139,18 @@ func (s *stubRepo) DeleteVirtualMachine(ctx context.Context, token string, id in
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateCluster(ctx context.Context, token string, in domain.ClusterWrite) (*domain.Cluster, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateCluster(ctx context.Context, token string, id int, in domain.ClusterWrite) (*domain.Cluster, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteCluster(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

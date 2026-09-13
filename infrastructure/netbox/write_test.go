@@ -1354,6 +1354,204 @@ func TestVirtualMachineWriteToWire(t *testing.T) {
 	}
 }
 
+func TestClient_CreateCluster(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath, gotCT, gotAuth string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotCT = r.Header.Get("Content-Type")
+			gotAuth = r.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"id":1,"name":"prod","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		ct := 5
+		cluster, err := client.CreateCluster(context.Background(), "tok", domain.ClusterWrite{Name: "prod", ClusterType: &ct})
+		if err != nil {
+			t.Fatalf("CreateCluster() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPost {
+			t.Errorf("method = %q, want POST", gotMethod)
+		}
+		if gotPath != "/api/virtualization/clusters/" {
+			t.Errorf("path = %q, want /api/virtualization/clusters/", gotPath)
+		}
+		if gotCT != "application/json" {
+			t.Errorf("Content-Type = %q, want application/json", gotCT)
+		}
+		if gotAuth != "Bearer tok" {
+			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["name"] != "prod" {
+			t.Errorf("request body = %s, want name prod", gotBody)
+		}
+		if reqBody["type"] != float64(5) {
+			t.Errorf("request body = %s, want type 5", gotBody)
+		}
+		if cluster.ID != 1 || cluster.Name != "prod" {
+			t.Errorf("cluster = %+v, want id 1 name prod", cluster)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"name":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateCluster(context.Background(), "tok", domain.ClusterWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if ve.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_UpdateCluster(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success patch", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":7,"name":"Renamed","created":"","last_updated":""}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		desc := "updated"
+		cluster, err := client.UpdateCluster(context.Background(), "tok", 7, domain.ClusterWrite{Description: &desc})
+		if err != nil {
+			t.Fatalf("UpdateCluster() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPatch {
+			t.Errorf("method = %q, want PATCH", gotMethod)
+		}
+		if gotPath != "/api/virtualization/clusters/7/" {
+			t.Errorf("path = %q, want /api/virtualization/clusters/7/", gotPath)
+		}
+		if cluster.ID != 7 {
+			t.Errorf("cluster = %+v, want id 7", cluster)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["description"] != "updated" {
+			t.Errorf("request body = %s, want description present", gotBody)
+		}
+		if _, ok := reqBody["name"]; ok {
+			t.Errorf("request body = %s, want name omitted (not provided)", gotBody)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"type":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.UpdateCluster(context.Background(), "tok", 7, domain.ClusterWrite{Name: "X"})
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_DeleteCluster(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success 204", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteCluster(context.Background(), "tok", 3); err != nil {
+			t.Fatalf("DeleteCluster() returned error: %v", err)
+		}
+		if gotMethod != http.MethodDelete {
+			t.Errorf("method = %q, want DELETE", gotMethod)
+		}
+		if gotPath != "/api/virtualization/clusters/3/" {
+			t.Errorf("path = %q, want /api/virtualization/clusters/3/", gotPath)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"detail":"Cannot delete object with dependent objects."}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		err := client.DeleteCluster(context.Background(), "tok", 3)
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClusterWriteToWire(t *testing.T) {
+	t.Parallel()
+
+	ct := 5
+	in := domain.ClusterWrite{Name: "prod", ClusterType: &ct}
+	w := clusterWriteToWire(in)
+	if w.Name != "prod" || w.ClusterType == nil || *w.ClusterType != 5 {
+		t.Errorf("wire = %+v, want name prod type 5", w)
+	}
+}
+
 // unmarshalableCustomFields returns a CustomFields value that json.Marshal
 // cannot serialize, forcing the write methods' marshal-error branch.
 func unmarshalableCustomFields() map[string]any {
@@ -1401,6 +1599,14 @@ func TestClient_WriteMarshalErrors(t *testing.T) {
 	}
 	if _, err := client.UpdateVirtualMachine(ctx, "tok", 7, badVM); err == nil {
 		t.Error("UpdateVirtualMachine: expected marshal error, got nil")
+	}
+
+	badCluster := domain.ClusterWrite{Name: "prod", CustomFields: unmarshalableCustomFields()}
+	if _, err := client.CreateCluster(ctx, "tok", badCluster); err == nil {
+		t.Error("CreateCluster: expected marshal error, got nil")
+	}
+	if _, err := client.UpdateCluster(ctx, "tok", 7, badCluster); err == nil {
+		t.Error("UpdateCluster: expected marshal error, got nil")
 	}
 }
 
