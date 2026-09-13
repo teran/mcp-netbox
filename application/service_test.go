@@ -901,6 +901,149 @@ func TestNetworkService_DeleteIPAddress(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreatePrefix(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePrefixFunc: func(_ context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.Prefix{ID: 1, Prefix: in.Prefix}, nil
+			},
+		})
+		prefix, err := svc.CreatePrefix(context.Background(), domain.PrefixWrite{Prefix: "10.0.0.0/24"})
+		if err != nil {
+			t.Fatalf("CreatePrefix() returned error: %v", err)
+		}
+		if prefix.ID != 1 || prefix.Prefix != "10.0.0.0/24" {
+			t.Errorf("prefix = %+v, want id 1 prefix 10.0.0.0/24", prefix)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"prefix":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePrefixFunc: func(_ context.Context, _ string, _ domain.PrefixWrite) (*domain.Prefix, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreatePrefix(context.Background(), domain.PrefixWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePrefixFunc: func(_ context.Context, _ string, _ domain.PrefixWrite) (*domain.Prefix, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreatePrefix(context.Background(), domain.PrefixWrite{Prefix: "A"})
+		if err == nil || !containsService(err.Error(), "create prefix:") {
+			t.Errorf("err = %v, want it to contain 'create prefix:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdatePrefix(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdatePrefixFunc: func(_ context.Context, _ string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
+				return &domain.Prefix{ID: id, Prefix: in.Prefix}, nil
+			},
+		})
+		prefix, err := svc.UpdatePrefix(context.Background(), 7, domain.PrefixWrite{Prefix: "10.0.0.0/24"})
+		if err != nil {
+			t.Fatalf("UpdatePrefix() returned error: %v", err)
+		}
+		if prefix.ID != 7 {
+			t.Errorf("prefix = %+v, want id 7", prefix)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdatePrefixFunc: func(_ context.Context, _ string, _ int, _ domain.PrefixWrite) (*domain.Prefix, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdatePrefix(context.Background(), 7, domain.PrefixWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdatePrefixFunc: func(_ context.Context, _ string, _ int, _ domain.PrefixWrite) (*domain.Prefix, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdatePrefix(context.Background(), 7, domain.PrefixWrite{})
+		if err == nil || !containsService(err.Error(), "update prefix:") {
+			t.Errorf("err = %v, want it to contain 'update prefix:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeletePrefix(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeletePrefixFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeletePrefix(context.Background(), 3); err != nil {
+			t.Fatalf("DeletePrefix() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeletePrefixFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeletePrefix(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeletePrefixFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeletePrefix(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete prefix:") {
+			t.Errorf("err = %v, want it to contain 'delete prefix:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

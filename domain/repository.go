@@ -62,4 +62,8 @@ type NetworkRepository interface {
 	CreateIPAddress(ctx context.Context, token string, in IPAddressWrite) (*IPAddress, error)
 	UpdateIPAddress(ctx context.Context, token string, id int, in IPAddressWrite) (*IPAddress, error)
 	DeleteIPAddress(ctx context.Context, token string, id int) error
+
+	CreatePrefix(ctx context.Context, token string, in PrefixWrite) (*Prefix, error)
+	UpdatePrefix(ctx context.Context, token string, id int, in PrefixWrite) (*Prefix, error)
+	DeletePrefix(ctx context.Context, token string, id int) error
 }

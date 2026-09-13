@@ -383,6 +383,30 @@ type IPAddressWrite struct {
 	CustomFields       map[string]any `json:"custom_fields,omitempty"`
 }
 
+// PrefixWrite is the domain DTO for creating or updating a NetBox prefix. It
+// carries only the writable fields.
+//
+// Optional scalar fields are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty" (pointer to
+// ""). Prefix is a plain string because it is required on create; the omitempty
+// tag drops it from a PATCH body when not provided. References to related
+// objects (site, VRF, tenant, VLAN, role) are their numeric NetBox IDs. IsPool
+// is a pointer so an update can set it to false explicitly.
+type PrefixWrite struct {
+	Prefix       string         `json:"prefix,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	VRF          *int           `json:"vrf,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	VLAN         *int           `json:"vlan,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	IsPool       *bool          `json:"is_pool,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

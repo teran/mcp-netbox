@@ -524,6 +524,43 @@ func (c *Client) DeleteIPAddress(ctx context.Context, token string, id int) erro
 	return mErr
 }
 
+// CreatePrefix creates a new prefix via POST /api/ipam/prefixes/.
+func (c *Client) CreatePrefix(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error) {
+	payload, err := json.Marshal(prefixWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal prefix create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/ipam/prefixes/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalPrefix(raw)
+}
+
+// UpdatePrefix partially updates a prefix via PATCH /api/ipam/prefixes/<id>/.
+func (c *Client) UpdatePrefix(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
+	payload, err := json.Marshal(prefixWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal prefix update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/ipam/prefixes/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalPrefix(raw)
+}
+
+// DeletePrefix deletes a prefix via DELETE /api/ipam/prefixes/<id>/.
+func (c *Client) DeletePrefix(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/ipam/prefixes/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -641,6 +678,37 @@ func unmarshalIPAddress(raw domain.RawObject) (*domain.IPAddress, error) {
 		return nil, fmt.Errorf("failed to unmarshal IP address: %w", err)
 	}
 	d := wireIPAddressToDomain(w)
+	return &d, nil
+}
+
+// prefixWriteToWire converts a domain prefix write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func prefixWriteToWire(in domain.PrefixWrite) WirePrefixWrite {
+	return WirePrefixWrite{
+		Prefix:       in.Prefix,
+		Site:         in.Site,
+		VRF:          in.VRF,
+		Tenant:       in.Tenant,
+		VLAN:         in.VLAN,
+		Status:       in.Status,
+		Role:         in.Role,
+		IsPool:       in.IsPool,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalPrefix decodes a prefix response body into a domain.Prefix.
+func unmarshalPrefix(raw domain.RawObject) (*domain.Prefix, error) {
+	var w WirePrefix
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal prefix: %w", err)
+	}
+	d := wirePrefixToDomain(w)
 	return &d, nil
 }
 

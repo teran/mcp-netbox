@@ -211,6 +211,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteIPAddress = %v", err)
 		}
 	})
+	t.Run("CreatePrefix", func(t *testing.T) {
+		got, err := (&MockRepo{CreatePrefixFunc: func(_ context.Context, _ string, in domain.PrefixWrite) (*domain.Prefix, error) {
+			return &domain.Prefix{ID: 1, Prefix: in.Prefix}, nil
+		}}).CreatePrefix(context.Background(), "t", domain.PrefixWrite{Prefix: "10.0.0.0/24"})
+		if err != nil || got == nil || got.Prefix != "10.0.0.0/24" {
+			t.Errorf("CreatePrefix = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdatePrefix", func(t *testing.T) {
+		got, err := (&MockRepo{UpdatePrefixFunc: func(_ context.Context, _ string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
+			return &domain.Prefix{ID: id, Prefix: in.Prefix}, nil
+		}}).UpdatePrefix(context.Background(), "t", 7, domain.PrefixWrite{Prefix: "10.0.0.0/24"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdatePrefix = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeletePrefix", func(t *testing.T) {
+		err := (&MockRepo{DeletePrefixFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeletePrefix(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeletePrefix = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -314,5 +341,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteIPAddress(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteIPAddress = %v", err)
+	}
+	if p, err := repo.CreatePrefix(ctx, "t", domain.PrefixWrite{Prefix: "10.0.0.0/24"}); err != nil || p.Prefix != "10.0.0.0/24" {
+		t.Errorf("CreatePrefix = (%v, %v)", p, err)
+	}
+	if p, err := repo.UpdatePrefix(ctx, "t", 7, domain.PrefixWrite{Prefix: "10.0.0.0/24"}); err != nil || p.ID != 7 {
+		t.Errorf("UpdatePrefix = (%v, %v)", p, err)
+	}
+	if err := repo.DeletePrefix(ctx, "t", 3); err != nil {
+		t.Errorf("DeletePrefix = %v", err)
 	}
 }

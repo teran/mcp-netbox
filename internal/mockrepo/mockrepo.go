@@ -34,6 +34,9 @@ type MockRepo struct {
 	CreateIPAddressFunc         func(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error)
 	UpdateIPAddressFunc         func(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error)
 	DeleteIPAddressFunc         func(ctx context.Context, token string, id int) error
+	CreatePrefixFunc            func(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error)
+	UpdatePrefixFunc            func(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error)
+	DeletePrefixFunc            func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -126,6 +129,18 @@ func (m *MockRepo) UpdateIPAddress(ctx context.Context, token string, id int, in
 
 func (m *MockRepo) DeleteIPAddress(ctx context.Context, token string, id int) error {
 	return m.DeleteIPAddressFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreatePrefix(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error) {
+	return m.CreatePrefixFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdatePrefix(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
+	return m.UpdatePrefixFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeletePrefix(ctx context.Context, token string, id int) error {
+	return m.DeletePrefixFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -221,5 +236,17 @@ func (r *NilRepo) UpdateIPAddress(ctx context.Context, token string, id int, in 
 }
 
 func (r *NilRepo) DeleteIPAddress(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreatePrefix(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error) {
+	return &domain.Prefix{ID: 1, Prefix: in.Prefix}, nil
+}
+
+func (r *NilRepo) UpdatePrefix(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
+	return &domain.Prefix{ID: id, Prefix: in.Prefix}, nil
+}
+
+func (r *NilRepo) DeletePrefix(ctx context.Context, token string, id int) error {
 	return nil
 }

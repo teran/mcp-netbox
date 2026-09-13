@@ -323,6 +323,46 @@ type IPAddressDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the IP address to delete,required"`
 }
 
+// PrefixCreateInput represents the writable fields for creating a prefix.
+type PrefixCreateInput struct {
+	Prefix       string         `json:"prefix" jsonschema:"network prefix in CIDR notation, e.g. 10.0.0.0/24 (required)"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	VRF          *int           `json:"vrf,omitempty" jsonschema:"VRF ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	VLAN         *int           `json:"vlan,omitempty" jsonschema:"VLAN ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: container, active, reserved, deprecated"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID (look up first)"`
+	IsPool       *bool          `json:"is_pool,omitempty" jsonschema:"whether this prefix is a pool"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PrefixUpdateInput represents the writable fields for updating a prefix. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type PrefixUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the prefix to update,required"`
+	Prefix       *string        `json:"prefix,omitempty" jsonschema:"network prefix in CIDR notation, e.g. 10.0.0.0/24"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	VRF          *int           `json:"vrf,omitempty" jsonschema:"VRF ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	VLAN         *int           `json:"vlan,omitempty" jsonschema:"VLAN ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: container, active, reserved, deprecated"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID"`
+	IsPool       *bool          `json:"is_pool,omitempty" jsonschema:"whether this prefix is a pool"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PrefixDeleteInput represents the input fields for deleting a prefix.
+type PrefixDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the prefix to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -351,6 +391,11 @@ type DeviceOutput struct {
 // IPAddressOutput represents the output for the create/update IP address tools.
 type IPAddressOutput struct {
 	Data domain.IPAddress `json:"data"`
+}
+
+// PrefixOutput represents the output for the create/update prefix tools.
+type PrefixOutput struct {
+	Data domain.Prefix `json:"data"`
 }
 
 // — write helpers —
@@ -502,6 +547,46 @@ func ipAddressWriteFromUpdate(in IPAddressUpdateInput) domain.IPAddressWrite {
 	write.Description = in.Description
 	write.AssignedObjectType = in.AssignedObjectType
 	write.AssignedObjectID = in.AssignedObjectID
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// prefixWriteFromCreate builds a domain.PrefixWrite from a create input.
+func prefixWriteFromCreate(in PrefixCreateInput) domain.PrefixWrite {
+	return domain.PrefixWrite{
+		Prefix:       in.Prefix,
+		Site:         in.Site,
+		VRF:          in.VRF,
+		Tenant:       in.Tenant,
+		VLAN:         in.VLAN,
+		Status:       in.Status,
+		Role:         in.Role,
+		IsPool:       in.IsPool,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// prefixWriteFromUpdate builds a domain.PrefixWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func prefixWriteFromUpdate(in PrefixUpdateInput) domain.PrefixWrite {
+	write := domain.PrefixWrite{}
+	if in.Prefix != nil {
+		write.Prefix = *in.Prefix
+	}
+	write.Site = in.Site
+	write.VRF = in.VRF
+	write.Tenant = in.Tenant
+	write.VLAN = in.VLAN
+	write.Status = in.Status
+	write.Role = in.Role
+	write.IsPool = in.IsPool
+	write.Description = in.Description
 	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
@@ -1106,6 +1191,71 @@ func NewDeleteIPAddressHandler(svc *application.NetworkService) mcp.ToolHandlerF
 		}
 
 		if err := s.DeleteIPAddress(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreatePrefixHandler creates a handler for the create_prefix tool.
+func NewCreatePrefixHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PrefixCreateInput, PrefixOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in PrefixCreateInput) (*mcp.CallToolResult, PrefixOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, PrefixOutput{}, errServiceNotAvailable
+		}
+		if in.Prefix == "" {
+			return &mcp.CallToolResult{IsError: true}, PrefixOutput{}, fmt.Errorf("prefix is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		prefix, err := s.CreatePrefix(ctx, prefixWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, PrefixOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PrefixOutput{Data: *prefix}, nil
+	}
+}
+
+// NewUpdatePrefixHandler creates a handler for the update_prefix tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdatePrefixHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PrefixUpdateInput, PrefixOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in PrefixUpdateInput) (*mcp.CallToolResult, PrefixOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, PrefixOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, PrefixOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		prefix, err := s.UpdatePrefix(ctx, in.ID, prefixWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, PrefixOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PrefixOutput{Data: *prefix}, nil
+	}
+}
+
+// NewDeletePrefixHandler creates a handler for the delete_prefix tool.
+func NewDeletePrefixHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PrefixDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in PrefixDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeletePrefix(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

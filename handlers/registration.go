@@ -211,4 +211,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_ip_address"], metrics, "delete_ip_address", WrapToolHandler[IPAddressDeleteInput, struct{}](metrics, "delete_ip_address", func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteIPAddressHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_prefix"], metrics, "create_prefix", WrapToolHandler[PrefixCreateInput, PrefixOutput](metrics, "create_prefix", func(ctx context.Context, req *mcp.CallToolRequest, in PrefixCreateInput) (*mcp.CallToolResult, PrefixOutput, error) {
+		return NewCreatePrefixHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_prefix"], metrics, "update_prefix", WrapToolHandler[PrefixUpdateInput, PrefixOutput](metrics, "update_prefix", func(ctx context.Context, req *mcp.CallToolRequest, in PrefixUpdateInput) (*mcp.CallToolResult, PrefixOutput, error) {
+		return NewUpdatePrefixHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_prefix"], metrics, "delete_prefix", WrapToolHandler[PrefixDeleteInput, struct{}](metrics, "delete_prefix", func(ctx context.Context, req *mcp.CallToolRequest, in PrefixDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeletePrefixHandler(svc)(ctx, req, in)
+	}))
 }

@@ -103,6 +103,18 @@ func (s *stubRepo) DeleteIPAddress(ctx context.Context, token string, id int) er
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreatePrefix(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdatePrefix(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeletePrefix(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

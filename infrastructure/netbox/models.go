@@ -62,6 +62,24 @@ type WireIPAddressWrite struct {
 	CustomFields       map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WirePrefixWrite is the wire request model for prefix create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields.
+// References to related objects are numeric IDs.
+type WirePrefixWrite struct {
+	Prefix       string         `json:"prefix,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	VRF          *int           `json:"vrf,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	VLAN         *int           `json:"vlan,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	IsPool       *bool          `json:"is_pool,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

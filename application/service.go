@@ -216,3 +216,30 @@ func (s *NetworkService) DeleteIPAddress(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreatePrefix relays a prefix create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreatePrefix(ctx context.Context, in domain.PrefixWrite) (*domain.Prefix, error) {
+	resp, err := s.repo.CreatePrefix(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create prefix: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdatePrefix relays a prefix update to the repository.
+func (s *NetworkService) UpdatePrefix(ctx context.Context, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
+	resp, err := s.repo.UpdatePrefix(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update prefix: %w", err)
+	}
+	return resp, nil
+}
+
+// DeletePrefix relays a prefix delete to the repository.
+func (s *NetworkService) DeletePrefix(ctx context.Context, id int) error {
+	if err := s.repo.DeletePrefix(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete prefix: %w", err)
+	}
+	return nil
+}

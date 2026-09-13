@@ -11,48 +11,48 @@ import (
 	"github.com/teran/mcp-netbox/internal/mockrepo"
 )
 
-func TestCreateIPAddressHandler(t *testing.T) {
+func TestCreatePrefixHandler(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			CreateIPAddressFunc: func(_ context.Context, _ string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
-				return &domain.IPAddress{ID: 1, Address: in.Address}, nil
+			CreatePrefixFunc: func(_ context.Context, _ string, in domain.PrefixWrite) (*domain.Prefix, error) {
+				return &domain.Prefix{ID: 1, Prefix: in.Prefix}, nil
 			},
 		}, "token")
 
-		handler := handlers.NewCreateIPAddressHandler(svc)
-		result, out, err := handler(context.Background(), nil, handlers.IPAddressCreateInput{Address: "192.168.1.1/24"})
+		handler := handlers.NewCreatePrefixHandler(svc)
+		result, out, err := handler(context.Background(), nil, handlers.PrefixCreateInput{Prefix: "10.0.0.0/24"})
 		if err != nil {
 			t.Fatalf("handler returned error: %v", err)
 		}
 		if result.IsError {
 			t.Error("result.IsError = true, want false")
 		}
-		if out.Data.ID != 1 || out.Data.Address != "192.168.1.1/24" {
-			t.Errorf("out.Data = %+v, want id 1 address 192.168.1.1/24", out.Data)
+		if out.Data.ID != 1 || out.Data.Prefix != "10.0.0.0/24" {
+			t.Errorf("out.Data = %+v, want id 1 prefix 10.0.0.0/24", out.Data)
 		}
 	})
 
-	t.Run("address required", func(t *testing.T) {
+	t.Run("prefix required", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.NilRepo{}, "token")
-		handler := handlers.NewCreateIPAddressHandler(svc)
-		result, _, _ := handler(context.Background(), nil, handlers.IPAddressCreateInput{Address: ""})
+		handler := handlers.NewCreatePrefixHandler(svc)
+		result, _, _ := handler(context.Background(), nil, handlers.PrefixCreateInput{Prefix: ""})
 		if !result.IsError {
-			t.Error("result.IsError = false, want true for missing address")
+			t.Error("result.IsError = false, want true for missing prefix")
 		}
 	})
 
 	t.Run("validation error in structured content", func(t *testing.T) {
-		body := []byte(`{"address":["This field is required."]}`)
+		body := []byte(`{"prefix":["This field is required."]}`)
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			CreateIPAddressFunc: func(_ context.Context, _ string, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
+			CreatePrefixFunc: func(_ context.Context, _ string, _ domain.PrefixWrite) (*domain.Prefix, error) {
 				return nil, &domain.ValidationError{StatusCode: 400, Body: body}
 			},
 		}, "token")
 
-		handler := handlers.NewCreateIPAddressHandler(svc)
-		result, _, err := handler(context.Background(), nil, handlers.IPAddressCreateInput{Address: "A"})
+		handler := handlers.NewCreatePrefixHandler(svc)
+		result, _, err := handler(context.Background(), nil, handlers.PrefixCreateInput{Prefix: "A"})
 		if err != nil {
 			t.Fatalf("handler returned non-nil error, want structured result: %v", err)
 		}
@@ -77,30 +77,30 @@ func TestCreateIPAddressHandler(t *testing.T) {
 
 	t.Run("generic error", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			CreateIPAddressFunc: func(_ context.Context, _ string, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
+			CreatePrefixFunc: func(_ context.Context, _ string, _ domain.PrefixWrite) (*domain.Prefix, error) {
 				return nil, &domain.ValidationError{StatusCode: 500, Body: []byte(`{}`)}
 			},
 		}, "token")
-		handler := handlers.NewCreateIPAddressHandler(svc)
-		result, _, _ := handler(context.Background(), nil, handlers.IPAddressCreateInput{Address: "A"})
+		handler := handlers.NewCreatePrefixHandler(svc)
+		result, _, _ := handler(context.Background(), nil, handlers.PrefixCreateInput{Prefix: "A"})
 		if !result.IsError {
 			t.Error("result.IsError = false, want true")
 		}
 	})
 }
 
-func TestUpdateIPAddressHandler(t *testing.T) {
+func TestUpdatePrefixHandler(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			UpdateIPAddressFunc: func(_ context.Context, _ string, id int, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
-				return &domain.IPAddress{ID: id, Address: "10.0.0.1/32"}, nil
+			UpdatePrefixFunc: func(_ context.Context, _ string, id int, _ domain.PrefixWrite) (*domain.Prefix, error) {
+				return &domain.Prefix{ID: id, Prefix: "10.0.0.0/24"}, nil
 			},
 		}, "token")
-		handler := handlers.NewUpdateIPAddressHandler(svc)
-		addr := "10.0.0.1/32"
-		result, out, err := handler(context.Background(), nil, handlers.IPAddressUpdateInput{ID: 7, Address: &addr})
+		handler := handlers.NewUpdatePrefixHandler(svc)
+		prefix := "10.0.0.0/24"
+		result, out, err := handler(context.Background(), nil, handlers.PrefixUpdateInput{ID: 7, Prefix: &prefix})
 		if err != nil {
 			t.Fatalf("handler returned error: %v", err)
 		}
@@ -111,22 +111,22 @@ func TestUpdateIPAddressHandler(t *testing.T) {
 
 	t.Run("invalid id", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.NilRepo{}, "token")
-		handler := handlers.NewUpdateIPAddressHandler(svc)
-		result, _, _ := handler(context.Background(), nil, handlers.IPAddressUpdateInput{ID: 0})
+		handler := handlers.NewUpdatePrefixHandler(svc)
+		result, _, _ := handler(context.Background(), nil, handlers.PrefixUpdateInput{ID: 0})
 		if !result.IsError {
 			t.Error("result.IsError = false, want true for invalid id")
 		}
 	})
 
 	t.Run("validation error in structured content", func(t *testing.T) {
-		body := []byte(`{"dns_name":["Enter a valid hostname."]}`)
+		body := []byte(`{"status":["This field is required."]}`)
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			UpdateIPAddressFunc: func(_ context.Context, _ string, _ int, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
+			UpdatePrefixFunc: func(_ context.Context, _ string, _ int, _ domain.PrefixWrite) (*domain.Prefix, error) {
 				return nil, &domain.ValidationError{StatusCode: 400, Body: body}
 			},
 		}, "token")
-		handler := handlers.NewUpdateIPAddressHandler(svc)
-		result, _, err := handler(context.Background(), nil, handlers.IPAddressUpdateInput{ID: 7})
+		handler := handlers.NewUpdatePrefixHandler(svc)
+		result, _, err := handler(context.Background(), nil, handlers.PrefixUpdateInput{ID: 7})
 		if err != nil {
 			t.Fatalf("handler returned non-nil error, want structured result: %v", err)
 		}
@@ -136,20 +136,20 @@ func TestUpdateIPAddressHandler(t *testing.T) {
 	})
 }
 
-func TestDeleteIPAddressHandler(t *testing.T) {
+func TestDeletePrefixHandler(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			DeleteIPAddressFunc: func(_ context.Context, _ string, id int) error {
+			DeletePrefixFunc: func(_ context.Context, _ string, id int) error {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
 				return nil
 			},
 		}, "token")
-		handler := handlers.NewDeleteIPAddressHandler(svc)
-		result, _, err := handler(context.Background(), nil, handlers.IPAddressDeleteInput{ID: 3})
+		handler := handlers.NewDeletePrefixHandler(svc)
+		result, _, err := handler(context.Background(), nil, handlers.PrefixDeleteInput{ID: 3})
 		if err != nil {
 			t.Fatalf("handler returned error: %v", err)
 		}
@@ -160,8 +160,8 @@ func TestDeleteIPAddressHandler(t *testing.T) {
 
 	t.Run("invalid id", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.NilRepo{}, "token")
-		handler := handlers.NewDeleteIPAddressHandler(svc)
-		result, _, _ := handler(context.Background(), nil, handlers.IPAddressDeleteInput{ID: 0})
+		handler := handlers.NewDeletePrefixHandler(svc)
+		result, _, _ := handler(context.Background(), nil, handlers.PrefixDeleteInput{ID: 0})
 		if !result.IsError {
 			t.Error("result.IsError = false, want true for invalid id")
 		}
@@ -170,12 +170,12 @@ func TestDeleteIPAddressHandler(t *testing.T) {
 	t.Run("validation error propagated", func(t *testing.T) {
 		body := []byte(`{"detail":["Cannot delete object with dependent objects."]}`)
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			DeleteIPAddressFunc: func(_ context.Context, _ string, _ int) error {
+			DeletePrefixFunc: func(_ context.Context, _ string, _ int) error {
 				return &domain.ValidationError{StatusCode: 400, Body: body}
 			},
 		}, "token")
-		handler := handlers.NewDeleteIPAddressHandler(svc)
-		result, _, err := handler(context.Background(), nil, handlers.IPAddressDeleteInput{ID: 3})
+		handler := handlers.NewDeletePrefixHandler(svc)
+		result, _, err := handler(context.Background(), nil, handlers.PrefixDeleteInput{ID: 3})
 		if err != nil {
 			t.Fatalf("handler returned non-nil error, want structured result: %v", err)
 		}
@@ -188,28 +188,28 @@ func TestDeleteIPAddressHandler(t *testing.T) {
 	})
 }
 
-func TestCreateIPAddressHandler_NoService(t *testing.T) {
+func TestCreatePrefixHandler_NoService(t *testing.T) {
 	t.Parallel()
-	handler := handlers.NewCreateIPAddressHandler(nil)
-	result, _, err := handler(context.Background(), nil, handlers.IPAddressCreateInput{Address: "A"})
+	handler := handlers.NewCreatePrefixHandler(nil)
+	result, _, err := handler(context.Background(), nil, handlers.PrefixCreateInput{Prefix: "A"})
 	if err == nil || !result.IsError {
 		t.Errorf("result.IsError = %v, err = %v; want error when no service", result.IsError, err)
 	}
 }
 
-func TestUpdateIPAddressHandler_NoService(t *testing.T) {
+func TestUpdatePrefixHandler_NoService(t *testing.T) {
 	t.Parallel()
-	handler := handlers.NewUpdateIPAddressHandler(nil)
-	result, _, err := handler(context.Background(), nil, handlers.IPAddressUpdateInput{ID: 1})
+	handler := handlers.NewUpdatePrefixHandler(nil)
+	result, _, err := handler(context.Background(), nil, handlers.PrefixUpdateInput{ID: 1})
 	if err == nil || !result.IsError {
 		t.Errorf("result.IsError = %v, err = %v; want error when no service", result.IsError, err)
 	}
 }
 
-func TestDeleteIPAddressHandler_NoService(t *testing.T) {
+func TestDeletePrefixHandler_NoService(t *testing.T) {
 	t.Parallel()
-	handler := handlers.NewDeleteIPAddressHandler(nil)
-	result, _, err := handler(context.Background(), nil, handlers.IPAddressDeleteInput{ID: 1})
+	handler := handlers.NewDeletePrefixHandler(nil)
+	result, _, err := handler(context.Background(), nil, handlers.PrefixDeleteInput{ID: 1})
 	if err == nil || !result.IsError {
 		t.Errorf("result.IsError = %v, err = %v; want error when no service", result.IsError, err)
 	}
