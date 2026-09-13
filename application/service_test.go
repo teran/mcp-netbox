@@ -1759,6 +1759,149 @@ func TestNetworkService_DeleteRack(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreateInterface(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateInterfaceFunc: func(_ context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.Interface{ID: 1, Name: in.Name}, nil
+			},
+		})
+		iface, err := svc.CreateInterface(context.Background(), domain.InterfaceWrite{Name: "eth0"})
+		if err != nil {
+			t.Fatalf("CreateInterface() returned error: %v", err)
+		}
+		if iface.ID != 1 || iface.Name != "eth0" {
+			t.Errorf("iface = %+v, want id 1 name eth0", iface)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateInterfaceFunc: func(_ context.Context, _ string, _ domain.InterfaceWrite) (*domain.Interface, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateInterface(context.Background(), domain.InterfaceWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateInterfaceFunc: func(_ context.Context, _ string, _ domain.InterfaceWrite) (*domain.Interface, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateInterface(context.Background(), domain.InterfaceWrite{Name: "eth0"})
+		if err == nil || !containsService(err.Error(), "create interface:") {
+			t.Errorf("err = %v, want it to contain 'create interface:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateInterface(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateInterfaceFunc: func(_ context.Context, _ string, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
+				return &domain.Interface{ID: id, Name: in.Name}, nil
+			},
+		})
+		iface, err := svc.UpdateInterface(context.Background(), 7, domain.InterfaceWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateInterface() returned error: %v", err)
+		}
+		if iface.ID != 7 {
+			t.Errorf("iface = %+v, want id 7", iface)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"type":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateInterfaceFunc: func(_ context.Context, _ string, _ int, _ domain.InterfaceWrite) (*domain.Interface, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateInterface(context.Background(), 7, domain.InterfaceWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateInterfaceFunc: func(_ context.Context, _ string, _ int, _ domain.InterfaceWrite) (*domain.Interface, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateInterface(context.Background(), 7, domain.InterfaceWrite{})
+		if err == nil || !containsService(err.Error(), "update interface:") {
+			t.Errorf("err = %v, want it to contain 'update interface:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteInterface(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteInterfaceFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteInterface(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteInterface() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteInterfaceFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteInterface(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteInterfaceFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteInterface(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete interface:") {
+			t.Errorf("err = %v, want it to contain 'delete interface:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

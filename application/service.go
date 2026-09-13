@@ -379,3 +379,30 @@ func (s *NetworkService) DeleteRack(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateInterface relays an interface create to the repository. ValidationError
+// is wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateInterface(ctx context.Context, in domain.InterfaceWrite) (*domain.Interface, error) {
+	resp, err := s.repo.CreateInterface(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create interface: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateInterface relays an interface update to the repository.
+func (s *NetworkService) UpdateInterface(ctx context.Context, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
+	resp, err := s.repo.UpdateInterface(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update interface: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteInterface relays an interface delete to the repository.
+func (s *NetworkService) DeleteInterface(ctx context.Context, id int) error {
+	if err := s.repo.DeleteInterface(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete interface: %w", err)
+	}
+	return nil
+}

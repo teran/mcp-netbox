@@ -171,6 +171,23 @@ type WireRackWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireInterfaceWrite is the wire request model for interface create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields. Device is the numeric ID of the parent device; type is a choice
+// string.
+type WireInterfaceWrite struct {
+	Device       *int           `json:"device,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Enabled      *bool          `json:"enabled,omitempty"`
+	MTU          *int           `json:"mtu,omitempty"`
+	MACAddress   *string        `json:"mac_address,omitempty"`
+	Speed        *int           `json:"speed,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

@@ -563,6 +563,43 @@ type RackDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the rack to delete,required"`
 }
 
+// InterfaceCreateInput represents the writable fields for creating a device
+// interface.
+type InterfaceCreateInput struct {
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name         string         `json:"name" jsonschema:"interface name (required)"`
+	Type         *string        `json:"type,omitempty" jsonschema:"interface type (required), e.g. 1000base-t, 10gbase-x-sfpp"`
+	Enabled      *bool          `json:"enabled,omitempty" jsonschema:"whether the interface is enabled"`
+	MTU          *int           `json:"mtu,omitempty" jsonschema:"MTU"`
+	MACAddress   *string        `json:"mac_address,omitempty" jsonschema:"MAC address"`
+	Speed        *int           `json:"speed,omitempty" jsonschema:"interface speed in bps"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// InterfaceUpdateInput represents the writable fields for updating a device
+// interface. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type InterfaceUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the interface to update,required"`
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"interface name"`
+	Type         *string        `json:"type,omitempty" jsonschema:"interface type"`
+	Enabled      *bool          `json:"enabled,omitempty" jsonschema:"whether the interface is enabled"`
+	MTU          *int           `json:"mtu,omitempty" jsonschema:"MTU"`
+	MACAddress   *string        `json:"mac_address,omitempty" jsonschema:"MAC address"`
+	Speed        *int           `json:"speed,omitempty" jsonschema:"interface speed in bps"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// InterfaceDeleteInput represents the input fields for deleting an interface.
+type InterfaceDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the interface to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -622,6 +659,11 @@ type CircuitOutput struct {
 // RackOutput represents the output for the create/update rack tools.
 type RackOutput struct {
 	Data domain.Rack `json:"data"`
+}
+
+// InterfaceOutput represents the output for the create/update interface tools.
+type InterfaceOutput struct {
+	Data domain.Interface `json:"data"`
 }
 
 // — write helpers —
@@ -1013,6 +1055,42 @@ func rackWriteFromUpdate(in RackUpdateInput) domain.RackWrite {
 	write.Width = in.Width
 	write.UHeight = in.UHeight
 	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// interfaceWriteFromCreate builds a domain.InterfaceWrite from a create input.
+func interfaceWriteFromCreate(in InterfaceCreateInput) domain.InterfaceWrite {
+	return domain.InterfaceWrite{
+		Device:       in.Device,
+		Name:         in.Name,
+		Type:         in.Type,
+		Enabled:      in.Enabled,
+		MTU:          in.MTU,
+		MACAddress:   in.MACAddress,
+		Speed:        in.Speed,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// interfaceWriteFromUpdate builds a domain.InterfaceWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func interfaceWriteFromUpdate(in InterfaceUpdateInput) domain.InterfaceWrite {
+	write := domain.InterfaceWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Device = in.Device
+	write.Type = in.Type
+	write.Enabled = in.Enabled
+	write.MTU = in.MTU
+	write.MACAddress = in.MACAddress
+	write.Speed = in.Speed
+	write.Description = in.Description
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
 	return write
@@ -2021,6 +2099,77 @@ func NewDeleteRackHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Ra
 		}
 
 		if err := s.DeleteRack(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateInterfaceHandler creates a handler for the create_interface tool.
+func NewCreateInterfaceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[InterfaceCreateInput, InterfaceOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in InterfaceCreateInput) (*mcp.CallToolResult, InterfaceOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, InterfaceOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, InterfaceOutput{}, fmt.Errorf("name is required")
+		}
+		if in.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, InterfaceOutput{}, fmt.Errorf("device is required")
+		}
+		if in.Type == nil {
+			return &mcp.CallToolResult{IsError: true}, InterfaceOutput{}, fmt.Errorf("type is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		iface, err := s.CreateInterface(ctx, interfaceWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, InterfaceOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, InterfaceOutput{Data: *iface}, nil
+	}
+}
+
+// NewUpdateInterfaceHandler creates a handler for the update_interface tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateInterfaceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[InterfaceUpdateInput, InterfaceOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in InterfaceUpdateInput) (*mcp.CallToolResult, InterfaceOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, InterfaceOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, InterfaceOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		iface, err := s.UpdateInterface(ctx, in.ID, interfaceWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, InterfaceOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, InterfaceOutput{Data: *iface}, nil
+	}
+}
+
+// NewDeleteInterfaceHandler creates a handler for the delete_interface tool.
+func NewDeleteInterfaceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[InterfaceDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in InterfaceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteInterface(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

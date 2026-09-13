@@ -524,6 +524,27 @@ type RackWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// InterfaceWrite is the domain DTO for creating or updating a NetBox device
+// interface. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Device and Type are required on
+// create. Optional scalar fields are pointers so that a partial-update (PATCH)
+// can distinguish "not provided" (nil) from "explicitly set to empty". Device
+// is the numeric NetBox ID of the parent device; type is a choice-string value.
+type InterfaceWrite struct {
+	Device       *int           `json:"device,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Enabled      *bool          `json:"enabled,omitempty"`
+	MTU          *int           `json:"mtu,omitempty"`
+	MACAddress   *string        `json:"mac_address,omitempty"`
+	Speed        *int           `json:"speed,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

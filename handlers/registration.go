@@ -283,4 +283,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_rack"], metrics, "delete_rack", WrapToolHandler[RackDeleteInput, struct{}](metrics, "delete_rack", func(ctx context.Context, req *mcp.CallToolRequest, in RackDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteRackHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_interface"], metrics, "create_interface", WrapToolHandler[InterfaceCreateInput, InterfaceOutput](metrics, "create_interface", func(ctx context.Context, req *mcp.CallToolRequest, in InterfaceCreateInput) (*mcp.CallToolResult, InterfaceOutput, error) {
+		return NewCreateInterfaceHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_interface"], metrics, "update_interface", WrapToolHandler[InterfaceUpdateInput, InterfaceOutput](metrics, "update_interface", func(ctx context.Context, req *mcp.CallToolRequest, in InterfaceUpdateInput) (*mcp.CallToolResult, InterfaceOutput, error) {
+		return NewUpdateInterfaceHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_interface"], metrics, "delete_interface", WrapToolHandler[InterfaceDeleteInput, struct{}](metrics, "delete_interface", func(ctx context.Context, req *mcp.CallToolRequest, in InterfaceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteInterfaceHandler(svc)(ctx, req, in)
+	}))
 }

@@ -346,6 +346,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteRack = %v", err)
 		}
 	})
+	t.Run("CreateInterface", func(t *testing.T) {
+		got, err := (&MockRepo{CreateInterfaceFunc: func(_ context.Context, _ string, in domain.InterfaceWrite) (*domain.Interface, error) {
+			return &domain.Interface{ID: 1, Name: in.Name}, nil
+		}}).CreateInterface(context.Background(), "t", domain.InterfaceWrite{Name: "eth0"})
+		if err != nil || got == nil || got.Name != "eth0" {
+			t.Errorf("CreateInterface = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateInterface", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateInterfaceFunc: func(_ context.Context, _ string, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
+			return &domain.Interface{ID: id, Name: in.Name}, nil
+		}}).UpdateInterface(context.Background(), "t", 7, domain.InterfaceWrite{Name: "eth0"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateInterface = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteInterface", func(t *testing.T) {
+		err := (&MockRepo{DeleteInterfaceFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteInterface(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteInterface = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -521,5 +548,23 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteCircuit(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteCircuit = %v", err)
+	}
+	if r, err := repo.CreateRack(ctx, "t", domain.RackWrite{Name: "R1"}); err != nil || r.Name != "R1" {
+		t.Errorf("CreateRack = (%v, %v)", r, err)
+	}
+	if r, err := repo.UpdateRack(ctx, "t", 7, domain.RackWrite{Name: "R1"}); err != nil || r.ID != 7 {
+		t.Errorf("UpdateRack = (%v, %v)", r, err)
+	}
+	if err := repo.DeleteRack(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRack = %v", err)
+	}
+	if i, err := repo.CreateInterface(ctx, "t", domain.InterfaceWrite{Name: "eth0"}); err != nil || i.Name != "eth0" {
+		t.Errorf("CreateInterface = (%v, %v)", i, err)
+	}
+	if i, err := repo.UpdateInterface(ctx, "t", 7, domain.InterfaceWrite{Name: "eth0"}); err != nil || i.ID != 7 {
+		t.Errorf("UpdateInterface = (%v, %v)", i, err)
+	}
+	if err := repo.DeleteInterface(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteInterface = %v", err)
 	}
 }

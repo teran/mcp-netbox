@@ -52,6 +52,9 @@ type MockRepo struct {
 	CreateRackFunc              func(ctx context.Context, token string, in domain.RackWrite) (*domain.Rack, error)
 	UpdateRackFunc              func(ctx context.Context, token string, id int, in domain.RackWrite) (*domain.Rack, error)
 	DeleteRackFunc              func(ctx context.Context, token string, id int) error
+	CreateInterfaceFunc         func(ctx context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error)
+	UpdateInterfaceFunc         func(ctx context.Context, token string, id int, in domain.InterfaceWrite) (*domain.Interface, error)
+	DeleteInterfaceFunc         func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -216,6 +219,18 @@ func (m *MockRepo) UpdateRack(ctx context.Context, token string, id int, in doma
 
 func (m *MockRepo) DeleteRack(ctx context.Context, token string, id int) error {
 	return m.DeleteRackFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateInterface(ctx context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error) {
+	return m.CreateInterfaceFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateInterface(ctx context.Context, token string, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
+	return m.UpdateInterfaceFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteInterface(ctx context.Context, token string, id int) error {
+	return m.DeleteInterfaceFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -383,5 +398,17 @@ func (r *NilRepo) UpdateRack(ctx context.Context, token string, id int, in domai
 }
 
 func (r *NilRepo) DeleteRack(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateInterface(ctx context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error) {
+	return &domain.Interface{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateInterface(ctx context.Context, token string, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
+	return &domain.Interface{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteInterface(ctx context.Context, token string, id int) error {
 	return nil
 }

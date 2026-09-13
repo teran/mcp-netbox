@@ -12,7 +12,7 @@ import (
 
 // expectedToolCount is the number of MCP tools registered by RegisterTools.
 // Update this when adding or removing tools.
-const expectedToolCount = 41
+const expectedToolCount = 44
 
 // countTools is a test helper that iterates over registered tools
 // by inspecting tool handlers. It uses the internal mcp.Server.ListTools

@@ -86,4 +86,8 @@ type NetworkRepository interface {
 	CreateRack(ctx context.Context, token string, in RackWrite) (*Rack, error)
 	UpdateRack(ctx context.Context, token string, id int, in RackWrite) (*Rack, error)
 	DeleteRack(ctx context.Context, token string, id int) error
+
+	CreateInterface(ctx context.Context, token string, in InterfaceWrite) (*Interface, error)
+	UpdateInterface(ctx context.Context, token string, id int, in InterfaceWrite) (*Interface, error)
+	DeleteInterface(ctx context.Context, token string, id int) error
 }

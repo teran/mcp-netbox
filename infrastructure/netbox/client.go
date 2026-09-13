@@ -750,6 +750,43 @@ func (c *Client) DeleteRack(ctx context.Context, token string, id int) error {
 	return mErr
 }
 
+// CreateInterface creates a new interface via POST /api/dcim/interfaces/.
+func (c *Client) CreateInterface(ctx context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error) {
+	payload, err := json.Marshal(interfaceWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal interface create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/interfaces/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalInterface(raw)
+}
+
+// UpdateInterface partially updates an interface via PATCH /api/dcim/interfaces/<id>/.
+func (c *Client) UpdateInterface(ctx context.Context, token string, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
+	payload, err := json.Marshal(interfaceWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal interface update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/interfaces/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalInterface(raw)
+}
+
+// DeleteInterface deletes an interface via DELETE /api/dcim/interfaces/<id>/.
+func (c *Client) DeleteInterface(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/dcim/interfaces/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -1051,6 +1088,35 @@ func unmarshalRack(raw domain.RawObject) (*domain.Rack, error) {
 		return nil, fmt.Errorf("failed to unmarshal rack: %w", err)
 	}
 	d := wireRackToDomain(w)
+	return &d, nil
+}
+
+// interfaceWriteToWire converts a domain interface write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func interfaceWriteToWire(in domain.InterfaceWrite) WireInterfaceWrite {
+	return WireInterfaceWrite{
+		Device:       in.Device,
+		Name:         in.Name,
+		Type:         in.Type,
+		Enabled:      in.Enabled,
+		MTU:          in.MTU,
+		MACAddress:   in.MACAddress,
+		Speed:        in.Speed,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalInterface decodes an interface response body into a domain.Interface.
+func unmarshalInterface(raw domain.RawObject) (*domain.Interface, error) {
+	var w WireInterface
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal interface: %w", err)
+	}
+	d := wireInterfaceToDomain(w)
 	return &d, nil
 }
 
