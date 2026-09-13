@@ -106,4 +106,8 @@ type NetworkRepository interface {
 	CreateProvider(ctx context.Context, token string, in ProviderWrite) (*Provider, error)
 	UpdateProvider(ctx context.Context, token string, id int, in ProviderWrite) (*Provider, error)
 	DeleteProvider(ctx context.Context, token string, id int) error
+
+	CreateTenant(ctx context.Context, token string, in TenantWrite) (*Tenant, error)
+	UpdateTenant(ctx context.Context, token string, id int, in TenantWrite) (*Tenant, error)
+	DeleteTenant(ctx context.Context, token string, id int) error
 }

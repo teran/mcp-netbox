@@ -942,6 +942,43 @@ func (c *Client) DeleteProvider(ctx context.Context, token string, id int) error
 	return mErr
 }
 
+// CreateTenant creates a new tenant via POST /api/tenancy/tenants/.
+func (c *Client) CreateTenant(ctx context.Context, token string, in domain.TenantWrite) (*domain.Tenant, error) {
+	payload, err := json.Marshal(tenantWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal tenant create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/tenancy/tenants/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalTenant(raw)
+}
+
+// UpdateTenant partially updates a tenant via PATCH /api/tenancy/tenants/<id>/.
+func (c *Client) UpdateTenant(ctx context.Context, token string, id int, in domain.TenantWrite) (*domain.Tenant, error) {
+	payload, err := json.Marshal(tenantWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal tenant update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/tenancy/tenants/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalTenant(raw)
+}
+
+// DeleteTenant deletes a tenant via DELETE /api/tenancy/tenants/<id>/.
+func (c *Client) DeleteTenant(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/tenancy/tenants/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -1414,6 +1451,48 @@ func wireProviderToDomain(w WireProvider) domain.Provider {
 		PortalURL:    w.PortalURL,
 		NocContact:   w.NocContact,
 		AdminContact: w.AdminContact,
+		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
+}
+
+// tenantWriteToWire converts a domain tenant write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func tenantWriteToWire(in domain.TenantWrite) WireTenantWrite {
+	return WireTenantWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalTenant decodes a tenant response body into a domain.Tenant.
+func unmarshalTenant(raw domain.RawObject) (*domain.Tenant, error) {
+	var w WireTenant
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tenant: %w", err)
+	}
+	d := wireTenantToDomain(w)
+	return &d, nil
+}
+
+// wireTenantToDomain converts a wire tenant to the domain model.
+func wireTenantToDomain(w WireTenant) domain.Tenant {
+	return domain.Tenant{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Slug:         w.Slug,
+		Display:      w.Display,
+		Description:  w.Description,
 		Comments:     w.Comments,
 		Tags:         wireTagsToDomain(w.Tags),
 		CustomFields: w.CustomFields,

@@ -750,6 +750,34 @@ type ProviderDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the provider to delete,required"`
 }
 
+// TenantCreateInput represents the writable fields for creating a tenant.
+type TenantCreateInput struct {
+	Name         string         `json:"name" jsonschema:"tenant name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// TenantUpdateInput represents the writable fields for updating a tenant. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type TenantUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the tenant to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"tenant name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// TenantDeleteInput represents the input fields for deleting a tenant.
+type TenantDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the tenant to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -836,6 +864,11 @@ type VMInterfaceOutput struct {
 // ProviderOutput represents the output for the create/update provider tools.
 type ProviderOutput struct {
 	Data domain.Provider `json:"data"`
+}
+
+// TenantOutput represents the output for the create/update tenant tools.
+type TenantOutput struct {
+	Data domain.Tenant `json:"data"`
 }
 
 // — write helpers —
@@ -1411,6 +1444,34 @@ func providerWriteFromUpdate(in ProviderUpdateInput) domain.ProviderWrite {
 	write.PortalURL = in.PortalURL
 	write.NocContact = in.NocContact
 	write.AdminContact = in.AdminContact
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// tenantWriteFromCreate builds a domain.TenantWrite from a create input.
+func tenantWriteFromCreate(in TenantCreateInput) domain.TenantWrite {
+	return domain.TenantWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// tenantWriteFromUpdate builds a domain.TenantWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func tenantWriteFromUpdate(in TenantUpdateInput) domain.TenantWrite {
+	write := domain.TenantWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Slug = in.Slug
+	write.Description = in.Description
 	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
@@ -2769,6 +2830,71 @@ func NewDeleteProviderHandler(svc *application.NetworkService) mcp.ToolHandlerFo
 		}
 
 		if err := s.DeleteProvider(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateTenantHandler creates a handler for the create_tenant tool.
+func NewCreateTenantHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TenantCreateInput, TenantOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in TenantCreateInput) (*mcp.CallToolResult, TenantOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, TenantOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, TenantOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateTenant(ctx, tenantWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, TenantOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TenantOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateTenantHandler creates a handler for the update_tenant tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateTenantHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TenantUpdateInput, TenantOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in TenantUpdateInput) (*mcp.CallToolResult, TenantOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, TenantOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, TenantOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateTenant(ctx, in.ID, tenantWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, TenantOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TenantOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteTenantHandler creates a handler for the delete_tenant tool.
+func NewDeleteTenantHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TenantDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in TenantDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteTenant(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

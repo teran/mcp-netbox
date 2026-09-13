@@ -256,6 +256,18 @@ type WireProviderWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireTenantWrite is the wire request model for tenant create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields.
+type WireTenantWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`
@@ -532,6 +544,20 @@ type (
 		PortalURL    string         `json:"portal_url,omitempty"`
 		NocContact   string         `json:"noc_contact,omitempty"`
 		AdminContact string         `json:"admin_contact,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	WireTenant struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
 		Comments     string         `json:"comments,omitempty"`
 		Tags         []WireTag      `json:"tags,omitempty"`
 		CustomFields map[string]any `json:"custom_fields,omitempty"`

@@ -434,6 +434,42 @@ func TestProviderWrite_ZeroValues(t *testing.T) {
 	}
 }
 
+func TestTenant_Populate(t *testing.T) {
+	tn := Tenant{
+		ID:          1,
+		Name:        "ACME",
+		Slug:        "acme",
+		Description: "desc",
+		Comments:    "comments",
+	}
+	if tn.Name != "ACME" || tn.Slug != "acme" || tn.Description != "desc" {
+		t.Errorf("tn = %+v, want name ACME slug acme description desc", tn)
+	}
+}
+
+func TestTenant_ZeroValues(t *testing.T) {
+	var tn Tenant
+	if tn.Name != "" || tn.Slug != "" {
+		t.Errorf("tn = %+v, want empty name and slug", tn)
+	}
+}
+
+func TestTenantWrite_Populate(t *testing.T) {
+	slug := "acme"
+	desc := "desc"
+	tw := TenantWrite{Name: "ACME", Slug: &slug, Description: &desc}
+	if tw.Name != "ACME" || tw.Slug == nil || *tw.Slug != "acme" {
+		t.Errorf("tw = %+v, want name ACME slug acme", tw)
+	}
+}
+
+func TestTenantWrite_ZeroValues(t *testing.T) {
+	var tw TenantWrite
+	if tw.Name != "" || tw.Slug != nil {
+		t.Errorf("tw = %+v, want empty name and nil slug", tw)
+	}
+}
+
 func TestNested_Populate(t *testing.T) {
 	n := Nested{
 		ID:   1,

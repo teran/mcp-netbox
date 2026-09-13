@@ -482,6 +482,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteProvider = %v", err)
 		}
 	})
+	t.Run("CreateTenant", func(t *testing.T) {
+		got, err := (&MockRepo{CreateTenantFunc: func(_ context.Context, _ string, in domain.TenantWrite) (*domain.Tenant, error) {
+			return &domain.Tenant{ID: 1, Name: in.Name}, nil
+		}}).CreateTenant(context.Background(), "t", domain.TenantWrite{Name: "ACME"})
+		if err != nil || got == nil || got.Name != "ACME" {
+			t.Errorf("CreateTenant = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateTenant", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateTenantFunc: func(_ context.Context, _ string, id int, _ domain.TenantWrite) (*domain.Tenant, error) {
+			return &domain.Tenant{ID: id}, nil
+		}}).UpdateTenant(context.Background(), "t", 7, domain.TenantWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateTenant = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteTenant", func(t *testing.T) {
+		err := (&MockRepo{DeleteTenantFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteTenant(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteTenant = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -712,5 +739,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteProvider(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteProvider = %v", err)
+	}
+	if tn, err := repo.CreateTenant(ctx, "t", domain.TenantWrite{Name: "ACME"}); err != nil || tn.Name != "ACME" {
+		t.Errorf("CreateTenant = (%v, %v)", tn, err)
+	}
+	if tn, err := repo.UpdateTenant(ctx, "t", 7, domain.TenantWrite{Name: "ACME"}); err != nil || tn.ID != 7 {
+		t.Errorf("UpdateTenant = (%v, %v)", tn, err)
+	}
+	if err := repo.DeleteTenant(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteTenant = %v", err)
 	}
 }

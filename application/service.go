@@ -518,3 +518,30 @@ func (s *NetworkService) DeleteProvider(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateTenant relays a tenant create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateTenant(ctx context.Context, in domain.TenantWrite) (*domain.Tenant, error) {
+	resp, err := s.repo.CreateTenant(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create tenant: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateTenant relays a tenant update to the repository.
+func (s *NetworkService) UpdateTenant(ctx context.Context, id int, in domain.TenantWrite) (*domain.Tenant, error) {
+	resp, err := s.repo.UpdateTenant(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update tenant: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteTenant relays a tenant delete to the repository.
+func (s *NetworkService) DeleteTenant(ctx context.Context, id int) error {
+	if err := s.repo.DeleteTenant(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete tenant: %w", err)
+	}
+	return nil
+}

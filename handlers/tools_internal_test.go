@@ -235,6 +235,18 @@ func (s *stubRepo) DeleteProvider(ctx context.Context, token string, id int) err
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateTenant(ctx context.Context, token string, in domain.TenantWrite) (*domain.Tenant, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateTenant(ctx context.Context, token string, id int, in domain.TenantWrite) (*domain.Tenant, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteTenant(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

@@ -67,6 +67,9 @@ type MockRepo struct {
 	CreateProviderFunc           func(ctx context.Context, token string, in domain.ProviderWrite) (*domain.Provider, error)
 	UpdateProviderFunc           func(ctx context.Context, token string, id int, in domain.ProviderWrite) (*domain.Provider, error)
 	DeleteProviderFunc           func(ctx context.Context, token string, id int) error
+	CreateTenantFunc             func(ctx context.Context, token string, in domain.TenantWrite) (*domain.Tenant, error)
+	UpdateTenantFunc             func(ctx context.Context, token string, id int, in domain.TenantWrite) (*domain.Tenant, error)
+	DeleteTenantFunc             func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -291,6 +294,18 @@ func (m *MockRepo) UpdateProvider(ctx context.Context, token string, id int, in 
 
 func (m *MockRepo) DeleteProvider(ctx context.Context, token string, id int) error {
 	return m.DeleteProviderFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateTenant(ctx context.Context, token string, in domain.TenantWrite) (*domain.Tenant, error) {
+	return m.CreateTenantFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateTenant(ctx context.Context, token string, id int, in domain.TenantWrite) (*domain.Tenant, error) {
+	return m.UpdateTenantFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteTenant(ctx context.Context, token string, id int) error {
+	return m.DeleteTenantFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -526,5 +541,17 @@ func (r *NilRepo) UpdateProvider(ctx context.Context, token string, id int, in d
 }
 
 func (r *NilRepo) DeleteProvider(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateTenant(ctx context.Context, token string, in domain.TenantWrite) (*domain.Tenant, error) {
+	return &domain.Tenant{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateTenant(ctx context.Context, token string, id int, in domain.TenantWrite) (*domain.Tenant, error) {
+	return &domain.Tenant{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteTenant(ctx context.Context, token string, id int) error {
 	return nil
 }

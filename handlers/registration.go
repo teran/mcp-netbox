@@ -345,4 +345,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_provider"], metrics, "delete_provider", WrapToolHandler[ProviderDeleteInput, struct{}](metrics, "delete_provider", func(ctx context.Context, req *mcp.CallToolRequest, in ProviderDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteProviderHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_tenant"], metrics, "create_tenant", WrapToolHandler[TenantCreateInput, TenantOutput](metrics, "create_tenant", func(ctx context.Context, req *mcp.CallToolRequest, in TenantCreateInput) (*mcp.CallToolResult, TenantOutput, error) {
+		return NewCreateTenantHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_tenant"], metrics, "update_tenant", WrapToolHandler[TenantUpdateInput, TenantOutput](metrics, "update_tenant", func(ctx context.Context, req *mcp.CallToolRequest, in TenantUpdateInput) (*mcp.CallToolResult, TenantOutput, error) {
+		return NewUpdateTenantHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_tenant"], metrics, "delete_tenant", WrapToolHandler[TenantDeleteInput, struct{}](metrics, "delete_tenant", func(ctx context.Context, req *mcp.CallToolRequest, in TenantDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteTenantHandler(svc)(ctx, req, in)
+	}))
 }

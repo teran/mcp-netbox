@@ -357,5 +357,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a circuits provider from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the provider, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_tenant",
+			Title:        "Create Tenant",
+			Description:  "Create a new tenancy tenant in NetBox. name is required; all other fields are optional. Provide slug/description/comments as strings, and tags as a list of tag names. Returns the created tenant.",
+			Instructions: "Use only when the caller explicitly wants to create a tenant and provides a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_tenant",
+			Title:        "Update Tenant",
+			Description:  "Partially update a tenancy tenant in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated tenant.",
+			Instructions: "Use to modify one or more fields of an existing tenant. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_tenant",
+			Title:        "Delete Tenant",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a tenancy tenant from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the tenant, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }
