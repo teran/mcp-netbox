@@ -1156,6 +1156,204 @@ func TestVLANWriteToWire(t *testing.T) {
 	}
 }
 
+func TestClient_CreateVirtualMachine(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath, gotCT, gotAuth string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotCT = r.Header.Get("Content-Type")
+			gotAuth = r.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"id":1,"name":"web-01","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		cluster := 2
+		vm, err := client.CreateVirtualMachine(context.Background(), "tok", domain.VirtualMachineWrite{Name: "web-01", Cluster: &cluster})
+		if err != nil {
+			t.Fatalf("CreateVirtualMachine() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPost {
+			t.Errorf("method = %q, want POST", gotMethod)
+		}
+		if gotPath != "/api/virtualization/virtual-machines/" {
+			t.Errorf("path = %q, want /api/virtualization/virtual-machines/", gotPath)
+		}
+		if gotCT != "application/json" {
+			t.Errorf("Content-Type = %q, want application/json", gotCT)
+		}
+		if gotAuth != "Bearer tok" {
+			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["name"] != "web-01" {
+			t.Errorf("request body = %s, want name web-01", gotBody)
+		}
+		if reqBody["cluster"] != float64(2) {
+			t.Errorf("request body = %s, want cluster 2", gotBody)
+		}
+		if vm.ID != 1 || vm.Name != "web-01" {
+			t.Errorf("vm = %+v, want id 1 name web-01", vm)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"name":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateVirtualMachine(context.Background(), "tok", domain.VirtualMachineWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if ve.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_UpdateVirtualMachine(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success patch", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":7,"name":"Renamed","created":"","last_updated":""}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		mem := 8192
+		vm, err := client.UpdateVirtualMachine(context.Background(), "tok", 7, domain.VirtualMachineWrite{Memory: &mem})
+		if err != nil {
+			t.Fatalf("UpdateVirtualMachine() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPatch {
+			t.Errorf("method = %q, want PATCH", gotMethod)
+		}
+		if gotPath != "/api/virtualization/virtual-machines/7/" {
+			t.Errorf("path = %q, want /api/virtualization/virtual-machines/7/", gotPath)
+		}
+		if vm.ID != 7 {
+			t.Errorf("vm = %+v, want id 7", vm)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["memory"] != float64(8192) {
+			t.Errorf("request body = %s, want memory present", gotBody)
+		}
+		if _, ok := reqBody["name"]; ok {
+			t.Errorf("request body = %s, want name omitted (not provided)", gotBody)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"status":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.UpdateVirtualMachine(context.Background(), "tok", 7, domain.VirtualMachineWrite{Name: "X"})
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_DeleteVirtualMachine(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success 204", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteVirtualMachine(context.Background(), "tok", 3); err != nil {
+			t.Fatalf("DeleteVirtualMachine() returned error: %v", err)
+		}
+		if gotMethod != http.MethodDelete {
+			t.Errorf("method = %q, want DELETE", gotMethod)
+		}
+		if gotPath != "/api/virtualization/virtual-machines/3/" {
+			t.Errorf("path = %q, want /api/virtualization/virtual-machines/3/", gotPath)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"detail":"Cannot delete object with dependent objects."}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		err := client.DeleteVirtualMachine(context.Background(), "tok", 3)
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestVirtualMachineWriteToWire(t *testing.T) {
+	t.Parallel()
+
+	cluster := 2
+	in := domain.VirtualMachineWrite{Name: "web-01", Cluster: &cluster}
+	w := virtualMachineWriteToWire(in)
+	if w.Name != "web-01" || w.Cluster == nil || *w.Cluster != 2 {
+		t.Errorf("wire = %+v, want name web-01 cluster 2", w)
+	}
+}
+
 // unmarshalableCustomFields returns a CustomFields value that json.Marshal
 // cannot serialize, forcing the write methods' marshal-error branch.
 func unmarshalableCustomFields() map[string]any {
@@ -1195,6 +1393,14 @@ func TestClient_WriteMarshalErrors(t *testing.T) {
 	}
 	if _, err := client.UpdateVLAN(ctx, "tok", 7, badVLAN); err == nil {
 		t.Error("UpdateVLAN: expected marshal error, got nil")
+	}
+
+	badVM := domain.VirtualMachineWrite{Name: "web-01", CustomFields: unmarshalableCustomFields()}
+	if _, err := client.CreateVirtualMachine(ctx, "tok", badVM); err == nil {
+		t.Error("CreateVirtualMachine: expected marshal error, got nil")
+	}
+	if _, err := client.UpdateVirtualMachine(ctx, "tok", 7, badVM); err == nil {
+		t.Error("UpdateVirtualMachine: expected marshal error, got nil")
 	}
 }
 

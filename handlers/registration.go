@@ -235,4 +235,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_vlan"], metrics, "delete_vlan", WrapToolHandler[VLANDeleteInput, struct{}](metrics, "delete_vlan", func(ctx context.Context, req *mcp.CallToolRequest, in VLANDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteVLANHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_virtual_machine"], metrics, "create_virtual_machine", WrapToolHandler[VirtualMachineCreateInput, VirtualMachineOutput](metrics, "create_virtual_machine", func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachineCreateInput) (*mcp.CallToolResult, VirtualMachineOutput, error) {
+		return NewCreateVirtualMachineHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_virtual_machine"], metrics, "update_virtual_machine", WrapToolHandler[VirtualMachineUpdateInput, VirtualMachineOutput](metrics, "update_virtual_machine", func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachineUpdateInput) (*mcp.CallToolResult, VirtualMachineOutput, error) {
+		return NewUpdateVirtualMachineHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_virtual_machine"], metrics, "delete_virtual_machine", WrapToolHandler[VirtualMachineDeleteInput, struct{}](metrics, "delete_virtual_machine", func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachineDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteVirtualMachineHandler(svc)(ctx, req, in)
+	}))
 }

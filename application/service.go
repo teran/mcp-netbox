@@ -270,3 +270,31 @@ func (s *NetworkService) DeleteVLAN(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateVirtualMachine relays a virtual machine create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateVirtualMachine(ctx context.Context, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	resp, err := s.repo.CreateVirtualMachine(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create virtual machine: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateVirtualMachine relays a virtual machine update to the repository.
+func (s *NetworkService) UpdateVirtualMachine(ctx context.Context, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	resp, err := s.repo.UpdateVirtualMachine(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update virtual machine: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteVirtualMachine relays a virtual machine delete to the repository.
+func (s *NetworkService) DeleteVirtualMachine(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVirtualMachine(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete virtual machine: %w", err)
+	}
+	return nil
+}

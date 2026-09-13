@@ -127,6 +127,18 @@ func (s *stubRepo) DeleteVLAN(ctx context.Context, token string, id int) error {
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateVirtualMachine(ctx context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVirtualMachine(ctx context.Context, token string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVirtualMachine(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

@@ -429,6 +429,30 @@ type VLANWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// VirtualMachineWrite is the domain DTO for creating or updating a NetBox
+// virtual machine. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". References to related objects (cluster,
+// role, tenant, platform, site) are their numeric NetBox IDs.
+type VirtualMachineWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Cluster      *int           `json:"cluster,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Platform     *int           `json:"platform,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	VCPUs        *float64       `json:"vcpus,omitempty"`
+	Memory       *int           `json:"memory,omitempty"`
+	Disk         *int           `json:"disk,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

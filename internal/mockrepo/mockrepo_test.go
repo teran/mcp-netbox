@@ -265,6 +265,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteVLAN = %v", err)
 		}
 	})
+	t.Run("CreateVirtualMachine", func(t *testing.T) {
+		got, err := (&MockRepo{CreateVirtualMachineFunc: func(_ context.Context, _ string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			return &domain.VirtualMachine{ID: 1, Name: in.Name}, nil
+		}}).CreateVirtualMachine(context.Background(), "t", domain.VirtualMachineWrite{Name: "web-01"})
+		if err != nil || got == nil || got.Name != "web-01" {
+			t.Errorf("CreateVirtualMachine = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateVirtualMachine", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateVirtualMachineFunc: func(_ context.Context, _ string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			return &domain.VirtualMachine{ID: id, Name: in.Name}, nil
+		}}).UpdateVirtualMachine(context.Background(), "t", 7, domain.VirtualMachineWrite{Name: "web-01"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateVirtualMachine = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteVirtualMachine", func(t *testing.T) {
+		err := (&MockRepo{DeleteVirtualMachineFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteVirtualMachine(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteVirtualMachine = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -386,5 +413,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteVLAN(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVLAN = %v", err)
+	}
+	if v, err := repo.CreateVirtualMachine(ctx, "t", domain.VirtualMachineWrite{Name: "web-01"}); err != nil || v.Name != "web-01" {
+		t.Errorf("CreateVirtualMachine = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateVirtualMachine(ctx, "t", 7, domain.VirtualMachineWrite{Name: "web-01"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateVirtualMachine = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteVirtualMachine(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteVirtualMachine = %v", err)
 	}
 }

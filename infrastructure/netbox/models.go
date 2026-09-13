@@ -97,6 +97,25 @@ type WireVLANWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireVirtualMachineWrite is the wire request model for virtual machine
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields. References to related objects are numeric IDs.
+type WireVirtualMachineWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Cluster      *int           `json:"cluster,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Platform     *int           `json:"platform,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	VCPUs        *float64       `json:"vcpus,omitempty"`
+	Memory       *int           `json:"memory,omitempty"`
+	Disk         *int           `json:"disk,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

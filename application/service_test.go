@@ -1187,6 +1187,149 @@ func TestNetworkService_DeleteVLAN(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreateVirtualMachine(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVirtualMachineFunc: func(_ context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.VirtualMachine{ID: 1, Name: in.Name}, nil
+			},
+		})
+		vm, err := svc.CreateVirtualMachine(context.Background(), domain.VirtualMachineWrite{Name: "web-01"})
+		if err != nil {
+			t.Fatalf("CreateVirtualMachine() returned error: %v", err)
+		}
+		if vm.ID != 1 || vm.Name != "web-01" {
+			t.Errorf("vm = %+v, want id 1 name web-01", vm)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVirtualMachineFunc: func(_ context.Context, _ string, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateVirtualMachine(context.Background(), domain.VirtualMachineWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVirtualMachineFunc: func(_ context.Context, _ string, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateVirtualMachine(context.Background(), domain.VirtualMachineWrite{Name: "web-01"})
+		if err == nil || !containsService(err.Error(), "create virtual machine:") {
+			t.Errorf("err = %v, want it to contain 'create virtual machine:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateVirtualMachine(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVirtualMachineFunc: func(_ context.Context, _ string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+				return &domain.VirtualMachine{ID: id, Name: in.Name}, nil
+			},
+		})
+		vm, err := svc.UpdateVirtualMachine(context.Background(), 7, domain.VirtualMachineWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateVirtualMachine() returned error: %v", err)
+		}
+		if vm.ID != 7 {
+			t.Errorf("vm = %+v, want id 7", vm)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVirtualMachineFunc: func(_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateVirtualMachine(context.Background(), 7, domain.VirtualMachineWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVirtualMachineFunc: func(_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateVirtualMachine(context.Background(), 7, domain.VirtualMachineWrite{})
+		if err == nil || !containsService(err.Error(), "update virtual machine:") {
+			t.Errorf("err = %v, want it to contain 'update virtual machine:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteVirtualMachine(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVirtualMachineFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteVirtualMachine(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteVirtualMachine() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVirtualMachineFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteVirtualMachine(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVirtualMachineFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteVirtualMachine(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete virtual machine:") {
+			t.Errorf("err = %v, want it to contain 'delete virtual machine:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

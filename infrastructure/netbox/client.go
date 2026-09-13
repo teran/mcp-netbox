@@ -598,6 +598,46 @@ func (c *Client) DeleteVLAN(ctx context.Context, token string, id int) error {
 	return mErr
 }
 
+// CreateVirtualMachine creates a new virtual machine via POST
+// /api/virtualization/virtual-machines/.
+func (c *Client) CreateVirtualMachine(ctx context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	payload, err := json.Marshal(virtualMachineWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual machine create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/virtualization/virtual-machines/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVirtualMachine(raw)
+}
+
+// UpdateVirtualMachine partially updates a virtual machine via PATCH
+// /api/virtualization/virtual-machines/<id>/.
+func (c *Client) UpdateVirtualMachine(ctx context.Context, token string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	payload, err := json.Marshal(virtualMachineWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual machine update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/virtualization/virtual-machines/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVirtualMachine(raw)
+}
+
+// DeleteVirtualMachine deletes a virtual machine via DELETE
+// /api/virtualization/virtual-machines/<id>/.
+func (c *Client) DeleteVirtualMachine(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/virtualization/virtual-machines/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -775,6 +815,39 @@ func unmarshalVLAN(raw domain.RawObject) (*domain.VLAN, error) {
 		return nil, fmt.Errorf("failed to unmarshal VLAN: %w", err)
 	}
 	d := wireVLANToDomain(w)
+	return &d, nil
+}
+
+// virtualMachineWriteToWire converts a domain virtual machine write DTO to the
+// wire request model. The fields map one-to-one; nil pointers on the domain
+// side remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func virtualMachineWriteToWire(in domain.VirtualMachineWrite) WireVirtualMachineWrite {
+	return WireVirtualMachineWrite{
+		Name:         in.Name,
+		Cluster:      in.Cluster,
+		Role:         in.Role,
+		Tenant:       in.Tenant,
+		Platform:     in.Platform,
+		Status:       in.Status,
+		Site:         in.Site,
+		VCPUs:        in.VCPUs,
+		Memory:       in.Memory,
+		Disk:         in.Disk,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalVirtualMachine decodes a virtual machine response body into a
+// domain.VirtualMachine.
+func unmarshalVirtualMachine(raw domain.RawObject) (*domain.VirtualMachine, error) {
+	var w WireVirtualMachine
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual machine: %w", err)
+	}
+	d := wireVirtualMachineToDomain(w)
 	return &d, nil
 }
 

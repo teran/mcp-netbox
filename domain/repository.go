@@ -70,4 +70,8 @@ type NetworkRepository interface {
 	CreateVLAN(ctx context.Context, token string, in VLANWrite) (*VLAN, error)
 	UpdateVLAN(ctx context.Context, token string, id int, in VLANWrite) (*VLAN, error)
 	DeleteVLAN(ctx context.Context, token string, id int) error
+
+	CreateVirtualMachine(ctx context.Context, token string, in VirtualMachineWrite) (*VirtualMachine, error)
+	UpdateVirtualMachine(ctx context.Context, token string, id int, in VirtualMachineWrite) (*VirtualMachine, error)
+	DeleteVirtualMachine(ctx context.Context, token string, id int) error
 }

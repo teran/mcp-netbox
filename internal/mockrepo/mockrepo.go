@@ -40,6 +40,9 @@ type MockRepo struct {
 	CreateVLANFunc              func(ctx context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error)
 	UpdateVLANFunc              func(ctx context.Context, token string, id int, in domain.VLANWrite) (*domain.VLAN, error)
 	DeleteVLANFunc              func(ctx context.Context, token string, id int) error
+	CreateVirtualMachineFunc    func(ctx context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error)
+	UpdateVirtualMachineFunc    func(ctx context.Context, token string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error)
+	DeleteVirtualMachineFunc    func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -156,6 +159,18 @@ func (m *MockRepo) UpdateVLAN(ctx context.Context, token string, id int, in doma
 
 func (m *MockRepo) DeleteVLAN(ctx context.Context, token string, id int) error {
 	return m.DeleteVLANFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateVirtualMachine(ctx context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	return m.CreateVirtualMachineFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateVirtualMachine(ctx context.Context, token string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	return m.UpdateVirtualMachineFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteVirtualMachine(ctx context.Context, token string, id int) error {
+	return m.DeleteVirtualMachineFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -275,5 +290,17 @@ func (r *NilRepo) UpdateVLAN(ctx context.Context, token string, id int, in domai
 }
 
 func (r *NilRepo) DeleteVLAN(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateVirtualMachine(ctx context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	return &domain.VirtualMachine{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateVirtualMachine(ctx context.Context, token string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+	return &domain.VirtualMachine{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteVirtualMachine(ctx context.Context, token string, id int) error {
 	return nil
 }

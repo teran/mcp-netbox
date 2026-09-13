@@ -193,5 +193,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a VLAN from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the VLAN, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_virtual_machine",
+			Title:        "Create Virtual Machine",
+			Description:  "Create a new virtual machine in NetBox. name is required; all other fields are optional. Provide cluster/role/tenant/platform/site as numeric IDs (look them up first), status as one of offline/active/planned/staged/failed/decommissioning, vcpus as a number, memory (MB) and disk (GB) as integers, and tags as a list of tag names. Returns the created virtual machine.",
+			Instructions: "Use only when the caller explicitly wants to create a virtual machine and provides a name. This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:         "update_virtual_machine",
+			Title:        "Update Virtual Machine",
+			Description:  "Partially update a virtual machine in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated virtual machine.",
+			Instructions: "Use to modify one or more fields of an existing virtual machine. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_virtual_machine",
+			Title:        "Delete Virtual Machine",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a virtual machine from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the virtual machine, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

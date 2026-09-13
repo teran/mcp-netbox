@@ -401,6 +401,50 @@ type VLANDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the VLAN to delete,required"`
 }
 
+// VirtualMachineCreateInput represents the writable fields for creating a
+// virtual machine.
+type VirtualMachineCreateInput struct {
+	Name         string         `json:"name" jsonschema:"VM name (required)"`
+	Cluster      *int           `json:"cluster,omitempty" jsonschema:"cluster ID"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID (look up first)"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Platform     *int           `json:"platform,omitempty" jsonschema:"platform ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: offline, active, planned, staged, failed, decommissioning"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	VCPUs        *float64       `json:"vcpus,omitempty" jsonschema:"number of virtual CPUs"`
+	Memory       *int           `json:"memory,omitempty" jsonschema:"memory in MB"`
+	Disk         *int           `json:"disk,omitempty" jsonschema:"disk size in GB"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualMachineUpdateInput represents the writable fields for updating a
+// virtual machine. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type VirtualMachineUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the virtual machine to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"VM name"`
+	Cluster      *int           `json:"cluster,omitempty" jsonschema:"cluster ID"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Platform     *int           `json:"platform,omitempty" jsonschema:"platform ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: offline, active, planned, staged, failed, decommissioning"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	VCPUs        *float64       `json:"vcpus,omitempty" jsonschema:"number of virtual CPUs"`
+	Memory       *int           `json:"memory,omitempty" jsonschema:"memory in MB"`
+	Disk         *int           `json:"disk,omitempty" jsonschema:"disk size in GB"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualMachineDeleteInput represents the input fields for deleting a virtual
+// machine.
+type VirtualMachineDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual machine to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -439,6 +483,12 @@ type PrefixOutput struct {
 // VLANOutput represents the output for the create/update VLAN tools.
 type VLANOutput struct {
 	Data domain.VLAN `json:"data"`
+}
+
+// VirtualMachineOutput represents the output for the create/update virtual
+// machine tools.
+type VirtualMachineOutput struct {
+	Data domain.VirtualMachine `json:"data"`
 }
 
 // — write helpers —
@@ -669,6 +719,49 @@ func vlanWriteFromUpdate(in VLANUpdateInput) domain.VLANWrite {
 	write.Status = in.Status
 	write.Role = in.Role
 	write.Description = in.Description
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// virtualMachineWriteFromCreate builds a domain.VirtualMachineWrite from a
+// create input.
+func virtualMachineWriteFromCreate(in VirtualMachineCreateInput) domain.VirtualMachineWrite {
+	return domain.VirtualMachineWrite{
+		Name:         in.Name,
+		Cluster:      in.Cluster,
+		Role:         in.Role,
+		Tenant:       in.Tenant,
+		Platform:     in.Platform,
+		Status:       in.Status,
+		Site:         in.Site,
+		VCPUs:        in.VCPUs,
+		Memory:       in.Memory,
+		Disk:         in.Disk,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// virtualMachineWriteFromUpdate builds a domain.VirtualMachineWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func virtualMachineWriteFromUpdate(in VirtualMachineUpdateInput) domain.VirtualMachineWrite {
+	write := domain.VirtualMachineWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Cluster = in.Cluster
+	write.Role = in.Role
+	write.Tenant = in.Tenant
+	write.Platform = in.Platform
+	write.Status = in.Status
+	write.Site = in.Site
+	write.VCPUs = in.VCPUs
+	write.Memory = in.Memory
+	write.Disk = in.Disk
 	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
@@ -1406,6 +1499,74 @@ func NewDeleteVLANHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VL
 		}
 
 		if err := s.DeleteVLAN(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateVirtualMachineHandler creates a handler for the
+// create_virtual_machine tool.
+func NewCreateVirtualMachineHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VirtualMachineCreateInput, VirtualMachineOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachineCreateInput) (*mcp.CallToolResult, VirtualMachineOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		vm, err := s.CreateVirtualMachine(ctx, virtualMachineWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VirtualMachineOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualMachineOutput{Data: *vm}, nil
+	}
+}
+
+// NewUpdateVirtualMachineHandler creates a handler for the
+// update_virtual_machine tool. It performs a partial-merge PATCH using only the
+// explicitly provided fields.
+func NewUpdateVirtualMachineHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VirtualMachineUpdateInput, VirtualMachineOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachineUpdateInput) (*mcp.CallToolResult, VirtualMachineOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		vm, err := s.UpdateVirtualMachine(ctx, in.ID, virtualMachineWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VirtualMachineOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualMachineOutput{Data: *vm}, nil
+	}
+}
+
+// NewDeleteVirtualMachineHandler creates a handler for the
+// delete_virtual_machine tool.
+func NewDeleteVirtualMachineHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VirtualMachineDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VirtualMachineDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteVirtualMachine(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}
