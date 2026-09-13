@@ -563,6 +563,34 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteDeviceType = %v", err)
 		}
 	})
+	t.Run("CreateLocation", func(t *testing.T) {
+		site := 5
+		got, err := (&MockRepo{CreateLocationFunc: func(_ context.Context, _ string, in domain.LocationWrite) (*domain.Location, error) {
+			return &domain.Location{ID: 1, Name: in.Name}, nil
+		}}).CreateLocation(context.Background(), "t", domain.LocationWrite{Name: "Row A", Site: &site})
+		if err != nil || got == nil || got.Name != "Row A" {
+			t.Errorf("CreateLocation = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateLocation", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateLocationFunc: func(_ context.Context, _ string, id int, _ domain.LocationWrite) (*domain.Location, error) {
+			return &domain.Location{ID: id}, nil
+		}}).UpdateLocation(context.Background(), "t", 7, domain.LocationWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateLocation = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteLocation", func(t *testing.T) {
+		err := (&MockRepo{DeleteLocationFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteLocation(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteLocation = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -820,5 +848,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteDeviceType(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteDeviceType = %v", err)
+	}
+	if loc, err := repo.CreateLocation(ctx, "t", domain.LocationWrite{Name: "Row A"}); err != nil || loc.Name != "Row A" {
+		t.Errorf("CreateLocation = (%v, %v)", loc, err)
+	}
+	if loc, err := repo.UpdateLocation(ctx, "t", 7, domain.LocationWrite{Name: "Row A"}); err != nil || loc.ID != 7 {
+		t.Errorf("UpdateLocation = (%v, %v)", loc, err)
+	}
+	if err := repo.DeleteLocation(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteLocation = %v", err)
 	}
 }

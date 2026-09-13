@@ -600,3 +600,30 @@ func (s *NetworkService) DeleteDeviceType(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateLocation relays a location create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateLocation(ctx context.Context, in domain.LocationWrite) (*domain.Location, error) {
+	resp, err := s.repo.CreateLocation(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create location: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateLocation relays a location update to the repository.
+func (s *NetworkService) UpdateLocation(ctx context.Context, id int, in domain.LocationWrite) (*domain.Location, error) {
+	resp, err := s.repo.UpdateLocation(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update location: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteLocation relays a location delete to the repository.
+func (s *NetworkService) DeleteLocation(ctx context.Context, id int) error {
+	if err := s.repo.DeleteLocation(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete location: %w", err)
+	}
+	return nil
+}

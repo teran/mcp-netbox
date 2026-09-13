@@ -76,6 +76,9 @@ type MockRepo struct {
 	CreateDeviceTypeFunc         func(ctx context.Context, token string, in domain.DeviceTypeWrite) (*domain.DeviceType, error)
 	UpdateDeviceTypeFunc         func(ctx context.Context, token string, id int, in domain.DeviceTypeWrite) (*domain.DeviceType, error)
 	DeleteDeviceTypeFunc         func(ctx context.Context, token string, id int) error
+	CreateLocationFunc           func(ctx context.Context, token string, in domain.LocationWrite) (*domain.Location, error)
+	UpdateLocationFunc           func(ctx context.Context, token string, id int, in domain.LocationWrite) (*domain.Location, error)
+	DeleteLocationFunc           func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -336,6 +339,18 @@ func (m *MockRepo) UpdateDeviceType(ctx context.Context, token string, id int, i
 
 func (m *MockRepo) DeleteDeviceType(ctx context.Context, token string, id int) error {
 	return m.DeleteDeviceTypeFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateLocation(ctx context.Context, token string, in domain.LocationWrite) (*domain.Location, error) {
+	return m.CreateLocationFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateLocation(ctx context.Context, token string, id int, in domain.LocationWrite) (*domain.Location, error) {
+	return m.UpdateLocationFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteLocation(ctx context.Context, token string, id int) error {
+	return m.DeleteLocationFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -607,5 +622,17 @@ func (r *NilRepo) UpdateDeviceType(ctx context.Context, token string, id int, in
 }
 
 func (r *NilRepo) DeleteDeviceType(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateLocation(ctx context.Context, token string, in domain.LocationWrite) (*domain.Location, error) {
+	return &domain.Location{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateLocation(ctx context.Context, token string, id int, in domain.LocationWrite) (*domain.Location, error) {
+	return &domain.Location{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteLocation(ctx context.Context, token string, id int) error {
 	return nil
 }

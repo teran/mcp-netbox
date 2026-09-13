@@ -2920,3 +2920,147 @@ func indexOfService(s, sub string) int {
 	}
 	return -1
 }
+
+func TestNetworkService_CreateLocation(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateLocationFunc: func(_ context.Context, token string, in domain.LocationWrite) (*domain.Location, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.Location{ID: 1, Name: in.Name}, nil
+			},
+		})
+		site := 5
+		p, err := svc.CreateLocation(context.Background(), domain.LocationWrite{Name: "Row A", Site: &site})
+		if err != nil {
+			t.Fatalf("CreateLocation() returned error: %v", err)
+		}
+		if p.ID != 1 || p.Name != "Row A" {
+			t.Errorf("p = %+v, want id 1 name 'Row A'", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"site":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateLocationFunc: func(_ context.Context, _ string, _ domain.LocationWrite) (*domain.Location, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateLocation(context.Background(), domain.LocationWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateLocationFunc: func(_ context.Context, _ string, _ domain.LocationWrite) (*domain.Location, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateLocation(context.Background(), domain.LocationWrite{Name: "Row A"})
+		if err == nil || !containsService(err.Error(), "create location:") {
+			t.Errorf("err = %v, want it to contain 'create location:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateLocation(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateLocationFunc: func(_ context.Context, _ string, id int, _ domain.LocationWrite) (*domain.Location, error) {
+				return &domain.Location{ID: id, Name: "Row B"}, nil
+			},
+		})
+		p, err := svc.UpdateLocation(context.Background(), 7, domain.LocationWrite{Name: "Row B"})
+		if err != nil {
+			t.Fatalf("UpdateLocation() returned error: %v", err)
+		}
+		if p.ID != 7 {
+			t.Errorf("p = %+v, want id 7", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateLocationFunc: func(_ context.Context, _ string, _ int, _ domain.LocationWrite) (*domain.Location, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateLocation(context.Background(), 7, domain.LocationWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateLocationFunc: func(_ context.Context, _ string, _ int, _ domain.LocationWrite) (*domain.Location, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateLocation(context.Background(), 7, domain.LocationWrite{})
+		if err == nil || !containsService(err.Error(), "update location:") {
+			t.Errorf("err = %v, want it to contain 'update location:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteLocation(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteLocationFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteLocation(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteLocation() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteLocationFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteLocation(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteLocationFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteLocation(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete location:") {
+			t.Errorf("err = %v, want it to contain 'delete location:'", err)
+		}
+	})
+}

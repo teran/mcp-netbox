@@ -271,6 +271,18 @@ func (s *stubRepo) DeleteDeviceType(ctx context.Context, token string, id int) e
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateLocation(ctx context.Context, token string, in domain.LocationWrite) (*domain.Location, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateLocation(ctx context.Context, token string, id int, in domain.LocationWrite) (*domain.Location, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteLocation(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

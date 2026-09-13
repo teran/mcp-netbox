@@ -118,4 +118,8 @@ type NetworkRepository interface {
 	CreateDeviceType(ctx context.Context, token string, in DeviceTypeWrite) (*DeviceType, error)
 	UpdateDeviceType(ctx context.Context, token string, id int, in DeviceTypeWrite) (*DeviceType, error)
 	DeleteDeviceType(ctx context.Context, token string, id int) error
+
+	CreateLocation(ctx context.Context, token string, in LocationWrite) (*Location, error)
+	UpdateLocation(ctx context.Context, token string, id int, in LocationWrite) (*Location, error)
+	DeleteLocation(ctx context.Context, token string, id int) error
 }

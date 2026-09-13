@@ -843,6 +843,39 @@ type DeviceTypeDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the device type to delete,required"`
 }
 
+// LocationCreateInput represents the writable fields for creating a location.
+// Name and Site (numeric NetBox ID) are required on create.
+type LocationCreateInput struct {
+	Name         string         `json:"name" jsonschema:"location name (required)"`
+	Site         *int           `json:"site,omitempty" jsonschema:"numeric ID of the parent site (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"numeric ID of a parent location"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Status       *string        `json:"status,omitempty" jsonschema:"location status (e.g. active, planned)"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// LocationUpdateInput represents the writable fields for updating a location.
+// All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type LocationUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the location to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"location name"`
+	Site         *int           `json:"site,omitempty" jsonschema:"numeric ID of the parent site"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"numeric ID of a parent location"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Status       *string        `json:"status,omitempty" jsonschema:"location status (e.g. active, planned)"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// LocationDeleteInput represents the input fields for deleting a location.
+type LocationDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the location to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -946,6 +979,11 @@ type ManufacturerOutput struct {
 // tools.
 type DeviceTypeOutput struct {
 	Data domain.DeviceType `json:"data"`
+}
+
+// LocationOutput represents the output for the create/update location tools.
+type LocationOutput struct {
+	Data domain.Location `json:"data"`
 }
 
 // — write helpers —
@@ -1613,6 +1651,38 @@ func deviceTypeWriteFromUpdate(in DeviceTypeUpdateInput) domain.DeviceTypeWrite 
 	write.IsFullDepth = in.IsFullDepth
 	write.SubdeviceRole = in.SubdeviceRole
 	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// locationWriteFromCreate builds a domain.LocationWrite from a create input.
+func locationWriteFromCreate(in LocationCreateInput) domain.LocationWrite {
+	return domain.LocationWrite{
+		Name:         in.Name,
+		Site:         in.Site,
+		Slug:         in.Slug,
+		Parent:       in.Parent,
+		Description:  in.Description,
+		Status:       in.Status,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// locationWriteFromUpdate builds a domain.LocationWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func locationWriteFromUpdate(in LocationUpdateInput) domain.LocationWrite {
+	write := domain.LocationWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Site = in.Site
+	write.Slug = in.Slug
+	write.Parent = in.Parent
+	write.Description = in.Description
+	write.Status = in.Status
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
 	return write
@@ -3171,6 +3241,74 @@ func NewDeleteDeviceTypeHandler(svc *application.NetworkService) mcp.ToolHandler
 		}
 
 		if err := s.DeleteDeviceType(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateLocationHandler creates a handler for the create_location tool.
+func NewCreateLocationHandler(svc *application.NetworkService) mcp.ToolHandlerFor[LocationCreateInput, LocationOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in LocationCreateInput) (*mcp.CallToolResult, LocationOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, LocationOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, LocationOutput{}, fmt.Errorf("name is required")
+		}
+		if in.Site == nil {
+			return &mcp.CallToolResult{IsError: true}, LocationOutput{}, fmt.Errorf("site is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateLocation(ctx, locationWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, LocationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, LocationOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateLocationHandler creates a handler for the update_location tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateLocationHandler(svc *application.NetworkService) mcp.ToolHandlerFor[LocationUpdateInput, LocationOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in LocationUpdateInput) (*mcp.CallToolResult, LocationOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, LocationOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, LocationOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateLocation(ctx, in.ID, locationWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, LocationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, LocationOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteLocationHandler creates a handler for the delete_location tool.
+func NewDeleteLocationHandler(svc *application.NetworkService) mcp.ToolHandlerFor[LocationDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in LocationDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteLocation(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

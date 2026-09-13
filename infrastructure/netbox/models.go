@@ -295,6 +295,20 @@ type WireDeviceTypeWrite struct {
 	CustomFields  map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireLocationWrite is the wire request model for location create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields. Site (numeric NetBox ID) is required on create.
+type WireLocationWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`
@@ -621,6 +635,22 @@ type (
 		CustomFields  map[string]any `json:"custom_fields,omitempty"`
 		Created       string         `json:"created"`
 		LastUpdated   string         `json:"last_updated"`
+	}
+
+	WireLocation struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Display      string         `json:"display,omitempty"`
+		Site         *WireNested    `json:"site"`
+		Parent       *WireNested    `json:"parent"`
+		Status       *WireLabel     `json:"status"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 )
 

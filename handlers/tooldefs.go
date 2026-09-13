@@ -411,5 +411,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a device type from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the device type, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_location",
+			Title:        "Create Location",
+			Description:  "Create a new site location in NetBox. name and site (numeric ID) are required; all other fields are optional. Provide slug/parent (numeric ID)/description/status as strings or integers, and tags as a list of tag names. Returns the created location.",
+			Instructions: "Use only when the caller explicitly wants to create a location and provides a name and a site. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_location",
+			Title:        "Update Location",
+			Description:  "Partially update a site location in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated location.",
+			Instructions: "Use to modify one or more fields of an existing location. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_location",
+			Title:        "Delete Location",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a site location from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the location, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

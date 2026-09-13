@@ -1055,6 +1055,44 @@ func (c *Client) DeleteDeviceType(ctx context.Context, token string, id int) err
 	return mErr
 }
 
+// CreateLocation creates a new site location via POST /api/dcim/locations/.
+func (c *Client) CreateLocation(ctx context.Context, token string, in domain.LocationWrite) (*domain.Location, error) {
+	payload, err := json.Marshal(locationWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal location create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/locations/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalLocation(raw)
+}
+
+// UpdateLocation partially updates a site location via PATCH
+// /api/dcim/locations/<id>/.
+func (c *Client) UpdateLocation(ctx context.Context, token string, id int, in domain.LocationWrite) (*domain.Location, error) {
+	payload, err := json.Marshal(locationWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal location update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/locations/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalLocation(raw)
+}
+
+// DeleteLocation deletes a site location via DELETE /api/dcim/locations/<id>/.
+func (c *Client) DeleteLocation(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/dcim/locations/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -2014,6 +2052,48 @@ func wireRackToDomain(w WireRack) domain.Rack {
 		Width:        w.Width,
 		UHeight:      w.UHeight,
 		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func locationWriteToWire(in domain.LocationWrite) WireLocationWrite {
+	return WireLocationWrite{
+		Name:         in.Name,
+		Site:         in.Site,
+		Slug:         in.Slug,
+		Parent:       in.Parent,
+		Description:  in.Description,
+		Status:       in.Status,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalLocation decodes a location response body into a domain.Location.
+func unmarshalLocation(raw domain.RawObject) (*domain.Location, error) {
+	var w WireLocation
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal location: %w", err)
+	}
+	d := wireLocationToDomain(w)
+	return &d, nil
+}
+
+// wireLocationToDomain converts a wire location to the domain model.
+func wireLocationToDomain(w WireLocation) domain.Location {
+	return domain.Location{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Slug:         w.Slug,
+		Display:      w.Display,
+		Site:         wireNestedToDomain(w.Site),
+		Parent:       wireNestedToDomain(w.Parent),
+		Status:       wireLabelToDomain(w.Status),
+		Description:  w.Description,
 		Tags:         wireTagsToDomain(w.Tags),
 		CustomFields: w.CustomFields,
 		Created:      w.Created,

@@ -346,6 +346,24 @@ type (
 		Created       string         `json:"created"`
 		LastUpdated   string         `json:"last_updated"`
 	}
+
+	// Location is a NetBox site location (a secondary entity: it has write
+	// tools but no read tool).
+	Location struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Display      string         `json:"display,omitempty"`
+		Site         *Nested        `json:"site"`
+		Parent       *Nested        `json:"parent"`
+		Status       *Label         `json:"status"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
 )
 
 type (
@@ -755,6 +773,26 @@ type DeviceTypeWrite struct {
 	Comments      *string        `json:"comments,omitempty"`
 	Tags          []string       `json:"tags,omitempty"`
 	CustomFields  map[string]any `json:"custom_fields,omitempty"`
+}
+
+// LocationWrite is the domain DTO for creating or updating a NetBox site
+// location. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Site (numeric NetBox ID) is
+// required on create. Optional scalar fields are pointers so that a
+// partial-update (PATCH) can distinguish "not provided" (nil) from "explicitly
+// set to empty" (pointer to ""). Parent is the numeric NetBox ID of a parent
+// location. Status is a choice-string value.
+type LocationWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
 // PaginatedResponse wraps a paginated API response with the total count,
