@@ -676,6 +676,43 @@ func (c *Client) DeleteCluster(ctx context.Context, token string, id int) error 
 	return mErr
 }
 
+// CreateCircuit creates a new circuit via POST /api/circuits/circuits/.
+func (c *Client) CreateCircuit(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error) {
+	payload, err := json.Marshal(circuitWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/circuits/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCircuit(raw)
+}
+
+// UpdateCircuit partially updates a circuit via PATCH /api/circuits/circuits/<id>/.
+func (c *Client) UpdateCircuit(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
+	payload, err := json.Marshal(circuitWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/circuits/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCircuit(raw)
+}
+
+// DeleteCircuit deletes a circuit via DELETE /api/circuits/circuits/<id>/.
+func (c *Client) DeleteCircuit(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/circuits/circuits/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -914,6 +951,36 @@ func unmarshalCluster(raw domain.RawObject) (*domain.Cluster, error) {
 		return nil, fmt.Errorf("failed to unmarshal cluster: %w", err)
 	}
 	d := wireClusterToDomain(w)
+	return &d, nil
+}
+
+// circuitWriteToWire converts a domain circuit write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func circuitWriteToWire(in domain.CircuitWrite) WireCircuitWrite {
+	return WireCircuitWrite{
+		CID:          in.CID,
+		Provider:     in.Provider,
+		CircuitType:  in.CircuitType,
+		Tenant:       in.Tenant,
+		Status:       in.Status,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+		InstallDate:  in.InstallDate,
+		CommitRate:   in.CommitRate,
+	}
+}
+
+// unmarshalCircuit decodes a circuit response body into a domain.Circuit.
+func unmarshalCircuit(raw domain.RawObject) (*domain.Circuit, error) {
+	var w WireCircuit
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal circuit: %w", err)
+	}
+	d := wireCircuitToDomain(w)
 	return &d, nil
 }
 

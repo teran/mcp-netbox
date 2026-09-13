@@ -1552,6 +1552,209 @@ func TestClusterWriteToWire(t *testing.T) {
 	}
 }
 
+func TestClient_CreateCircuit(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath, gotCT, gotAuth string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotCT = r.Header.Get("Content-Type")
+			gotAuth = r.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"id":1,"cid":"CIR-001","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		prov := 2
+		ct := 3
+		circuit, err := client.CreateCircuit(context.Background(), "tok", domain.CircuitWrite{CID: "CIR-001", Provider: &prov, CircuitType: &ct})
+		if err != nil {
+			t.Fatalf("CreateCircuit() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPost {
+			t.Errorf("method = %q, want POST", gotMethod)
+		}
+		if gotPath != "/api/circuits/circuits/" {
+			t.Errorf("path = %q, want /api/circuits/circuits/", gotPath)
+		}
+		if gotCT != "application/json" {
+			t.Errorf("Content-Type = %q, want application/json", gotCT)
+		}
+		if gotAuth != "Bearer tok" {
+			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["cid"] != "CIR-001" {
+			t.Errorf("request body = %s, want cid CIR-001", gotBody)
+		}
+		if reqBody["provider"] != float64(2) {
+			t.Errorf("request body = %s, want provider 2", gotBody)
+		}
+		if reqBody["circuit_type"] != float64(3) {
+			t.Errorf("request body = %s, want circuit_type 3", gotBody)
+		}
+		if circuit.ID != 1 || circuit.CID != "CIR-001" {
+			t.Errorf("circuit = %+v, want id 1 cid CIR-001", circuit)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"cid":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateCircuit(context.Background(), "tok", domain.CircuitWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if ve.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_UpdateCircuit(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success patch", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":7,"cid":"Renamed","created":"","last_updated":""}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		desc := "updated"
+		circuit, err := client.UpdateCircuit(context.Background(), "tok", 7, domain.CircuitWrite{Description: &desc})
+		if err != nil {
+			t.Fatalf("UpdateCircuit() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPatch {
+			t.Errorf("method = %q, want PATCH", gotMethod)
+		}
+		if gotPath != "/api/circuits/circuits/7/" {
+			t.Errorf("path = %q, want /api/circuits/circuits/7/", gotPath)
+		}
+		if circuit.ID != 7 {
+			t.Errorf("circuit = %+v, want id 7", circuit)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["description"] != "updated" {
+			t.Errorf("request body = %s, want description present", gotBody)
+		}
+		if _, ok := reqBody["cid"]; ok {
+			t.Errorf("request body = %s, want cid omitted (not provided)", gotBody)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"provider":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.UpdateCircuit(context.Background(), "tok", 7, domain.CircuitWrite{CID: "X"})
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_DeleteCircuit(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success 204", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteCircuit(context.Background(), "tok", 3); err != nil {
+			t.Fatalf("DeleteCircuit() returned error: %v", err)
+		}
+		if gotMethod != http.MethodDelete {
+			t.Errorf("method = %q, want DELETE", gotMethod)
+		}
+		if gotPath != "/api/circuits/circuits/3/" {
+			t.Errorf("path = %q, want /api/circuits/circuits/3/", gotPath)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"detail":"Cannot delete object with dependent objects."}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		err := client.DeleteCircuit(context.Background(), "tok", 3)
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestCircuitWriteToWire(t *testing.T) {
+	t.Parallel()
+
+	prov := 2
+	ct := 3
+	in := domain.CircuitWrite{CID: "CIR-001", Provider: &prov, CircuitType: &ct}
+	w := circuitWriteToWire(in)
+	if w.CID != "CIR-001" || w.Provider == nil || *w.Provider != 2 || w.CircuitType == nil || *w.CircuitType != 3 {
+		t.Errorf("wire = %+v, want cid CIR-001 provider 2 circuit_type 3", w)
+	}
+}
+
 // unmarshalableCustomFields returns a CustomFields value that json.Marshal
 // cannot serialize, forcing the write methods' marshal-error branch.
 func unmarshalableCustomFields() map[string]any {
@@ -1607,6 +1810,14 @@ func TestClient_WriteMarshalErrors(t *testing.T) {
 	}
 	if _, err := client.UpdateCluster(ctx, "tok", 7, badCluster); err == nil {
 		t.Error("UpdateCluster: expected marshal error, got nil")
+	}
+
+	badCircuit := domain.CircuitWrite{CID: "CIR-001", CustomFields: unmarshalableCustomFields()}
+	if _, err := client.CreateCircuit(ctx, "tok", badCircuit); err == nil {
+		t.Error("CreateCircuit: expected marshal error, got nil")
+	}
+	if _, err := client.UpdateCircuit(ctx, "tok", 7, badCircuit); err == nil {
+		t.Error("UpdateCircuit: expected marshal error, got nil")
 	}
 }
 

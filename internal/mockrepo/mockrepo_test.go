@@ -319,6 +319,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteCluster = %v", err)
 		}
 	})
+	t.Run("CreateCircuit", func(t *testing.T) {
+		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
+			return &domain.Circuit{ID: 1, CID: in.CID}, nil
+		}}).CreateCircuit(context.Background(), "t", domain.CircuitWrite{CID: "CIR-001"})
+		if err != nil || got == nil || got.CID != "CIR-001" {
+			t.Errorf("CreateCircuit = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateCircuit", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateCircuitFunc: func(_ context.Context, _ string, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
+			return &domain.Circuit{ID: id, CID: in.CID}, nil
+		}}).UpdateCircuit(context.Background(), "t", 7, domain.CircuitWrite{CID: "CIR-001"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateCircuit = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteCircuit", func(t *testing.T) {
+		err := (&MockRepo{DeleteCircuitFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteCircuit(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteCircuit = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -458,5 +485,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteCluster(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteCluster = %v", err)
+	}
+	if c, err := repo.CreateCircuit(ctx, "t", domain.CircuitWrite{CID: "CIR-001"}); err != nil || c.CID != "CIR-001" {
+		t.Errorf("CreateCircuit = (%v, %v)", c, err)
+	}
+	if c, err := repo.UpdateCircuit(ctx, "t", 7, domain.CircuitWrite{CID: "CIR-001"}); err != nil || c.ID != 7 {
+		t.Errorf("UpdateCircuit = (%v, %v)", c, err)
+	}
+	if err := repo.DeleteCircuit(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteCircuit = %v", err)
 	}
 }

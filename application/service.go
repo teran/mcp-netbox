@@ -325,3 +325,30 @@ func (s *NetworkService) DeleteCluster(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateCircuit relays a circuit create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateCircuit(ctx context.Context, in domain.CircuitWrite) (*domain.Circuit, error) {
+	resp, err := s.repo.CreateCircuit(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create circuit: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateCircuit relays a circuit update to the repository.
+func (s *NetworkService) UpdateCircuit(ctx context.Context, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
+	resp, err := s.repo.UpdateCircuit(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update circuit: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteCircuit relays a circuit delete to the repository.
+func (s *NetworkService) DeleteCircuit(ctx context.Context, id int) error {
+	if err := s.repo.DeleteCircuit(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete circuit: %w", err)
+	}
+	return nil
+}

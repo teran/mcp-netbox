@@ -474,6 +474,29 @@ type ClusterWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// CircuitWrite is the domain DTO for creating or updating a NetBox circuit. It
+// carries only the writable fields.
+//
+// CID is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Provider and CircuitType are
+// required on create. Optional scalar fields are pointers so that a
+// partial-update (PATCH) can distinguish "not provided" (nil) from "explicitly
+// set to empty". References to related objects (provider, circuit_type, tenant)
+// are their numeric NetBox IDs.
+type CircuitWrite struct {
+	CID          string         `json:"cid,omitempty"`
+	Provider     *int           `json:"provider,omitempty"`
+	CircuitType  *int           `json:"circuit_type,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+	InstallDate  *string        `json:"install_date,omitempty"`
+	CommitRate   *int           `json:"commit_rate,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

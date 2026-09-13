@@ -78,4 +78,8 @@ type NetworkRepository interface {
 	CreateCluster(ctx context.Context, token string, in ClusterWrite) (*Cluster, error)
 	UpdateCluster(ctx context.Context, token string, id int, in ClusterWrite) (*Cluster, error)
 	DeleteCluster(ctx context.Context, token string, id int) error
+
+	CreateCircuit(ctx context.Context, token string, in CircuitWrite) (*Circuit, error)
+	UpdateCircuit(ctx context.Context, token string, id int, in CircuitWrite) (*Circuit, error)
+	DeleteCircuit(ctx context.Context, token string, id int) error
 }

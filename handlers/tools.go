@@ -479,6 +479,44 @@ type ClusterDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the cluster to delete,required"`
 }
 
+// CircuitCreateInput represents the writable fields for creating a circuit.
+type CircuitCreateInput struct {
+	CID          string         `json:"cid" jsonschema:"circuit ID (required)"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID (required)"`
+	CircuitType  *int           `json:"circuit_type,omitempty" jsonschema:"circuit type ID (required)"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: planned, provisioning, active, offline, decommissioning"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+	InstallDate  *string        `json:"install_date,omitempty" jsonschema:"install date (YYYY-MM-DD)"`
+	CommitRate   *int           `json:"commit_rate,omitempty" jsonschema:"committed rate in kbps"`
+}
+
+// CircuitUpdateInput represents the writable fields for updating a circuit. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type CircuitUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the circuit to update,required"`
+	CID          *string        `json:"cid,omitempty" jsonschema:"circuit ID"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	CircuitType  *int           `json:"circuit_type,omitempty" jsonschema:"circuit type ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: planned, provisioning, active, offline, decommissioning"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+	InstallDate  *string        `json:"install_date,omitempty" jsonschema:"install date (YYYY-MM-DD)"`
+	CommitRate   *int           `json:"commit_rate,omitempty" jsonschema:"committed rate in kbps"`
+}
+
+// CircuitDeleteInput represents the input fields for deleting a circuit.
+type CircuitDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the circuit to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -528,6 +566,11 @@ type VirtualMachineOutput struct {
 // ClusterOutput represents the output for the create/update cluster tools.
 type ClusterOutput struct {
 	Data domain.Cluster `json:"data"`
+}
+
+// CircuitOutput represents the output for the create/update circuit tools.
+type CircuitOutput struct {
+	Data domain.Circuit `json:"data"`
 }
 
 // — write helpers —
@@ -838,6 +881,44 @@ func clusterWriteFromUpdate(in ClusterUpdateInput) domain.ClusterWrite {
 	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
+	return write
+}
+
+// circuitWriteFromCreate builds a domain.CircuitWrite from a create input.
+func circuitWriteFromCreate(in CircuitCreateInput) domain.CircuitWrite {
+	return domain.CircuitWrite{
+		CID:          in.CID,
+		Provider:     in.Provider,
+		CircuitType:  in.CircuitType,
+		Tenant:       in.Tenant,
+		Status:       in.Status,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+		InstallDate:  in.InstallDate,
+		CommitRate:   in.CommitRate,
+	}
+}
+
+// circuitWriteFromUpdate builds a domain.CircuitWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func circuitWriteFromUpdate(in CircuitUpdateInput) domain.CircuitWrite {
+	write := domain.CircuitWrite{}
+	if in.CID != nil {
+		write.CID = *in.CID
+	}
+	write.Provider = in.Provider
+	write.CircuitType = in.CircuitType
+	write.Tenant = in.Tenant
+	write.Status = in.Status
+	write.Description = in.Description
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	write.InstallDate = in.InstallDate
+	write.CommitRate = in.CommitRate
 	return write
 }
 
@@ -1708,6 +1789,77 @@ func NewDeleteClusterHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 		}
 
 		if err := s.DeleteCluster(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateCircuitHandler creates a handler for the create_circuit tool.
+func NewCreateCircuitHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitCreateInput, CircuitOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitCreateInput) (*mcp.CallToolResult, CircuitOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitOutput{}, errServiceNotAvailable
+		}
+		if in.CID == "" {
+			return &mcp.CallToolResult{IsError: true}, CircuitOutput{}, fmt.Errorf("cid is required")
+		}
+		if in.Provider == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitOutput{}, fmt.Errorf("provider is required")
+		}
+		if in.CircuitType == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitOutput{}, fmt.Errorf("circuit_type is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		circuit, err := s.CreateCircuit(ctx, circuitWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, CircuitOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitOutput{Data: *circuit}, nil
+	}
+}
+
+// NewUpdateCircuitHandler creates a handler for the update_circuit tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateCircuitHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitUpdateInput, CircuitOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitUpdateInput) (*mcp.CallToolResult, CircuitOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		circuit, err := s.UpdateCircuit(ctx, in.ID, circuitWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, CircuitOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitOutput{Data: *circuit}, nil
+	}
+}
+
+// NewDeleteCircuitHandler creates a handler for the delete_circuit tool.
+func NewDeleteCircuitHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteCircuit(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

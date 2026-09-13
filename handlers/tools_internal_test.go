@@ -151,6 +151,18 @@ func (s *stubRepo) DeleteCluster(ctx context.Context, token string, id int) erro
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateCircuit(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateCircuit(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteCircuit(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

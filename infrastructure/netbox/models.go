@@ -132,6 +132,24 @@ type WireClusterWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireCircuitWrite is the wire request model for circuit create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields. References to related objects (provider, circuit_type, tenant) are
+// numeric IDs.
+type WireCircuitWrite struct {
+	CID          string         `json:"cid,omitempty"`
+	Provider     *int           `json:"provider,omitempty"`
+	CircuitType  *int           `json:"circuit_type,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+	InstallDate  *string        `json:"install_date,omitempty"`
+	CommitRate   *int           `json:"commit_rate,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

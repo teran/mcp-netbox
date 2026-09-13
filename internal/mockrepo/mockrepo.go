@@ -46,6 +46,9 @@ type MockRepo struct {
 	CreateClusterFunc           func(ctx context.Context, token string, in domain.ClusterWrite) (*domain.Cluster, error)
 	UpdateClusterFunc           func(ctx context.Context, token string, id int, in domain.ClusterWrite) (*domain.Cluster, error)
 	DeleteClusterFunc           func(ctx context.Context, token string, id int) error
+	CreateCircuitFunc           func(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error)
+	UpdateCircuitFunc           func(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error)
+	DeleteCircuitFunc           func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -186,6 +189,18 @@ func (m *MockRepo) UpdateCluster(ctx context.Context, token string, id int, in d
 
 func (m *MockRepo) DeleteCluster(ctx context.Context, token string, id int) error {
 	return m.DeleteClusterFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateCircuit(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error) {
+	return m.CreateCircuitFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateCircuit(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
+	return m.UpdateCircuitFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteCircuit(ctx context.Context, token string, id int) error {
+	return m.DeleteCircuitFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -329,5 +344,17 @@ func (r *NilRepo) UpdateCluster(ctx context.Context, token string, id int, in do
 }
 
 func (r *NilRepo) DeleteCluster(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateCircuit(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error) {
+	return &domain.Circuit{ID: 1, CID: in.CID}, nil
+}
+
+func (r *NilRepo) UpdateCircuit(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
+	return &domain.Circuit{ID: id, CID: in.CID}, nil
+}
+
+func (r *NilRepo) DeleteCircuit(ctx context.Context, token string, id int) error {
 	return nil
 }

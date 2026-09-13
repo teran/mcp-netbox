@@ -259,4 +259,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_cluster"], metrics, "delete_cluster", WrapToolHandler[ClusterDeleteInput, struct{}](metrics, "delete_cluster", func(ctx context.Context, req *mcp.CallToolRequest, in ClusterDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteClusterHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_circuit"], metrics, "create_circuit", WrapToolHandler[CircuitCreateInput, CircuitOutput](metrics, "create_circuit", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitCreateInput) (*mcp.CallToolResult, CircuitOutput, error) {
+		return NewCreateCircuitHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_circuit"], metrics, "update_circuit", WrapToolHandler[CircuitUpdateInput, CircuitOutput](metrics, "update_circuit", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitUpdateInput) (*mcp.CallToolResult, CircuitOutput, error) {
+		return NewUpdateCircuitHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_circuit"], metrics, "delete_circuit", WrapToolHandler[CircuitDeleteInput, struct{}](metrics, "delete_circuit", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteCircuitHandler(svc)(ctx, req, in)
+	}))
 }

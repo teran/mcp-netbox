@@ -229,5 +229,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a cluster from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the cluster, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_circuit",
+			Title:        "Create Circuit",
+			Description:  "Create a new circuit in NetBox. cid and provider and circuit_type are required; all other fields are optional. Provide provider/circuit_type/tenant as numeric IDs (look them up first), status as one of planned/provisioning/active/offline/decommissioning, install_date as YYYY-MM-DD, commit_rate in kbps, and tags as a list of tag names. Returns the created circuit.",
+			Instructions: "Use only when the caller explicitly wants to create a circuit and provides a cid, a provider and a circuit_type. This tool mutates NetBox; confirm the cid and key attributes before calling.",
+		},
+		{
+			Name:         "update_circuit",
+			Title:        "Update Circuit",
+			Description:  "Partially update a circuit in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated circuit.",
+			Instructions: "Use to modify one or more fields of an existing circuit. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_circuit",
+			Title:        "Delete Circuit",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a circuit from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the circuit, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }
