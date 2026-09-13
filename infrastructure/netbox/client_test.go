@@ -1777,3 +1777,43 @@ func TestWireCableTerminationToDomain_Populated(t *testing.T) {
 		t.Errorf("wireCableTerminationToDomain = %+v", got)
 	}
 }
+
+func TestClient_ForwardsRequestID(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-Request-ID") != "corr-123" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"count":0,"results":[]}`))
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	ctx := domain.WithRequestID(context.Background(), "corr-123")
+	_, err := client.ListSites(ctx, "token", nil)
+	if err != nil {
+		t.Fatalf("ListSites() returned error: %v", err)
+	}
+}
+
+func TestClient_NoRequestIDHeaderWhenAbsent(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("X-Request-ID"); got != "" {
+			t.Errorf("X-Request-ID = %q, want empty", got)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"count":0,"results":[]}`))
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	_, err := client.ListSites(context.Background(), "token", nil)
+	if err != nil {
+		t.Fatalf("ListSites() returned error: %v", err)
+	}
+}

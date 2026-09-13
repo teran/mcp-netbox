@@ -17,7 +17,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
+	"github.com/sirupsen/logrus"
 	"resty.dev/v3"
 
 	"github.com/teran/mcp-netbox/domain"
@@ -78,14 +80,38 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 		return nil, fmt.Errorf("failed to parse URL: %w", err)
 	}
 
-	resp, err := c.client.R().
+	start := time.Now()
+
+	req := c.client.R().
 		SetContext(ctx).
 		SetResponseBodyLimit(maxBodySize).
 		SetResponseBodyUnlimitedReads(true).
 		SetHeader("Accept", "application/json").
 		SetHeader("Authorization", "Bearer "+token).
-		SetQueryParams(params).
-		Execute(method, u.String())
+		SetQueryParams(params)
+
+	// Propagate the correlation ID to the upstream NetBox call so records on
+	// both sides of the wire can be matched (L9/G11).
+	if requestID := domain.RequestIDFromContext(ctx); requestID != "" {
+		req = req.SetHeader(requestIDHeader, requestID)
+	}
+
+	resp, err := req.Execute(method, u.String())
+	duration := time.Since(start)
+
+	// Emit an outbound per-request log record tagged with the same request_id.
+	logger := getLogger()
+	entry := logger.WithFields(logrus.Fields{
+		"method":   method,
+		"path":     u.Path,
+		"duration": duration,
+		"status":   statusCodeOf(resp),
+	})
+	if requestID := domain.RequestIDFromContext(ctx); requestID != "" {
+		entry = entry.WithField("request_id", requestID)
+	}
+	entry.Debug("netbox request")
+
 	if err != nil {
 		if errors.Is(err, resty.ErrReadExceedsThresholdLimit) {
 			return nil, fmt.Errorf("response body exceeds %d bytes (got at least %d bytes), truncation detected", maxBodySize, maxBodySize)
@@ -117,6 +143,19 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 
 	return resp.Bytes(), nil
 }
+
+// statusCodeOf returns the HTTP status code of a resty response, or 0 when the
+// response is nil (e.g. a transport-level error).
+func statusCodeOf(resp *resty.Response) int {
+	if resp == nil {
+		return 0
+	}
+	return resp.StatusCode()
+}
+
+// requestIDHeader is the standard correlation header forwarded to upstream
+// HTTP calls.
+const requestIDHeader = "X-Request-ID"
 
 func (c *Client) get(ctx context.Context, token, path string, params map[string]string) ([]byte, error) {
 	return c.doRequest(ctx, token, http.MethodGet, path, params)

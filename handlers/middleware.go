@@ -17,6 +17,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/teran/mcp-netbox/application"
+	"github.com/teran/mcp-netbox/domain"
 )
 
 // contextKey is an unexported type for context value keys.
@@ -33,6 +34,48 @@ const (
 )
 
 var ErrTokenRequired = errors.New("authorization token is required")
+
+// requestIDHeader is the standard header used to propagate a correlation ID.
+const requestIDHeader = "X-Request-ID"
+
+// RequestIDMiddleware injects a per-request correlation ID into the context.
+// If the inbound request already carries an X-Request-ID (e.g. from a reverse
+// proxy), that value is reused; otherwise a fresh ID is generated (L9/G11).
+func RequestIDMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := r.Header.Get(requestIDHeader)
+		if id == "" {
+			id = newRequestID()
+		}
+		ctx := domain.WithRequestID(r.Context(), id)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// WithSession returns a logrus entry derived from logger and decorated with the
+// request-scoped correlation fields (request_id, and session_id when known)
+// read from ctx. It is the base entry for all request-scoped log lines (L9).
+func WithSession(ctx context.Context, logger *logrus.Logger) *logrus.Entry {
+	entry := logger.WithFields(logrus.Fields{})
+	if id := domain.RequestIDFromContext(ctx); id != "" {
+		entry = entry.WithField("request_id", id)
+	}
+	if sid := sessionIDFromContext(ctx); sid != "" {
+		entry = entry.WithField("session_id", sid)
+	}
+	return entry
+}
+
+// sessionIDFromContext returns an optional session id from the context. MCP
+// sessions are not tracked by this server, so it always returns "".
+func sessionIDFromContext(context.Context) string {
+	return ""
+}
+
+// newRequestID returns a fresh correlation identifier.
+func newRequestID() string {
+	return fmt.Sprintf("%d", time.Now().UnixNano())
+}
 
 // TokenMiddleware extracts the NetBox API token from the Authorization header.
 // Supports both "Bearer <token>" and "Token <token>" schemes (case-insensitive).
@@ -233,7 +276,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		duration := time.Since(start)
 
-		getLogger().WithFields(logrus.Fields{
+		WithSession(r.Context(), getLogger()).WithFields(logrus.Fields{
 			"http_method": r.Method,
 			"path":        r.URL.Path,
 			"method":      toolName,

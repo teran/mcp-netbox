@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net/http"
@@ -8,7 +9,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/teran/mcp-netbox/application"
+	"github.com/teran/mcp-netbox/domain"
 )
 
 func TestSanitizeLog(t *testing.T) {
@@ -454,5 +458,72 @@ func TestLoggingMiddleware_ToolCallMethod(t *testing.T) {
 
 	if rec.Code != http.StatusOK {
 		t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
+	}
+}
+
+func TestRequestIDMiddleware_GeneratesID(t *testing.T) {
+	t.Parallel()
+
+	var got string
+	handler := RequestIDMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = domain.RequestIDFromContext(r.Context())
+	}))
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if got == "" {
+		t.Error("RequestIDFromContext = empty, want a generated id")
+	}
+}
+
+func TestRequestIDMiddleware_ReusesInboundHeader(t *testing.T) {
+	t.Parallel()
+
+	var got string
+	handler := RequestIDMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = domain.RequestIDFromContext(r.Context())
+	}))
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	req.Header.Set("X-Request-ID", "inbound-42")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if got != "inbound-42" {
+		t.Errorf("RequestIDFromContext = %q, want inbound-42", got)
+	}
+}
+
+func TestWithSession_AddsRequestIDField(t *testing.T) {
+	t.Parallel()
+
+	var buf bytes.Buffer
+	l := logrus.New()
+	l.SetOutput(&buf)
+	l.SetLevel(logrus.InfoLevel)
+
+	ctx := domain.WithRequestID(context.Background(), "req-xyz")
+	WithSession(ctx, l).Info("hello")
+
+	out := buf.String()
+	if !strings.Contains(out, "req-xyz") {
+		t.Errorf("log output = %q, want it to contain the request_id", out)
+	}
+}
+
+func TestWithSession_NoRequestID(t *testing.T) {
+	t.Parallel()
+
+	var buf bytes.Buffer
+	l := logrus.New()
+	l.SetOutput(&buf)
+	l.SetLevel(logrus.InfoLevel)
+
+	WithSession(context.Background(), l).Info("hello")
+
+	if strings.Contains(buf.String(), "request_id") {
+		t.Errorf("log output = %q, want no request_id field", buf.String())
 	}
 }
