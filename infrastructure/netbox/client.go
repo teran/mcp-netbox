@@ -1093,6 +1093,46 @@ func (c *Client) DeleteLocation(ctx context.Context, token string, id int) error
 	return mErr
 }
 
+// CreateClusterType creates a new cluster type via POST
+// /api/virtualization/cluster-types/.
+func (c *Client) CreateClusterType(ctx context.Context, token string, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+	payload, err := json.Marshal(clusterTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal cluster type create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/virtualization/cluster-types/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalClusterType(raw)
+}
+
+// UpdateClusterType partially updates a cluster type via PATCH
+// /api/virtualization/cluster-types/<id>/.
+func (c *Client) UpdateClusterType(ctx context.Context, token string, id int, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+	payload, err := json.Marshal(clusterTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal cluster type update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/virtualization/cluster-types/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalClusterType(raw)
+}
+
+// DeleteClusterType deletes a cluster type via DELETE
+// /api/virtualization/cluster-types/<id>/.
+func (c *Client) DeleteClusterType(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/virtualization/cluster-types/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -2093,6 +2133,43 @@ func wireLocationToDomain(w WireLocation) domain.Location {
 		Site:         wireNestedToDomain(w.Site),
 		Parent:       wireNestedToDomain(w.Parent),
 		Status:       wireLabelToDomain(w.Status),
+		Description:  w.Description,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func clusterTypeWriteToWire(in domain.ClusterTypeWrite) WireClusterTypeWrite {
+	return WireClusterTypeWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalClusterType decodes a cluster type response body into a
+// domain.ClusterType.
+func unmarshalClusterType(raw domain.RawObject) (*domain.ClusterType, error) {
+	var w WireClusterType
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal cluster type: %w", err)
+	}
+	d := wireClusterTypeToDomain(w)
+	return &d, nil
+}
+
+// wireClusterTypeToDomain converts a wire cluster type to the domain model.
+func wireClusterTypeToDomain(w WireClusterType) domain.ClusterType {
+	return domain.ClusterType{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Slug:         w.Slug,
+		Display:      w.Display,
 		Description:  w.Description,
 		Tags:         wireTagsToDomain(w.Tags),
 		CustomFields: w.CustomFields,

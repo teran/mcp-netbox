@@ -627,3 +627,31 @@ func (s *NetworkService) DeleteLocation(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateClusterType relays a cluster type create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateClusterType(ctx context.Context, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+	resp, err := s.repo.CreateClusterType(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create cluster type: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateClusterType relays a cluster type update to the repository.
+func (s *NetworkService) UpdateClusterType(ctx context.Context, id int, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+	resp, err := s.repo.UpdateClusterType(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update cluster type: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteClusterType relays a cluster type delete to the repository.
+func (s *NetworkService) DeleteClusterType(ctx context.Context, id int) error {
+	if err := s.repo.DeleteClusterType(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete cluster type: %w", err)
+	}
+	return nil
+}

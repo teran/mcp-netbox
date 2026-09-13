@@ -122,4 +122,8 @@ type NetworkRepository interface {
 	CreateLocation(ctx context.Context, token string, in LocationWrite) (*Location, error)
 	UpdateLocation(ctx context.Context, token string, id int, in LocationWrite) (*Location, error)
 	DeleteLocation(ctx context.Context, token string, id int) error
+
+	CreateClusterType(ctx context.Context, token string, in ClusterTypeWrite) (*ClusterType, error)
+	UpdateClusterType(ctx context.Context, token string, id int, in ClusterTypeWrite) (*ClusterType, error)
+	DeleteClusterType(ctx context.Context, token string, id int) error
 }

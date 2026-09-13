@@ -429,5 +429,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a site location from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the location, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_cluster_type",
+			Title:        "Create Cluster Type",
+			Description:  "Create a new cluster type in NetBox. name is required; all other fields are optional. Provide slug/description as strings, and tags as a list of tag names. Returns the created cluster type.",
+			Instructions: "Use only when the caller explicitly wants to create a cluster type and provides a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_cluster_type",
+			Title:        "Update Cluster Type",
+			Description:  "Partially update a cluster type in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated cluster type.",
+			Instructions: "Use to modify one or more fields of an existing cluster type. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_cluster_type",
+			Title:        "Delete Cluster Type",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a cluster type from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the cluster type, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

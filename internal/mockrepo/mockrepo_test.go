@@ -591,6 +591,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteLocation = %v", err)
 		}
 	})
+	t.Run("CreateClusterType", func(t *testing.T) {
+		got, err := (&MockRepo{CreateClusterTypeFunc: func(_ context.Context, _ string, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+			return &domain.ClusterType{ID: 1, Name: in.Name}, nil
+		}}).CreateClusterType(context.Background(), "t", domain.ClusterTypeWrite{Name: "KVM"})
+		if err != nil || got == nil || got.Name != "KVM" {
+			t.Errorf("CreateClusterType = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateClusterType", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateClusterTypeFunc: func(_ context.Context, _ string, id int, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+			return &domain.ClusterType{ID: id}, nil
+		}}).UpdateClusterType(context.Background(), "t", 7, domain.ClusterTypeWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateClusterType = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteClusterType", func(t *testing.T) {
+		err := (&MockRepo{DeleteClusterTypeFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteClusterType(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteClusterType = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -857,5 +884,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteLocation(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteLocation = %v", err)
+	}
+	if ct, err := repo.CreateClusterType(ctx, "t", domain.ClusterTypeWrite{Name: "KVM"}); err != nil || ct.Name != "KVM" {
+		t.Errorf("CreateClusterType = (%v, %v)", ct, err)
+	}
+	if ct, err := repo.UpdateClusterType(ctx, "t", 7, domain.ClusterTypeWrite{Name: "KVM"}); err != nil || ct.ID != 7 {
+		t.Errorf("UpdateClusterType = (%v, %v)", ct, err)
+	}
+	if err := repo.DeleteClusterType(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteClusterType = %v", err)
 	}
 }

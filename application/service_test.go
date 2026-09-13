@@ -3064,3 +3064,146 @@ func TestNetworkService_DeleteLocation(t *testing.T) {
 		}
 	})
 }
+
+func TestNetworkService_CreateClusterType(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateClusterTypeFunc: func(_ context.Context, token string, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.ClusterType{ID: 1, Name: in.Name}, nil
+			},
+		})
+		p, err := svc.CreateClusterType(context.Background(), domain.ClusterTypeWrite{Name: "KVM"})
+		if err != nil {
+			t.Fatalf("CreateClusterType() returned error: %v", err)
+		}
+		if p.ID != 1 || p.Name != "KVM" {
+			t.Errorf("p = %+v, want id 1 name 'KVM'", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateClusterTypeFunc: func(_ context.Context, _ string, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateClusterType(context.Background(), domain.ClusterTypeWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateClusterTypeFunc: func(_ context.Context, _ string, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateClusterType(context.Background(), domain.ClusterTypeWrite{Name: "KVM"})
+		if err == nil || !containsService(err.Error(), "create cluster type:") {
+			t.Errorf("err = %v, want it to contain 'create cluster type:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateClusterType(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateClusterTypeFunc: func(_ context.Context, _ string, id int, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+				return &domain.ClusterType{ID: id, Name: "KVM"}, nil
+			},
+		})
+		p, err := svc.UpdateClusterType(context.Background(), 7, domain.ClusterTypeWrite{Name: "KVM"})
+		if err != nil {
+			t.Fatalf("UpdateClusterType() returned error: %v", err)
+		}
+		if p.ID != 7 {
+			t.Errorf("p = %+v, want id 7", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateClusterTypeFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateClusterType(context.Background(), 7, domain.ClusterTypeWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateClusterTypeFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateClusterType(context.Background(), 7, domain.ClusterTypeWrite{})
+		if err == nil || !containsService(err.Error(), "update cluster type:") {
+			t.Errorf("err = %v, want it to contain 'update cluster type:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteClusterType(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteClusterTypeFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteClusterType(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteClusterType() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteClusterTypeFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteClusterType(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteClusterTypeFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteClusterType(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete cluster type:") {
+			t.Errorf("err = %v, want it to contain 'delete cluster type:'", err)
+		}
+	})
+}

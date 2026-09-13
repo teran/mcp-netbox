@@ -79,6 +79,9 @@ type MockRepo struct {
 	CreateLocationFunc           func(ctx context.Context, token string, in domain.LocationWrite) (*domain.Location, error)
 	UpdateLocationFunc           func(ctx context.Context, token string, id int, in domain.LocationWrite) (*domain.Location, error)
 	DeleteLocationFunc           func(ctx context.Context, token string, id int) error
+	CreateClusterTypeFunc        func(ctx context.Context, token string, in domain.ClusterTypeWrite) (*domain.ClusterType, error)
+	UpdateClusterTypeFunc        func(ctx context.Context, token string, id int, in domain.ClusterTypeWrite) (*domain.ClusterType, error)
+	DeleteClusterTypeFunc        func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -351,6 +354,18 @@ func (m *MockRepo) UpdateLocation(ctx context.Context, token string, id int, in 
 
 func (m *MockRepo) DeleteLocation(ctx context.Context, token string, id int) error {
 	return m.DeleteLocationFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateClusterType(ctx context.Context, token string, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+	return m.CreateClusterTypeFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateClusterType(ctx context.Context, token string, id int, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+	return m.UpdateClusterTypeFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteClusterType(ctx context.Context, token string, id int) error {
+	return m.DeleteClusterTypeFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -634,5 +649,17 @@ func (r *NilRepo) UpdateLocation(ctx context.Context, token string, id int, in d
 }
 
 func (r *NilRepo) DeleteLocation(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateClusterType(ctx context.Context, token string, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+	return &domain.ClusterType{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateClusterType(ctx context.Context, token string, id int, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+	return &domain.ClusterType{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteClusterType(ctx context.Context, token string, id int) error {
 	return nil
 }

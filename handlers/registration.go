@@ -393,4 +393,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_location"], metrics, "delete_location", WrapToolHandler[LocationDeleteInput, struct{}](metrics, "delete_location", func(ctx context.Context, req *mcp.CallToolRequest, in LocationDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteLocationHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_cluster_type"], metrics, "create_cluster_type", WrapToolHandler[ClusterTypeCreateInput, ClusterTypeOutput](metrics, "create_cluster_type", func(ctx context.Context, req *mcp.CallToolRequest, in ClusterTypeCreateInput) (*mcp.CallToolResult, ClusterTypeOutput, error) {
+		return NewCreateClusterTypeHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_cluster_type"], metrics, "update_cluster_type", WrapToolHandler[ClusterTypeUpdateInput, ClusterTypeOutput](metrics, "update_cluster_type", func(ctx context.Context, req *mcp.CallToolRequest, in ClusterTypeUpdateInput) (*mcp.CallToolResult, ClusterTypeOutput, error) {
+		return NewUpdateClusterTypeHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_cluster_type"], metrics, "delete_cluster_type", WrapToolHandler[ClusterTypeDeleteInput, struct{}](metrics, "delete_cluster_type", func(ctx context.Context, req *mcp.CallToolRequest, in ClusterTypeDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteClusterTypeHandler(svc)(ctx, req, in)
+	}))
 }
