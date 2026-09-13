@@ -58,6 +58,9 @@ type MockRepo struct {
 	CreateCircuitTerminationFunc func(ctx context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error)
 	UpdateCircuitTerminationFunc func(ctx context.Context, token string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error)
 	DeleteCircuitTerminationFunc func(ctx context.Context, token string, id int) error
+	CreateCableFunc              func(ctx context.Context, token string, in domain.CableWrite) (*domain.Cable, error)
+	UpdateCableFunc              func(ctx context.Context, token string, id int, in domain.CableWrite) (*domain.Cable, error)
+	DeleteCableFunc              func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -246,6 +249,18 @@ func (m *MockRepo) UpdateCircuitTermination(ctx context.Context, token string, i
 
 func (m *MockRepo) DeleteCircuitTermination(ctx context.Context, token string, id int) error {
 	return m.DeleteCircuitTerminationFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateCable(ctx context.Context, token string, in domain.CableWrite) (*domain.Cable, error) {
+	return m.CreateCableFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateCable(ctx context.Context, token string, id int, in domain.CableWrite) (*domain.Cable, error) {
+	return m.UpdateCableFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteCable(ctx context.Context, token string, id int) error {
+	return m.DeleteCableFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -437,5 +452,25 @@ func (r *NilRepo) UpdateCircuitTermination(ctx context.Context, token string, id
 }
 
 func (r *NilRepo) DeleteCircuitTermination(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateCable(ctx context.Context, token string, in domain.CableWrite) (*domain.Cable, error) {
+	c := &domain.Cable{ID: 1}
+	if in.Label != nil {
+		c.Label = *in.Label
+	}
+	return c, nil
+}
+
+func (r *NilRepo) UpdateCable(ctx context.Context, token string, id int, in domain.CableWrite) (*domain.Cable, error) {
+	c := &domain.Cable{ID: id}
+	if in.Label != nil {
+		c.Label = *in.Label
+	}
+	return c, nil
+}
+
+func (r *NilRepo) DeleteCable(ctx context.Context, token string, id int) error {
 	return nil
 }

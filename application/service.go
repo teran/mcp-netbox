@@ -436,3 +436,30 @@ func (s *NetworkService) DeleteCircuitTermination(ctx context.Context, id int) e
 	}
 	return nil
 }
+
+// CreateCable relays a cable create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateCable(ctx context.Context, in domain.CableWrite) (*domain.Cable, error) {
+	resp, err := s.repo.CreateCable(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create cable: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateCable relays a cable update to the repository.
+func (s *NetworkService) UpdateCable(ctx context.Context, id int, in domain.CableWrite) (*domain.Cable, error) {
+	resp, err := s.repo.UpdateCable(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update cable: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteCable relays a cable delete to the repository.
+func (s *NetworkService) DeleteCable(ctx context.Context, id int) error {
+	if err := s.repo.DeleteCable(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete cable: %w", err)
+	}
+	return nil
+}

@@ -17,6 +17,8 @@ type toolDef struct {
 // toolDefs returns the ordered set of tool definitions registered by
 // RegisterTools. The order follows the read -> write/update -> delete grouping
 // (S3); every tool here is read-only.
+//
+//nolint:maintidx // data-declaration function; the cyclomatic count is inherent to listing every tool
 func toolDefs() []toolDef {
 	return []toolDef{
 		{
@@ -300,6 +302,24 @@ func toolDefs() []toolDef {
 			Title:        "Delete Circuit Termination",
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a circuit termination from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the circuit termination, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:         "create_cable",
+			Title:        "Create Cable",
+			Description:  "Create a new cable in NetBox. termination_a and termination_b are required; each is an object with object_type (e.g. dcim.interface) and object_id. All other fields are optional. Provide type/status/length_unit as NetBox choice strings, length as a number, and tags as a list of tag names. Returns the created cable.",
+			Instructions: "Use only when the caller explicitly wants to create a cable and provides both terminations. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_cable",
+			Title:        "Update Cable",
+			Description:  "Partially update a cable in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated cable.",
+			Instructions: "Use to modify one or more fields of an existing cable. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_cable",
+			Title:        "Delete Cable",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a cable from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the cable, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
 	}
 }

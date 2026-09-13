@@ -307,4 +307,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_circuit_termination"], metrics, "delete_circuit_termination", WrapToolHandler[CircuitTerminationDeleteInput, struct{}](metrics, "delete_circuit_termination", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTerminationDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteCircuitTerminationHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_cable"], metrics, "create_cable", WrapToolHandler[CableCreateInput, CableOutput](metrics, "create_cable", func(ctx context.Context, req *mcp.CallToolRequest, in CableCreateInput) (*mcp.CallToolResult, CableOutput, error) {
+		return NewCreateCableHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_cable"], metrics, "update_cable", WrapToolHandler[CableUpdateInput, CableOutput](metrics, "update_cable", func(ctx context.Context, req *mcp.CallToolRequest, in CableUpdateInput) (*mcp.CallToolResult, CableOutput, error) {
+		return NewUpdateCableHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_cable"], metrics, "delete_cable", WrapToolHandler[CableDeleteInput, struct{}](metrics, "delete_cable", func(ctx context.Context, req *mcp.CallToolRequest, in CableDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteCableHandler(svc)(ctx, req, in)
+	}))
 }

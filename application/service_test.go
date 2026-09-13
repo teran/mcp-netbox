@@ -2045,6 +2045,153 @@ func TestNetworkService_DeleteCircuitTermination(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreateCable(t *testing.T) {
+	t.Parallel()
+
+	label := "link-01"
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCableFunc: func(_ context.Context, token string, in domain.CableWrite) (*domain.Cable, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.Cable{ID: 1, Label: *in.Label}, nil
+			},
+		})
+		c, err := svc.CreateCable(context.Background(), domain.CableWrite{Label: &label})
+		if err != nil {
+			t.Fatalf("CreateCable() returned error: %v", err)
+		}
+		if c.ID != 1 || c.Label != "link-01" {
+			t.Errorf("c = %+v, want id 1 label link-01", c)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"termination_a":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCableFunc: func(_ context.Context, _ string, _ domain.CableWrite) (*domain.Cable, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateCable(context.Background(), domain.CableWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCableFunc: func(_ context.Context, _ string, _ domain.CableWrite) (*domain.Cable, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateCable(context.Background(), domain.CableWrite{Label: &label})
+		if err == nil || !containsService(err.Error(), "create cable:") {
+			t.Errorf("err = %v, want it to contain 'create cable:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateCable(t *testing.T) {
+	t.Parallel()
+
+	label := "link-02"
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCableFunc: func(_ context.Context, _ string, id int, _ domain.CableWrite) (*domain.Cable, error) {
+				return &domain.Cable{ID: id, Label: label}, nil
+			},
+		})
+		c, err := svc.UpdateCable(context.Background(), 7, domain.CableWrite{Label: &label})
+		if err != nil {
+			t.Fatalf("UpdateCable() returned error: %v", err)
+		}
+		if c.ID != 7 {
+			t.Errorf("c = %+v, want id 7", c)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["invalid"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCableFunc: func(_ context.Context, _ string, _ int, _ domain.CableWrite) (*domain.Cable, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateCable(context.Background(), 7, domain.CableWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCableFunc: func(_ context.Context, _ string, _ int, _ domain.CableWrite) (*domain.Cable, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateCable(context.Background(), 7, domain.CableWrite{})
+		if err == nil || !containsService(err.Error(), "update cable:") {
+			t.Errorf("err = %v, want it to contain 'update cable:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteCable(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCableFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteCable(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteCable() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCableFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteCable(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCableFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteCable(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete cable:") {
+			t.Errorf("err = %v, want it to contain 'delete cable:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

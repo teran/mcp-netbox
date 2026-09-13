@@ -400,6 +400,34 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteCircuitTermination = %v", err)
 		}
 	})
+	t.Run("CreateCable", func(t *testing.T) {
+		label := "link-01"
+		got, err := (&MockRepo{CreateCableFunc: func(_ context.Context, _ string, in domain.CableWrite) (*domain.Cable, error) {
+			return &domain.Cable{ID: 1, Label: *in.Label}, nil
+		}}).CreateCable(context.Background(), "t", domain.CableWrite{Label: &label})
+		if err != nil || got == nil || got.Label != "link-01" {
+			t.Errorf("CreateCable = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateCable", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateCableFunc: func(_ context.Context, _ string, id int, _ domain.CableWrite) (*domain.Cable, error) {
+			return &domain.Cable{ID: id}, nil
+		}}).UpdateCable(context.Background(), "t", 7, domain.CableWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateCable = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteCable", func(t *testing.T) {
+		err := (&MockRepo{DeleteCableFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteCable(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteCable = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -602,5 +630,15 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteCircuitTermination(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteCircuitTermination = %v", err)
+	}
+	label := "link-01"
+	if c, err := repo.CreateCable(ctx, "t", domain.CableWrite{Label: &label}); err != nil || c.Label != "link-01" {
+		t.Errorf("CreateCable = (%v, %v)", c, err)
+	}
+	if c, err := repo.UpdateCable(ctx, "t", 7, domain.CableWrite{Label: &label}); err != nil || c.ID != 7 {
+		t.Errorf("UpdateCable = (%v, %v)", c, err)
+	}
+	if err := repo.DeleteCable(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteCable = %v", err)
 	}
 }

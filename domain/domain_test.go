@@ -351,6 +351,33 @@ func TestCable_ZeroValues(t *testing.T) {
 	}
 }
 
+func TestCableWrite_Populate(t *testing.T) {
+	label := "link-01"
+	length := 10.5
+	cw := CableWrite{
+		TerminationA: &CableTerminationWrite{ObjectType: "dcim.interface", ObjectID: 101},
+		TerminationB: &CableTerminationWrite{ObjectType: "dcim.interface", ObjectID: 102},
+		Label:        &label,
+		Length:       &length,
+	}
+	if cw.TerminationA.ObjectType != "dcim.interface" || cw.TerminationA.ObjectID != 101 {
+		t.Errorf("TerminationA = %+v, want dcim.interface 101", cw.TerminationA)
+	}
+	if cw.TerminationB.ObjectID != 102 {
+		t.Errorf("TerminationB = %+v, want object_id 102", cw.TerminationB)
+	}
+	if cw.Label == nil || *cw.Label != "link-01" || cw.Length == nil || *cw.Length != 10.5 {
+		t.Errorf("cw = %+v, want label link-01 length 10.5", cw)
+	}
+}
+
+func TestCableWrite_ZeroValues(t *testing.T) {
+	var cw CableWrite
+	if cw.TerminationA != nil || cw.TerminationB != nil {
+		t.Errorf("cw = %+v, want nil terminations", cw)
+	}
+}
+
 func TestNested_Populate(t *testing.T) {
 	n := Nested{
 		ID:   1,

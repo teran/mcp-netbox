@@ -634,6 +634,52 @@ type CircuitTerminationDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the circuit termination to delete,required"`
 }
 
+// CableTerminationInput represents one end of a cable connection for the
+// create/update tools. NetBox requires the object_type (e.g. "dcim.interface")
+// and the numeric object_id.
+type CableTerminationInput struct {
+	ObjectType string `json:"object_type" jsonschema:"type of the terminated object, e.g. dcim.interface (required)"`
+	ObjectID   int    `json:"object_id" jsonschema:"numeric ID of the terminated object (required)"`
+}
+
+// CableCreateInput represents the writable fields for creating a cable.
+type CableCreateInput struct {
+	TerminationA *CableTerminationInput `json:"termination_a,omitempty" jsonschema:"first end of the cable (required)"`
+	TerminationB *CableTerminationInput `json:"termination_b,omitempty" jsonschema:"second end of the cable (required)"`
+	Type         *string                `json:"type,omitempty" jsonschema:"cable type (choice string)"`
+	Status       *string                `json:"status,omitempty" jsonschema:"cable status (choice string)"`
+	Label        *string                `json:"label,omitempty" jsonschema:"cable label"`
+	Color        *string                `json:"color,omitempty" jsonschema:"cable color (hex or name)"`
+	Length       *float64               `json:"length,omitempty" jsonschema:"cable length"`
+	LengthUnit   *string                `json:"length_unit,omitempty" jsonschema:"length unit (choice string)"`
+	Description  *string                `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string               `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any         `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CableUpdateInput represents the writable fields for updating a cable. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type CableUpdateInput struct {
+	ID           int                    `json:"id" jsonschema:"numeric ID of the cable to update,required"`
+	TerminationA *CableTerminationInput `json:"termination_a,omitempty" jsonschema:"first end of the cable"`
+	TerminationB *CableTerminationInput `json:"termination_b,omitempty" jsonschema:"second end of the cable"`
+	Type         *string                `json:"type,omitempty" jsonschema:"cable type (choice string)"`
+	Status       *string                `json:"status,omitempty" jsonschema:"cable status (choice string)"`
+	Label        *string                `json:"label,omitempty" jsonschema:"cable label"`
+	Color        *string                `json:"color,omitempty" jsonschema:"cable color (hex or name)"`
+	Length       *float64               `json:"length,omitempty" jsonschema:"cable length"`
+	LengthUnit   *string                `json:"length_unit,omitempty" jsonschema:"length unit (choice string)"`
+	Description  *string                `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string               `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any         `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CableDeleteInput represents the input fields for deleting a cable.
+type CableDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the cable to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -704,6 +750,11 @@ type InterfaceOutput struct {
 // termination tools.
 type CircuitTerminationOutput struct {
 	Data domain.CircuitTermination `json:"data"`
+}
+
+// CableOutput represents the output for the create/update cable tools.
+type CableOutput struct {
+	Data domain.Cable `json:"data"`
 }
 
 // — write helpers —
@@ -1167,6 +1218,53 @@ func circuitTerminationWriteFromUpdate(in CircuitTerminationUpdateInput) domain.
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
 	return write
+}
+
+// cableTerminationFromInput converts a handler termination input into a domain
+// cable termination DTO.
+func cableTerminationFromInput(in *CableTerminationInput) *domain.CableTerminationWrite {
+	if in == nil {
+		return nil
+	}
+	return &domain.CableTerminationWrite{
+		ObjectType: in.ObjectType,
+		ObjectID:   in.ObjectID,
+	}
+}
+
+// cableWriteFromCreate builds a domain.CableWrite from a create input.
+func cableWriteFromCreate(in CableCreateInput) domain.CableWrite {
+	return domain.CableWrite{
+		TerminationA: cableTerminationFromInput(in.TerminationA),
+		TerminationB: cableTerminationFromInput(in.TerminationB),
+		Type:         in.Type,
+		Status:       in.Status,
+		Label:        in.Label,
+		Color:        in.Color,
+		Length:       in.Length,
+		LengthUnit:   in.LengthUnit,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// cableWriteFromUpdate builds a domain.CableWrite from an update input, mapping
+// only the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func cableWriteFromUpdate(in CableUpdateInput) domain.CableWrite {
+	return domain.CableWrite{
+		TerminationA: cableTerminationFromInput(in.TerminationA),
+		TerminationB: cableTerminationFromInput(in.TerminationB),
+		Type:         in.Type,
+		Status:       in.Status,
+		Label:        in.Label,
+		Color:        in.Color,
+		Length:       in.Length,
+		LengthUnit:   in.LengthUnit,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
 }
 
 // — handler factories —
@@ -2317,6 +2415,74 @@ func NewDeleteCircuitTerminationHandler(svc *application.NetworkService) mcp.Too
 		}
 
 		if err := s.DeleteCircuitTermination(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateCableHandler creates a handler for the create_cable tool.
+func NewCreateCableHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CableCreateInput, CableOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CableCreateInput) (*mcp.CallToolResult, CableOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CableOutput{}, errServiceNotAvailable
+		}
+		if in.TerminationA == nil {
+			return &mcp.CallToolResult{IsError: true}, CableOutput{}, fmt.Errorf("termination_a is required")
+		}
+		if in.TerminationB == nil {
+			return &mcp.CallToolResult{IsError: true}, CableOutput{}, fmt.Errorf("termination_b is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		c, err := s.CreateCable(ctx, cableWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, CableOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CableOutput{Data: *c}, nil
+	}
+}
+
+// NewUpdateCableHandler creates a handler for the update_cable tool. It performs
+// a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateCableHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CableUpdateInput, CableOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CableUpdateInput) (*mcp.CallToolResult, CableOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CableOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CableOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		c, err := s.UpdateCable(ctx, in.ID, cableWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, CableOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CableOutput{Data: *c}, nil
+	}
+}
+
+// NewDeleteCableHandler creates a handler for the delete_cable tool.
+func NewDeleteCableHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CableDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CableDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteCable(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

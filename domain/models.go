@@ -564,6 +564,38 @@ type CircuitTerminationWrite struct {
 	CustomFields  map[string]any `json:"custom_fields,omitempty"`
 }
 
+// CableTerminationWrite describes one end of a cable for create/update. NetBox
+// represents each termination as a nested object carrying the object_type
+// (e.g. "dcim.interface") and the numeric object_id. Both fields are required
+// on create.
+type CableTerminationWrite struct {
+	ObjectType string `json:"object_type"`
+	ObjectID   int    `json:"object_id"`
+}
+
+// CableWrite is the domain DTO for creating or updating a NetBox cable. It
+// carries only the writable fields.
+//
+// TerminationA and TerminationB are required on create; each is a nested
+// object with object_type and object_id. They are pointers so a partial-update
+// (PATCH) can omit them (moving a termination is done via other NetBox
+// operations). Optional scalar fields are pointers so that a PATCH can
+// distinguish "not provided" (nil) from "explicitly set to empty". Type, Status
+// and LengthUnit are choice-string values.
+type CableWrite struct {
+	TerminationA *CableTerminationWrite `json:"termination_a,omitempty"`
+	TerminationB *CableTerminationWrite `json:"termination_b,omitempty"`
+	Type         *string                `json:"type,omitempty"`
+	Status       *string                `json:"status,omitempty"`
+	Label        *string                `json:"label,omitempty"`
+	Color        *string                `json:"color,omitempty"`
+	Length       *float64               `json:"length,omitempty"`
+	LengthUnit   *string                `json:"length_unit,omitempty"`
+	Description  *string                `json:"description,omitempty"`
+	Tags         []string               `json:"tags,omitempty"`
+	CustomFields map[string]any         `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

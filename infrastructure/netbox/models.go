@@ -203,6 +203,29 @@ type WireCircuitTerminationWrite struct {
 	CustomFields  map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireCableWriteTermination is the wire request model for one end of a cable
+// create/update. NetBox accepts a nested object with object_type and object_id.
+type WireCableWriteTermination struct {
+	ObjectType string `json:"object_type"`
+	ObjectID   int    `json:"object_id"`
+}
+
+// WireCableWrite is the wire request model for cable create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields.
+type WireCableWrite struct {
+	TerminationA *WireCableWriteTermination `json:"termination_a,omitempty"`
+	TerminationB *WireCableWriteTermination `json:"termination_b,omitempty"`
+	Type         *string                    `json:"type,omitempty"`
+	Status       *string                    `json:"status,omitempty"`
+	Label        *string                    `json:"label,omitempty"`
+	Color        *string                    `json:"color,omitempty"`
+	Length       *float64                   `json:"length,omitempty"`
+	LengthUnit   *string                    `json:"length_unit,omitempty"`
+	Description  *string                    `json:"description,omitempty"`
+	Tags         []string                   `json:"tags,omitempty"`
+	CustomFields map[string]any             `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

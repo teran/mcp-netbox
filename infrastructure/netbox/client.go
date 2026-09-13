@@ -827,6 +827,43 @@ func (c *Client) DeleteCircuitTermination(ctx context.Context, token string, id 
 	return mErr
 }
 
+// CreateCable creates a new cable via POST /api/dcim/cables/.
+func (c *Client) CreateCable(ctx context.Context, token string, in domain.CableWrite) (*domain.Cable, error) {
+	payload, err := json.Marshal(cableWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal cable create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/cables/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCable(raw)
+}
+
+// UpdateCable partially updates a cable via PATCH /api/dcim/cables/<id>/.
+func (c *Client) UpdateCable(ctx context.Context, token string, id int, in domain.CableWrite) (*domain.Cable, error) {
+	payload, err := json.Marshal(cableWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal cable update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/cables/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCable(raw)
+}
+
+// DeleteCable deletes a cable via DELETE /api/dcim/cables/<id>/.
+func (c *Client) DeleteCable(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/dcim/cables/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -1185,6 +1222,47 @@ func unmarshalCircuitTermination(raw domain.RawObject) (*domain.CircuitTerminati
 		return nil, fmt.Errorf("failed to unmarshal circuit termination: %w", err)
 	}
 	d := wireCircuitTerminationToDomain(w)
+	return &d, nil
+}
+
+// cableTerminationWriteToWire converts a domain cable termination DTO to the
+// wire request model.
+func cableTerminationWriteToWire(in *domain.CableTerminationWrite) *WireCableWriteTermination {
+	if in == nil {
+		return nil
+	}
+	return &WireCableWriteTermination{
+		ObjectType: in.ObjectType,
+		ObjectID:   in.ObjectID,
+	}
+}
+
+// cableWriteToWire converts a domain cable write DTO to the wire request model.
+// The fields map one-to-one; nil pointers on the domain side remain nil on the
+// wire side so json.Marshal omits them (required for a partial PATCH body).
+func cableWriteToWire(in domain.CableWrite) WireCableWrite {
+	return WireCableWrite{
+		TerminationA: cableTerminationWriteToWire(in.TerminationA),
+		TerminationB: cableTerminationWriteToWire(in.TerminationB),
+		Type:         in.Type,
+		Status:       in.Status,
+		Label:        in.Label,
+		Color:        in.Color,
+		Length:       in.Length,
+		LengthUnit:   in.LengthUnit,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalCable decodes a cable response body into a domain.Cable.
+func unmarshalCable(raw domain.RawObject) (*domain.Cable, error) {
+	var w WireCable
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal cable: %w", err)
+	}
+	d := wireCableToDomain(w)
 	return &d, nil
 }
 
