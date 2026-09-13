@@ -394,6 +394,46 @@ func TestVMInterfaceWrite_ZeroValues(t *testing.T) {
 	}
 }
 
+func TestProvider_Populate(t *testing.T) {
+	p := Provider{
+		ID:           1,
+		Name:         "ACME",
+		Slug:         "acme",
+		Asn:          64512,
+		Account:      "ACC-1",
+		PortalURL:    "https://portal.example.com",
+		NocContact:   "noc@example.com",
+		AdminContact: "admin@example.com",
+		Comments:     "comments",
+	}
+	if p.Name != "ACME" || p.Asn != 64512 || p.PortalURL != "https://portal.example.com" {
+		t.Errorf("p = %+v, want name ACME asn 64512 portal url", p)
+	}
+}
+
+func TestProvider_ZeroValues(t *testing.T) {
+	var p Provider
+	if p.Name != "" || p.Asn != 0 {
+		t.Errorf("p = %+v, want empty name and zero asn", p)
+	}
+}
+
+func TestProviderWrite_Populate(t *testing.T) {
+	asn := 64512
+	portal := "https://portal.example.com"
+	pw := ProviderWrite{Name: "ACME", Asn: &asn, PortalURL: &portal}
+	if pw.Name != "ACME" || pw.Asn == nil || *pw.Asn != 64512 || pw.PortalURL == nil || *pw.PortalURL != portal {
+		t.Errorf("pw = %+v, want name ACME asn 64512 portal url", pw)
+	}
+}
+
+func TestProviderWrite_ZeroValues(t *testing.T) {
+	var pw ProviderWrite
+	if pw.Name != "" || pw.Asn != nil {
+		t.Errorf("pw = %+v, want empty name and nil asn", pw)
+	}
+}
+
 func TestNested_Populate(t *testing.T) {
 	n := Nested{
 		ID:   1,

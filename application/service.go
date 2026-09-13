@@ -491,3 +491,30 @@ func (s *NetworkService) DeleteVMInterface(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateProvider relays a provider create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateProvider(ctx context.Context, in domain.ProviderWrite) (*domain.Provider, error) {
+	resp, err := s.repo.CreateProvider(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create provider: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateProvider relays a provider update to the repository.
+func (s *NetworkService) UpdateProvider(ctx context.Context, id int, in domain.ProviderWrite) (*domain.Provider, error) {
+	resp, err := s.repo.UpdateProvider(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update provider: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteProvider relays a provider delete to the repository.
+func (s *NetworkService) DeleteProvider(ctx context.Context, id int) error {
+	if err := s.repo.DeleteProvider(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete provider: %w", err)
+	}
+	return nil
+}

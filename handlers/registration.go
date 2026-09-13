@@ -333,4 +333,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_vm_interface"], metrics, "delete_vm_interface", WrapToolHandler[VMInterfaceDeleteInput, struct{}](metrics, "delete_vm_interface", func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfaceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteVMInterfaceHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_provider"], metrics, "create_provider", WrapToolHandler[ProviderCreateInput, ProviderOutput](metrics, "create_provider", func(ctx context.Context, req *mcp.CallToolRequest, in ProviderCreateInput) (*mcp.CallToolResult, ProviderOutput, error) {
+		return NewCreateProviderHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_provider"], metrics, "update_provider", WrapToolHandler[ProviderUpdateInput, ProviderOutput](metrics, "update_provider", func(ctx context.Context, req *mcp.CallToolRequest, in ProviderUpdateInput) (*mcp.CallToolResult, ProviderOutput, error) {
+		return NewUpdateProviderHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_provider"], metrics, "delete_provider", WrapToolHandler[ProviderDeleteInput, struct{}](metrics, "delete_provider", func(ctx context.Context, req *mcp.CallToolRequest, in ProviderDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteProviderHandler(svc)(ctx, req, in)
+	}))
 }

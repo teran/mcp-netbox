@@ -102,4 +102,8 @@ type NetworkRepository interface {
 	CreateVMInterface(ctx context.Context, token string, in VMInterfaceWrite) (*VMInterface, error)
 	UpdateVMInterface(ctx context.Context, token string, id int, in VMInterfaceWrite) (*VMInterface, error)
 	DeleteVMInterface(ctx context.Context, token string, id int) error
+
+	CreateProvider(ctx context.Context, token string, in ProviderWrite) (*Provider, error)
+	UpdateProvider(ctx context.Context, token string, id int, in ProviderWrite) (*Provider, error)
+	DeleteProvider(ctx context.Context, token string, id int) error
 }

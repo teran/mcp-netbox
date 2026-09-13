@@ -275,6 +275,26 @@ type (
 		Created        string         `json:"created"`
 		LastUpdated    string         `json:"last_updated"`
 	}
+
+	// Provider is a circuits provider (a secondary entity: it has write tools
+	// but no read tool).
+	Provider struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Display      string         `json:"display,omitempty"`
+		Asn          int            `json:"asn,omitempty"`
+		Account      string         `json:"account,omitempty"`
+		PortalURL    string         `json:"portal_url,omitempty"`
+		NocContact   string         `json:"noc_contact,omitempty"`
+		AdminContact string         `json:"admin_contact,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
 )
 
 type (
@@ -611,6 +631,25 @@ type VMInterfaceWrite struct {
 	Description    *string        `json:"description,omitempty"`
 	Tags           []string       `json:"tags,omitempty"`
 	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ProviderWrite is the domain DTO for creating or updating a NetBox circuits
+// provider. It carries only the writable fields.
+//
+// Name is required on create. Optional scalar fields are pointers so that a
+// partial-update (PATCH) can distinguish "not provided" (nil) from "explicitly
+// set to empty". Asn is a numeric AS number.
+type ProviderWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Asn          *int           `json:"asn,omitempty"`
+	Account      *string        `json:"account,omitempty"`
+	PortalURL    *string        `json:"portal_url,omitempty"`
+	NocContact   *string        `json:"noc_contact,omitempty"`
+	AdminContact *string        `json:"admin_contact,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
 // PaginatedResponse wraps a paginated API response with the total count,

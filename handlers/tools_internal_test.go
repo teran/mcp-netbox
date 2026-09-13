@@ -223,6 +223,18 @@ func (s *stubRepo) DeleteVMInterface(ctx context.Context, token string, id int) 
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateProvider(ctx context.Context, token string, in domain.ProviderWrite) (*domain.Provider, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateProvider(ctx context.Context, token string, id int, in domain.ProviderWrite) (*domain.Provider, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteProvider(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

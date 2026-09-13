@@ -240,6 +240,22 @@ type WireVMInterfaceWrite struct {
 	CustomFields   map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireProviderWrite is the wire request model for provider create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields. Asn is a numeric AS number.
+type WireProviderWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Asn          *int           `json:"asn,omitempty"`
+	Account      *string        `json:"account,omitempty"`
+	PortalURL    *string        `json:"portal_url,omitempty"`
+	NocContact   *string        `json:"noc_contact,omitempty"`
+	AdminContact *string        `json:"admin_contact,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`
@@ -503,6 +519,24 @@ type (
 		CustomFields   map[string]any `json:"custom_fields,omitempty"`
 		Created        string         `json:"created"`
 		LastUpdated    string         `json:"last_updated"`
+	}
+
+	WireProvider struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Display      string         `json:"display,omitempty"`
+		Asn          int            `json:"asn,omitempty"`
+		Account      string         `json:"account,omitempty"`
+		PortalURL    string         `json:"portal_url,omitempty"`
+		NocContact   string         `json:"noc_contact,omitempty"`
+		AdminContact string         `json:"admin_contact,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 )
 

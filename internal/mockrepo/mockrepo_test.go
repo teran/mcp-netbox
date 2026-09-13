@@ -455,6 +455,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteVMInterface = %v", err)
 		}
 	})
+	t.Run("CreateProvider", func(t *testing.T) {
+		got, err := (&MockRepo{CreateProviderFunc: func(_ context.Context, _ string, in domain.ProviderWrite) (*domain.Provider, error) {
+			return &domain.Provider{ID: 1, Name: in.Name}, nil
+		}}).CreateProvider(context.Background(), "t", domain.ProviderWrite{Name: "ACME"})
+		if err != nil || got == nil || got.Name != "ACME" {
+			t.Errorf("CreateProvider = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateProvider", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateProviderFunc: func(_ context.Context, _ string, id int, _ domain.ProviderWrite) (*domain.Provider, error) {
+			return &domain.Provider{ID: id}, nil
+		}}).UpdateProvider(context.Background(), "t", 7, domain.ProviderWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateProvider = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteProvider", func(t *testing.T) {
+		err := (&MockRepo{DeleteProviderFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteProvider(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteProvider = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -676,5 +703,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteVMInterface(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVMInterface = %v", err)
+	}
+	if p, err := repo.CreateProvider(ctx, "t", domain.ProviderWrite{Name: "ACME"}); err != nil || p.Name != "ACME" {
+		t.Errorf("CreateProvider = (%v, %v)", p, err)
+	}
+	if p, err := repo.UpdateProvider(ctx, "t", 7, domain.ProviderWrite{Name: "ACME"}); err != nil || p.ID != 7 {
+		t.Errorf("UpdateProvider = (%v, %v)", p, err)
+	}
+	if err := repo.DeleteProvider(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteProvider = %v", err)
 	}
 }

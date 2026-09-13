@@ -64,6 +64,9 @@ type MockRepo struct {
 	CreateVMInterfaceFunc        func(ctx context.Context, token string, in domain.VMInterfaceWrite) (*domain.VMInterface, error)
 	UpdateVMInterfaceFunc        func(ctx context.Context, token string, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error)
 	DeleteVMInterfaceFunc        func(ctx context.Context, token string, id int) error
+	CreateProviderFunc           func(ctx context.Context, token string, in domain.ProviderWrite) (*domain.Provider, error)
+	UpdateProviderFunc           func(ctx context.Context, token string, id int, in domain.ProviderWrite) (*domain.Provider, error)
+	DeleteProviderFunc           func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -276,6 +279,18 @@ func (m *MockRepo) UpdateVMInterface(ctx context.Context, token string, id int, 
 
 func (m *MockRepo) DeleteVMInterface(ctx context.Context, token string, id int) error {
 	return m.DeleteVMInterfaceFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateProvider(ctx context.Context, token string, in domain.ProviderWrite) (*domain.Provider, error) {
+	return m.CreateProviderFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateProvider(ctx context.Context, token string, id int, in domain.ProviderWrite) (*domain.Provider, error) {
+	return m.UpdateProviderFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteProvider(ctx context.Context, token string, id int) error {
+	return m.DeleteProviderFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -499,5 +514,17 @@ func (r *NilRepo) UpdateVMInterface(ctx context.Context, token string, id int, i
 }
 
 func (r *NilRepo) DeleteVMInterface(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateProvider(ctx context.Context, token string, in domain.ProviderWrite) (*domain.Provider, error) {
+	return &domain.Provider{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateProvider(ctx context.Context, token string, id int, in domain.ProviderWrite) (*domain.Provider, error) {
+	return &domain.Provider{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteProvider(ctx context.Context, token string, id int) error {
 	return nil
 }

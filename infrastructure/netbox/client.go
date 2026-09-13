@@ -904,6 +904,44 @@ func (c *Client) DeleteVMInterface(ctx context.Context, token string, id int) er
 	return mErr
 }
 
+// CreateProvider creates a new provider via POST /api/circuits/providers/.
+func (c *Client) CreateProvider(ctx context.Context, token string, in domain.ProviderWrite) (*domain.Provider, error) {
+	payload, err := json.Marshal(providerWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal provider create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/providers/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalProvider(raw)
+}
+
+// UpdateProvider partially updates a provider via PATCH
+// /api/circuits/providers/<id>/.
+func (c *Client) UpdateProvider(ctx context.Context, token string, id int, in domain.ProviderWrite) (*domain.Provider, error) {
+	payload, err := json.Marshal(providerWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal provider update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/providers/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalProvider(raw)
+}
+
+// DeleteProvider deletes a provider via DELETE /api/circuits/providers/<id>/.
+func (c *Client) DeleteProvider(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/circuits/providers/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -1332,6 +1370,56 @@ func unmarshalVMInterface(raw domain.RawObject) (*domain.VMInterface, error) {
 	}
 	d := wireVMInterfaceToDomain(w)
 	return &d, nil
+}
+
+// providerWriteToWire converts a domain provider write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func providerWriteToWire(in domain.ProviderWrite) WireProviderWrite {
+	return WireProviderWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Asn:          in.Asn,
+		Account:      in.Account,
+		PortalURL:    in.PortalURL,
+		NocContact:   in.NocContact,
+		AdminContact: in.AdminContact,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalProvider decodes a provider response body into a domain.Provider.
+func unmarshalProvider(raw domain.RawObject) (*domain.Provider, error) {
+	var w WireProvider
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal provider: %w", err)
+	}
+	d := wireProviderToDomain(w)
+	return &d, nil
+}
+
+// wireProviderToDomain converts a wire provider to the domain model.
+func wireProviderToDomain(w WireProvider) domain.Provider {
+	return domain.Provider{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Slug:         w.Slug,
+		Display:      w.Display,
+		Asn:          w.Asn,
+		Account:      w.Account,
+		PortalURL:    w.PortalURL,
+		NocContact:   w.NocContact,
+		AdminContact: w.AdminContact,
+		Comments:     w.Comments,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
 }
 
 func wireNestedToDomain(w *WireNested) *domain.Nested {

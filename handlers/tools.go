@@ -714,6 +714,42 @@ type VMInterfaceDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the VM interface to delete,required"`
 }
 
+// ProviderCreateInput represents the writable fields for creating a provider.
+type ProviderCreateInput struct {
+	Name         string         `json:"name" jsonschema:"provider name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Asn          *int           `json:"asn,omitempty" jsonschema:"autonomous system number"`
+	Account      *string        `json:"account,omitempty" jsonschema:"provider account number"`
+	PortalURL    *string        `json:"portal_url,omitempty" jsonschema:"portal URL"`
+	NocContact   *string        `json:"noc_contact,omitempty" jsonschema:"NOC contact"`
+	AdminContact *string        `json:"admin_contact,omitempty" jsonschema:"administrative contact"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderUpdateInput represents the writable fields for updating a provider.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type ProviderUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the provider to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"provider name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Asn          *int           `json:"asn,omitempty" jsonschema:"autonomous system number"`
+	Account      *string        `json:"account,omitempty" jsonschema:"provider account number"`
+	PortalURL    *string        `json:"portal_url,omitempty" jsonschema:"portal URL"`
+	NocContact   *string        `json:"noc_contact,omitempty" jsonschema:"NOC contact"`
+	AdminContact *string        `json:"admin_contact,omitempty" jsonschema:"administrative contact"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderDeleteInput represents the input fields for deleting a provider.
+type ProviderDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the provider to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -795,6 +831,11 @@ type CableOutput struct {
 // tools.
 type VMInterfaceOutput struct {
 	Data domain.VMInterface `json:"data"`
+}
+
+// ProviderOutput represents the output for the create/update provider tools.
+type ProviderOutput struct {
+	Data domain.Provider `json:"data"`
 }
 
 // — write helpers —
@@ -1335,6 +1376,42 @@ func vmInterfaceWriteFromUpdate(in VMInterfaceUpdateInput) domain.VMInterfaceWri
 	write.MTU = in.MTU
 	write.MACAddress = in.MACAddress
 	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// providerWriteFromCreate builds a domain.ProviderWrite from a create input.
+func providerWriteFromCreate(in ProviderCreateInput) domain.ProviderWrite {
+	return domain.ProviderWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Asn:          in.Asn,
+		Account:      in.Account,
+		PortalURL:    in.PortalURL,
+		NocContact:   in.NocContact,
+		AdminContact: in.AdminContact,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// providerWriteFromUpdate builds a domain.ProviderWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func providerWriteFromUpdate(in ProviderUpdateInput) domain.ProviderWrite {
+	write := domain.ProviderWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Slug = in.Slug
+	write.Asn = in.Asn
+	write.Account = in.Account
+	write.PortalURL = in.PortalURL
+	write.NocContact = in.NocContact
+	write.AdminContact = in.AdminContact
+	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
 	return write
@@ -2627,6 +2704,71 @@ func NewDeleteVMInterfaceHandler(svc *application.NetworkService) mcp.ToolHandle
 		}
 
 		if err := s.DeleteVMInterface(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateProviderHandler creates a handler for the create_provider tool.
+func NewCreateProviderHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ProviderCreateInput, ProviderOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ProviderCreateInput) (*mcp.CallToolResult, ProviderOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ProviderOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateProvider(ctx, providerWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ProviderOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateProviderHandler creates a handler for the update_provider tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateProviderHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ProviderUpdateInput, ProviderOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ProviderUpdateInput) (*mcp.CallToolResult, ProviderOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateProvider(ctx, in.ID, providerWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ProviderOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteProviderHandler creates a handler for the delete_provider tool.
+func NewDeleteProviderHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ProviderDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ProviderDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteProvider(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}
