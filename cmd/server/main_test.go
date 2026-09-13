@@ -282,3 +282,41 @@ func TestNewPrivateIPCheckingDialer_DNSFailure(t *testing.T) {
 		t.Fatal("expected dial with unresolvable hostname to fail")
 	}
 }
+
+func TestBannerString(t *testing.T) {
+	t.Cleanup(restoreBuildVars)
+	appName = "mcp-netbox"
+	appVersion = "1.2.3"
+	appCommitHash = "abc123"
+	appTimestamp = "2026-01-01T00:00:00Z"
+
+	got := bannerString()
+	want := "Starting mcp-netbox/1.2.3 (commit: abc123; built at 2026-01-01T00:00:00Z) ..."
+	if got != want {
+		t.Errorf("bannerString() = %q, want %q", got, want)
+	}
+}
+
+func TestBannerString_Defaults(t *testing.T) {
+	t.Cleanup(restoreBuildVars)
+	appName = ""
+	appVersion = ""
+	appCommitHash = ""
+	appTimestamp = ""
+
+	got := bannerString()
+	for _, want := range []string{"mcp-netbox", "Starting", "commit:", "built at"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("bannerString() = %q, missing %q", got, want)
+		}
+	}
+}
+
+// restoreBuildVars returns the package build vars to their defaults so
+// concurrent (non-banner) tests are unaffected.
+func restoreBuildVars() {
+	appName = "mcp-netbox"
+	appVersion = "dev"
+	appCommitHash = "none"
+	appTimestamp = "unknown"
+}

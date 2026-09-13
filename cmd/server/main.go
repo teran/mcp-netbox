@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,12 +22,24 @@ import (
 	"github.com/teran/mcp-netbox/internal/logging"
 )
 
-// Build-time variables injected by goreleaser (via ldflags).
+// Build-time variables injected by goreleaser (via ldflags, B2).
 var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
+	appName       = "mcp-netbox"
+	appVersion    = "dev"
+	appCommitHash = "none"
+	appTimestamp  = "unknown"
 )
+
+// bannerString returns the B5 startup banner built from the ldflags-embedded
+// build metadata. It is emitted as the very first log line when logging is
+// enabled (L6).
+func bannerString() string {
+	name := appName
+	if name == "" {
+		name = "mcp-netbox"
+	}
+	return fmt.Sprintf("Starting %s/%s (commit: %s; built at %s) ...", name, appVersion, appCommitHash, appTimestamp)
+}
 
 func main() {
 	cfg, err := config.Load()
@@ -130,7 +141,8 @@ func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport m
 	// service injection. Register the shared service directly.
 	handlers.RegisterTools(srv, nil, svc)
 
-	logger.WithField("netbox_url", handlers.SanitizeLog(redactedURL(cfg.NetBoxURL))).Info("starting stdio MCP server")
+	// B5/L6: when logging is enabled, the startup banner is the very first log line.
+	logger.Info(bannerString())
 
 	conn, err := srv.Connect(context.Background(), transport, nil)
 	if err != nil {
@@ -171,8 +183,8 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	mux, stopRateLimit := handlers.NewMux(cfg, metrics, sharedHTTPClient, breaker, mcpHandler)
 	defer stopRateLimit()
 
-	logger.WithField("netbox_url", handlers.SanitizeLog(redactedURL(cfg.NetBoxURL))).Info("starting server")
-	logger.WithFields(logrus.Fields{"version": version, "commit": commit, "date": date}).Info("build info")
+	// B5/L6: when logging is enabled, the startup banner is the very first log line.
+	logger.Info(bannerString())
 
 	mainServer := &http.Server{
 		Addr:              cfg.ListenAddr,
@@ -254,7 +266,7 @@ const serverInstructions = `This server provides READ-ONLY access to the NetBox 
 func newMCPServer(logger *logrus.Logger) *mcp.Server {
 	return mcp.NewServer(&mcp.Implementation{
 		Name:    "mcp-netbox",
-		Version: version,
+		Version: appVersion,
 	}, &mcp.ServerOptions{
 		Capabilities: &mcp.ServerCapabilities{
 			Tools: &mcp.ToolCapabilities{ListChanged: false},
@@ -289,14 +301,4 @@ func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Break
 		},
 		Transport: cbTransport,
 	}, cbTransport.Breaker()
-}
-
-// redactedURL returns the NetBox URL with any credentials redacted for safe
-// logging.
-func redactedURL(raw string) string {
-	u, err := url.Parse(raw)
-	if err != nil {
-		return raw
-	}
-	return u.Redacted()
 }
