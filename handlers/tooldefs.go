@@ -393,5 +393,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a device manufacturer from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the manufacturer, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_device_type",
+			Title:        "Create Device Type",
+			Description:  "Create a new device type in NetBox. manufacturer (numeric ID) and model are required; all other fields are optional. Provide part_number/comments as strings, u_height as a number, is_full_depth/subdevice_role as booleans, slug as a string, and tags as a list of tag names. Returns the created device type.",
+			Instructions: "Use only when the caller explicitly wants to create a device type and provides a manufacturer and model. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_device_type",
+			Title:        "Update Device Type",
+			Description:  "Partially update a device type in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated device type.",
+			Instructions: "Use to modify one or more fields of an existing device type. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_device_type",
+			Title:        "Delete Device Type",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a device type from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the device type, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

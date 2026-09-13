@@ -1017,6 +1017,44 @@ func (c *Client) DeleteManufacturer(ctx context.Context, token string, id int) e
 	return mErr
 }
 
+// CreateDeviceType creates a new device type via POST /api/dcim/device-types/.
+func (c *Client) CreateDeviceType(ctx context.Context, token string, in domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+	payload, err := json.Marshal(deviceTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal device type create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/device-types/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalDeviceType(raw)
+}
+
+// UpdateDeviceType partially updates a device type via PATCH
+// /api/dcim/device-types/<id>/.
+func (c *Client) UpdateDeviceType(ctx context.Context, token string, id int, in domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+	payload, err := json.Marshal(deviceTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal device type update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/device-types/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalDeviceType(raw)
+}
+
+// DeleteDeviceType deletes a device type via DELETE /api/dcim/device-types/<id>/.
+func (c *Client) DeleteDeviceType(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/dcim/device-types/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -1577,6 +1615,57 @@ func wireManufacturerToDomain(w WireManufacturer) domain.Manufacturer {
 		CustomFields: w.CustomFields,
 		Created:      w.Created,
 		LastUpdated:  w.LastUpdated,
+	}
+}
+
+// deviceTypeWriteToWire converts a domain device type write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func deviceTypeWriteToWire(in domain.DeviceTypeWrite) WireDeviceTypeWrite {
+	return WireDeviceTypeWrite{
+		Manufacturer:  in.Manufacturer,
+		Model:         in.Model,
+		Slug:          in.Slug,
+		PartNumber:    in.PartNumber,
+		UHeight:       in.UHeight,
+		IsFullDepth:   in.IsFullDepth,
+		SubdeviceRole: in.SubdeviceRole,
+		Comments:      in.Comments,
+		Tags:          in.Tags,
+		CustomFields:  in.CustomFields,
+	}
+}
+
+// unmarshalDeviceType decodes a device type response body into a
+// domain.DeviceType.
+func unmarshalDeviceType(raw domain.RawObject) (*domain.DeviceType, error) {
+	var w WireDeviceType
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal device type: %w", err)
+	}
+	d := wireDeviceTypeToDomain(w)
+	return &d, nil
+}
+
+// wireDeviceTypeToDomain converts a wire device type to the domain model.
+func wireDeviceTypeToDomain(w WireDeviceType) domain.DeviceType {
+	return domain.DeviceType{
+		ID:            w.ID,
+		URL:           w.URL,
+		Manufacturer:  wireNestedToDomain(w.Manufacturer),
+		Model:         w.Model,
+		Slug:          w.Slug,
+		Display:       w.Display,
+		PartNumber:    w.PartNumber,
+		UHeight:       w.UHeight,
+		IsFullDepth:   w.IsFullDepth,
+		SubdeviceRole: wireLabelToDomain(w.SubdeviceRole),
+		Comments:      w.Comments,
+		Tags:          wireTagsToDomain(w.Tags),
+		CustomFields:  w.CustomFields,
+		Created:       w.Created,
+		LastUpdated:   w.LastUpdated,
 	}
 }
 

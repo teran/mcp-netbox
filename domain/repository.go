@@ -114,4 +114,8 @@ type NetworkRepository interface {
 	CreateManufacturer(ctx context.Context, token string, in ManufacturerWrite) (*Manufacturer, error)
 	UpdateManufacturer(ctx context.Context, token string, id int, in ManufacturerWrite) (*Manufacturer, error)
 	DeleteManufacturer(ctx context.Context, token string, id int) error
+
+	CreateDeviceType(ctx context.Context, token string, in DeviceTypeWrite) (*DeviceType, error)
+	UpdateDeviceType(ctx context.Context, token string, id int, in DeviceTypeWrite) (*DeviceType, error)
+	DeleteDeviceType(ctx context.Context, token string, id int) error
 }

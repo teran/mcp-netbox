@@ -536,6 +536,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteManufacturer = %v", err)
 		}
 	})
+	t.Run("CreateDeviceType", func(t *testing.T) {
+		got, err := (&MockRepo{CreateDeviceTypeFunc: func(_ context.Context, _ string, in domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+			return &domain.DeviceType{ID: 1, Model: in.Model}, nil
+		}}).CreateDeviceType(context.Background(), "t", domain.DeviceTypeWrite{Model: "C9300"})
+		if err != nil || got == nil || got.Model != "C9300" {
+			t.Errorf("CreateDeviceType = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateDeviceType", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateDeviceTypeFunc: func(_ context.Context, _ string, id int, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+			return &domain.DeviceType{ID: id}, nil
+		}}).UpdateDeviceType(context.Background(), "t", 7, domain.DeviceTypeWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateDeviceType = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteDeviceType", func(t *testing.T) {
+		err := (&MockRepo{DeleteDeviceTypeFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteDeviceType(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteDeviceType = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -784,5 +811,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteManufacturer(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteManufacturer = %v", err)
+	}
+	if dt, err := repo.CreateDeviceType(ctx, "t", domain.DeviceTypeWrite{Model: "C9300"}); err != nil || dt.Model != "C9300" {
+		t.Errorf("CreateDeviceType = (%v, %v)", dt, err)
+	}
+	if dt, err := repo.UpdateDeviceType(ctx, "t", 7, domain.DeviceTypeWrite{Model: "C9300"}); err != nil || dt.ID != 7 {
+		t.Errorf("UpdateDeviceType = (%v, %v)", dt, err)
+	}
+	if err := repo.DeleteDeviceType(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteDeviceType = %v", err)
 	}
 }

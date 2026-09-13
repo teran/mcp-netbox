@@ -326,6 +326,26 @@ type (
 		Created      string         `json:"created"`
 		LastUpdated  string         `json:"last_updated"`
 	}
+
+	// DeviceType is a device type (a secondary entity: it has write tools but
+	// no read tool). NetBox names the model field "model", not "name".
+	DeviceType struct {
+		ID            int            `json:"id"`
+		URL           string         `json:"url,omitempty"`
+		Manufacturer  *Nested        `json:"manufacturer"`
+		Model         string         `json:"model"`
+		Slug          string         `json:"slug,omitempty"`
+		Display       string         `json:"display,omitempty"`
+		PartNumber    string         `json:"part_number,omitempty"`
+		UHeight       float64        `json:"u_height,omitempty"`
+		IsFullDepth   bool           `json:"is_full_depth,omitempty"`
+		SubdeviceRole *Label         `json:"subdevice_role,omitempty"`
+		Comments      string         `json:"comments,omitempty"`
+		Tags          []Tag          `json:"tags,omitempty"`
+		CustomFields  map[string]any `json:"custom_fields,omitempty"`
+		Created       string         `json:"created"`
+		LastUpdated   string         `json:"last_updated"`
+	}
 )
 
 type (
@@ -712,6 +732,29 @@ type ManufacturerWrite struct {
 	Description  *string        `json:"description,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// DeviceTypeWrite is the domain DTO for creating or updating a NetBox device
+// type. It carries only the writable fields.
+//
+// Manufacturer (numeric NetBox ID) and Model are required on create. Model is a
+// plain string because it is required on create; the omitempty tag drops it
+// from a PATCH body when not provided. Optional scalar fields are pointers so
+// that a partial-update (PATCH) can distinguish "not provided" (nil) from
+// "explicitly set to empty" (pointer to ""). IsFullDepth is a pointer so an
+// update can set it to false explicitly. SubdeviceRole is a choice-string
+// value.
+type DeviceTypeWrite struct {
+	Manufacturer  *int           `json:"manufacturer,omitempty"`
+	Model         string         `json:"model,omitempty"`
+	Slug          *string        `json:"slug,omitempty"`
+	PartNumber    *string        `json:"part_number,omitempty"`
+	UHeight       *float64       `json:"u_height,omitempty"`
+	IsFullDepth   *bool          `json:"is_full_depth,omitempty"`
+	SubdeviceRole *string        `json:"subdevice_role,omitempty"`
+	Comments      *string        `json:"comments,omitempty"`
+	Tags          []string       `json:"tags,omitempty"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty"`
 }
 
 // PaginatedResponse wraps a paginated API response with the total count,

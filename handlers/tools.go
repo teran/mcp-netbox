@@ -806,6 +806,43 @@ type ManufacturerDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the manufacturer to delete,required"`
 }
 
+// DeviceTypeCreateInput represents the writable fields for creating a device
+// type. Manufacturer (numeric NetBox ID) and Model are required on create.
+type DeviceTypeCreateInput struct {
+	Manufacturer  *int           `json:"manufacturer,omitempty" jsonschema:"numeric ID of the manufacturer (required)"`
+	Model         string         `json:"model" jsonschema:"device model name (required)"`
+	Slug          *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	PartNumber    *string        `json:"part_number,omitempty" jsonschema:"part number"`
+	UHeight       *float64       `json:"u_height,omitempty" jsonschema:"height in rack units (U)"`
+	IsFullDepth   *bool          `json:"is_full_depth,omitempty" jsonschema:"whether the device is full depth"`
+	SubdeviceRole *string        `json:"subdevice_role,omitempty" jsonschema:"parent/child subdevice role"`
+	Comments      *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
+	Tags          []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// DeviceTypeUpdateInput represents the writable fields for updating a device
+// type. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type DeviceTypeUpdateInput struct {
+	ID            int            `json:"id" jsonschema:"numeric ID of the device type to update,required"`
+	Manufacturer  *int           `json:"manufacturer,omitempty" jsonschema:"numeric ID of the manufacturer"`
+	Model         *string        `json:"model,omitempty" jsonschema:"device model name"`
+	Slug          *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	PartNumber    *string        `json:"part_number,omitempty" jsonschema:"part number"`
+	UHeight       *float64       `json:"u_height,omitempty" jsonschema:"height in rack units (U)"`
+	IsFullDepth   *bool          `json:"is_full_depth,omitempty" jsonschema:"whether the device is full depth"`
+	SubdeviceRole *string        `json:"subdevice_role,omitempty" jsonschema:"parent/child subdevice role"`
+	Comments      *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
+	Tags          []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// DeviceTypeDeleteInput represents the input fields for deleting a device type.
+type DeviceTypeDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the device type to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -903,6 +940,12 @@ type TenantOutput struct {
 // tools.
 type ManufacturerOutput struct {
 	Data domain.Manufacturer `json:"data"`
+}
+
+// DeviceTypeOutput represents the output for the create/update device type
+// tools.
+type DeviceTypeOutput struct {
+	Data domain.DeviceType `json:"data"`
 }
 
 // — write helpers —
@@ -1534,6 +1577,42 @@ func manufacturerWriteFromUpdate(in ManufacturerUpdateInput) domain.Manufacturer
 	}
 	write.Slug = in.Slug
 	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// deviceTypeWriteFromCreate builds a domain.DeviceTypeWrite from a create input.
+func deviceTypeWriteFromCreate(in DeviceTypeCreateInput) domain.DeviceTypeWrite {
+	return domain.DeviceTypeWrite{
+		Manufacturer:  in.Manufacturer,
+		Model:         in.Model,
+		Slug:          in.Slug,
+		PartNumber:    in.PartNumber,
+		UHeight:       in.UHeight,
+		IsFullDepth:   in.IsFullDepth,
+		SubdeviceRole: in.SubdeviceRole,
+		Comments:      in.Comments,
+		Tags:          in.Tags,
+		CustomFields:  in.CustomFields,
+	}
+}
+
+// deviceTypeWriteFromUpdate builds a domain.DeviceTypeWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func deviceTypeWriteFromUpdate(in DeviceTypeUpdateInput) domain.DeviceTypeWrite {
+	write := domain.DeviceTypeWrite{}
+	if in.Model != nil {
+		write.Model = *in.Model
+	}
+	write.Manufacturer = in.Manufacturer
+	write.Slug = in.Slug
+	write.PartNumber = in.PartNumber
+	write.UHeight = in.UHeight
+	write.IsFullDepth = in.IsFullDepth
+	write.SubdeviceRole = in.SubdeviceRole
+	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
 	return write
@@ -3024,6 +3103,74 @@ func NewDeleteManufacturerHandler(svc *application.NetworkService) mcp.ToolHandl
 		}
 
 		if err := s.DeleteManufacturer(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateDeviceTypeHandler creates a handler for the create_device_type tool.
+func NewCreateDeviceTypeHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceTypeCreateInput, DeviceTypeOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in DeviceTypeCreateInput) (*mcp.CallToolResult, DeviceTypeOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceTypeOutput{}, errServiceNotAvailable
+		}
+		if in.Manufacturer == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceTypeOutput{}, fmt.Errorf("manufacturer is required")
+		}
+		if in.Model == "" {
+			return &mcp.CallToolResult{IsError: true}, DeviceTypeOutput{}, fmt.Errorf("model is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateDeviceType(ctx, deviceTypeWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, DeviceTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceTypeOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateDeviceTypeHandler creates a handler for the update_device_type tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateDeviceTypeHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceTypeUpdateInput, DeviceTypeOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in DeviceTypeUpdateInput) (*mcp.CallToolResult, DeviceTypeOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceTypeOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceTypeOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateDeviceType(ctx, in.ID, deviceTypeWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, DeviceTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceTypeOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteDeviceTypeHandler creates a handler for the delete_device_type tool.
+func NewDeleteDeviceTypeHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceTypeDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in DeviceTypeDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteDeviceType(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

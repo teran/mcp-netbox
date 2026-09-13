@@ -504,6 +504,41 @@ func TestManufacturerWrite_ZeroValues(t *testing.T) {
 	}
 }
 
+func TestDeviceType_Populate(t *testing.T) {
+	dt := DeviceType{
+		ID:         1,
+		Model:      "C9300-24T",
+		PartNumber: "C9300-24T",
+		UHeight:    1,
+	}
+	if dt.Model != "C9300-24T" || dt.PartNumber != "C9300-24T" || dt.UHeight != 1 {
+		t.Errorf("dt = %+v, want model C9300-24T", dt)
+	}
+}
+
+func TestDeviceType_ZeroValues(t *testing.T) {
+	var dt DeviceType
+	if dt.Model != "" || dt.Manufacturer != nil {
+		t.Errorf("dt = %+v, want empty model and nil manufacturer", dt)
+	}
+}
+
+func TestDeviceTypeWrite_Populate(t *testing.T) {
+	mf := 3
+	u := 1.0
+	dtw := DeviceTypeWrite{Manufacturer: &mf, Model: "C9300-24T", UHeight: &u}
+	if dtw.Model != "C9300-24T" || dtw.Manufacturer == nil || *dtw.Manufacturer != 3 {
+		t.Errorf("dtw = %+v, want model C9300-24T manufacturer 3", dtw)
+	}
+}
+
+func TestDeviceTypeWrite_ZeroValues(t *testing.T) {
+	var dtw DeviceTypeWrite
+	if dtw.Model != "" || dtw.Manufacturer != nil {
+		t.Errorf("dtw = %+v, want empty model and nil manufacturer", dtw)
+	}
+}
+
 func TestNested_Populate(t *testing.T) {
 	n := Nested{
 		ID:   1,

@@ -279,6 +279,22 @@ type WireManufacturerWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireDeviceTypeWrite is the wire request model for device type create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields. The model field is named "model" (not "name").
+type WireDeviceTypeWrite struct {
+	Manufacturer  *int           `json:"manufacturer,omitempty"`
+	Model         string         `json:"model,omitempty"`
+	Slug          *string        `json:"slug,omitempty"`
+	PartNumber    *string        `json:"part_number,omitempty"`
+	UHeight       *float64       `json:"u_height,omitempty"`
+	IsFullDepth   *bool          `json:"is_full_depth,omitempty"`
+	SubdeviceRole *string        `json:"subdevice_role,omitempty"`
+	Comments      *string        `json:"comments,omitempty"`
+	Tags          []string       `json:"tags,omitempty"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`
@@ -587,6 +603,24 @@ type (
 		CustomFields map[string]any `json:"custom_fields,omitempty"`
 		Created      string         `json:"created"`
 		LastUpdated  string         `json:"last_updated"`
+	}
+
+	WireDeviceType struct {
+		ID            int            `json:"id"`
+		URL           string         `json:"url"`
+		Manufacturer  *WireNested    `json:"manufacturer"`
+		Model         string         `json:"model"`
+		Slug          string         `json:"slug,omitempty"`
+		Display       string         `json:"display,omitempty"`
+		PartNumber    string         `json:"part_number,omitempty"`
+		UHeight       float64        `json:"u_height,omitempty"`
+		IsFullDepth   bool           `json:"is_full_depth,omitempty"`
+		SubdeviceRole *WireLabel     `json:"subdevice_role,omitempty"`
+		Comments      string         `json:"comments,omitempty"`
+		Tags          []WireTag      `json:"tags,omitempty"`
+		CustomFields  map[string]any `json:"custom_fields,omitempty"`
+		Created       string         `json:"created"`
+		LastUpdated   string         `json:"last_updated"`
 	}
 )
 
