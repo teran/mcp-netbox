@@ -242,8 +242,11 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// LoggingMiddleware logs MCP requests with method, duration, size, and status.
-// It never logs the Authorization header content.
+// LoggingMiddleware logs MCP requests with tool, source, duration, byte sizes,
+// and outcome. It never logs the Authorization header content. When logging is
+// enabled (LOG_LEVEL set), it emits a per-tool-call trace line at debug level
+// (L8) with structured fields: tool, args (non-sensitive), source, duration,
+// in_bytes, out_bytes, outcome — plus the request_id added by WithSession.
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -275,15 +278,53 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(lrw, r)
 
 		duration := time.Since(start)
+		outcome := "success"
+		if lrw.statusCode >= 400 {
+			outcome = "error"
+		}
 
 		WithSession(r.Context(), getLogger()).WithFields(logrus.Fields{
+			"tool":        toolName,
+			"args":        requestArgs(body),
+			"source":      requestSource(r),
+			"duration":    duration,
+			"in_bytes":    len(body),
+			"out_bytes":   lrw.bodySize.Load(),
+			"outcome":     outcome,
 			"http_method": r.Method,
 			"path":        r.URL.Path,
-			"method":      toolName,
-			"duration":    duration,
-			"req_size":    len(body),
-			"resp_size":   lrw.bodySize.Load(),
 			"status":      lrw.statusCode,
-		}).Info("mcp_request")
+		}).Debug("mcp_request")
 	})
+}
+
+// requestArgs extracts the JSON-RPC params from a request body for logging.
+// The value is only the params object (if present) and never contains the
+// Authorization header, which carries the token. Empty bodies yield nil.
+func requestArgs(body []byte) interface{} {
+	if len(body) == 0 {
+		return nil
+	}
+	var req struct {
+		Params json.RawMessage `json:"params"`
+	}
+	if err := json.Unmarshal(body, &req); err != nil || len(req.Params) == 0 {
+		return nil
+	}
+	return req.Params
+}
+
+// requestSource derives the client source from the request headers, in order:
+// X-Real-IP, then X-Forwarded-For, then the peer address. Values are
+// comma-joined so all proxy hops are visible (L8).
+func requestSource(r *http.Request) string {
+	var parts []string
+	if v := r.Header.Get("X-Real-IP"); v != "" {
+		parts = append(parts, v)
+	}
+	if v := r.Header.Get("X-Forwarded-For"); v != "" {
+		parts = append(parts, v)
+	}
+	parts = append(parts, r.RemoteAddr)
+	return strings.Join(parts, ", ")
 }

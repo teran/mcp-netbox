@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -525,5 +526,84 @@ func TestWithSession_NoRequestID(t *testing.T) {
 
 	if strings.Contains(buf.String(), "request_id") {
 		t.Errorf("log output = %q, want no request_id field", buf.String())
+	}
+}
+
+func TestRequestSource_Chain(t *testing.T) {
+	t.Parallel()
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	req.Header.Set("X-Real-IP", "1.1.1.1")
+	req.Header.Set("X-Forwarded-For", "2.2.2.2, 3.3.3.3")
+	req.RemoteAddr = "4.4.4.4:1234"
+
+	got := requestSource(req)
+	if got != "1.1.1.1, 2.2.2.2, 3.3.3.3, 4.4.4.4:1234" {
+		t.Errorf("requestSource = %q", got)
+	}
+}
+
+func TestRequestSource_OnlyPeer(t *testing.T) {
+	t.Parallel()
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	req.RemoteAddr = "10.0.0.1:99"
+
+	if got := requestSource(req); got != "10.0.0.1:99" {
+		t.Errorf("requestSource = %q, want peer only", got)
+	}
+}
+
+func TestRequestArgs_ExtractsParams(t *testing.T) {
+	t.Parallel()
+
+	body := []byte(`{"method":"tools/call/get_sites","params":{"q":"dc"}}`)
+	got := requestArgs(body)
+	if string(got.(json.RawMessage)) != `{"q":"dc"}` {
+		t.Errorf("requestArgs = %s, want params object", got)
+	}
+}
+
+func TestRequestArgs_Empty(t *testing.T) {
+	t.Parallel()
+
+	if got := requestArgs(nil); got != nil {
+		t.Errorf("requestArgs(nil) = %v, want nil", got)
+	}
+	if got := requestArgs([]byte(`{"method":"ping"}`)); got != nil {
+		t.Errorf("requestArgs(no params) = %v, want nil", got)
+	}
+}
+
+func TestLoggingMiddleware_DebugLevelWithFields(t *testing.T) {
+	t.Cleanup(func() {
+		SetLogger(nil)
+	})
+
+	var buf bytes.Buffer
+	l := logrus.New()
+	l.SetOutput(&buf)
+	l.SetLevel(logrus.DebugLevel)
+	SetLogger(l)
+
+	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"result":"ok"}`))
+	}))
+
+	body := `{"method":"tools/call/get_sites","params":{"q":"dc"}}`
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/mcp", strings.NewReader(body))
+	req.RemoteAddr = "5.5.5.5:80"
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	out := buf.String()
+	for _, want := range []string{"get_sites", "5.5.5.5:80", "success", "mcp_request"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("log output missing %q; got: %s", want, out)
+		}
+	}
+	if strings.Contains(out, "Authorization") {
+		t.Errorf("log output must not contain Authorization header; got: %s", out)
 	}
 }
