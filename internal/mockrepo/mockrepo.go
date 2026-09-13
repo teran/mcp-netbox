@@ -61,6 +61,9 @@ type MockRepo struct {
 	CreateCableFunc              func(ctx context.Context, token string, in domain.CableWrite) (*domain.Cable, error)
 	UpdateCableFunc              func(ctx context.Context, token string, id int, in domain.CableWrite) (*domain.Cable, error)
 	DeleteCableFunc              func(ctx context.Context, token string, id int) error
+	CreateVMInterfaceFunc        func(ctx context.Context, token string, in domain.VMInterfaceWrite) (*domain.VMInterface, error)
+	UpdateVMInterfaceFunc        func(ctx context.Context, token string, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error)
+	DeleteVMInterfaceFunc        func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -261,6 +264,18 @@ func (m *MockRepo) UpdateCable(ctx context.Context, token string, id int, in dom
 
 func (m *MockRepo) DeleteCable(ctx context.Context, token string, id int) error {
 	return m.DeleteCableFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateVMInterface(ctx context.Context, token string, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	return m.CreateVMInterfaceFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateVMInterface(ctx context.Context, token string, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	return m.UpdateVMInterfaceFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteVMInterface(ctx context.Context, token string, id int) error {
+	return m.DeleteVMInterfaceFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -472,5 +487,17 @@ func (r *NilRepo) UpdateCable(ctx context.Context, token string, id int, in doma
 }
 
 func (r *NilRepo) DeleteCable(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateVMInterface(ctx context.Context, token string, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	return &domain.VMInterface{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateVMInterface(ctx context.Context, token string, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	return &domain.VMInterface{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteVMInterface(ctx context.Context, token string, id int) error {
 	return nil
 }

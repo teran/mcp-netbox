@@ -428,6 +428,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteCable = %v", err)
 		}
 	})
+	t.Run("CreateVMInterface", func(t *testing.T) {
+		got, err := (&MockRepo{CreateVMInterfaceFunc: func(_ context.Context, _ string, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+			return &domain.VMInterface{ID: 1, Name: in.Name}, nil
+		}}).CreateVMInterface(context.Background(), "t", domain.VMInterfaceWrite{Name: "eth0"})
+		if err != nil || got == nil || got.Name != "eth0" {
+			t.Errorf("CreateVMInterface = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateVMInterface", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateVMInterfaceFunc: func(_ context.Context, _ string, id int, _ domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+			return &domain.VMInterface{ID: id}, nil
+		}}).UpdateVMInterface(context.Background(), "t", 7, domain.VMInterfaceWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateVMInterface = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteVMInterface", func(t *testing.T) {
+		err := (&MockRepo{DeleteVMInterfaceFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteVMInterface(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteVMInterface = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -640,5 +667,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteCable(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteCable = %v", err)
+	}
+	if vi, err := repo.CreateVMInterface(ctx, "t", domain.VMInterfaceWrite{Name: "eth0"}); err != nil || vi.Name != "eth0" {
+		t.Errorf("CreateVMInterface = (%v, %v)", vi, err)
+	}
+	if vi, err := repo.UpdateVMInterface(ctx, "t", 7, domain.VMInterfaceWrite{Name: "eth0"}); err != nil || vi.ID != 7 {
+		t.Errorf("UpdateVMInterface = (%v, %v)", vi, err)
+	}
+	if err := repo.DeleteVMInterface(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteVMInterface = %v", err)
 	}
 }

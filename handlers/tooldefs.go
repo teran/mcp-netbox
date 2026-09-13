@@ -321,5 +321,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a cable from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the cable, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_vm_interface",
+			Title:        "Create VM Interface",
+			Description:  "Create a new virtual-machine interface in NetBox. virtual_machine (the parent VM's numeric ID) and name are required; all other fields are optional. Provide mtu as an integer, mac_address as a string, and tags as a list of tag names. Returns the created VM interface.",
+			Instructions: "Use only when the caller explicitly wants to create a VM interface and provides a virtual_machine and a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_vm_interface",
+			Title:        "Update VM Interface",
+			Description:  "Partially update a virtual-machine interface in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated VM interface.",
+			Instructions: "Use to modify one or more fields of an existing VM interface. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_vm_interface",
+			Title:        "Delete VM Interface",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a virtual-machine interface from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the VM interface, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

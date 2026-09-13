@@ -596,6 +596,23 @@ type CableWrite struct {
 	CustomFields map[string]any         `json:"custom_fields,omitempty"`
 }
 
+// VMInterfaceWrite is the domain DTO for creating or updating a NetBox
+// virtual-machine interface. It carries only the writable fields.
+//
+// VirtualMachine is the numeric NetBox ID of the parent VM and Name is required
+// on create. Optional scalar fields are pointers so that a partial-update
+// (PATCH) can distinguish "not provided" (nil) from "explicitly set to empty".
+type VMInterfaceWrite struct {
+	VirtualMachine *int           `json:"virtual_machine,omitempty"`
+	Name           string         `json:"name,omitempty"`
+	Enabled        *bool          `json:"enabled,omitempty"`
+	MTU            *int           `json:"mtu,omitempty"`
+	MACAddress     *string        `json:"mac_address,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

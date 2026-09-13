@@ -378,6 +378,22 @@ func TestCableWrite_ZeroValues(t *testing.T) {
 	}
 }
 
+func TestVMInterfaceWrite_Populate(t *testing.T) {
+	vm := 5
+	mtu := 1500
+	viw := VMInterfaceWrite{VirtualMachine: &vm, Name: "eth0", MTU: &mtu}
+	if viw.Name != "eth0" || viw.VirtualMachine == nil || *viw.VirtualMachine != 5 || viw.MTU == nil || *viw.MTU != 1500 {
+		t.Errorf("viw = %+v, want name eth0 virtual_machine 5 mtu 1500", viw)
+	}
+}
+
+func TestVMInterfaceWrite_ZeroValues(t *testing.T) {
+	var viw VMInterfaceWrite
+	if viw.Name != "" || viw.VirtualMachine != nil {
+		t.Errorf("viw = %+v, want empty name and nil virtual_machine", viw)
+	}
+}
+
 func TestNested_Populate(t *testing.T) {
 	n := Nested{
 		ID:   1,

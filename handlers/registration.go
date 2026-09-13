@@ -119,6 +119,8 @@ func registerDeleteTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, 
 }
 
 // RegisterTools registers all NetBox MCP tools on the given server.
+//
+//nolint:maintidx // one registration block per tool; the size is inherent to the tool inventory
 func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkService) {
 	registerTool(s, toolDefIndex()["get_sites"], metrics, "get_sites", WrapToolHandler[SitesInput, PaginatedOutput[domain.Site]](metrics, "get_sites", func(ctx context.Context, req *mcp.CallToolRequest, in SitesInput) (*mcp.CallToolResult, PaginatedOutput[domain.Site], error) {
 		return NewGetSitesHandler(svc)(ctx, req, in)
@@ -318,5 +320,17 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 
 	registerDeleteTool(s, toolDefIndex()["delete_cable"], metrics, "delete_cable", WrapToolHandler[CableDeleteInput, struct{}](metrics, "delete_cable", func(ctx context.Context, req *mcp.CallToolRequest, in CableDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteCableHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["create_vm_interface"], metrics, "create_vm_interface", WrapToolHandler[VMInterfaceCreateInput, VMInterfaceOutput](metrics, "create_vm_interface", func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfaceCreateInput) (*mcp.CallToolResult, VMInterfaceOutput, error) {
+		return NewCreateVMInterfaceHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_vm_interface"], metrics, "update_vm_interface", WrapToolHandler[VMInterfaceUpdateInput, VMInterfaceOutput](metrics, "update_vm_interface", func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfaceUpdateInput) (*mcp.CallToolResult, VMInterfaceOutput, error) {
+		return NewUpdateVMInterfaceHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_vm_interface"], metrics, "delete_vm_interface", WrapToolHandler[VMInterfaceDeleteInput, struct{}](metrics, "delete_vm_interface", func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfaceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteVMInterfaceHandler(svc)(ctx, req, in)
 	}))
 }

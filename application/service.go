@@ -463,3 +463,31 @@ func (s *NetworkService) DeleteCable(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateVMInterface relays a VM interface create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateVMInterface(ctx context.Context, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	resp, err := s.repo.CreateVMInterface(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create vm interface: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateVMInterface relays a VM interface update to the repository.
+func (s *NetworkService) UpdateVMInterface(ctx context.Context, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	resp, err := s.repo.UpdateVMInterface(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update vm interface: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteVMInterface relays a VM interface delete to the repository.
+func (s *NetworkService) DeleteVMInterface(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVMInterface(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete vm interface: %w", err)
+	}
+	return nil
+}

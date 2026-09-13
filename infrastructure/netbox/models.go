@@ -226,6 +226,20 @@ type WireCableWrite struct {
 	CustomFields map[string]any             `json:"custom_fields,omitempty"`
 }
 
+// WireVMInterfaceWrite is the wire request model for VM interface
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields. VirtualMachine is a numeric ID.
+type WireVMInterfaceWrite struct {
+	VirtualMachine *int           `json:"virtual_machine,omitempty"`
+	Name           string         `json:"name,omitempty"`
+	Enabled        *bool          `json:"enabled,omitempty"`
+	MTU            *int           `json:"mtu,omitempty"`
+	MACAddress     *string        `json:"mac_address,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

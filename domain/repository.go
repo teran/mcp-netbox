@@ -98,4 +98,8 @@ type NetworkRepository interface {
 	CreateCable(ctx context.Context, token string, in CableWrite) (*Cable, error)
 	UpdateCable(ctx context.Context, token string, id int, in CableWrite) (*Cable, error)
 	DeleteCable(ctx context.Context, token string, id int) error
+
+	CreateVMInterface(ctx context.Context, token string, in VMInterfaceWrite) (*VMInterface, error)
+	UpdateVMInterface(ctx context.Context, token string, id int, in VMInterfaceWrite) (*VMInterface, error)
+	DeleteVMInterface(ctx context.Context, token string, id int) error
 }

@@ -864,6 +864,46 @@ func (c *Client) DeleteCable(ctx context.Context, token string, id int) error {
 	return mErr
 }
 
+// CreateVMInterface creates a new VM interface via POST
+// /api/virtualization/interfaces/.
+func (c *Client) CreateVMInterface(ctx context.Context, token string, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	payload, err := json.Marshal(vmInterfaceWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal vm interface create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/virtualization/interfaces/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVMInterface(raw)
+}
+
+// UpdateVMInterface partially updates a VM interface via PATCH
+// /api/virtualization/interfaces/<id>/.
+func (c *Client) UpdateVMInterface(ctx context.Context, token string, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	payload, err := json.Marshal(vmInterfaceWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal vm interface update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/virtualization/interfaces/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVMInterface(raw)
+}
+
+// DeleteVMInterface deletes a VM interface via DELETE
+// /api/virtualization/interfaces/<id>/.
+func (c *Client) DeleteVMInterface(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/virtualization/interfaces/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -1263,6 +1303,34 @@ func unmarshalCable(raw domain.RawObject) (*domain.Cable, error) {
 		return nil, fmt.Errorf("failed to unmarshal cable: %w", err)
 	}
 	d := wireCableToDomain(w)
+	return &d, nil
+}
+
+// vmInterfaceWriteToWire converts a domain VM interface write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func vmInterfaceWriteToWire(in domain.VMInterfaceWrite) WireVMInterfaceWrite {
+	return WireVMInterfaceWrite{
+		VirtualMachine: in.VirtualMachine,
+		Name:           in.Name,
+		Enabled:        in.Enabled,
+		MTU:            in.MTU,
+		MACAddress:     in.MACAddress,
+		Description:    in.Description,
+		Tags:           in.Tags,
+		CustomFields:   in.CustomFields,
+	}
+}
+
+// unmarshalVMInterface decodes a VM interface response body into a
+// domain.VMInterface.
+func unmarshalVMInterface(raw domain.RawObject) (*domain.VMInterface, error) {
+	var w WireVMInterface
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal vm interface: %w", err)
+	}
+	d := wireVMInterfaceToDomain(w)
 	return &d, nil
 }
 

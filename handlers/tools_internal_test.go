@@ -211,6 +211,18 @@ func (s *stubRepo) DeleteCable(ctx context.Context, token string, id int) error 
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateVMInterface(ctx context.Context, token string, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVMInterface(ctx context.Context, token string, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVMInterface(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

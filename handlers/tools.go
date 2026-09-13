@@ -680,6 +680,40 @@ type CableDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the cable to delete,required"`
 }
 
+// VMInterfaceCreateInput represents the writable fields for creating a
+// virtual-machine interface.
+type VMInterfaceCreateInput struct {
+	VirtualMachine *int           `json:"virtual_machine,omitempty" jsonschema:"parent virtual machine ID (required)"`
+	Name           string         `json:"name" jsonschema:"interface name (required)"`
+	Enabled        *bool          `json:"enabled,omitempty" jsonschema:"whether the interface is enabled"`
+	MTU            *int           `json:"mtu,omitempty" jsonschema:"MTU"`
+	MACAddress     *string        `json:"mac_address,omitempty" jsonschema:"MAC address"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VMInterfaceUpdateInput represents the writable fields for updating a
+// virtual-machine interface. All fields are optional; only the explicitly
+// provided ones are patched (PATCH merge).
+type VMInterfaceUpdateInput struct {
+	ID             int            `json:"id" jsonschema:"numeric ID of the VM interface to update,required"`
+	VirtualMachine *int           `json:"virtual_machine,omitempty" jsonschema:"parent virtual machine ID"`
+	Name           *string        `json:"name,omitempty" jsonschema:"interface name"`
+	Enabled        *bool          `json:"enabled,omitempty" jsonschema:"whether the interface is enabled"`
+	MTU            *int           `json:"mtu,omitempty" jsonschema:"MTU"`
+	MACAddress     *string        `json:"mac_address,omitempty" jsonschema:"MAC address"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VMInterfaceDeleteInput represents the input fields for deleting a
+// virtual-machine interface.
+type VMInterfaceDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the VM interface to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -755,6 +789,12 @@ type CircuitTerminationOutput struct {
 // CableOutput represents the output for the create/update cable tools.
 type CableOutput struct {
 	Data domain.Cable `json:"data"`
+}
+
+// VMInterfaceOutput represents the output for the create/update VM interface
+// tools.
+type VMInterfaceOutput struct {
+	Data domain.VMInterface `json:"data"`
 }
 
 // — write helpers —
@@ -1265,6 +1305,39 @@ func cableWriteFromUpdate(in CableUpdateInput) domain.CableWrite {
 		Tags:         in.Tags,
 		CustomFields: in.CustomFields,
 	}
+}
+
+// vmInterfaceWriteFromCreate builds a domain.VMInterfaceWrite from a create
+// input.
+func vmInterfaceWriteFromCreate(in VMInterfaceCreateInput) domain.VMInterfaceWrite {
+	return domain.VMInterfaceWrite{
+		VirtualMachine: in.VirtualMachine,
+		Name:           in.Name,
+		Enabled:        in.Enabled,
+		MTU:            in.MTU,
+		MACAddress:     in.MACAddress,
+		Description:    in.Description,
+		Tags:           in.Tags,
+		CustomFields:   in.CustomFields,
+	}
+}
+
+// vmInterfaceWriteFromUpdate builds a domain.VMInterfaceWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func vmInterfaceWriteFromUpdate(in VMInterfaceUpdateInput) domain.VMInterfaceWrite {
+	write := domain.VMInterfaceWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.VirtualMachine = in.VirtualMachine
+	write.Enabled = in.Enabled
+	write.MTU = in.MTU
+	write.MACAddress = in.MACAddress
+	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
 }
 
 // — handler factories —
@@ -2483,6 +2556,77 @@ func NewDeleteCableHandler(svc *application.NetworkService) mcp.ToolHandlerFor[C
 		}
 
 		if err := s.DeleteCable(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateVMInterfaceHandler creates a handler for the create_vm_interface
+// tool.
+func NewCreateVMInterfaceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VMInterfaceCreateInput, VMInterfaceOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfaceCreateInput) (*mcp.CallToolResult, VMInterfaceOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VMInterfaceOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VMInterfaceOutput{}, fmt.Errorf("name is required")
+		}
+		if in.VirtualMachine == nil {
+			return &mcp.CallToolResult{IsError: true}, VMInterfaceOutput{}, fmt.Errorf("virtual_machine is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		vi, err := s.CreateVMInterface(ctx, vmInterfaceWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VMInterfaceOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VMInterfaceOutput{Data: *vi}, nil
+	}
+}
+
+// NewUpdateVMInterfaceHandler creates a handler for the update_vm_interface
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdateVMInterfaceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VMInterfaceUpdateInput, VMInterfaceOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfaceUpdateInput) (*mcp.CallToolResult, VMInterfaceOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VMInterfaceOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VMInterfaceOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		vi, err := s.UpdateVMInterface(ctx, in.ID, vmInterfaceWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VMInterfaceOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VMInterfaceOutput{Data: *vi}, nil
+	}
+}
+
+// NewDeleteVMInterfaceHandler creates a handler for the delete_vm_interface
+// tool.
+func NewDeleteVMInterfaceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VMInterfaceDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VMInterfaceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteVMInterface(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}
