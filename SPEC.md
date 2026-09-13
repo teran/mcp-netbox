@@ -5,6 +5,16 @@
 An MCP (Model Context Protocol) server for [NetBox](https://netboxlabs.com/).
 This server exposes NetBox infrastructure data through the MCP protocol using **Streamable HTTP** transport (remote mode), allowing AI assistants to query DCIM, IPAM, virtualization, tenancy, and circuits data.
 
+## Repository Location (R5)
+
+The repository is hosted **publicly on GitHub.com** at
+`github.com/teran/mcp-netbox` (module path `github.com/teran/mcp-netbox`,
+container image `ghcr.io/teran/mcp-netbox`). Because the repository is **public**
+(not an internal Forgejo host), the public module path is used and the S6
+local-only-naming restriction does **not** apply. The default branch is `master`
+(R2). This location was fixed before development and drives the module path, the
+README badge URLs, the CI workflow triggers, and the image/release tagging scheme.
+
 ## Key Differentiators
 
 - **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected via the `TRANSPORT` env var (default `http`).
@@ -93,8 +103,14 @@ inner layers depend on nothing internal, outer layers may depend inward:
 | Application       | `application`                           | Use cases / `NetworkService` business logic          |
 | Domain            | `domain`                                | Domain models + repository interfaces (ports)        |
 | Config            | `config`                                | Env loading + validation (envconfig + ozzo-validation) |
-| Logging           | `internal/logging`                      | logrus setup, channel-by-transport (L1–L4)           |
+| Logging           | `internal/logging`                      | logrus setup, channel-by-transport (L1–L4), SDK `slog`→logrus handler |
 | HTTP transport    | `handlers`                              | MCP tool handlers, middleware chain, metrics, registration |
+
+> **Layout note (A1):** this repository deliberately uses the Clean/DDD layered
+> layout above (composition root + layered packages) rather than the skill's
+> default simple single-package layout. This is an explicit, documented choice
+> for this project; dependency boundaries are enforced by `.go-arch-lint.yml`
+> (C6).
 
 ### Tool Registry
 
@@ -141,7 +157,8 @@ The MCP `Server` is shared; only the transport wiring differs.
 | Transport         | Hybrid — Streamable HTTP (MCP spec 2025-03-26+) and STDIO, selected via `TRANSPORT` |
 | HTTP Router       | `net/http` standard library + middleware pattern                |
 | Tool Registration | `handlers/registration.go` — `RegisterTools()` function         |
-| Logging           | `github.com/sirupsen/logrus` — channel by transport, gated by `LOG_LEVEL` |
+| Logging           | `github.com/sirupsen/logrus` — channel by transport, gated by `LOG_LEVEL`; SDK `slog` wired into logrus |
+| Outbound HTTP     | `resty.dev/v3` — NetBox client (DNS-rebinding dialer + circuit breaker transport preserved) |
 | Metrics           | Prometheus (Go runtime + custom MCP metrics) on port 8081       |
 
 ## Configuration (Environment Variables)
@@ -185,6 +202,30 @@ when `LOG_LEVEL` is set (L2).
 - **Secrets (L5):** tokens, passwords and credentials are **never** logged. The
   token is redacted (see [Security](#security--secrets)) and URLs are logged via
   `url.Redacted()`.
+- **Startup banner (L6/B5):** when logging is enabled (`LOG_LEVEL` set), the
+  very first log line at startup is the banner
+  `Starting {appName}/{appVersion} (commit: {appCommitHash}; built at {appTimestamp}) ...`,
+  built from ldflags-embedded metadata. No banner is emitted when logging is
+  disabled.
+- **SDK logger (L7/G10):** the MCP go-sdk's internal `slog` logger is wired into
+  the server's logrus logger via `ServerOptions.Logger` (an `slog.Handler`
+  forwarding to logrus), so SDK-level MCP events — session connect/end,
+  tool-call results and errors, protocol warnings — are visible in the server
+  logs at the configured level.
+- **Per-request trace logging (L8):** when logging is enabled, each MCP tool
+  call emits a log line at debug/trace level with structured fields: `tool`,
+  `args` (only non-sensitive request params, never the Authorization token),
+  `source` (derived for HTTP from `X-Real-IP` → `X-Forwarded-For` → `RemoteAddr`,
+  comma-joined so all proxy hops are visible; `"STDIO"` for stdio), `duration`,
+  `in_bytes`, `out_bytes`, and `outcome` (success/error).
+- **Correlation via request_id (L9/G11):** every incoming request is assigned a
+  unique `request_id` (reusing an inbound `X-Request-ID` when present), injected
+  into the request context via `domain.WithRequestID`. A context-aware entry
+  builder (`WithSession`) decorates all request-scoped log lines with
+  `request_id`/`session_id`. The outbound NetBox client forwards the id as the
+  `X-Request-ID` header and emits its own per-request log record (method, path,
+  `in_bytes`, `out_bytes`, status, duration) tagged with the same `request_id`, so
+  client- and server-side records can be matched across the wire.
 
 ## MCP Tools
 
@@ -565,17 +606,18 @@ List cables in NetBox with optional filters.
 
 ## Middleware Chain (HTTP transport)
 
-The server applies nine middleware layers to every HTTP request, executed in this order (outermost first):
+The server applies ten middleware layers to every HTTP request, executed in this order (outermost first):
 
-1. **RecoveryMiddleware** — catches panics, returns 500
-2. **SecurityHeadersMiddleware** — sets security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
-3. **HostValidationMiddleware** — rejects requests with empty or malformed `Host` headers
-4. **MetricsMiddleware** — tracks in-flight requests via gauge
-5. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
-6. **BodyLimitMiddleware** — 1 MB request body limit
-7. **LoggingMiddleware** — logs MCP method, duration, status, sizes (never logs token)
-8. **TokenMiddleware** — extracts token from `Authorization` header, stores as `*application.Token` in context (safe redaction via String/GoString/MarshalJSON)
-9. **injectClientMiddleware** — creates NetBox API client with per-request token, stores service in context
+1. **RequestIDMiddleware** — injects a per-request `request_id` into the context (reusing an inbound `X-Request-ID` when present) for correlation (L9/G11)
+2. **RecoveryMiddleware** — catches panics, returns 500
+3. **SecurityHeadersMiddleware** — sets security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
+4. **HostValidationMiddleware** — rejects requests with empty or malformed `Host` headers
+5. **MetricsMiddleware** — tracks in-flight requests via gauge
+6. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
+7. **BodyLimitMiddleware** — 1 MB request body limit
+8. **LoggingMiddleware** — logs MCP tool, source, duration, byte sizes, outcome, and `request_id` at debug level (never logs token) (L8)
+9. **TokenMiddleware** — extracts token from `Authorization` header, stores as `*application.Token` in context (safe redaction via String/GoString/MarshalJSON)
+10. **injectClientMiddleware** — creates NetBox API client with per-request token, stores service in context
 
 The middleware chain applies only to the **HTTP** transport. In **STDIO** mode there is no HTTP layer, so the middleware is skipped entirely: a single shared `NetworkService` is built once with the `NETBOX_TOKEN` from the environment and registered directly on the MCP server.
 

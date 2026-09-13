@@ -29,20 +29,21 @@ This document describes the agents/assistants involved in the development and op
 
 | Package / File                              | Purpose                                         |
 |---------------------------------------------|-------------------------------------------------|
-| `cmd/server/main.go`                        | Entrypoint; HTTP/STDIO transport wiring, MCP server + instructions |
+| `cmd/server/main.go`                        | Entrypoint; HTTP/STDIO transport wiring, MCP server + instructions, SDK slog→logrus logger, B5 startup banner, build metadata (ldflags `appName/appVersion/appCommitHash/appTimestamp`) |
 | `config/config.go`                          | Configuration loading (`envconfig` + ozzo-validation); includes `TRANSPORT`, `NETBOX_TOKEN`, `LOG_*` |
-| `handlers/middleware.go`                    | Token extraction, body limit, logging, batch validation middleware |
+| `handlers/middleware.go`                    | Token extraction, body limit, request_id injection, logging/trace, batch validation middleware |
 | `handlers/ratelimit.go`                     | Rate limiting middleware (global + per-client)  |
 | `handlers/metrics.go`                       | Prometheus metrics collectors + middleware + `WrapToolHandler` |
 | `handlers/tools.go`                         | MCP tool handler factories + I/O types          |
-| `handlers/registration.go`                  | Tool registration via `RegisterTools()` (annotations + instructions) |
+| `handlers/registration.go`                  | Tool registration via `RegisterTools()` (annotations + instructions); tool definitions in `handlers/tooldefs.go` |
 | `handlers/server.go`                        | HTTP mux builder, middleware chain assembly, service-per-request injection |
 | `application/service.go`                    | Business logic / use case layer                 |
-| `domain/`                                   | Domain models + repository interfaces (ports)   |
+| `domain/`                                   | Domain models + repository interfaces (ports), request_id context helpers (`WithRequestID`/`RequestIDFromContext`) |
 | `domain/repository.go`                      | NetworkRepository interface (port), RawObject type for generic object retrieval |
-| `infrastructure/netbox/client.go`           | NetBox HTTP API client (adapters)               |
+| `infrastructure/netbox/client.go`           | NetBox REST client via `resty.dev/v3` (DNS-rebinding dialer + circuit breaker transport), `X-Request-ID` forwarding + per-request outbound log |
 | `infrastructure/netbox/models.go`           | JSON wire models + `toDomain()` conversion      |
 | `internal/logging/logging.go`               | logrus setup: channel-by-transport, `LOG_LEVEL` gating, `LOG_FORMAT`/`LOG_FILENAME` |
+| `internal/logging/slog.go`                  | slog→logrus handler, `NewSlogLogger` (SDK logger wiring, L7/G10) |
 
 ## Tool-to-Agent Mapping
 
