@@ -526,4 +526,234 @@ func TestDeviceWriteToWire(t *testing.T) {
 	}
 }
 
+func TestClient_CreateIPAddress(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath, gotCT, gotAuth string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotCT = r.Header.Get("Content-Type")
+			gotAuth = r.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"id":1,"address":"192.168.1.1/24","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		vrf := 2
+		ip, err := client.CreateIPAddress(context.Background(), "tok", domain.IPAddressWrite{Address: "192.168.1.1/24", VRF: &vrf})
+		if err != nil {
+			t.Fatalf("CreateIPAddress() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPost {
+			t.Errorf("method = %q, want POST", gotMethod)
+		}
+		if gotPath != "/api/ipam/ip-addresses/" {
+			t.Errorf("path = %q, want /api/ipam/ip-addresses/", gotPath)
+		}
+		if gotCT != "application/json" {
+			t.Errorf("Content-Type = %q, want application/json", gotCT)
+		}
+		if gotAuth != "Bearer tok" {
+			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["address"] != "192.168.1.1/24" {
+			t.Errorf("request body = %s, want address 192.168.1.1/24", gotBody)
+		}
+		if reqBody["vrf"] != float64(2) {
+			t.Errorf("request body = %s, want vrf 2", gotBody)
+		}
+		if ip.ID != 1 || ip.Address != "192.168.1.1/24" {
+			t.Errorf("ip = %+v, want id 1 address 192.168.1.1/24", ip)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"address":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateIPAddress(context.Background(), "tok", domain.IPAddressWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if ve.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+
+	t.Run("not found 404", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateIPAddress(context.Background(), "tok", domain.IPAddressWrite{Address: "X"})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if errors.As(err, &ve) {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		}
+	})
+}
+
+func TestClient_UpdateIPAddress(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success patch", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":7,"address":"10.0.0.1/32","created":"","last_updated":""}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		desc := "updated"
+		ip, err := client.UpdateIPAddress(context.Background(), "tok", 7, domain.IPAddressWrite{Description: &desc})
+		if err != nil {
+			t.Fatalf("UpdateIPAddress() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPatch {
+			t.Errorf("method = %q, want PATCH", gotMethod)
+		}
+		if gotPath != "/api/ipam/ip-addresses/7/" {
+			t.Errorf("path = %q, want /api/ipam/ip-addresses/7/", gotPath)
+		}
+		if ip.ID != 7 {
+			t.Errorf("ip = %+v, want id 7", ip)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["description"] != "updated" {
+			t.Errorf("request body = %s, want description present", gotBody)
+		}
+		if _, ok := reqBody["address"]; ok {
+			t.Errorf("request body = %s, want address omitted (not provided)", gotBody)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"dns_name":["Enter a valid hostname."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.UpdateIPAddress(context.Background(), "tok", 7, domain.IPAddressWrite{Address: "X"})
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_DeleteIPAddress(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success 204", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteIPAddress(context.Background(), "tok", 3); err != nil {
+			t.Fatalf("DeleteIPAddress() returned error: %v", err)
+		}
+		if gotMethod != http.MethodDelete {
+			t.Errorf("method = %q, want DELETE", gotMethod)
+		}
+		if gotPath != "/api/ipam/ip-addresses/3/" {
+			t.Errorf("path = %q, want /api/ipam/ip-addresses/3/", gotPath)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"detail":"Cannot delete object with dependent objects."}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		err := client.DeleteIPAddress(context.Background(), "tok", 3)
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+
+	t.Run("not found 404", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteIPAddress(context.Background(), "tok", 999); err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+}
+
+func TestIPAddressWriteToWire(t *testing.T) {
+	t.Parallel()
+
+	vrf := 2
+	dns := "host.example.com"
+	in := domain.IPAddressWrite{Address: "10.0.0.1/32", VRF: &vrf, DNSName: &dns}
+	w := ipAddressWriteToWire(in)
+	if w.Address != "10.0.0.1/32" || w.VRF == nil || *w.VRF != 2 || w.DNSName == nil || *w.DNSName != dns {
+		t.Errorf("wire = %+v, want address 10.0.0.1/32 vrf 2 dns %s", w, dns)
+	}
+}
+
 func ptrStr(s string) *string { return &s }

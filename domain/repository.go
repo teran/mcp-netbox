@@ -58,4 +58,8 @@ type NetworkRepository interface {
 	CreateDevice(ctx context.Context, token string, in DeviceWrite) (*Device, error)
 	UpdateDevice(ctx context.Context, token string, id int, in DeviceWrite) (*Device, error)
 	DeleteDevice(ctx context.Context, token string, id int) error
+
+	CreateIPAddress(ctx context.Context, token string, in IPAddressWrite) (*IPAddress, error)
+	UpdateIPAddress(ctx context.Context, token string, id int, in IPAddressWrite) (*IPAddress, error)
+	DeleteIPAddress(ctx context.Context, token string, id int) error
 }

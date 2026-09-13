@@ -139,5 +139,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a device from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the device, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_ip_address",
+			Title:        "Create IP Address",
+			Description:  "Create a new IP address in NetBox. address is required (e.g. 192.168.1.1/24); all other fields are optional. Provide vrf/tenant/assigned_object_id as numeric IDs (look them up first), status as one of active/reserved/deprecated/dhcp/slaac, role as one of loopback/secondary/anycast/vip/vrrp/hsrp/glbp/carp, and tags as a list of tag names. Returns the created IP address.",
+			Instructions: "Use only when the caller explicitly wants to create an IP address and provides an address. This tool mutates NetBox; confirm the address and key attributes before calling.",
+		},
+		{
+			Name:         "update_ip_address",
+			Title:        "Update IP Address",
+			Description:  "Partially update an IP address in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display, assigned_object) are ignored. Returns the updated IP address.",
+			Instructions: "Use to modify one or more fields of an existing IP address. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_ip_address",
+			Title:        "Delete IP Address",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes an IP address from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the IP address, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

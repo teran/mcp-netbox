@@ -91,6 +91,18 @@ func (s *stubRepo) DeleteDevice(ctx context.Context, token string, id int) error
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateIPAddress(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateIPAddress(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteIPAddress(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

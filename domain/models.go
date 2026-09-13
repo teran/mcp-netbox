@@ -360,6 +360,29 @@ type DeviceWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// IPAddressWrite is the domain DTO for creating or updating a NetBox IP
+// address. It carries only the writable fields.
+//
+// Optional scalar fields are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty" (pointer to
+// ""). Address is a plain string because it is required on create; the
+// omitempty tag drops it from a PATCH body when not provided. References to
+// related objects (VRF, tenant, assigned object) are their numeric NetBox IDs.
+type IPAddressWrite struct {
+	Address            string         `json:"address,omitempty"`
+	Status             *string        `json:"status,omitempty"`
+	Role               *string        `json:"role,omitempty"`
+	VRF                *int           `json:"vrf,omitempty"`
+	Tenant             *int           `json:"tenant,omitempty"`
+	DNSName            *string        `json:"dns_name,omitempty"`
+	Description        *string        `json:"description,omitempty"`
+	AssignedObjectType *string        `json:"assigned_object_type,omitempty"`
+	AssignedObjectID   *int           `json:"assigned_object_id,omitempty"`
+	Comments           *string        `json:"comments,omitempty"`
+	Tags               []string       `json:"tags,omitempty"`
+	CustomFields       map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

@@ -189,3 +189,30 @@ func (s *NetworkService) DeleteDevice(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateIPAddress relays an IP address create to the repository. ValidationError
+// is wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateIPAddress(ctx context.Context, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	resp, err := s.repo.CreateIPAddress(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create IP address: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateIPAddress relays an IP address update to the repository.
+func (s *NetworkService) UpdateIPAddress(ctx context.Context, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	resp, err := s.repo.UpdateIPAddress(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update IP address: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteIPAddress relays an IP address delete to the repository.
+func (s *NetworkService) DeleteIPAddress(ctx context.Context, id int) error {
+	if err := s.repo.DeleteIPAddress(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete IP address: %w", err)
+	}
+	return nil
+}

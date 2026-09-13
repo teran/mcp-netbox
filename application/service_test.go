@@ -752,6 +752,155 @@ func TestNetworkService_DeleteDevice(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreateIPAddress(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateIPAddressFunc: func(_ context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.IPAddress{ID: 1, Address: in.Address}, nil
+			},
+		})
+		ip, err := svc.CreateIPAddress(context.Background(), domain.IPAddressWrite{Address: "A"})
+		if err != nil {
+			t.Fatalf("CreateIPAddress() returned error: %v", err)
+		}
+		if ip.ID != 1 || ip.Address != "A" {
+			t.Errorf("ip = %+v, want id 1 address A", ip)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"address":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateIPAddressFunc: func(_ context.Context, _ string, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateIPAddress(context.Background(), domain.IPAddressWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+		if string(got.Body) != `{"address":["required"]}` {
+			t.Errorf("Body = %s, want original body", got.Body)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateIPAddressFunc: func(_ context.Context, _ string, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateIPAddress(context.Background(), domain.IPAddressWrite{Address: "A"})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !containsService(err.Error(), "create IP address:") {
+			t.Errorf("err = %q, want it to contain 'create IP address:'", err.Error())
+		}
+	})
+}
+
+func TestNetworkService_UpdateIPAddress(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateIPAddressFunc: func(_ context.Context, _ string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+				return &domain.IPAddress{ID: id, Address: in.Address}, nil
+			},
+		})
+		ip, err := svc.UpdateIPAddress(context.Background(), 7, domain.IPAddressWrite{Address: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateIPAddress() returned error: %v", err)
+		}
+		if ip.ID != 7 || ip.Address != "Renamed" {
+			t.Errorf("ip = %+v, want id 7 address Renamed", ip)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"dns_name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateIPAddressFunc: func(_ context.Context, _ string, _ int, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateIPAddress(context.Background(), 7, domain.IPAddressWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateIPAddressFunc: func(_ context.Context, _ string, _ int, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateIPAddress(context.Background(), 7, domain.IPAddressWrite{})
+		if err == nil || !containsService(err.Error(), "update IP address:") {
+			t.Errorf("err = %v, want it to contain 'update IP address:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteIPAddress(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteIPAddressFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteIPAddress(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteIPAddress() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteIPAddressFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteIPAddress(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteIPAddressFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteIPAddress(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete IP address:") {
+			t.Errorf("err = %v, want it to contain 'delete IP address:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

@@ -31,6 +31,9 @@ type MockRepo struct {
 	CreateDeviceFunc            func(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error)
 	UpdateDeviceFunc            func(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error)
 	DeleteDeviceFunc            func(ctx context.Context, token string, id int) error
+	CreateIPAddressFunc         func(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error)
+	UpdateIPAddressFunc         func(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error)
+	DeleteIPAddressFunc         func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -111,6 +114,18 @@ func (m *MockRepo) UpdateDevice(ctx context.Context, token string, id int, in do
 
 func (m *MockRepo) DeleteDevice(ctx context.Context, token string, id int) error {
 	return m.DeleteDeviceFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateIPAddress(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	return m.CreateIPAddressFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateIPAddress(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	return m.UpdateIPAddressFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteIPAddress(ctx context.Context, token string, id int) error {
+	return m.DeleteIPAddressFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -194,5 +209,17 @@ func (r *NilRepo) UpdateDevice(ctx context.Context, token string, id int, in dom
 }
 
 func (r *NilRepo) DeleteDevice(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateIPAddress(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	return &domain.IPAddress{ID: 1, Address: in.Address}, nil
+}
+
+func (r *NilRepo) UpdateIPAddress(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	return &domain.IPAddress{ID: id, Address: in.Address}, nil
+}
+
+func (r *NilRepo) DeleteIPAddress(ctx context.Context, token string, id int) error {
 	return nil
 }

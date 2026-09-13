@@ -184,6 +184,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteDevice = %v", err)
 		}
 	})
+	t.Run("CreateIPAddress", func(t *testing.T) {
+		got, err := (&MockRepo{CreateIPAddressFunc: func(_ context.Context, _ string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+			return &domain.IPAddress{ID: 1, Address: in.Address}, nil
+		}}).CreateIPAddress(context.Background(), "t", domain.IPAddressWrite{Address: "10.0.0.1/32"})
+		if err != nil || got == nil || got.Address != "10.0.0.1/32" {
+			t.Errorf("CreateIPAddress = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateIPAddress", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateIPAddressFunc: func(_ context.Context, _ string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+			return &domain.IPAddress{ID: id, Address: in.Address}, nil
+		}}).UpdateIPAddress(context.Background(), "t", 7, domain.IPAddressWrite{Address: "10.0.0.1/32"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateIPAddress = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteIPAddress", func(t *testing.T) {
+		err := (&MockRepo{DeleteIPAddressFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteIPAddress(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteIPAddress = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -278,5 +305,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteDevice(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteDevice = %v", err)
+	}
+	if ip, err := repo.CreateIPAddress(ctx, "t", domain.IPAddressWrite{Address: "10.0.0.1/32"}); err != nil || ip.Address != "10.0.0.1/32" {
+		t.Errorf("CreateIPAddress = (%v, %v)", ip, err)
+	}
+	if ip, err := repo.UpdateIPAddress(ctx, "t", 7, domain.IPAddressWrite{Address: "10.0.0.1/32"}); err != nil || ip.ID != 7 {
+		t.Errorf("UpdateIPAddress = (%v, %v)", ip, err)
+	}
+	if err := repo.DeleteIPAddress(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteIPAddress = %v", err)
 	}
 }

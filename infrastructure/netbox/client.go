@@ -486,6 +486,44 @@ func (c *Client) DeleteDevice(ctx context.Context, token string, id int) error {
 	return mErr
 }
 
+// CreateIPAddress creates a new IP address via POST /api/ipam/ip-addresses/.
+func (c *Client) CreateIPAddress(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	payload, err := json.Marshal(ipAddressWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal IP address create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/ipam/ip-addresses/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalIPAddress(raw)
+}
+
+// UpdateIPAddress partially updates an IP address via
+// PATCH /api/ipam/ip-addresses/<id>/.
+func (c *Client) UpdateIPAddress(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+	payload, err := json.Marshal(ipAddressWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal IP address update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/ipam/ip-addresses/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalIPAddress(raw)
+}
+
+// DeleteIPAddress deletes an IP address via DELETE /api/ipam/ip-addresses/<id>/.
+func (c *Client) DeleteIPAddress(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/ipam/ip-addresses/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -571,6 +609,38 @@ func unmarshalDevice(raw domain.RawObject) (*domain.Device, error) {
 		return nil, fmt.Errorf("failed to unmarshal device: %w", err)
 	}
 	d := wireDeviceToDomain(w)
+	return &d, nil
+}
+
+// ipAddressWriteToWire converts a domain IP address write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func ipAddressWriteToWire(in domain.IPAddressWrite) WireIPAddressWrite {
+	return WireIPAddressWrite{
+		Address:            in.Address,
+		Status:             in.Status,
+		Role:               in.Role,
+		VRF:                in.VRF,
+		Tenant:             in.Tenant,
+		DNSName:            in.DNSName,
+		Description:        in.Description,
+		AssignedObjectType: in.AssignedObjectType,
+		AssignedObjectID:   in.AssignedObjectID,
+		Comments:           in.Comments,
+		Tags:               in.Tags,
+		CustomFields:       in.CustomFields,
+	}
+}
+
+// unmarshalIPAddress decodes an IP address response body into a
+// domain.IPAddress.
+func unmarshalIPAddress(raw domain.RawObject) (*domain.IPAddress, error) {
+	var w WireIPAddress
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal IP address: %w", err)
+	}
+	d := wireIPAddressToDomain(w)
 	return &d, nil
 }
 

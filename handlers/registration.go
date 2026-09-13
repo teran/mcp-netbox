@@ -199,4 +199,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_device"], metrics, "delete_device", WrapToolHandler[DeviceDeleteInput, struct{}](metrics, "delete_device", func(ctx context.Context, req *mcp.CallToolRequest, in DeviceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteDeviceHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_ip_address"], metrics, "create_ip_address", WrapToolHandler[IPAddressCreateInput, IPAddressOutput](metrics, "create_ip_address", func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressCreateInput) (*mcp.CallToolResult, IPAddressOutput, error) {
+		return NewCreateIPAddressHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_ip_address"], metrics, "update_ip_address", WrapToolHandler[IPAddressUpdateInput, IPAddressOutput](metrics, "update_ip_address", func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressUpdateInput) (*mcp.CallToolResult, IPAddressOutput, error) {
+		return NewUpdateIPAddressHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_ip_address"], metrics, "delete_ip_address", WrapToolHandler[IPAddressDeleteInput, struct{}](metrics, "delete_ip_address", func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteIPAddressHandler(svc)(ctx, req, in)
+	}))
 }

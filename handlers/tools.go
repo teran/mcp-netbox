@@ -283,6 +283,46 @@ type DeviceDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the device to delete,required"`
 }
 
+// IPAddressCreateInput represents the writable fields for creating an IP address.
+type IPAddressCreateInput struct {
+	Address            string         `json:"address" jsonschema:"IP address or prefix, e.g. 192.168.1.1/24 (required)"`
+	Status             *string        `json:"status,omitempty" jsonschema:"status: active, reserved, deprecated, dhcp, slaac"`
+	Role               *string        `json:"role,omitempty" jsonschema:"role: loopback, secondary, anycast, vip, vrrp, hsrp, glbp, carp"`
+	VRF                *int           `json:"vrf,omitempty" jsonschema:"VRF ID"`
+	Tenant             *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	DNSName            *string        `json:"dns_name,omitempty" jsonschema:"hostname or FQDN"`
+	Description        *string        `json:"description,omitempty" jsonschema:"short description"`
+	AssignedObjectType *string        `json:"assigned_object_type,omitempty" jsonschema:"assigned object type, e.g. dcim.interface (use with assigned_object_id)"`
+	AssignedObjectID   *int           `json:"assigned_object_id,omitempty" jsonschema:"ID of the assigned object (use with assigned_object_type)"`
+	Comments           *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags               []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields       map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// IPAddressUpdateInput represents the writable fields for updating an IP
+// address. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type IPAddressUpdateInput struct {
+	ID                 int            `json:"id" jsonschema:"numeric ID of the IP address to update,required"`
+	Address            *string        `json:"address,omitempty" jsonschema:"IP address or prefix, e.g. 192.168.1.1/24"`
+	Status             *string        `json:"status,omitempty" jsonschema:"status: active, reserved, deprecated, dhcp, slaac"`
+	Role               *string        `json:"role,omitempty" jsonschema:"role: loopback, secondary, anycast, vip, vrrp, hsrp, glbp, carp"`
+	VRF                *int           `json:"vrf,omitempty" jsonschema:"VRF ID"`
+	Tenant             *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	DNSName            *string        `json:"dns_name,omitempty" jsonschema:"hostname or FQDN"`
+	Description        *string        `json:"description,omitempty" jsonschema:"short description"`
+	AssignedObjectType *string        `json:"assigned_object_type,omitempty" jsonschema:"assigned object type, e.g. dcim.interface"`
+	AssignedObjectID   *int           `json:"assigned_object_id,omitempty" jsonschema:"ID of the assigned object"`
+	Comments           *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags               []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields       map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// IPAddressDeleteInput represents the input fields for deleting an IP address.
+type IPAddressDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the IP address to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -306,6 +346,11 @@ type SiteOutput struct {
 // DeviceOutput represents the output for the create/update device tools.
 type DeviceOutput struct {
 	Data domain.Device `json:"data"`
+}
+
+// IPAddressOutput represents the output for the create/update IP address tools.
+type IPAddressOutput struct {
+	Data domain.IPAddress `json:"data"`
 }
 
 // — write helpers —
@@ -417,6 +462,46 @@ func deviceWriteFromUpdate(in DeviceUpdateInput) domain.DeviceWrite {
 	write.Face = in.Face
 	write.Status = in.Status
 	write.Cluster = in.Cluster
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// ipAddressWriteFromCreate builds a domain.IPAddressWrite from a create input.
+func ipAddressWriteFromCreate(in IPAddressCreateInput) domain.IPAddressWrite {
+	return domain.IPAddressWrite{
+		Address:            in.Address,
+		Status:             in.Status,
+		Role:               in.Role,
+		VRF:                in.VRF,
+		Tenant:             in.Tenant,
+		DNSName:            in.DNSName,
+		Description:        in.Description,
+		AssignedObjectType: in.AssignedObjectType,
+		AssignedObjectID:   in.AssignedObjectID,
+		Comments:           in.Comments,
+		Tags:               in.Tags,
+		CustomFields:       in.CustomFields,
+	}
+}
+
+// ipAddressWriteFromUpdate builds a domain.IPAddressWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func ipAddressWriteFromUpdate(in IPAddressUpdateInput) domain.IPAddressWrite {
+	write := domain.IPAddressWrite{}
+	if in.Address != nil {
+		write.Address = *in.Address
+	}
+	write.Status = in.Status
+	write.Role = in.Role
+	write.VRF = in.VRF
+	write.Tenant = in.Tenant
+	write.DNSName = in.DNSName
+	write.Description = in.Description
+	write.AssignedObjectType = in.AssignedObjectType
+	write.AssignedObjectID = in.AssignedObjectID
 	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
@@ -956,6 +1041,71 @@ func NewDeleteDeviceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[
 		}
 
 		if err := s.DeleteDevice(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateIPAddressHandler creates a handler for the create_ip_address tool.
+func NewCreateIPAddressHandler(svc *application.NetworkService) mcp.ToolHandlerFor[IPAddressCreateInput, IPAddressOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressCreateInput) (*mcp.CallToolResult, IPAddressOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, IPAddressOutput{}, errServiceNotAvailable
+		}
+		if in.Address == "" {
+			return &mcp.CallToolResult{IsError: true}, IPAddressOutput{}, fmt.Errorf("address is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		ip, err := s.CreateIPAddress(ctx, ipAddressWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, IPAddressOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, IPAddressOutput{Data: *ip}, nil
+	}
+}
+
+// NewUpdateIPAddressHandler creates a handler for the update_ip_address tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateIPAddressHandler(svc *application.NetworkService) mcp.ToolHandlerFor[IPAddressUpdateInput, IPAddressOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressUpdateInput) (*mcp.CallToolResult, IPAddressOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, IPAddressOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, IPAddressOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		ip, err := s.UpdateIPAddress(ctx, in.ID, ipAddressWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, IPAddressOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, IPAddressOutput{Data: *ip}, nil
+	}
+}
+
+// NewDeleteIPAddressHandler creates a handler for the delete_ip_address tool.
+func NewDeleteIPAddressHandler(svc *application.NetworkService) mcp.ToolHandlerFor[IPAddressDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in IPAddressDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteIPAddress(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}
