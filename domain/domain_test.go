@@ -470,6 +470,40 @@ func TestTenantWrite_ZeroValues(t *testing.T) {
 	}
 }
 
+func TestManufacturer_Populate(t *testing.T) {
+	m := Manufacturer{
+		ID:          1,
+		Name:        "Cisco",
+		Slug:        "cisco",
+		Description: "desc",
+	}
+	if m.Name != "Cisco" || m.Slug != "cisco" || m.Description != "desc" {
+		t.Errorf("m = %+v, want name Cisco slug cisco description desc", m)
+	}
+}
+
+func TestManufacturer_ZeroValues(t *testing.T) {
+	var m Manufacturer
+	if m.Name != "" || m.Slug != "" {
+		t.Errorf("m = %+v, want empty name and slug", m)
+	}
+}
+
+func TestManufacturerWrite_Populate(t *testing.T) {
+	slug := "cisco"
+	mw := ManufacturerWrite{Name: "Cisco", Slug: &slug}
+	if mw.Name != "Cisco" || mw.Slug == nil || *mw.Slug != "cisco" {
+		t.Errorf("mw = %+v, want name Cisco slug cisco", mw)
+	}
+}
+
+func TestManufacturerWrite_ZeroValues(t *testing.T) {
+	var mw ManufacturerWrite
+	if mw.Name != "" || mw.Slug != nil {
+		t.Errorf("mw = %+v, want empty name and nil slug", mw)
+	}
+}
+
 func TestNested_Populate(t *testing.T) {
 	n := Nested{
 		ID:   1,

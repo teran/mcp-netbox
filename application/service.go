@@ -545,3 +545,31 @@ func (s *NetworkService) DeleteTenant(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateManufacturer relays a manufacturer create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateManufacturer(ctx context.Context, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+	resp, err := s.repo.CreateManufacturer(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create manufacturer: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateManufacturer relays a manufacturer update to the repository.
+func (s *NetworkService) UpdateManufacturer(ctx context.Context, id int, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+	resp, err := s.repo.UpdateManufacturer(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update manufacturer: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteManufacturer relays a manufacturer delete to the repository.
+func (s *NetworkService) DeleteManufacturer(ctx context.Context, id int) error {
+	if err := s.repo.DeleteManufacturer(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete manufacturer: %w", err)
+	}
+	return nil
+}

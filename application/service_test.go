@@ -2621,6 +2621,149 @@ func TestNetworkService_DeleteTenant(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreateManufacturer(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateManufacturerFunc: func(_ context.Context, token string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.Manufacturer{ID: 1, Name: in.Name}, nil
+			},
+		})
+		p, err := svc.CreateManufacturer(context.Background(), domain.ManufacturerWrite{Name: "Cisco"})
+		if err != nil {
+			t.Fatalf("CreateManufacturer() returned error: %v", err)
+		}
+		if p.ID != 1 || p.Name != "Cisco" {
+			t.Errorf("p = %+v, want id 1 name Cisco", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateManufacturerFunc: func(_ context.Context, _ string, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateManufacturer(context.Background(), domain.ManufacturerWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateManufacturerFunc: func(_ context.Context, _ string, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateManufacturer(context.Background(), domain.ManufacturerWrite{Name: "Cisco"})
+		if err == nil || !containsService(err.Error(), "create manufacturer:") {
+			t.Errorf("err = %v, want it to contain 'create manufacturer:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateManufacturer(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateManufacturerFunc: func(_ context.Context, _ string, id int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+				return &domain.Manufacturer{ID: id, Name: "Cisco2"}, nil
+			},
+		})
+		p, err := svc.UpdateManufacturer(context.Background(), 7, domain.ManufacturerWrite{Name: "Cisco2"})
+		if err != nil {
+			t.Fatalf("UpdateManufacturer() returned error: %v", err)
+		}
+		if p.ID != 7 {
+			t.Errorf("p = %+v, want id 7", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateManufacturerFunc: func(_ context.Context, _ string, _ int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateManufacturer(context.Background(), 7, domain.ManufacturerWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateManufacturerFunc: func(_ context.Context, _ string, _ int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateManufacturer(context.Background(), 7, domain.ManufacturerWrite{})
+		if err == nil || !containsService(err.Error(), "update manufacturer:") {
+			t.Errorf("err = %v, want it to contain 'update manufacturer:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteManufacturer(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteManufacturerFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteManufacturer(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteManufacturer() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteManufacturerFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteManufacturer(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteManufacturerFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteManufacturer(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete manufacturer:") {
+			t.Errorf("err = %v, want it to contain 'delete manufacturer:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

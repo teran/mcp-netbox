@@ -110,4 +110,8 @@ type NetworkRepository interface {
 	CreateTenant(ctx context.Context, token string, in TenantWrite) (*Tenant, error)
 	UpdateTenant(ctx context.Context, token string, id int, in TenantWrite) (*Tenant, error)
 	DeleteTenant(ctx context.Context, token string, id int) error
+
+	CreateManufacturer(ctx context.Context, token string, in ManufacturerWrite) (*Manufacturer, error)
+	UpdateManufacturer(ctx context.Context, token string, id int, in ManufacturerWrite) (*Manufacturer, error)
+	DeleteManufacturer(ctx context.Context, token string, id int) error
 }

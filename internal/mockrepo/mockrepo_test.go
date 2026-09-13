@@ -509,6 +509,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteTenant = %v", err)
 		}
 	})
+	t.Run("CreateManufacturer", func(t *testing.T) {
+		got, err := (&MockRepo{CreateManufacturerFunc: func(_ context.Context, _ string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+			return &domain.Manufacturer{ID: 1, Name: in.Name}, nil
+		}}).CreateManufacturer(context.Background(), "t", domain.ManufacturerWrite{Name: "Cisco"})
+		if err != nil || got == nil || got.Name != "Cisco" {
+			t.Errorf("CreateManufacturer = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateManufacturer", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateManufacturerFunc: func(_ context.Context, _ string, id int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+			return &domain.Manufacturer{ID: id}, nil
+		}}).UpdateManufacturer(context.Background(), "t", 7, domain.ManufacturerWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateManufacturer = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteManufacturer", func(t *testing.T) {
+		err := (&MockRepo{DeleteManufacturerFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteManufacturer(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteManufacturer = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -748,5 +775,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteTenant(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteTenant = %v", err)
+	}
+	if m, err := repo.CreateManufacturer(ctx, "t", domain.ManufacturerWrite{Name: "Cisco"}); err != nil || m.Name != "Cisco" {
+		t.Errorf("CreateManufacturer = (%v, %v)", m, err)
+	}
+	if m, err := repo.UpdateManufacturer(ctx, "t", 7, domain.ManufacturerWrite{Name: "Cisco"}); err != nil || m.ID != 7 {
+		t.Errorf("UpdateManufacturer = (%v, %v)", m, err)
+	}
+	if err := repo.DeleteManufacturer(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteManufacturer = %v", err)
 	}
 }

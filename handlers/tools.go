@@ -778,6 +778,34 @@ type TenantDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the tenant to delete,required"`
 }
 
+// ManufacturerCreateInput represents the writable fields for creating a
+// manufacturer.
+type ManufacturerCreateInput struct {
+	Name         string         `json:"name" jsonschema:"manufacturer name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ManufacturerUpdateInput represents the writable fields for updating a
+// manufacturer. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type ManufacturerUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the manufacturer to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"manufacturer name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ManufacturerDeleteInput represents the input fields for deleting a
+// manufacturer.
+type ManufacturerDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the manufacturer to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -869,6 +897,12 @@ type ProviderOutput struct {
 // TenantOutput represents the output for the create/update tenant tools.
 type TenantOutput struct {
 	Data domain.Tenant `json:"data"`
+}
+
+// ManufacturerOutput represents the output for the create/update manufacturer
+// tools.
+type ManufacturerOutput struct {
+	Data domain.Manufacturer `json:"data"`
 }
 
 // — write helpers —
@@ -1473,6 +1507,33 @@ func tenantWriteFromUpdate(in TenantUpdateInput) domain.TenantWrite {
 	write.Slug = in.Slug
 	write.Description = in.Description
 	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// manufacturerWriteFromCreate builds a domain.ManufacturerWrite from a create
+// input.
+func manufacturerWriteFromCreate(in ManufacturerCreateInput) domain.ManufacturerWrite {
+	return domain.ManufacturerWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// manufacturerWriteFromUpdate builds a domain.ManufacturerWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func manufacturerWriteFromUpdate(in ManufacturerUpdateInput) domain.ManufacturerWrite {
+	write := domain.ManufacturerWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Slug = in.Slug
+	write.Description = in.Description
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
 	return write
@@ -2895,6 +2956,74 @@ func NewDeleteTenantHandler(svc *application.NetworkService) mcp.ToolHandlerFor[
 		}
 
 		if err := s.DeleteTenant(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateManufacturerHandler creates a handler for the create_manufacturer
+// tool.
+func NewCreateManufacturerHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ManufacturerCreateInput, ManufacturerOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ManufacturerCreateInput) (*mcp.CallToolResult, ManufacturerOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ManufacturerOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ManufacturerOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateManufacturer(ctx, manufacturerWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ManufacturerOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ManufacturerOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateManufacturerHandler creates a handler for the update_manufacturer
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdateManufacturerHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ManufacturerUpdateInput, ManufacturerOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ManufacturerUpdateInput) (*mcp.CallToolResult, ManufacturerOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ManufacturerOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ManufacturerOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateManufacturer(ctx, in.ID, manufacturerWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ManufacturerOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ManufacturerOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteManufacturerHandler creates a handler for the delete_manufacturer
+// tool.
+func NewDeleteManufacturerHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ManufacturerDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ManufacturerDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteManufacturer(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

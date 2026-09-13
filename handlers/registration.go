@@ -357,4 +357,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_tenant"], metrics, "delete_tenant", WrapToolHandler[TenantDeleteInput, struct{}](metrics, "delete_tenant", func(ctx context.Context, req *mcp.CallToolRequest, in TenantDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteTenantHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_manufacturer"], metrics, "create_manufacturer", WrapToolHandler[ManufacturerCreateInput, ManufacturerOutput](metrics, "create_manufacturer", func(ctx context.Context, req *mcp.CallToolRequest, in ManufacturerCreateInput) (*mcp.CallToolResult, ManufacturerOutput, error) {
+		return NewCreateManufacturerHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_manufacturer"], metrics, "update_manufacturer", WrapToolHandler[ManufacturerUpdateInput, ManufacturerOutput](metrics, "update_manufacturer", func(ctx context.Context, req *mcp.CallToolRequest, in ManufacturerUpdateInput) (*mcp.CallToolResult, ManufacturerOutput, error) {
+		return NewUpdateManufacturerHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_manufacturer"], metrics, "delete_manufacturer", WrapToolHandler[ManufacturerDeleteInput, struct{}](metrics, "delete_manufacturer", func(ctx context.Context, req *mcp.CallToolRequest, in ManufacturerDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteManufacturerHandler(svc)(ctx, req, in)
+	}))
 }

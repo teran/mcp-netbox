@@ -70,6 +70,9 @@ type MockRepo struct {
 	CreateTenantFunc             func(ctx context.Context, token string, in domain.TenantWrite) (*domain.Tenant, error)
 	UpdateTenantFunc             func(ctx context.Context, token string, id int, in domain.TenantWrite) (*domain.Tenant, error)
 	DeleteTenantFunc             func(ctx context.Context, token string, id int) error
+	CreateManufacturerFunc       func(ctx context.Context, token string, in domain.ManufacturerWrite) (*domain.Manufacturer, error)
+	UpdateManufacturerFunc       func(ctx context.Context, token string, id int, in domain.ManufacturerWrite) (*domain.Manufacturer, error)
+	DeleteManufacturerFunc       func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -306,6 +309,18 @@ func (m *MockRepo) UpdateTenant(ctx context.Context, token string, id int, in do
 
 func (m *MockRepo) DeleteTenant(ctx context.Context, token string, id int) error {
 	return m.DeleteTenantFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateManufacturer(ctx context.Context, token string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+	return m.CreateManufacturerFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateManufacturer(ctx context.Context, token string, id int, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+	return m.UpdateManufacturerFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteManufacturer(ctx context.Context, token string, id int) error {
+	return m.DeleteManufacturerFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -553,5 +568,17 @@ func (r *NilRepo) UpdateTenant(ctx context.Context, token string, id int, in dom
 }
 
 func (r *NilRepo) DeleteTenant(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateManufacturer(ctx context.Context, token string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+	return &domain.Manufacturer{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateManufacturer(ctx context.Context, token string, id int, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+	return &domain.Manufacturer{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteManufacturer(ctx context.Context, token string, id int) error {
 	return nil
 }

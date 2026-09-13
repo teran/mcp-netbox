@@ -247,6 +247,18 @@ func (s *stubRepo) DeleteTenant(ctx context.Context, token string, id int) error
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateManufacturer(ctx context.Context, token string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateManufacturer(ctx context.Context, token string, id int, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteManufacturer(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 
