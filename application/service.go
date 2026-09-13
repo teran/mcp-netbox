@@ -243,3 +243,30 @@ func (s *NetworkService) DeletePrefix(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateVLAN relays a VLAN create to the repository. ValidationError is wrapped
+// (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateVLAN(ctx context.Context, in domain.VLANWrite) (*domain.VLAN, error) {
+	resp, err := s.repo.CreateVLAN(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create VLAN: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateVLAN relays a VLAN update to the repository.
+func (s *NetworkService) UpdateVLAN(ctx context.Context, id int, in domain.VLANWrite) (*domain.VLAN, error) {
+	resp, err := s.repo.UpdateVLAN(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update VLAN: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteVLAN relays a VLAN delete to the repository.
+func (s *NetworkService) DeleteVLAN(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVLAN(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete VLAN: %w", err)
+	}
+	return nil
+}

@@ -37,6 +37,9 @@ type MockRepo struct {
 	CreatePrefixFunc            func(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error)
 	UpdatePrefixFunc            func(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error)
 	DeletePrefixFunc            func(ctx context.Context, token string, id int) error
+	CreateVLANFunc              func(ctx context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error)
+	UpdateVLANFunc              func(ctx context.Context, token string, id int, in domain.VLANWrite) (*domain.VLAN, error)
+	DeleteVLANFunc              func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -141,6 +144,18 @@ func (m *MockRepo) UpdatePrefix(ctx context.Context, token string, id int, in do
 
 func (m *MockRepo) DeletePrefix(ctx context.Context, token string, id int) error {
 	return m.DeletePrefixFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateVLAN(ctx context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error) {
+	return m.CreateVLANFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateVLAN(ctx context.Context, token string, id int, in domain.VLANWrite) (*domain.VLAN, error) {
+	return m.UpdateVLANFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteVLAN(ctx context.Context, token string, id int) error {
+	return m.DeleteVLANFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -248,5 +263,17 @@ func (r *NilRepo) UpdatePrefix(ctx context.Context, token string, id int, in dom
 }
 
 func (r *NilRepo) DeletePrefix(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateVLAN(ctx context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error) {
+	return &domain.VLAN{ID: 1, VID: in.VID, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateVLAN(ctx context.Context, token string, id int, in domain.VLANWrite) (*domain.VLAN, error) {
+	return &domain.VLAN{ID: id, VID: in.VID, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteVLAN(ctx context.Context, token string, id int) error {
 	return nil
 }

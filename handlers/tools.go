@@ -363,6 +363,44 @@ type PrefixDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the prefix to delete,required"`
 }
 
+// VLANCreateInput represents the writable fields for creating a VLAN.
+type VLANCreateInput struct {
+	VID          int            `json:"vid" jsonschema:"VLAN ID, 1-4094 (required)"`
+	Name         string         `json:"name" jsonschema:"VLAN name (required)"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Group        *int           `json:"group,omitempty" jsonschema:"VLAN group ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: active, reserved, deprecated"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID (look up first)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VLANUpdateInput represents the writable fields for updating a VLAN. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type VLANUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the VLAN to update,required"`
+	VID          *int           `json:"vid,omitempty" jsonschema:"VLAN ID, 1-4094"`
+	Name         *string        `json:"name,omitempty" jsonschema:"VLAN name"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Group        *int           `json:"group,omitempty" jsonschema:"VLAN group ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: active, reserved, deprecated"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VLANDeleteInput represents the input fields for deleting a VLAN.
+type VLANDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the VLAN to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -396,6 +434,11 @@ type IPAddressOutput struct {
 // PrefixOutput represents the output for the create/update prefix tools.
 type PrefixOutput struct {
 	Data domain.Prefix `json:"data"`
+}
+
+// VLANOutput represents the output for the create/update VLAN tools.
+type VLANOutput struct {
+	Data domain.VLAN `json:"data"`
 }
 
 // — write helpers —
@@ -586,6 +629,45 @@ func prefixWriteFromUpdate(in PrefixUpdateInput) domain.PrefixWrite {
 	write.Status = in.Status
 	write.Role = in.Role
 	write.IsPool = in.IsPool
+	write.Description = in.Description
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// vlanWriteFromCreate builds a domain.VLANWrite from a create input.
+func vlanWriteFromCreate(in VLANCreateInput) domain.VLANWrite {
+	return domain.VLANWrite{
+		VID:          in.VID,
+		Name:         in.Name,
+		Site:         in.Site,
+		Group:        in.Group,
+		Tenant:       in.Tenant,
+		Status:       in.Status,
+		Role:         in.Role,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// vlanWriteFromUpdate builds a domain.VLANWrite from an update input, mapping
+// only the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func vlanWriteFromUpdate(in VLANUpdateInput) domain.VLANWrite {
+	write := domain.VLANWrite{}
+	if in.VID != nil {
+		write.VID = *in.VID
+	}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Site = in.Site
+	write.Group = in.Group
+	write.Tenant = in.Tenant
+	write.Status = in.Status
+	write.Role = in.Role
 	write.Description = in.Description
 	write.Comments = in.Comments
 	write.Tags = in.Tags
@@ -1256,6 +1338,74 @@ func NewDeletePrefixHandler(svc *application.NetworkService) mcp.ToolHandlerFor[
 		}
 
 		if err := s.DeletePrefix(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateVLANHandler creates a handler for the create_vlan tool.
+func NewCreateVLANHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLANCreateInput, VLANOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VLANCreateInput) (*mcp.CallToolResult, VLANOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VLANOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VLANOutput{}, fmt.Errorf("name is required")
+		}
+		if in.VID <= 0 {
+			return &mcp.CallToolResult{IsError: true}, VLANOutput{}, fmt.Errorf("vid must be a positive integer")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		vlan, err := s.CreateVLAN(ctx, vlanWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VLANOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VLANOutput{Data: *vlan}, nil
+	}
+}
+
+// NewUpdateVLANHandler creates a handler for the update_vlan tool. It performs a
+// partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateVLANHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLANUpdateInput, VLANOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VLANUpdateInput) (*mcp.CallToolResult, VLANOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VLANOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VLANOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		vlan, err := s.UpdateVLAN(ctx, in.ID, vlanWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VLANOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VLANOutput{Data: *vlan}, nil
+	}
+}
+
+// NewDeleteVLANHandler creates a handler for the delete_vlan tool.
+func NewDeleteVLANHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VLANDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VLANDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteVLAN(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

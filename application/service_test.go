@@ -1044,6 +1044,149 @@ func TestNetworkService_DeletePrefix(t *testing.T) {
 	})
 }
 
+func TestNetworkService_CreateVLAN(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVLANFunc: func(_ context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.VLAN{ID: 1, VID: in.VID, Name: in.Name}, nil
+			},
+		})
+		vlan, err := svc.CreateVLAN(context.Background(), domain.VLANWrite{VID: 100, Name: "mgmt"})
+		if err != nil {
+			t.Fatalf("CreateVLAN() returned error: %v", err)
+		}
+		if vlan.ID != 1 || vlan.VID != 100 || vlan.Name != "mgmt" {
+			t.Errorf("vlan = %+v, want id 1 vid 100 name mgmt", vlan)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVLANFunc: func(_ context.Context, _ string, _ domain.VLANWrite) (*domain.VLAN, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateVLAN(context.Background(), domain.VLANWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVLANFunc: func(_ context.Context, _ string, _ domain.VLANWrite) (*domain.VLAN, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateVLAN(context.Background(), domain.VLANWrite{VID: 100, Name: "mgmt"})
+		if err == nil || !containsService(err.Error(), "create VLAN:") {
+			t.Errorf("err = %v, want it to contain 'create VLAN:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateVLAN(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVLANFunc: func(_ context.Context, _ string, id int, in domain.VLANWrite) (*domain.VLAN, error) {
+				return &domain.VLAN{ID: id, VID: in.VID, Name: in.Name}, nil
+			},
+		})
+		vlan, err := svc.UpdateVLAN(context.Background(), 7, domain.VLANWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateVLAN() returned error: %v", err)
+		}
+		if vlan.ID != 7 {
+			t.Errorf("vlan = %+v, want id 7", vlan)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVLANFunc: func(_ context.Context, _ string, _ int, _ domain.VLANWrite) (*domain.VLAN, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateVLAN(context.Background(), 7, domain.VLANWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVLANFunc: func(_ context.Context, _ string, _ int, _ domain.VLANWrite) (*domain.VLAN, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateVLAN(context.Background(), 7, domain.VLANWrite{})
+		if err == nil || !containsService(err.Error(), "update VLAN:") {
+			t.Errorf("err = %v, want it to contain 'update VLAN:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteVLAN(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVLANFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteVLAN(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteVLAN() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVLANFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteVLAN(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVLANFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteVLAN(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete VLAN:") {
+			t.Errorf("err = %v, want it to contain 'delete VLAN:'", err)
+		}
+	})
+}
+
 // containsService is a tiny substring helper scoped to this test package.
 func containsService(s, sub string) bool {
 	return len(s) >= len(sub) && indexOfService(s, sub) >= 0

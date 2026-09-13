@@ -407,6 +407,28 @@ type PrefixWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// VLANWrite is the domain DTO for creating or updating a NetBox VLAN. It
+// carries only the writable fields.
+//
+// VID and Name are plain scalars because both are required on create; their
+// omitempty tags drop them from a PATCH body when not provided. Other optional
+// scalar fields are pointers so that a partial-update (PATCH) can distinguish
+// "not provided" (nil) from "explicitly set to empty". References to related
+// objects (site, group, tenant, role) are their numeric NetBox IDs.
+type VLANWrite struct {
+	VID          int            `json:"vid,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Group        *int           `json:"group,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

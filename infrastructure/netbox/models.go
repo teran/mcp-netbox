@@ -80,6 +80,23 @@ type WirePrefixWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireVLANWrite is the wire request model for VLAN create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields.
+// References to related objects are numeric IDs.
+type WireVLANWrite struct {
+	VID          int            `json:"vid,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Group        *int           `json:"group,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

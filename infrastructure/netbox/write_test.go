@@ -955,4 +955,247 @@ func TestPrefixWriteToWire(t *testing.T) {
 	}
 }
 
+func TestClient_CreateVLAN(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath, gotCT, gotAuth string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotCT = r.Header.Get("Content-Type")
+			gotAuth = r.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"id":1,"vid":100,"name":"mgmt","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		site := 2
+		vlan, err := client.CreateVLAN(context.Background(), "tok", domain.VLANWrite{VID: 100, Name: "mgmt", Site: &site})
+		if err != nil {
+			t.Fatalf("CreateVLAN() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPost {
+			t.Errorf("method = %q, want POST", gotMethod)
+		}
+		if gotPath != "/api/ipam/vlans/" {
+			t.Errorf("path = %q, want /api/ipam/vlans/", gotPath)
+		}
+		if gotCT != "application/json" {
+			t.Errorf("Content-Type = %q, want application/json", gotCT)
+		}
+		if gotAuth != "Bearer tok" {
+			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["name"] != "mgmt" {
+			t.Errorf("request body = %s, want name mgmt", gotBody)
+		}
+		if reqBody["vid"] != float64(100) {
+			t.Errorf("request body = %s, want vid 100", gotBody)
+		}
+		if reqBody["site"] != float64(2) {
+			t.Errorf("request body = %s, want site 2", gotBody)
+		}
+		if vlan.ID != 1 || vlan.VID != 100 || vlan.Name != "mgmt" {
+			t.Errorf("vlan = %+v, want id 1 vid 100 name mgmt", vlan)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"name":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateVLAN(context.Background(), "tok", domain.VLANWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if ve.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_UpdateVLAN(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success patch", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			gotBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"id":7,"vid":200,"name":"Renamed","created":"","last_updated":""}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		desc := "updated"
+		vlan, err := client.UpdateVLAN(context.Background(), "tok", 7, domain.VLANWrite{Description: &desc})
+		if err != nil {
+			t.Fatalf("UpdateVLAN() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPatch {
+			t.Errorf("method = %q, want PATCH", gotMethod)
+		}
+		if gotPath != "/api/ipam/vlans/7/" {
+			t.Errorf("path = %q, want /api/ipam/vlans/7/", gotPath)
+		}
+		if vlan.ID != 7 {
+			t.Errorf("vlan = %+v, want id 7", vlan)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["description"] != "updated" {
+			t.Errorf("request body = %s, want description present", gotBody)
+		}
+		if _, ok := reqBody["name"]; ok {
+			t.Errorf("request body = %s, want name omitted (not provided)", gotBody)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"status":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.UpdateVLAN(context.Background(), "tok", 7, domain.VLANWrite{Name: "X"})
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestClient_DeleteVLAN(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success 204", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotMethod = r.Method
+			gotPath = r.URL.Path
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteVLAN(context.Background(), "tok", 3); err != nil {
+			t.Fatalf("DeleteVLAN() returned error: %v", err)
+		}
+		if gotMethod != http.MethodDelete {
+			t.Errorf("method = %q, want DELETE", gotMethod)
+		}
+		if gotPath != "/api/ipam/vlans/3/" {
+			t.Errorf("path = %q, want /api/ipam/vlans/3/", gotPath)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"detail":"Cannot delete object with dependent objects."}`
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		err := client.DeleteVLAN(context.Background(), "tok", 3)
+		var ve *domain.ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(ve.Body) != body {
+			t.Errorf("Body = %s, want %s", ve.Body, body)
+		}
+	})
+}
+
+func TestVLANWriteToWire(t *testing.T) {
+	t.Parallel()
+
+	site := 2
+	in := domain.VLANWrite{VID: 100, Name: "mgmt", Site: &site}
+	w := vlanWriteToWire(in)
+	if w.VID != 100 || w.Name != "mgmt" || w.Site == nil || *w.Site != 2 {
+		t.Errorf("wire = %+v, want vid 100 name mgmt site 2", w)
+	}
+}
+
+// unmarshalableCustomFields returns a CustomFields value that json.Marshal
+// cannot serialize, forcing the write methods' marshal-error branch.
+func unmarshalableCustomFields() map[string]any {
+	return map[string]any{"bad": make(chan int)}
+}
+
+func TestClient_WriteMarshalErrors(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	ctx := context.Background()
+
+	badIP := domain.IPAddressWrite{Address: "10.0.0.1/32", CustomFields: unmarshalableCustomFields()}
+	if _, err := client.CreateIPAddress(ctx, "tok", badIP); err == nil {
+		t.Error("CreateIPAddress: expected marshal error, got nil")
+	}
+	if _, err := client.UpdateIPAddress(ctx, "tok", 7, badIP); err == nil {
+		t.Error("UpdateIPAddress: expected marshal error, got nil")
+	}
+
+	badPrefix := domain.PrefixWrite{Prefix: "10.0.0.0/24", CustomFields: unmarshalableCustomFields()}
+	if _, err := client.CreatePrefix(ctx, "tok", badPrefix); err == nil {
+		t.Error("CreatePrefix: expected marshal error, got nil")
+	}
+	if _, err := client.UpdatePrefix(ctx, "tok", 7, badPrefix); err == nil {
+		t.Error("UpdatePrefix: expected marshal error, got nil")
+	}
+
+	badVLAN := domain.VLANWrite{VID: 100, Name: "mgmt", CustomFields: unmarshalableCustomFields()}
+	if _, err := client.CreateVLAN(ctx, "tok", badVLAN); err == nil {
+		t.Error("CreateVLAN: expected marshal error, got nil")
+	}
+	if _, err := client.UpdateVLAN(ctx, "tok", 7, badVLAN); err == nil {
+		t.Error("UpdateVLAN: expected marshal error, got nil")
+	}
+}
+
 func ptrStr(s string) *string { return &s }

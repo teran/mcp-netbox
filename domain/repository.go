@@ -66,4 +66,8 @@ type NetworkRepository interface {
 	CreatePrefix(ctx context.Context, token string, in PrefixWrite) (*Prefix, error)
 	UpdatePrefix(ctx context.Context, token string, id int, in PrefixWrite) (*Prefix, error)
 	DeletePrefix(ctx context.Context, token string, id int) error
+
+	CreateVLAN(ctx context.Context, token string, in VLANWrite) (*VLAN, error)
+	UpdateVLAN(ctx context.Context, token string, id int, in VLANWrite) (*VLAN, error)
+	DeleteVLAN(ctx context.Context, token string, id int) error
 }

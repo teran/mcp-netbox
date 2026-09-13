@@ -175,5 +175,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a prefix from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the prefix, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_vlan",
+			Title:        "Create VLAN",
+			Description:  "Create a new VLAN in NetBox. vid (1-4094) and name are required; all other fields are optional. Provide site/group/tenant/role as numeric IDs (look them up first), status as one of active/reserved/deprecated, and tags as a list of tag names. Returns the created VLAN.",
+			Instructions: "Use only when the caller explicitly wants to create a VLAN and provides both a VLAN ID (vid) and a name. This tool mutates NetBox; confirm the vid and key attributes before calling.",
+		},
+		{
+			Name:         "update_vlan",
+			Title:        "Update VLAN",
+			Description:  "Partially update a VLAN in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated VLAN.",
+			Instructions: "Use to modify one or more fields of an existing VLAN. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_vlan",
+			Title:        "Delete VLAN",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a VLAN from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the VLAN, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

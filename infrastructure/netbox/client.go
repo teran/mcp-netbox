@@ -561,6 +561,43 @@ func (c *Client) DeletePrefix(ctx context.Context, token string, id int) error {
 	return mErr
 }
 
+// CreateVLAN creates a new VLAN via POST /api/ipam/vlans/.
+func (c *Client) CreateVLAN(ctx context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error) {
+	payload, err := json.Marshal(vlanWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal VLAN create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/ipam/vlans/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVLAN(raw)
+}
+
+// UpdateVLAN partially updates a VLAN via PATCH /api/ipam/vlans/<id>/.
+func (c *Client) UpdateVLAN(ctx context.Context, token string, id int, in domain.VLANWrite) (*domain.VLAN, error) {
+	payload, err := json.Marshal(vlanWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal VLAN update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/ipam/vlans/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVLAN(raw)
+}
+
+// DeleteVLAN deletes a VLAN via DELETE /api/ipam/vlans/<id>/.
+func (c *Client) DeleteVLAN(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/ipam/vlans/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -709,6 +746,35 @@ func unmarshalPrefix(raw domain.RawObject) (*domain.Prefix, error) {
 		return nil, fmt.Errorf("failed to unmarshal prefix: %w", err)
 	}
 	d := wirePrefixToDomain(w)
+	return &d, nil
+}
+
+// vlanWriteToWire converts a domain VLAN write DTO to the wire request model.
+// The fields map one-to-one; nil pointers on the domain side remain nil on the
+// wire side so json.Marshal omits them (required for a partial PATCH body).
+func vlanWriteToWire(in domain.VLANWrite) WireVLANWrite {
+	return WireVLANWrite{
+		VID:          in.VID,
+		Name:         in.Name,
+		Site:         in.Site,
+		Group:        in.Group,
+		Tenant:       in.Tenant,
+		Status:       in.Status,
+		Role:         in.Role,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalVLAN decodes a VLAN response body into a domain.VLAN.
+func unmarshalVLAN(raw domain.RawObject) (*domain.VLAN, error) {
+	var w WireVLAN
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal VLAN: %w", err)
+	}
+	d := wireVLANToDomain(w)
 	return &d, nil
 }
 

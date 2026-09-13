@@ -238,6 +238,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeletePrefix = %v", err)
 		}
 	})
+	t.Run("CreateVLAN", func(t *testing.T) {
+		got, err := (&MockRepo{CreateVLANFunc: func(_ context.Context, _ string, in domain.VLANWrite) (*domain.VLAN, error) {
+			return &domain.VLAN{ID: 1, VID: in.VID, Name: in.Name}, nil
+		}}).CreateVLAN(context.Background(), "t", domain.VLANWrite{VID: 100, Name: "mgmt"})
+		if err != nil || got == nil || got.Name != "mgmt" {
+			t.Errorf("CreateVLAN = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateVLAN", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateVLANFunc: func(_ context.Context, _ string, id int, in domain.VLANWrite) (*domain.VLAN, error) {
+			return &domain.VLAN{ID: id, VID: in.VID, Name: in.Name}, nil
+		}}).UpdateVLAN(context.Background(), "t", 7, domain.VLANWrite{VID: 100, Name: "mgmt"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateVLAN = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteVLAN", func(t *testing.T) {
+		err := (&MockRepo{DeleteVLANFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteVLAN(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteVLAN = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -350,5 +377,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeletePrefix(ctx, "t", 3); err != nil {
 		t.Errorf("DeletePrefix = %v", err)
+	}
+	if v, err := repo.CreateVLAN(ctx, "t", domain.VLANWrite{VID: 100, Name: "mgmt"}); err != nil || v.Name != "mgmt" {
+		t.Errorf("CreateVLAN = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateVLAN(ctx, "t", 7, domain.VLANWrite{VID: 100, Name: "mgmt"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateVLAN = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteVLAN(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteVLAN = %v", err)
 	}
 }
