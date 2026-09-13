@@ -162,3 +162,30 @@ func (s *NetworkService) DeleteSite(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateDevice relays a device create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateDevice(ctx context.Context, in domain.DeviceWrite) (*domain.Device, error) {
+	resp, err := s.repo.CreateDevice(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create device: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateDevice relays a device update to the repository.
+func (s *NetworkService) UpdateDevice(ctx context.Context, id int, in domain.DeviceWrite) (*domain.Device, error) {
+	resp, err := s.repo.UpdateDevice(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update device: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteDevice relays a device delete to the repository.
+func (s *NetworkService) DeleteDevice(ctx context.Context, id int) error {
+	if err := s.repo.DeleteDevice(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete device: %w", err)
+	}
+	return nil
+}

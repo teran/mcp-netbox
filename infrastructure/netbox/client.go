@@ -449,6 +449,43 @@ func (c *Client) DeleteSite(ctx context.Context, token string, id int) error {
 	return mErr
 }
 
+// CreateDevice creates a new device via POST /api/dcim/devices/.
+func (c *Client) CreateDevice(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error) {
+	payload, err := json.Marshal(deviceWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal device create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/devices/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalDevice(raw)
+}
+
+// UpdateDevice partially updates a device via PATCH /api/dcim/devices/<id>/.
+func (c *Client) UpdateDevice(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error) {
+	payload, err := json.Marshal(deviceWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal device update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/devices/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalDevice(raw)
+}
+
+// DeleteDevice deletes a device via DELETE /api/dcim/devices/<id>/.
+func (c *Client) DeleteDevice(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/dcim/devices/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -499,6 +536,41 @@ func unmarshalSite(raw domain.RawObject) (*domain.Site, error) {
 		return nil, fmt.Errorf("failed to unmarshal site: %w", err)
 	}
 	d := wireSiteToDomain(w)
+	return &d, nil
+}
+
+// deviceWriteToWire converts a domain device write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func deviceWriteToWire(in domain.DeviceWrite) WireDeviceWrite {
+	return WireDeviceWrite{
+		Name:         in.Name,
+		DeviceType:   in.DeviceType,
+		Role:         in.Role,
+		Tenant:       in.Tenant,
+		Platform:     in.Platform,
+		Serial:       in.Serial,
+		AssetTag:     in.AssetTag,
+		Site:         in.Site,
+		Rack:         in.Rack,
+		Position:     in.Position,
+		Face:         in.Face,
+		Status:       in.Status,
+		Cluster:      in.Cluster,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalDevice decodes a device response body into a domain.Device.
+func unmarshalDevice(raw domain.RawObject) (*domain.Device, error) {
+	var w WireDevice
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal device: %w", err)
+	}
+	d := wireDeviceToDomain(w)
 	return &d, nil
 }
 

@@ -22,6 +22,28 @@ type WireSiteWrite struct {
 	CustomFields    map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireDeviceWrite is the wire request model for device create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields. Related
+// objects are expressed as numeric IDs.
+type WireDeviceWrite struct {
+	Name         string         `json:"name,omitempty"`
+	DeviceType   *int           `json:"device_type,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Platform     *int           `json:"platform,omitempty"`
+	Serial       *string        `json:"serial,omitempty"`
+	AssetTag     *string        `json:"asset_tag,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Rack         *int           `json:"rack,omitempty"`
+	Position     *float64       `json:"position,omitempty"`
+	Face         *string        `json:"face,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Cluster      *int           `json:"cluster,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`

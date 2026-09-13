@@ -14,7 +14,7 @@ var (
 	_ domain.NetworkRepository = (*NilRepo)(nil)
 )
 
-//nolint:gocognit,gocyclo // exhaustive per-method table test over every repository method
+//nolint:gocognit,gocyclo,maintidx // exhaustive per-method table test over every repository method
 func TestMockRepo_AllMethods(t *testing.T) {
 	t.Parallel()
 
@@ -157,6 +157,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteSite = %v", err)
 		}
 	})
+	t.Run("CreateDevice", func(t *testing.T) {
+		got, err := (&MockRepo{CreateDeviceFunc: func(_ context.Context, _ string, in domain.DeviceWrite) (*domain.Device, error) {
+			return &domain.Device{ID: 1, Name: in.Name}, nil
+		}}).CreateDevice(context.Background(), "t", domain.DeviceWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateDevice = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateDevice", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateDeviceFunc: func(_ context.Context, _ string, id int, in domain.DeviceWrite) (*domain.Device, error) {
+			return &domain.Device{ID: id, Name: in.Name}, nil
+		}}).UpdateDevice(context.Background(), "t", 7, domain.DeviceWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateDevice = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteDevice", func(t *testing.T) {
+		err := (&MockRepo{DeleteDeviceFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteDevice(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteDevice = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -242,5 +269,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteSite(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteSite = %v", err)
+	}
+	if d, err := repo.CreateDevice(ctx, "t", domain.DeviceWrite{Name: "A"}); err != nil || d.Name != "A" {
+		t.Errorf("CreateDevice = (%v, %v)", d, err)
+	}
+	if d, err := repo.UpdateDevice(ctx, "t", 7, domain.DeviceWrite{Name: "A"}); err != nil || d.ID != 7 {
+		t.Errorf("UpdateDevice = (%v, %v)", d, err)
+	}
+	if err := repo.DeleteDevice(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteDevice = %v", err)
 	}
 }

@@ -28,6 +28,9 @@ type MockRepo struct {
 	CreateSiteFunc              func(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error)
 	UpdateSiteFunc              func(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error)
 	DeleteSiteFunc              func(ctx context.Context, token string, id int) error
+	CreateDeviceFunc            func(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error)
+	UpdateDeviceFunc            func(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error)
+	DeleteDeviceFunc            func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -96,6 +99,18 @@ func (m *MockRepo) UpdateSite(ctx context.Context, token string, id int, in doma
 
 func (m *MockRepo) DeleteSite(ctx context.Context, token string, id int) error {
 	return m.DeleteSiteFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateDevice(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error) {
+	return m.CreateDeviceFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateDevice(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error) {
+	return m.UpdateDeviceFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteDevice(ctx context.Context, token string, id int) error {
+	return m.DeleteDeviceFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -167,5 +182,17 @@ func (r *NilRepo) UpdateSite(ctx context.Context, token string, id int, in domai
 }
 
 func (r *NilRepo) DeleteSite(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateDevice(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error) {
+	return &domain.Device{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateDevice(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error) {
+	return &domain.Device{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteDevice(ctx context.Context, token string, id int) error {
 	return nil
 }

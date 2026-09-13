@@ -86,4 +86,64 @@ func TestSiteWrite_ExplicitEmptyString(t *testing.T) {
 	}
 }
 
+func TestDeviceWrite_PartialUpdateOmitsUnsetFields(t *testing.T) {
+	t.Parallel()
+
+	// A partially-populated write (e.g. update of serial only) must marshal to
+	// JSON containing only the set fields — nil pointers must be omitted so the
+	// PATCH body is minimal and does not clear unrelated fields.
+	w := DeviceWrite{Serial: ptr("SN-123")}
+
+	b, err := json.Marshal(w)
+	if err != nil {
+		t.Fatalf("Marshal() error: %v", err)
+	}
+	s := string(b)
+	if !strings.Contains(s, `"serial":"SN-123"`) {
+		t.Errorf("marshal = %s, want serial present", s)
+	}
+	for _, forbidden := range []string{"name", "device_type", "role", "tenant", "platform", "asset_tag", "site", "rack", "position", "face", "status", "cluster", "comments"} {
+		if strings.Contains(s, `"`+forbidden+`"`) {
+			t.Errorf("marshal = %s, field %q should be omitted when unset", s, forbidden)
+		}
+	}
+}
+
+func TestDeviceWrite_CreateIncludesName(t *testing.T) {
+	t.Parallel()
+
+	w := DeviceWrite{Name: "router1", DeviceType: ptrInt(2), Site: ptrInt(3)}
+	b, err := json.Marshal(w)
+	if err != nil {
+		t.Fatalf("Marshal() error: %v", err)
+	}
+	s := string(b)
+	if !strings.Contains(s, `"name":"router1"`) {
+		t.Errorf("marshal = %s, want name present", s)
+	}
+	if !strings.Contains(s, `"device_type":2`) {
+		t.Errorf("marshal = %s, want device_type present", s)
+	}
+	if !strings.Contains(s, `"site":3`) {
+		t.Errorf("marshal = %s, want site present", s)
+	}
+}
+
+func TestDeviceWrite_ExplicitEmptyString(t *testing.T) {
+	t.Parallel()
+
+	// A pointer to an empty string must marshal as an explicit empty value so a
+	// PATCH can clear a field (distinct from "not provided").
+	w := DeviceWrite{Serial: ptr("")}
+	b, err := json.Marshal(w)
+	if err != nil {
+		t.Fatalf("Marshal() error: %v", err)
+	}
+	if !strings.Contains(string(b), `"serial":""`) {
+		t.Errorf("marshal = %s, want explicit empty serial", string(b))
+	}
+}
+
 func ptr(s string) *string { return &s }
+
+func ptrInt(i int) *int { return &i }

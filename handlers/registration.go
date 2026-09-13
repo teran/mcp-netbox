@@ -187,4 +187,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_site"], metrics, "delete_site", WrapToolHandler[SiteDeleteInput, struct{}](metrics, "delete_site", func(ctx context.Context, req *mcp.CallToolRequest, in SiteDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteSiteHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_device"], metrics, "create_device", WrapToolHandler[DeviceCreateInput, DeviceOutput](metrics, "create_device", func(ctx context.Context, req *mcp.CallToolRequest, in DeviceCreateInput) (*mcp.CallToolResult, DeviceOutput, error) {
+		return NewCreateDeviceHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_device"], metrics, "update_device", WrapToolHandler[DeviceUpdateInput, DeviceOutput](metrics, "update_device", func(ctx context.Context, req *mcp.CallToolRequest, in DeviceUpdateInput) (*mcp.CallToolResult, DeviceOutput, error) {
+		return NewUpdateDeviceHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_device"], metrics, "delete_device", WrapToolHandler[DeviceDeleteInput, struct{}](metrics, "delete_device", func(ctx context.Context, req *mcp.CallToolRequest, in DeviceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteDeviceHandler(svc)(ctx, req, in)
+	}))
 }

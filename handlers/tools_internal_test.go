@@ -79,6 +79,18 @@ func (s *stubRepo) DeleteSite(ctx context.Context, token string, id int) error {
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateDevice(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateDevice(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteDevice(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

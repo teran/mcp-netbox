@@ -54,4 +54,8 @@ type NetworkRepository interface {
 	CreateSite(ctx context.Context, token string, in SiteWrite) (*Site, error)
 	UpdateSite(ctx context.Context, token string, id int, in SiteWrite) (*Site, error)
 	DeleteSite(ctx context.Context, token string, id int) error
+
+	CreateDevice(ctx context.Context, token string, in DeviceWrite) (*Device, error)
+	UpdateDevice(ctx context.Context, token string, id int, in DeviceWrite) (*Device, error)
+	DeleteDevice(ctx context.Context, token string, id int) error
 }

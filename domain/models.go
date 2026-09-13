@@ -333,6 +333,33 @@ type SiteWrite struct {
 	CustomFields    map[string]any `json:"custom_fields,omitempty"`
 }
 
+// DeviceWrite is the domain DTO for creating or updating a NetBox device. It
+// carries only the writable fields.
+//
+// Optional scalar fields are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty" (pointer to
+// ""). Name is a plain string because it is required on create; the omitempty
+// tag drops it from a PATCH body when not provided. References to related
+// objects (device type, role, tenant, etc.) are their numeric NetBox IDs.
+type DeviceWrite struct {
+	Name         string         `json:"name,omitempty"`
+	DeviceType   *int           `json:"device_type,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Platform     *int           `json:"platform,omitempty"`
+	Serial       *string        `json:"serial,omitempty"`
+	AssetTag     *string        `json:"asset_tag,omitempty"`
+	Site         *int           `json:"site,omitempty"`
+	Rack         *int           `json:"rack,omitempty"`
+	Position     *float64       `json:"position,omitempty"`
+	Face         *string        `json:"face,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Cluster      *int           `json:"cluster,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // PaginatedResponse wraps a paginated API response with the total count,
 // navigation URLs and the current page's typed results.
 type PaginatedResponse[T any] struct {

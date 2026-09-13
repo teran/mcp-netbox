@@ -235,6 +235,54 @@ type SiteDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the site to delete,required"`
 }
 
+// DeviceCreateInput represents the writable fields for creating a device.
+type DeviceCreateInput struct {
+	Name         string         `json:"name" jsonschema:"device name (required)"`
+	DeviceType   *int           `json:"device_type,omitempty" jsonschema:"device type ID (look up first)"`
+	Role         *int           `json:"role,omitempty" jsonschema:"device role ID (look up first)"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Platform     *int           `json:"platform,omitempty" jsonschema:"platform ID"`
+	Serial       *string        `json:"serial,omitempty" jsonschema:"serial number"`
+	AssetTag     *string        `json:"asset_tag,omitempty" jsonschema:"asset tag"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Rack         *int           `json:"rack,omitempty" jsonschema:"rack ID"`
+	Position     *float64       `json:"position,omitempty" jsonschema:"position within the rack (U height)"`
+	Face         *string        `json:"face,omitempty" jsonschema:"rack face: front or rear"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: offline, active, planned, staged, failed, inventory, decommissioning"`
+	Cluster      *int           `json:"cluster,omitempty" jsonschema:"cluster ID"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// DeviceUpdateInput represents the writable fields for updating a device. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type DeviceUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the device to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"device name"`
+	DeviceType   *int           `json:"device_type,omitempty" jsonschema:"device type ID"`
+	Role         *int           `json:"role,omitempty" jsonschema:"device role ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Platform     *int           `json:"platform,omitempty" jsonschema:"platform ID"`
+	Serial       *string        `json:"serial,omitempty" jsonschema:"serial number"`
+	AssetTag     *string        `json:"asset_tag,omitempty" jsonschema:"asset tag"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Rack         *int           `json:"rack,omitempty" jsonschema:"rack ID"`
+	Position     *float64       `json:"position,omitempty" jsonschema:"position within the rack (U height)"`
+	Face         *string        `json:"face,omitempty" jsonschema:"rack face: front or rear"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status: offline, active, planned, staged, failed, inventory, decommissioning"`
+	Cluster      *int           `json:"cluster,omitempty" jsonschema:"cluster ID"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// DeviceDeleteInput represents the input fields for deleting a device.
+type DeviceDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the device to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -253,6 +301,11 @@ type GetObjectOutput struct {
 // SiteOutput represents the output for the create/update site tools.
 type SiteOutput struct {
 	Data domain.Site `json:"data"`
+}
+
+// DeviceOutput represents the output for the create/update device tools.
+type DeviceOutput struct {
+	Data domain.Device `json:"data"`
 }
 
 // — write helpers —
@@ -320,6 +373,54 @@ func strPtr(s string) *string {
 		return nil
 	}
 	return &s
+}
+
+// deviceWriteFromCreate builds a domain.DeviceWrite from a create input.
+func deviceWriteFromCreate(in DeviceCreateInput) domain.DeviceWrite {
+	return domain.DeviceWrite{
+		Name:         in.Name,
+		DeviceType:   in.DeviceType,
+		Role:         in.Role,
+		Tenant:       in.Tenant,
+		Platform:     in.Platform,
+		Serial:       in.Serial,
+		AssetTag:     in.AssetTag,
+		Site:         in.Site,
+		Rack:         in.Rack,
+		Position:     in.Position,
+		Face:         in.Face,
+		Status:       in.Status,
+		Cluster:      in.Cluster,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// deviceWriteFromUpdate builds a domain.DeviceWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func deviceWriteFromUpdate(in DeviceUpdateInput) domain.DeviceWrite {
+	write := domain.DeviceWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.DeviceType = in.DeviceType
+	write.Role = in.Role
+	write.Tenant = in.Tenant
+	write.Platform = in.Platform
+	write.Serial = in.Serial
+	write.AssetTag = in.AssetTag
+	write.Site = in.Site
+	write.Rack = in.Rack
+	write.Position = in.Position
+	write.Face = in.Face
+	write.Status = in.Status
+	write.Cluster = in.Cluster
+	write.Comments = in.Comments
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
 }
 
 // — handler factories —
@@ -790,6 +891,71 @@ func NewDeleteSiteHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Si
 		}
 
 		if err := s.DeleteSite(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateDeviceHandler creates a handler for the create_device tool.
+func NewCreateDeviceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceCreateInput, DeviceOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in DeviceCreateInput) (*mcp.CallToolResult, DeviceOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, DeviceOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		device, err := s.CreateDevice(ctx, deviceWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, DeviceOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceOutput{Data: *device}, nil
+	}
+}
+
+// NewUpdateDeviceHandler creates a handler for the update_device tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateDeviceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceUpdateInput, DeviceOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in DeviceUpdateInput) (*mcp.CallToolResult, DeviceOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		device, err := s.UpdateDevice(ctx, in.ID, deviceWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, DeviceOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceOutput{Data: *device}, nil
+	}
+}
+
+// NewDeleteDeviceHandler creates a handler for the delete_device tool.
+func NewDeleteDeviceHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in DeviceDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteDevice(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}
