@@ -537,5 +537,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes an IPAM role from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the role, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_contact",
+			Title:        "Create Contact",
+			Description:  "Create a new tenancy contact in NetBox. name is required; all other fields are optional. Provide group as a numeric contact group ID, and title/phone/email/address/link/description/comments as strings. Returns the created contact.",
+			Instructions: "Use only when the caller explicitly wants to create a contact and provides a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_contact",
+			Title:        "Update Contact",
+			Description:  "Partially update a tenancy contact in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated) are ignored. Returns the updated contact.",
+			Instructions: "Use to modify one or more fields of an existing contact. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_contact",
+			Title:        "Delete Contact",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a tenancy contact from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the contact, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

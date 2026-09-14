@@ -1325,6 +1325,44 @@ func (c *Client) DeleteRole(ctx context.Context, token string, id int) error {
 	return mErr
 }
 
+// CreateContact creates a new tenancy contact via POST /api/tenancy/contacts/.
+func (c *Client) CreateContact(ctx context.Context, token string, in domain.ContactWrite) (*domain.Contact, error) {
+	payload, err := json.Marshal(contactWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal contact create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/tenancy/contacts/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalContact(raw)
+}
+
+// UpdateContact partially updates a tenancy contact via
+// PATCH /api/tenancy/contacts/<id>/.
+func (c *Client) UpdateContact(ctx context.Context, token string, id int, in domain.ContactWrite) (*domain.Contact, error) {
+	payload, err := json.Marshal(contactWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal contact update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/tenancy/contacts/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalContact(raw)
+}
+
+// DeleteContact deletes a tenancy contact via DELETE /api/tenancy/contacts/<id>/.
+func (c *Client) DeleteContact(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/tenancy/contacts/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -2566,6 +2604,53 @@ func wireRoleToDomain(w WireRole) domain.Role {
 		Slug:         w.Slug,
 		Weight:       w.Weight,
 		Description:  w.Description,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func contactWriteToWire(in domain.ContactWrite) WireContactWrite {
+	return WireContactWrite{
+		Name:         in.Name,
+		Group:        in.Group,
+		Title:        in.Title,
+		Phone:        in.Phone,
+		Email:        in.Email,
+		Address:      in.Address,
+		Link:         in.Link,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalContact decodes a tenancy contact response body into a domain.Contact.
+func unmarshalContact(raw domain.RawObject) (*domain.Contact, error) {
+	var w WireContact
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal contact: %w", err)
+	}
+	d := wireContactToDomain(w)
+	return &d, nil
+}
+
+// wireContactToDomain converts a wire tenancy contact to the domain model.
+func wireContactToDomain(w WireContact) domain.Contact {
+	return domain.Contact{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Group:        wireNestedToDomain(w.Group),
+		Title:        w.Title,
+		Phone:        w.Phone,
+		Email:        w.Email,
+		Address:      w.Address,
+		Link:         w.Link,
+		Description:  w.Description,
+		Comments:     w.Comments,
 		Tags:         wireTagsToDomain(w.Tags),
 		CustomFields: w.CustomFields,
 		Created:      w.Created,

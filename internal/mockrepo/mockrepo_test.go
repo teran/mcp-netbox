@@ -753,6 +753,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteRole = %v", err)
 		}
 	})
+	t.Run("CreateContact", func(t *testing.T) {
+		got, err := (&MockRepo{CreateContactFunc: func(_ context.Context, _ string, in domain.ContactWrite) (*domain.Contact, error) {
+			return &domain.Contact{ID: 1, Name: in.Name}, nil
+		}}).CreateContact(context.Background(), "t", domain.ContactWrite{Name: "ops"})
+		if err != nil || got == nil || got.Name != "ops" {
+			t.Errorf("CreateContact = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateContact", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateContactFunc: func(_ context.Context, _ string, id int, _ domain.ContactWrite) (*domain.Contact, error) {
+			return &domain.Contact{ID: id}, nil
+		}}).UpdateContact(context.Background(), "t", 7, domain.ContactWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateContact = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteContact", func(t *testing.T) {
+		err := (&MockRepo{DeleteContactFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteContact(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteContact = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -1073,5 +1100,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteRole(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteRole = %v", err)
+	}
+	if v, err := repo.CreateContact(ctx, "t", domain.ContactWrite{Name: "ops"}); err != nil || v.Name != "ops" {
+		t.Errorf("CreateContact = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateContact(ctx, "t", 7, domain.ContactWrite{Name: "ops"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateContact = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteContact(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteContact = %v", err)
 	}
 }

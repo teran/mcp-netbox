@@ -795,3 +795,31 @@ func (s *NetworkService) DeleteRole(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateContact relays a tenancy contact create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateContact(ctx context.Context, in domain.ContactWrite) (*domain.Contact, error) {
+	resp, err := s.repo.CreateContact(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create contact: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateContact relays a tenancy contact update to the repository.
+func (s *NetworkService) UpdateContact(ctx context.Context, id int, in domain.ContactWrite) (*domain.Contact, error) {
+	resp, err := s.repo.UpdateContact(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update contact: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteContact relays a tenancy contact delete to the repository.
+func (s *NetworkService) DeleteContact(ctx context.Context, id int) error {
+	if err := s.repo.DeleteContact(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete contact: %w", err)
+	}
+	return nil
+}

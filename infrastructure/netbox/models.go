@@ -379,6 +379,23 @@ type WireRoleWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireContactWrite is the wire request model for tenancy contact create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields.
+type WireContactWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Group        *int           `json:"group,omitempty"`
+	Title        *string        `json:"title,omitempty"`
+	Phone        *string        `json:"phone,omitempty"`
+	Email        *string        `json:"email,omitempty"`
+	Address      *string        `json:"address,omitempty"`
+	Link         *string        `json:"link,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`
@@ -805,6 +822,24 @@ type (
 		Slug         string         `json:"slug,omitempty"`
 		Weight       int            `json:"weight"`
 		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	WireContact struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Group        *WireNested    `json:"group"`
+		Title        string         `json:"title,omitempty"`
+		Phone        string         `json:"phone,omitempty"`
+		Email        string         `json:"email,omitempty"`
+		Address      string         `json:"address,omitempty"`
+		Link         string         `json:"link,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
 		Tags         []WireTag      `json:"tags,omitempty"`
 		CustomFields map[string]any `json:"custom_fields,omitempty"`
 		Created      string         `json:"created"`

@@ -97,6 +97,9 @@ type MockRepo struct {
 	CreateRoleFunc               func(ctx context.Context, token string, in domain.RoleWrite) (*domain.Role, error)
 	UpdateRoleFunc               func(ctx context.Context, token string, id int, in domain.RoleWrite) (*domain.Role, error)
 	DeleteRoleFunc               func(ctx context.Context, token string, id int) error
+	CreateContactFunc            func(ctx context.Context, token string, in domain.ContactWrite) (*domain.Contact, error)
+	UpdateContactFunc            func(ctx context.Context, token string, id int, in domain.ContactWrite) (*domain.Contact, error)
+	DeleteContactFunc            func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -441,6 +444,18 @@ func (m *MockRepo) UpdateRole(ctx context.Context, token string, id int, in doma
 
 func (m *MockRepo) DeleteRole(ctx context.Context, token string, id int) error {
 	return m.DeleteRoleFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateContact(ctx context.Context, token string, in domain.ContactWrite) (*domain.Contact, error) {
+	return m.CreateContactFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateContact(ctx context.Context, token string, id int, in domain.ContactWrite) (*domain.Contact, error) {
+	return m.UpdateContactFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteContact(ctx context.Context, token string, id int) error {
+	return m.DeleteContactFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -796,5 +811,17 @@ func (r *NilRepo) UpdateRole(ctx context.Context, token string, id int, in domai
 }
 
 func (r *NilRepo) DeleteRole(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateContact(ctx context.Context, token string, in domain.ContactWrite) (*domain.Contact, error) {
+	return &domain.Contact{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateContact(ctx context.Context, token string, id int, in domain.ContactWrite) (*domain.Contact, error) {
+	return &domain.Contact{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteContact(ctx context.Context, token string, id int) error {
 	return nil
 }

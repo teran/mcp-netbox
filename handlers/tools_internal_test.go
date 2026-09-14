@@ -355,6 +355,18 @@ func (s *stubRepo) DeleteRole(ctx context.Context, token string, id int) error {
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateContact(ctx context.Context, token string, in domain.ContactWrite) (*domain.Contact, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateContact(ctx context.Context, token string, id int, in domain.ContactWrite) (*domain.Contact, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteContact(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

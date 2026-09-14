@@ -465,4 +465,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_role"], metrics, "delete_role", WrapToolHandler[RoleDeleteInput, struct{}](metrics, "delete_role", func(ctx context.Context, req *mcp.CallToolRequest, in RoleDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteRoleHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_contact"], metrics, "create_contact", WrapToolHandler[ContactCreateInput, ContactOutput](metrics, "create_contact", func(ctx context.Context, req *mcp.CallToolRequest, in ContactCreateInput) (*mcp.CallToolResult, ContactOutput, error) {
+		return NewCreateContactHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_contact"], metrics, "update_contact", WrapToolHandler[ContactUpdateInput, ContactOutput](metrics, "update_contact", func(ctx context.Context, req *mcp.CallToolRequest, in ContactUpdateInput) (*mcp.CallToolResult, ContactOutput, error) {
+		return NewUpdateContactHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_contact"], metrics, "delete_contact", WrapToolHandler[ContactDeleteInput, struct{}](metrics, "delete_contact", func(ctx context.Context, req *mcp.CallToolRequest, in ContactDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteContactHandler(svc)(ctx, req, in)
+	}))
 }

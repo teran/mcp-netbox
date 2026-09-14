@@ -146,4 +146,8 @@ type NetworkRepository interface {
 	CreateRole(ctx context.Context, token string, in RoleWrite) (*Role, error)
 	UpdateRole(ctx context.Context, token string, id int, in RoleWrite) (*Role, error)
 	DeleteRole(ctx context.Context, token string, id int) error
+
+	CreateContact(ctx context.Context, token string, in ContactWrite) (*Contact, error)
+	UpdateContact(ctx context.Context, token string, id int, in ContactWrite) (*Contact, error)
+	DeleteContact(ctx context.Context, token string, id int) error
 }

@@ -367,6 +367,26 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// Contact is a NetBox tenancy contact (a secondary entity: it has write
+	// tools but no read tool).
+	Contact struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Group        *Nested        `json:"group"`
+		Title        string         `json:"title,omitempty"`
+		Phone        string         `json:"phone,omitempty"`
+		Email        string         `json:"email,omitempty"`
+		Address      string         `json:"address,omitempty"`
+		Link         string         `json:"link,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
 	// Manufacturer is a device manufacturer (a secondary entity: it has write
 	// tools but no read tool).
 	Manufacturer struct {
@@ -990,6 +1010,28 @@ type RoleWrite struct {
 	Slug         *string        `json:"slug,omitempty"`
 	Weight       *int           `json:"weight,omitempty"`
 	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ContactWrite is the domain DTO for creating or updating a NetBox tenancy
+// contact. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Group is a pointer to the
+// numeric contact-group ID and is optional (a contact may exist without a
+// group). Other optional scalar fields are pointers so that a partial-update
+// (PATCH) can distinguish "not provided" (nil) from "explicitly set to empty".
+type ContactWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Group        *int           `json:"group,omitempty"`
+	Title        *string        `json:"title,omitempty"`
+	Phone        *string        `json:"phone,omitempty"`
+	Email        *string        `json:"email,omitempty"`
+	Address      *string        `json:"address,omitempty"`
+	Link         *string        `json:"link,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }

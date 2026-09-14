@@ -1049,6 +1049,45 @@ type RoleDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the role to delete,required"`
 }
 
+// ContactCreateInput represents the writable fields for creating a tenancy
+// contact. name is required on create; group is optional.
+type ContactCreateInput struct {
+	Name         string         `json:"name" jsonschema:"contact name (required)"`
+	Group        *int           `json:"group,omitempty" jsonschema:"numeric contact group ID"`
+	Title        *string        `json:"title,omitempty" jsonschema:"job title or role"`
+	Phone        *string        `json:"phone,omitempty" jsonschema:"phone number"`
+	Email        *string        `json:"email,omitempty" jsonschema:"email address"`
+	Address      *string        `json:"address,omitempty" jsonschema:"physical address"`
+	Link         *string        `json:"link,omitempty" jsonschema:"link/URL"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactUpdateInput represents the writable fields for updating a tenancy
+// contact. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type ContactUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the contact to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"contact name"`
+	Group        *int           `json:"group,omitempty" jsonschema:"numeric contact group ID"`
+	Title        *string        `json:"title,omitempty" jsonschema:"job title or role"`
+	Phone        *string        `json:"phone,omitempty" jsonschema:"phone number"`
+	Email        *string        `json:"email,omitempty" jsonschema:"email address"`
+	Address      *string        `json:"address,omitempty" jsonschema:"physical address"`
+	Link         *string        `json:"link,omitempty" jsonschema:"link/URL"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactDeleteInput represents the input fields for deleting a tenancy contact.
+type ContactDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the contact to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -1190,6 +1229,11 @@ type VlanGroupOutput struct {
 // RoleOutput represents the output for the create/update role tools.
 type RoleOutput struct {
 	Data domain.Role `json:"data"`
+}
+
+// ContactOutput represents the output for the create/update contact tools.
+type ContactOutput struct {
+	Data domain.Contact `json:"data"`
 }
 
 // — write helpers —
@@ -2024,6 +2068,44 @@ func roleWriteFromUpdate(in RoleUpdateInput) domain.RoleWrite {
 	write.Slug = in.Slug
 	write.Weight = in.Weight
 	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// contactWriteFromCreate builds a domain.ContactWrite from a create input.
+func contactWriteFromCreate(in ContactCreateInput) domain.ContactWrite {
+	return domain.ContactWrite{
+		Name:         in.Name,
+		Group:        in.Group,
+		Title:        in.Title,
+		Phone:        in.Phone,
+		Email:        in.Email,
+		Address:      in.Address,
+		Link:         in.Link,
+		Description:  in.Description,
+		Comments:     in.Comments,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// contactWriteFromUpdate builds a domain.ContactWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func contactWriteFromUpdate(in ContactUpdateInput) domain.ContactWrite {
+	write := domain.ContactWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Group = in.Group
+	write.Title = in.Title
+	write.Phone = in.Phone
+	write.Email = in.Email
+	write.Address = in.Address
+	write.Link = in.Link
+	write.Description = in.Description
+	write.Comments = in.Comments
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
 	return write
@@ -4074,6 +4156,71 @@ func NewDeleteRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Ro
 		}
 
 		if err := s.DeleteRole(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateContactHandler creates a handler for the create_contact tool.
+func NewCreateContactHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ContactCreateInput, ContactOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ContactCreateInput) (*mcp.CallToolResult, ContactOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ContactOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateContact(ctx, contactWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ContactOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateContactHandler creates a handler for the update_contact tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateContactHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ContactUpdateInput, ContactOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ContactUpdateInput) (*mcp.CallToolResult, ContactOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ContactOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateContact(ctx, in.ID, contactWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ContactOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteContactHandler creates a handler for the delete_contact tool.
+func NewDeleteContactHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ContactDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ContactDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteContact(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}
