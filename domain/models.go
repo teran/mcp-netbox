@@ -352,6 +352,21 @@ type (
 		ObjectID   int    `json:"object_id"`
 	}
 
+	// Role is a NetBox IPAM role (a secondary entity: it has write tools but
+	// no read tool).
+	Role struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Weight       int            `json:"weight"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
 	// Manufacturer is a device manufacturer (a secondary entity: it has write
 	// tools but no read tool).
 	Manufacturer struct {
@@ -959,6 +974,22 @@ type VlanGroupWrite struct {
 	ScopeID      *int           `json:"scope_id,omitempty"`
 	MinVID       *int           `json:"min_vid,omitempty"`
 	MaxVID       *int           `json:"max_vid,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// RoleWrite is the domain DTO for creating or updating a NetBox IPAM role. It
+// carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields (slug,
+// weight, description) are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty".
+type RoleWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Weight       *int           `json:"weight,omitempty"`
+	Description  *string        `json:"description,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }

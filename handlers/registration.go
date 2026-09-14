@@ -453,4 +453,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_vlan_group"], metrics, "delete_vlan_group", WrapToolHandler[VlanGroupDeleteInput, struct{}](metrics, "delete_vlan_group", func(ctx context.Context, req *mcp.CallToolRequest, in VlanGroupDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteVlanGroupHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_role"], metrics, "create_role", WrapToolHandler[RoleCreateInput, RoleOutput](metrics, "create_role", func(ctx context.Context, req *mcp.CallToolRequest, in RoleCreateInput) (*mcp.CallToolResult, RoleOutput, error) {
+		return NewCreateRoleHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_role"], metrics, "update_role", WrapToolHandler[RoleUpdateInput, RoleOutput](metrics, "update_role", func(ctx context.Context, req *mcp.CallToolRequest, in RoleUpdateInput) (*mcp.CallToolResult, RoleOutput, error) {
+		return NewUpdateRoleHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_role"], metrics, "delete_role", WrapToolHandler[RoleDeleteInput, struct{}](metrics, "delete_role", func(ctx context.Context, req *mcp.CallToolRequest, in RoleDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteRoleHandler(svc)(ctx, req, in)
+	}))
 }

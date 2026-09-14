@@ -519,5 +519,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a VLAN group from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the VLAN group, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_role",
+			Title:        "Create Role",
+			Description:  "Create a new IPAM role in NetBox. name is required; all other fields are optional. Provide slug and description as strings, weight as an integer, and tags as a list of tag names. Returns the created role.",
+			Instructions: "Use only when the caller explicitly wants to create an IPAM role and provides a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_role",
+			Title:        "Update Role",
+			Description:  "Partially update an IPAM role in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated) are ignored. Returns the updated role.",
+			Instructions: "Use to modify one or more fields of an existing IPAM role. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_role",
+			Title:        "Delete Role",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes an IPAM role from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the role, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

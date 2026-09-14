@@ -94,6 +94,9 @@ type MockRepo struct {
 	CreateVlanGroupFunc          func(ctx context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error)
 	UpdateVlanGroupFunc          func(ctx context.Context, token string, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error)
 	DeleteVlanGroupFunc          func(ctx context.Context, token string, id int) error
+	CreateRoleFunc               func(ctx context.Context, token string, in domain.RoleWrite) (*domain.Role, error)
+	UpdateRoleFunc               func(ctx context.Context, token string, id int, in domain.RoleWrite) (*domain.Role, error)
+	DeleteRoleFunc               func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -426,6 +429,18 @@ func (m *MockRepo) UpdateVlanGroup(ctx context.Context, token string, id int, in
 
 func (m *MockRepo) DeleteVlanGroup(ctx context.Context, token string, id int) error {
 	return m.DeleteVlanGroupFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateRole(ctx context.Context, token string, in domain.RoleWrite) (*domain.Role, error) {
+	return m.CreateRoleFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateRole(ctx context.Context, token string, id int, in domain.RoleWrite) (*domain.Role, error) {
+	return m.UpdateRoleFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteRole(ctx context.Context, token string, id int) error {
+	return m.DeleteRoleFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -769,5 +784,17 @@ func (r *NilRepo) UpdateVlanGroup(ctx context.Context, token string, id int, in 
 }
 
 func (r *NilRepo) DeleteVlanGroup(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateRole(ctx context.Context, token string, in domain.RoleWrite) (*domain.Role, error) {
+	return &domain.Role{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateRole(ctx context.Context, token string, id int, in domain.RoleWrite) (*domain.Role, error) {
+	return &domain.Role{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteRole(ctx context.Context, token string, id int) error {
 	return nil
 }

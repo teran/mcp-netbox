@@ -726,6 +726,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteVlanGroup = %v", err)
 		}
 	})
+	t.Run("CreateRole", func(t *testing.T) {
+		got, err := (&MockRepo{CreateRoleFunc: func(_ context.Context, _ string, in domain.RoleWrite) (*domain.Role, error) {
+			return &domain.Role{ID: 1, Name: in.Name}, nil
+		}}).CreateRole(context.Background(), "t", domain.RoleWrite{Name: "prod"})
+		if err != nil || got == nil || got.Name != "prod" {
+			t.Errorf("CreateRole = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRole", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateRoleFunc: func(_ context.Context, _ string, id int, _ domain.RoleWrite) (*domain.Role, error) {
+			return &domain.Role{ID: id}, nil
+		}}).UpdateRole(context.Background(), "t", 7, domain.RoleWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRole = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRole", func(t *testing.T) {
+		err := (&MockRepo{DeleteRoleFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteRole(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRole = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -1037,5 +1064,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteVlanGroup(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVlanGroup = %v", err)
+	}
+	if v, err := repo.CreateRole(ctx, "t", domain.RoleWrite{Name: "prod"}); err != nil || v.Name != "prod" {
+		t.Errorf("CreateRole = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateRole(ctx, "t", 7, domain.RoleWrite{Name: "prod"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateRole = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteRole(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRole = %v", err)
 	}
 }

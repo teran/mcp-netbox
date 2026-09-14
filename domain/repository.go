@@ -142,4 +142,8 @@ type NetworkRepository interface {
 	CreateVlanGroup(ctx context.Context, token string, in VlanGroupWrite) (*VlanGroup, error)
 	UpdateVlanGroup(ctx context.Context, token string, id int, in VlanGroupWrite) (*VlanGroup, error)
 	DeleteVlanGroup(ctx context.Context, token string, id int) error
+
+	CreateRole(ctx context.Context, token string, in RoleWrite) (*Role, error)
+	UpdateRole(ctx context.Context, token string, id int, in RoleWrite) (*Role, error)
+	DeleteRole(ctx context.Context, token string, id int) error
 }

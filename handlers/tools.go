@@ -1020,6 +1020,35 @@ type VlanGroupDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the VLAN group to delete,required"`
 }
 
+// RoleCreateInput represents the writable fields for creating an IPAM role.
+// name is required on create.
+type RoleCreateInput struct {
+	Name         string         `json:"name" jsonschema:"role name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Weight       *int           `json:"weight,omitempty" jsonschema:"sorting weight"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RoleUpdateInput represents the writable fields for updating an IPAM role.
+// All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type RoleUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the role to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"role name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Weight       *int           `json:"weight,omitempty" jsonschema:"sorting weight"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RoleDeleteInput represents the input fields for deleting an IPAM role.
+type RoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the role to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -1156,6 +1185,11 @@ type VrfOutput struct {
 // VlanGroupOutput represents the output for the create/update VLAN group tools.
 type VlanGroupOutput struct {
 	Data domain.VlanGroup `json:"data"`
+}
+
+// RoleOutput represents the output for the create/update role tools.
+type RoleOutput struct {
+	Data domain.Role `json:"data"`
 }
 
 // — write helpers —
@@ -1965,6 +1999,34 @@ func vlanGroupWriteFromCreate(in VlanGroupCreateInput) domain.VlanGroupWrite {
 		Tags:         in.Tags,
 		CustomFields: in.CustomFields,
 	}
+}
+
+// vlanGroupWriteFromUpdate builds a domain.VlanGroupWrite from an update input,
+// roleWriteFromCreate builds a domain.RoleWrite from a create input.
+func roleWriteFromCreate(in RoleCreateInput) domain.RoleWrite {
+	return domain.RoleWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Weight:       in.Weight,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// roleWriteFromUpdate builds a domain.RoleWrite from an update input, mapping
+// only the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func roleWriteFromUpdate(in RoleUpdateInput) domain.RoleWrite {
+	write := domain.RoleWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Slug = in.Slug
+	write.Weight = in.Weight
+	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
 }
 
 // vlanGroupWriteFromUpdate builds a domain.VlanGroupWrite from an update input,
@@ -3947,6 +4009,71 @@ func NewDeleteVlanGroupHandler(svc *application.NetworkService) mcp.ToolHandlerF
 		}
 
 		if err := s.DeleteVlanGroup(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateRoleHandler creates a handler for the create_role tool.
+func NewCreateRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RoleCreateInput, RoleOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in RoleCreateInput) (*mcp.CallToolResult, RoleOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, RoleOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateRole(ctx, roleWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, RoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RoleOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateRoleHandler creates a handler for the update_role tool. It performs
+// a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RoleUpdateInput, RoleOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in RoleUpdateInput) (*mcp.CallToolResult, RoleOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, RoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateRole(ctx, in.ID, roleWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, RoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RoleOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteRoleHandler creates a handler for the delete_role tool.
+func NewDeleteRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RoleDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in RoleDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteRole(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

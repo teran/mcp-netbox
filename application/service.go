@@ -767,3 +767,31 @@ func (s *NetworkService) DeleteVlanGroup(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateRole relays an IPAM role create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateRole(ctx context.Context, in domain.RoleWrite) (*domain.Role, error) {
+	resp, err := s.repo.CreateRole(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create role: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateRole relays an IPAM role update to the repository.
+func (s *NetworkService) UpdateRole(ctx context.Context, id int, in domain.RoleWrite) (*domain.Role, error) {
+	resp, err := s.repo.UpdateRole(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update role: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteRole relays an IPAM role delete to the repository.
+func (s *NetworkService) DeleteRole(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRole(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete role: %w", err)
+	}
+	return nil
+}

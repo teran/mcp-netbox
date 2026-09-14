@@ -1288,6 +1288,43 @@ func (c *Client) DeleteVlanGroup(ctx context.Context, token string, id int) erro
 	return mErr
 }
 
+// CreateRole creates a new IPAM role via POST /api/ipam/roles/.
+func (c *Client) CreateRole(ctx context.Context, token string, in domain.RoleWrite) (*domain.Role, error) {
+	payload, err := json.Marshal(roleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal role create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/ipam/roles/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalRole(raw)
+}
+
+// UpdateRole partially updates an IPAM role via PATCH /api/ipam/roles/<id>/.
+func (c *Client) UpdateRole(ctx context.Context, token string, id int, in domain.RoleWrite) (*domain.Role, error) {
+	payload, err := json.Marshal(roleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal role update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/ipam/roles/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalRole(raw)
+}
+
+// DeleteRole deletes an IPAM role via DELETE /api/ipam/roles/<id>/.
+func (c *Client) DeleteRole(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/ipam/roles/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -2496,5 +2533,42 @@ func wireVlanGroupScopeToDomain(s *WireVlanGroupScope) *domain.VlanGroupScope {
 	return &domain.VlanGroupScope{
 		ObjectType: s.ObjectType,
 		ObjectID:   s.ObjectID,
+	}
+}
+
+func roleWriteToWire(in domain.RoleWrite) WireRoleWrite {
+	return WireRoleWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Weight:       in.Weight,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalRole decodes an IPAM role response body into a domain.Role.
+func unmarshalRole(raw domain.RawObject) (*domain.Role, error) {
+	var w WireRole
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal role: %w", err)
+	}
+	d := wireRoleToDomain(w)
+	return &d, nil
+}
+
+// wireRoleToDomain converts a wire IPAM role to the domain model.
+func wireRoleToDomain(w WireRole) domain.Role {
+	return domain.Role{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Slug:         w.Slug,
+		Weight:       w.Weight,
+		Description:  w.Description,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
 	}
 }

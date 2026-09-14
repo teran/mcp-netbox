@@ -368,6 +368,17 @@ type WireVlanGroupWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireRoleWrite is the wire request model for IPAM role create/update (POST/
+// PATCH body). Its json tags intentionally mirror NetBox's writable fields.
+type WireRoleWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Weight       *int           `json:"weight,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`
@@ -785,6 +796,19 @@ type (
 	WireVlanGroupScope struct {
 		ObjectType string `json:"object_type"`
 		ObjectID   int    `json:"object_id"`
+	}
+
+	WireRole struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Weight       int            `json:"weight"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 )
 
