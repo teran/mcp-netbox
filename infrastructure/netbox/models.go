@@ -342,6 +342,17 @@ type WireCircuitTypeWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireVrfWrite is the wire request model for VRF create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields.
+type WireVrfWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Rd           string         `json:"rd,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 type (
 	WireSite struct {
 		ID              int            `json:"id"`
@@ -720,6 +731,20 @@ type (
 		Display      string         `json:"display,omitempty"`
 		Description  string         `json:"description,omitempty"`
 		CircuitCount int            `json:"circuit_count"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	WireVrf struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Rd           string         `json:"rd,omitempty"`
+		Tenant       *WireNested    `json:"tenant"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
 		Tags         []WireTag      `json:"tags,omitempty"`
 		CustomFields map[string]any `json:"custom_fields,omitempty"`
 		Created      string         `json:"created"`

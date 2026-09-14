@@ -319,6 +319,18 @@ func (s *stubRepo) DeleteCircuitType(ctx context.Context, token string, id int) 
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateVrf(ctx context.Context, token string, in domain.VrfWrite) (*domain.Vrf, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVrf(ctx context.Context, token string, id int, in domain.VrfWrite) (*domain.Vrf, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVrf(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

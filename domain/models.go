@@ -312,6 +312,22 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// Vrf is a NetBox VRF (a secondary entity: it has write tools but no read
+	// tool).
+	Vrf struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Rd           string         `json:"rd,omitempty"`
+		Tenant       *Nested        `json:"tenant"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
 	// Manufacturer is a device manufacturer (a secondary entity: it has write
 	// tools but no read tool).
 	Manufacturer struct {
@@ -881,6 +897,23 @@ type ClusterGroupWrite struct {
 type CircuitTypeWrite struct {
 	Name         string         `json:"name,omitempty"`
 	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// VrfWrite is the domain DTO for creating or updating a NetBox VRF. It carries
+// only the writable fields.
+//
+// Name and Rd are plain strings because they are required on create; the
+// omitempty tags drop them from a PATCH body when not provided. Optional scalar
+// fields are pointers so that a partial-update (PATCH) can distinguish "not
+// provided" (nil) from "explicitly set to empty" (pointer to ""). Tenant is a
+// pointer to the numeric NetBox tenant ID.
+type VrfWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Rd           string         `json:"rd,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
 	Description  *string        `json:"description,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
 	CustomFields map[string]any `json:"custom_fields,omitempty"`

@@ -88,6 +88,9 @@ type MockRepo struct {
 	CreateCircuitTypeFunc        func(ctx context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error)
 	UpdateCircuitTypeFunc        func(ctx context.Context, token string, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error)
 	DeleteCircuitTypeFunc        func(ctx context.Context, token string, id int) error
+	CreateVrfFunc                func(ctx context.Context, token string, in domain.VrfWrite) (*domain.Vrf, error)
+	UpdateVrfFunc                func(ctx context.Context, token string, id int, in domain.VrfWrite) (*domain.Vrf, error)
+	DeleteVrfFunc                func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -396,6 +399,18 @@ func (m *MockRepo) UpdateCircuitType(ctx context.Context, token string, id int, 
 
 func (m *MockRepo) DeleteCircuitType(ctx context.Context, token string, id int) error {
 	return m.DeleteCircuitTypeFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateVrf(ctx context.Context, token string, in domain.VrfWrite) (*domain.Vrf, error) {
+	return m.CreateVrfFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateVrf(ctx context.Context, token string, id int, in domain.VrfWrite) (*domain.Vrf, error) {
+	return m.UpdateVrfFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteVrf(ctx context.Context, token string, id int) error {
+	return m.DeleteVrfFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -715,5 +730,17 @@ func (r *NilRepo) UpdateCircuitType(ctx context.Context, token string, id int, i
 }
 
 func (r *NilRepo) DeleteCircuitType(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateVrf(ctx context.Context, token string, in domain.VrfWrite) (*domain.Vrf, error) {
+	return &domain.Vrf{ID: 1, Name: in.Name, Rd: in.Rd}, nil
+}
+
+func (r *NilRepo) UpdateVrf(ctx context.Context, token string, id int, in domain.VrfWrite) (*domain.Vrf, error) {
+	return &domain.Vrf{ID: id, Name: in.Name, Rd: in.Rd}, nil
+}
+
+func (r *NilRepo) DeleteVrf(ctx context.Context, token string, id int) error {
 	return nil
 }

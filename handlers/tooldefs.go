@@ -483,5 +483,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a circuit type from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the circuit type, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_vrf",
+			Title:        "Create VRF",
+			Description:  "Create a new VRF in NetBox. name and rd are required; all other fields are optional. Provide tenant as a numeric tenant ID, description as a string, and tags as a list of tag names. Returns the created VRF.",
+			Instructions: "Use only when the caller explicitly wants to create a VRF and provides a name and route distinguisher (rd). This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_vrf",
+			Title:        "Update VRF",
+			Description:  "Partially update a VRF in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated VRF.",
+			Instructions: "Use to modify one or more fields of an existing VRF. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_vrf",
+			Title:        "Delete VRF",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a VRF from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the VRF, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

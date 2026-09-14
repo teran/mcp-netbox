@@ -672,6 +672,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteCircuitType = %v", err)
 		}
 	})
+	t.Run("CreateVrf", func(t *testing.T) {
+		got, err := (&MockRepo{CreateVrfFunc: func(_ context.Context, _ string, in domain.VrfWrite) (*domain.Vrf, error) {
+			return &domain.Vrf{ID: 1, Name: in.Name, Rd: in.Rd}, nil
+		}}).CreateVrf(context.Background(), "t", domain.VrfWrite{Name: "prod", Rd: "65000:1"})
+		if err != nil || got == nil || got.Name != "prod" || got.Rd != "65000:1" {
+			t.Errorf("CreateVrf = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateVrf", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateVrfFunc: func(_ context.Context, _ string, id int, _ domain.VrfWrite) (*domain.Vrf, error) {
+			return &domain.Vrf{ID: id}, nil
+		}}).UpdateVrf(context.Background(), "t", 7, domain.VrfWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateVrf = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteVrf", func(t *testing.T) {
+		err := (&MockRepo{DeleteVrfFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteVrf(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteVrf = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -965,5 +992,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteCircuitType(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteCircuitType = %v", err)
+	}
+	if v, err := repo.CreateVrf(ctx, "t", domain.VrfWrite{Name: "prod", Rd: "65000:1"}); err != nil || v.Name != "prod" || v.Rd != "65000:1" {
+		t.Errorf("CreateVrf = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateVrf(ctx, "t", 7, domain.VrfWrite{Name: "prod"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateVrf = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteVrf(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteVrf = %v", err)
 	}
 }

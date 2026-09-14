@@ -957,6 +957,34 @@ type CircuitTypeDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the circuit type to delete,required"`
 }
 
+// VrfCreateInput represents the writable fields for creating a VRF. Name and rd
+// are required on create.
+type VrfCreateInput struct {
+	Name         string         `json:"name" jsonschema:"VRF name (required)"`
+	Rd           string         `json:"rd" jsonschema:"route distinguisher (required)"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"numeric tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VrfUpdateInput represents the writable fields for updating a VRF. All fields
+// are optional; only the explicitly provided ones are patched (PATCH merge).
+type VrfUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the VRF to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"VRF name"`
+	Rd           *string        `json:"rd,omitempty" jsonschema:"route distinguisher"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"numeric tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VrfDeleteInput represents the input fields for deleting a VRF.
+type VrfDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the VRF to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -1083,6 +1111,11 @@ type ClusterGroupOutput struct {
 // tools.
 type CircuitTypeOutput struct {
 	Data domain.CircuitType `json:"data"`
+}
+
+// VrfOutput represents the output for the create/update VRF tools.
+type VrfOutput struct {
+	Data domain.Vrf `json:"data"`
 }
 
 // — write helpers —
@@ -1844,6 +1877,35 @@ func circuitTypeWriteFromUpdate(in CircuitTypeUpdateInput) domain.CircuitTypeWri
 		write.Name = *in.Name
 	}
 	write.Slug = in.Slug
+	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// vrfWriteFromCreate builds a domain.VrfWrite from a create input.
+func vrfWriteFromCreate(in VrfCreateInput) domain.VrfWrite {
+	return domain.VrfWrite{
+		Name:         in.Name,
+		Rd:           in.Rd,
+		Tenant:       in.Tenant,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// vrfWriteFromUpdate builds a domain.VrfWrite from an update input, mapping
+// only the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func vrfWriteFromUpdate(in VrfUpdateInput) domain.VrfWrite {
+	write := domain.VrfWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	if in.Rd != nil {
+		write.Rd = *in.Rd
+	}
+	write.Tenant = in.Tenant
 	write.Description = in.Description
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
@@ -3681,6 +3743,71 @@ func NewDeleteCircuitTypeHandler(svc *application.NetworkService) mcp.ToolHandle
 		}
 
 		if err := s.DeleteCircuitType(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateVrfHandler creates a handler for the create_vrf tool.
+func NewCreateVrfHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VrfCreateInput, VrfOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VrfCreateInput) (*mcp.CallToolResult, VrfOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VrfOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" || in.Rd == "" {
+			return &mcp.CallToolResult{IsError: true}, VrfOutput{}, fmt.Errorf("name and rd are required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateVrf(ctx, vrfWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VrfOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VrfOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateVrfHandler creates a handler for the update_vrf tool. It performs a
+// partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateVrfHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VrfUpdateInput, VrfOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VrfUpdateInput) (*mcp.CallToolResult, VrfOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VrfOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VrfOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateVrf(ctx, in.ID, vrfWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VrfOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VrfOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteVrfHandler creates a handler for the delete_vrf tool.
+func NewDeleteVrfHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VrfDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VrfDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteVrf(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

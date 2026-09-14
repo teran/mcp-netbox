@@ -711,3 +711,31 @@ func (s *NetworkService) DeleteCircuitType(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateVrf relays a VRF create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateVrf(ctx context.Context, in domain.VrfWrite) (*domain.Vrf, error) {
+	resp, err := s.repo.CreateVrf(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create vrf: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateVrf relays a VRF update to the repository.
+func (s *NetworkService) UpdateVrf(ctx context.Context, id int, in domain.VrfWrite) (*domain.Vrf, error) {
+	resp, err := s.repo.UpdateVrf(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update vrf: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteVrf relays a VRF delete to the repository.
+func (s *NetworkService) DeleteVrf(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVrf(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete vrf: %w", err)
+	}
+	return nil
+}

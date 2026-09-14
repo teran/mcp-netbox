@@ -429,4 +429,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_circuit_type"], metrics, "delete_circuit_type", WrapToolHandler[CircuitTypeDeleteInput, struct{}](metrics, "delete_circuit_type", func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTypeDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteCircuitTypeHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_vrf"], metrics, "create_vrf", WrapToolHandler[VrfCreateInput, VrfOutput](metrics, "create_vrf", func(ctx context.Context, req *mcp.CallToolRequest, in VrfCreateInput) (*mcp.CallToolResult, VrfOutput, error) {
+		return NewCreateVrfHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_vrf"], metrics, "update_vrf", WrapToolHandler[VrfUpdateInput, VrfOutput](metrics, "update_vrf", func(ctx context.Context, req *mcp.CallToolRequest, in VrfUpdateInput) (*mcp.CallToolResult, VrfOutput, error) {
+		return NewUpdateVrfHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_vrf"], metrics, "delete_vrf", WrapToolHandler[VrfDeleteInput, struct{}](metrics, "delete_vrf", func(ctx context.Context, req *mcp.CallToolRequest, in VrfDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteVrfHandler(svc)(ctx, req, in)
+	}))
 }

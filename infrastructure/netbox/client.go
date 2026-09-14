@@ -1213,6 +1213,43 @@ func (c *Client) DeleteCircuitType(ctx context.Context, token string, id int) er
 	return mErr
 }
 
+// CreateVrf creates a new VRF via POST /api/ipam/vrfs/.
+func (c *Client) CreateVrf(ctx context.Context, token string, in domain.VrfWrite) (*domain.Vrf, error) {
+	payload, err := json.Marshal(vrfWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal vrf create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/ipam/vrfs/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVrf(raw)
+}
+
+// UpdateVrf partially updates a VRF via PATCH /api/ipam/vrfs/<id>/.
+func (c *Client) UpdateVrf(ctx context.Context, token string, id int, in domain.VrfWrite) (*domain.Vrf, error) {
+	payload, err := json.Marshal(vrfWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal vrf update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/ipam/vrfs/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVrf(raw)
+}
+
+// DeleteVrf deletes a VRF via DELETE /api/ipam/vrfs/<id>/.
+func (c *Client) DeleteVrf(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/ipam/vrfs/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -2326,6 +2363,44 @@ func wireCircuitTypeToDomain(w WireCircuitType) domain.CircuitType {
 		Display:      w.Display,
 		Description:  w.Description,
 		CircuitCount: w.CircuitCount,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func vrfWriteToWire(in domain.VrfWrite) WireVrfWrite {
+	return WireVrfWrite{
+		Name:         in.Name,
+		Rd:           in.Rd,
+		Tenant:       in.Tenant,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalVrf decodes a VRF response body into a domain.Vrf.
+func unmarshalVrf(raw domain.RawObject) (*domain.Vrf, error) {
+	var w WireVrf
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal vrf: %w", err)
+	}
+	d := wireVrfToDomain(w)
+	return &d, nil
+}
+
+// wireVrfToDomain converts a wire VRF to the domain model.
+func wireVrfToDomain(w WireVrf) domain.Vrf {
+	return domain.Vrf{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Rd:           w.Rd,
+		Tenant:       wireNestedToDomain(w.Tenant),
+		Display:      w.Display,
+		Description:  w.Description,
 		Tags:         wireTagsToDomain(w.Tags),
 		CustomFields: w.CustomFields,
 		Created:      w.Created,

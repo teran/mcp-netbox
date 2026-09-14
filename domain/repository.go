@@ -134,4 +134,8 @@ type NetworkRepository interface {
 	CreateCircuitType(ctx context.Context, token string, in CircuitTypeWrite) (*CircuitType, error)
 	UpdateCircuitType(ctx context.Context, token string, id int, in CircuitTypeWrite) (*CircuitType, error)
 	DeleteCircuitType(ctx context.Context, token string, id int) error
+
+	CreateVrf(ctx context.Context, token string, in VrfWrite) (*Vrf, error)
+	UpdateVrf(ctx context.Context, token string, id int, in VrfWrite) (*Vrf, error)
+	DeleteVrf(ctx context.Context, token string, id int) error
 }
