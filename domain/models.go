@@ -328,6 +328,30 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// VlanGroup is a NetBox VLAN group (a secondary entity: it has write tools
+	// but no read tool).
+	VlanGroup struct {
+		ID           int             `json:"id"`
+		URL          string          `json:"url,omitempty"`
+		Name         string          `json:"name"`
+		Slug         string          `json:"slug,omitempty"`
+		Display      string          `json:"display,omitempty"`
+		Description  string          `json:"description,omitempty"`
+		Scope        *VlanGroupScope `json:"scope"`
+		MinVID       *int            `json:"min_vid"`
+		MaxVID       *int            `json:"max_vid"`
+		Tags         []Tag           `json:"tags,omitempty"`
+		CustomFields map[string]any  `json:"custom_fields,omitempty"`
+		Created      string          `json:"created"`
+		LastUpdated  string          `json:"last_updated"`
+	}
+
+	// VlanGroupScope is the polymorphic scope reference on a VLAN group.
+	VlanGroupScope struct {
+		ObjectType string `json:"object_type"`
+		ObjectID   int    `json:"object_id"`
+	}
+
 	// Manufacturer is a device manufacturer (a secondary entity: it has write
 	// tools but no read tool).
 	Manufacturer struct {
@@ -915,6 +939,26 @@ type VrfWrite struct {
 	Rd           string         `json:"rd,omitempty"`
 	Tenant       *int           `json:"tenant,omitempty"`
 	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// VlanGroupWrite is the domain DTO for creating or updating a NetBox VLAN
+// group. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty" (pointer to ""). The polymorphic scope
+// is written via scope_type (content type) and scope_id (object ID).
+type VlanGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	ScopeType    *string        `json:"scope_type,omitempty"`
+	ScopeID      *int           `json:"scope_id,omitempty"`
+	MinVID       *int           `json:"min_vid,omitempty"`
+	MaxVID       *int           `json:"max_vid,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }

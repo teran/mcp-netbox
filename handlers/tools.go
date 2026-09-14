@@ -985,6 +985,41 @@ type VrfDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the VRF to delete,required"`
 }
 
+// VlanGroupCreateInput represents the writable fields for creating a VLAN
+// group. Name is required on create.
+type VlanGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"VLAN group name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	ScopeType    *string        `json:"scope_type,omitempty" jsonschema:"scope content type (e.g. dcim.site)"`
+	ScopeID      *int           `json:"scope_id,omitempty" jsonschema:"numeric ID of the scoped object"`
+	MinVID       *int           `json:"min_vid,omitempty" jsonschema:"lowest permissible child VLAN ID"`
+	MaxVID       *int           `json:"max_vid,omitempty" jsonschema:"highest permissible child VLAN ID"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VlanGroupUpdateInput represents the writable fields for updating a VLAN
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type VlanGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the VLAN group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"VLAN group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	ScopeType    *string        `json:"scope_type,omitempty" jsonschema:"scope content type (e.g. dcim.site)"`
+	ScopeID      *int           `json:"scope_id,omitempty" jsonschema:"numeric ID of the scoped object"`
+	MinVID       *int           `json:"min_vid,omitempty" jsonschema:"lowest permissible child VLAN ID"`
+	MaxVID       *int           `json:"max_vid,omitempty" jsonschema:"highest permissible child VLAN ID"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VlanGroupDeleteInput represents the input fields for deleting a VLAN group.
+type VlanGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the VLAN group to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -1116,6 +1151,11 @@ type CircuitTypeOutput struct {
 // VrfOutput represents the output for the create/update VRF tools.
 type VrfOutput struct {
 	Data domain.Vrf `json:"data"`
+}
+
+// VlanGroupOutput represents the output for the create/update VLAN group tools.
+type VlanGroupOutput struct {
+	Data domain.VlanGroup `json:"data"`
 }
 
 // — write helpers —
@@ -1907,6 +1947,40 @@ func vrfWriteFromUpdate(in VrfUpdateInput) domain.VrfWrite {
 	}
 	write.Tenant = in.Tenant
 	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// vlanGroupWriteFromCreate builds a domain.VlanGroupWrite from a create input.
+func vlanGroupWriteFromCreate(in VlanGroupCreateInput) domain.VlanGroupWrite {
+	return domain.VlanGroupWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		ScopeType:    in.ScopeType,
+		ScopeID:      in.ScopeID,
+		MinVID:       in.MinVID,
+		MaxVID:       in.MaxVID,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// vlanGroupWriteFromUpdate builds a domain.VlanGroupWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func vlanGroupWriteFromUpdate(in VlanGroupUpdateInput) domain.VlanGroupWrite {
+	write := domain.VlanGroupWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Slug = in.Slug
+	write.Description = in.Description
+	write.ScopeType = in.ScopeType
+	write.ScopeID = in.ScopeID
+	write.MinVID = in.MinVID
+	write.MaxVID = in.MaxVID
 	write.Tags = in.Tags
 	write.CustomFields = in.CustomFields
 	return write
@@ -3808,6 +3882,71 @@ func NewDeleteVrfHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Vrf
 		}
 
 		if err := s.DeleteVrf(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateVlanGroupHandler creates a handler for the create_vlan_group tool.
+func NewCreateVlanGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VlanGroupCreateInput, VlanGroupOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VlanGroupCreateInput) (*mcp.CallToolResult, VlanGroupOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VlanGroupOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VlanGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateVlanGroup(ctx, vlanGroupWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VlanGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VlanGroupOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateVlanGroupHandler creates a handler for the update_vlan_group tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateVlanGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VlanGroupUpdateInput, VlanGroupOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VlanGroupUpdateInput) (*mcp.CallToolResult, VlanGroupOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, VlanGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VlanGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateVlanGroup(ctx, in.ID, vlanGroupWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, VlanGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VlanGroupOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteVlanGroupHandler creates a handler for the delete_vlan_group tool.
+func NewDeleteVlanGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[VlanGroupDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in VlanGroupDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteVlanGroup(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

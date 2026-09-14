@@ -441,4 +441,16 @@ func RegisterTools(s *mcp.Server, metrics *Metrics, svc *application.NetworkServ
 	registerDeleteTool(s, toolDefIndex()["delete_vrf"], metrics, "delete_vrf", WrapToolHandler[VrfDeleteInput, struct{}](metrics, "delete_vrf", func(ctx context.Context, req *mcp.CallToolRequest, in VrfDeleteInput) (*mcp.CallToolResult, struct{}, error) {
 		return NewDeleteVrfHandler(svc)(ctx, req, in)
 	}))
+
+	registerWriteTool(s, toolDefIndex()["create_vlan_group"], metrics, "create_vlan_group", WrapToolHandler[VlanGroupCreateInput, VlanGroupOutput](metrics, "create_vlan_group", func(ctx context.Context, req *mcp.CallToolRequest, in VlanGroupCreateInput) (*mcp.CallToolResult, VlanGroupOutput, error) {
+		return NewCreateVlanGroupHandler(svc)(ctx, req, in)
+	}))
+
+	registerWriteTool(s, toolDefIndex()["update_vlan_group"], metrics, "update_vlan_group", WrapToolHandler[VlanGroupUpdateInput, VlanGroupOutput](metrics, "update_vlan_group", func(ctx context.Context, req *mcp.CallToolRequest, in VlanGroupUpdateInput) (*mcp.CallToolResult, VlanGroupOutput, error) {
+		return NewUpdateVlanGroupHandler(svc)(ctx, req, in)
+	}))
+
+	registerDeleteTool(s, toolDefIndex()["delete_vlan_group"], metrics, "delete_vlan_group", WrapToolHandler[VlanGroupDeleteInput, struct{}](metrics, "delete_vlan_group", func(ctx context.Context, req *mcp.CallToolRequest, in VlanGroupDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		return NewDeleteVlanGroupHandler(svc)(ctx, req, in)
+	}))
 }

@@ -739,3 +739,31 @@ func (s *NetworkService) DeleteVrf(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateVlanGroup relays a VLAN group create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateVlanGroup(ctx context.Context, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	resp, err := s.repo.CreateVlanGroup(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create vlan group: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateVlanGroup relays a VLAN group update to the repository.
+func (s *NetworkService) UpdateVlanGroup(ctx context.Context, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	resp, err := s.repo.UpdateVlanGroup(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update vlan group: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteVlanGroup relays a VLAN group delete to the repository.
+func (s *NetworkService) DeleteVlanGroup(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVlanGroup(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete vlan group: %w", err)
+	}
+	return nil
+}

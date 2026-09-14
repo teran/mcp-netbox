@@ -91,6 +91,9 @@ type MockRepo struct {
 	CreateVrfFunc                func(ctx context.Context, token string, in domain.VrfWrite) (*domain.Vrf, error)
 	UpdateVrfFunc                func(ctx context.Context, token string, id int, in domain.VrfWrite) (*domain.Vrf, error)
 	DeleteVrfFunc                func(ctx context.Context, token string, id int) error
+	CreateVlanGroupFunc          func(ctx context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error)
+	UpdateVlanGroupFunc          func(ctx context.Context, token string, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error)
+	DeleteVlanGroupFunc          func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -411,6 +414,18 @@ func (m *MockRepo) UpdateVrf(ctx context.Context, token string, id int, in domai
 
 func (m *MockRepo) DeleteVrf(ctx context.Context, token string, id int) error {
 	return m.DeleteVrfFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateVlanGroup(ctx context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	return m.CreateVlanGroupFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateVlanGroup(ctx context.Context, token string, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	return m.UpdateVlanGroupFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteVlanGroup(ctx context.Context, token string, id int) error {
+	return m.DeleteVlanGroupFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -742,5 +757,17 @@ func (r *NilRepo) UpdateVrf(ctx context.Context, token string, id int, in domain
 }
 
 func (r *NilRepo) DeleteVrf(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateVlanGroup(ctx context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	return &domain.VlanGroup{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateVlanGroup(ctx context.Context, token string, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	return &domain.VlanGroup{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteVlanGroup(ctx context.Context, token string, id int) error {
 	return nil
 }

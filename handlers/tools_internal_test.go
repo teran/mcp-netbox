@@ -331,6 +331,18 @@ func (s *stubRepo) DeleteVrf(ctx context.Context, token string, id int) error {
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateVlanGroup(ctx context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVlanGroup(ctx context.Context, token string, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVlanGroup(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

@@ -3636,3 +3636,146 @@ func TestNetworkService_DeleteVrf(t *testing.T) {
 		}
 	})
 }
+
+func TestNetworkService_CreateVlanGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVlanGroupFunc: func(_ context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.VlanGroup{ID: 1, Name: in.Name}, nil
+			},
+		})
+		p, err := svc.CreateVlanGroup(context.Background(), domain.VlanGroupWrite{Name: "DC VLANs"})
+		if err != nil {
+			t.Fatalf("CreateVlanGroup() returned error: %v", err)
+		}
+		if p.ID != 1 || p.Name != "DC VLANs" {
+			t.Errorf("p = %+v, want id 1 name 'DC VLANs'", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVlanGroupFunc: func(_ context.Context, _ string, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateVlanGroup(context.Background(), domain.VlanGroupWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVlanGroupFunc: func(_ context.Context, _ string, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateVlanGroup(context.Background(), domain.VlanGroupWrite{Name: "DC VLANs"})
+		if err == nil || !containsService(err.Error(), "create vlan group:") {
+			t.Errorf("err = %v, want it to contain 'create vlan group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateVlanGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVlanGroupFunc: func(_ context.Context, _ string, id int, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+				return &domain.VlanGroup{ID: id, Name: "DC VLANs"}, nil
+			},
+		})
+		p, err := svc.UpdateVlanGroup(context.Background(), 7, domain.VlanGroupWrite{Name: "DC VLANs"})
+		if err != nil {
+			t.Fatalf("UpdateVlanGroup() returned error: %v", err)
+		}
+		if p.ID != 7 {
+			t.Errorf("p = %+v, want id 7", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVlanGroupFunc: func(_ context.Context, _ string, _ int, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateVlanGroup(context.Background(), 7, domain.VlanGroupWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVlanGroupFunc: func(_ context.Context, _ string, _ int, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateVlanGroup(context.Background(), 7, domain.VlanGroupWrite{})
+		if err == nil || !containsService(err.Error(), "update vlan group:") {
+			t.Errorf("err = %v, want it to contain 'update vlan group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteVlanGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVlanGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteVlanGroup(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteVlanGroup() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVlanGroupFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteVlanGroup(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVlanGroupFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteVlanGroup(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete vlan group:") {
+			t.Errorf("err = %v, want it to contain 'delete vlan group:'", err)
+		}
+	})
+}

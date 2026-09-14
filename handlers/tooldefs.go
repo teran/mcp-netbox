@@ -501,5 +501,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a VRF from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the VRF, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_vlan_group",
+			Title:        "Create VLAN Group",
+			Description:  "Create a new VLAN group in NetBox. name is required; all other fields are optional. Provide slug/description as strings, scope_type (e.g. dcim.site) and scope_id for the scope, min_vid/max_vid as integers, and tags as a list of tag names. Returns the created VLAN group.",
+			Instructions: "Use only when the caller explicitly wants to create a VLAN group and provides a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_vlan_group",
+			Title:        "Update VLAN Group",
+			Description:  "Partially update a VLAN group in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated VLAN group.",
+			Instructions: "Use to modify one or more fields of an existing VLAN group. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_vlan_group",
+			Title:        "Delete VLAN Group",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a VLAN group from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the VLAN group, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

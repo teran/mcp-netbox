@@ -138,4 +138,8 @@ type NetworkRepository interface {
 	CreateVrf(ctx context.Context, token string, in VrfWrite) (*Vrf, error)
 	UpdateVrf(ctx context.Context, token string, id int, in VrfWrite) (*Vrf, error)
 	DeleteVrf(ctx context.Context, token string, id int) error
+
+	CreateVlanGroup(ctx context.Context, token string, in VlanGroupWrite) (*VlanGroup, error)
+	UpdateVlanGroup(ctx context.Context, token string, id int, in VlanGroupWrite) (*VlanGroup, error)
+	DeleteVlanGroup(ctx context.Context, token string, id int) error
 }

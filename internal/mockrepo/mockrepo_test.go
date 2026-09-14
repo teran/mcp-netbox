@@ -699,6 +699,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteVrf = %v", err)
 		}
 	})
+	t.Run("CreateVlanGroup", func(t *testing.T) {
+		got, err := (&MockRepo{CreateVlanGroupFunc: func(_ context.Context, _ string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+			return &domain.VlanGroup{ID: 1, Name: in.Name}, nil
+		}}).CreateVlanGroup(context.Background(), "t", domain.VlanGroupWrite{Name: "DC VLANs"})
+		if err != nil || got == nil || got.Name != "DC VLANs" {
+			t.Errorf("CreateVlanGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateVlanGroup", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateVlanGroupFunc: func(_ context.Context, _ string, id int, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+			return &domain.VlanGroup{ID: id}, nil
+		}}).UpdateVlanGroup(context.Background(), "t", 7, domain.VlanGroupWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateVlanGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteVlanGroup", func(t *testing.T) {
+		err := (&MockRepo{DeleteVlanGroupFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteVlanGroup(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteVlanGroup = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -1001,5 +1028,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteVrf(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVrf = %v", err)
+	}
+	if vg, err := repo.CreateVlanGroup(ctx, "t", domain.VlanGroupWrite{Name: "DC VLANs"}); err != nil || vg.Name != "DC VLANs" {
+		t.Errorf("CreateVlanGroup = (%v, %v)", vg, err)
+	}
+	if vg, err := repo.UpdateVlanGroup(ctx, "t", 7, domain.VlanGroupWrite{Name: "DC VLANs"}); err != nil || vg.ID != 7 {
+		t.Errorf("UpdateVlanGroup = (%v, %v)", vg, err)
+	}
+	if err := repo.DeleteVlanGroup(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteVlanGroup = %v", err)
 	}
 }

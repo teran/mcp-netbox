@@ -1250,6 +1250,44 @@ func (c *Client) DeleteVrf(ctx context.Context, token string, id int) error {
 	return mErr
 }
 
+// CreateVlanGroup creates a new VLAN group via POST /api/ipam/vlan-groups/.
+func (c *Client) CreateVlanGroup(ctx context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	payload, err := json.Marshal(vlanGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal vlan group create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/ipam/vlan-groups/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVlanGroup(raw)
+}
+
+// UpdateVlanGroup partially updates a VLAN group via PATCH
+// /api/ipam/vlan-groups/<id>/.
+func (c *Client) UpdateVlanGroup(ctx context.Context, token string, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+	payload, err := json.Marshal(vlanGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal vlan group update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/ipam/vlan-groups/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalVlanGroup(raw)
+}
+
+// DeleteVlanGroup deletes a VLAN group via DELETE /api/ipam/vlan-groups/<id>/.
+func (c *Client) DeleteVlanGroup(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/ipam/vlan-groups/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -2405,5 +2443,58 @@ func wireVrfToDomain(w WireVrf) domain.Vrf {
 		CustomFields: w.CustomFields,
 		Created:      w.Created,
 		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func vlanGroupWriteToWire(in domain.VlanGroupWrite) WireVlanGroupWrite {
+	return WireVlanGroupWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		ScopeType:    in.ScopeType,
+		ScopeID:      in.ScopeID,
+		MinVID:       in.MinVID,
+		MaxVID:       in.MaxVID,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalVlanGroup decodes a VLAN group response body into a domain.VlanGroup.
+func unmarshalVlanGroup(raw domain.RawObject) (*domain.VlanGroup, error) {
+	var w WireVlanGroup
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal vlan group: %w", err)
+	}
+	d := wireVlanGroupToDomain(w)
+	return &d, nil
+}
+
+// wireVlanGroupToDomain converts a wire VLAN group to the domain model.
+func wireVlanGroupToDomain(w WireVlanGroup) domain.VlanGroup {
+	return domain.VlanGroup{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Slug:         w.Slug,
+		Display:      w.Display,
+		Description:  w.Description,
+		Scope:        wireVlanGroupScopeToDomain(w.Scope),
+		MinVID:       w.MinVID,
+		MaxVID:       w.MaxVID,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func wireVlanGroupScopeToDomain(s *WireVlanGroupScope) *domain.VlanGroupScope {
+	if s == nil {
+		return nil
+	}
+	return &domain.VlanGroupScope{
+		ObjectType: s.ObjectType,
+		ObjectID:   s.ObjectID,
 	}
 }
