@@ -85,6 +85,9 @@ type MockRepo struct {
 	CreateClusterGroupFunc       func(ctx context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error)
 	UpdateClusterGroupFunc       func(ctx context.Context, token string, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error)
 	DeleteClusterGroupFunc       func(ctx context.Context, token string, id int) error
+	CreateCircuitTypeFunc        func(ctx context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error)
+	UpdateCircuitTypeFunc        func(ctx context.Context, token string, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error)
+	DeleteCircuitTypeFunc        func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -381,6 +384,18 @@ func (m *MockRepo) UpdateClusterGroup(ctx context.Context, token string, id int,
 
 func (m *MockRepo) DeleteClusterGroup(ctx context.Context, token string, id int) error {
 	return m.DeleteClusterGroupFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateCircuitType(ctx context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	return m.CreateCircuitTypeFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateCircuitType(ctx context.Context, token string, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	return m.UpdateCircuitTypeFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteCircuitType(ctx context.Context, token string, id int) error {
+	return m.DeleteCircuitTypeFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -688,5 +703,17 @@ func (r *NilRepo) UpdateClusterGroup(ctx context.Context, token string, id int, 
 }
 
 func (r *NilRepo) DeleteClusterGroup(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateCircuitType(ctx context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	return &domain.CircuitType{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateCircuitType(ctx context.Context, token string, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	return &domain.CircuitType{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteCircuitType(ctx context.Context, token string, id int) error {
 	return nil
 }

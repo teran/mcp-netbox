@@ -683,3 +683,31 @@ func (s *NetworkService) DeleteClusterGroup(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateCircuitType relays a circuit type create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateCircuitType(ctx context.Context, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	resp, err := s.repo.CreateCircuitType(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create circuit type: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateCircuitType relays a circuit type update to the repository.
+func (s *NetworkService) UpdateCircuitType(ctx context.Context, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	resp, err := s.repo.UpdateCircuitType(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update circuit type: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteCircuitType relays a circuit type delete to the repository.
+func (s *NetworkService) DeleteCircuitType(ctx context.Context, id int) error {
+	if err := s.repo.DeleteCircuitType(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete circuit type: %w", err)
+	}
+	return nil
+}

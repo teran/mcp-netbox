@@ -307,6 +307,18 @@ func (s *stubRepo) DeleteClusterGroup(ctx context.Context, token string, id int)
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateCircuitType(ctx context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateCircuitType(ctx context.Context, token string, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteCircuitType(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

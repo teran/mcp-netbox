@@ -3350,3 +3350,146 @@ func TestNetworkService_DeleteClusterGroup(t *testing.T) {
 		}
 	})
 }
+
+func TestNetworkService_CreateCircuitType(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCircuitTypeFunc: func(_ context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.CircuitType{ID: 1, Name: in.Name}, nil
+			},
+		})
+		p, err := svc.CreateCircuitType(context.Background(), domain.CircuitTypeWrite{Name: "Fiber"})
+		if err != nil {
+			t.Fatalf("CreateCircuitType() returned error: %v", err)
+		}
+		if p.ID != 1 || p.Name != "Fiber" {
+			t.Errorf("p = %+v, want id 1 name 'Fiber'", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCircuitTypeFunc: func(_ context.Context, _ string, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateCircuitType(context.Background(), domain.CircuitTypeWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateCircuitTypeFunc: func(_ context.Context, _ string, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateCircuitType(context.Background(), domain.CircuitTypeWrite{Name: "Fiber"})
+		if err == nil || !containsService(err.Error(), "create circuit type:") {
+			t.Errorf("err = %v, want it to contain 'create circuit type:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateCircuitType(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCircuitTypeFunc: func(_ context.Context, _ string, id int, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+				return &domain.CircuitType{ID: id, Name: "Fiber"}, nil
+			},
+		})
+		p, err := svc.UpdateCircuitType(context.Background(), 7, domain.CircuitTypeWrite{Name: "Fiber"})
+		if err != nil {
+			t.Fatalf("UpdateCircuitType() returned error: %v", err)
+		}
+		if p.ID != 7 {
+			t.Errorf("p = %+v, want id 7", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCircuitTypeFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateCircuitType(context.Background(), 7, domain.CircuitTypeWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateCircuitTypeFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateCircuitType(context.Background(), 7, domain.CircuitTypeWrite{})
+		if err == nil || !containsService(err.Error(), "update circuit type:") {
+			t.Errorf("err = %v, want it to contain 'update circuit type:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteCircuitType(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCircuitTypeFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteCircuitType(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteCircuitType() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCircuitTypeFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteCircuitType(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteCircuitTypeFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteCircuitType(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete circuit type:") {
+			t.Errorf("err = %v, want it to contain 'delete circuit type:'", err)
+		}
+	})
+}

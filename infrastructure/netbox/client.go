@@ -1173,6 +1173,46 @@ func (c *Client) DeleteClusterGroup(ctx context.Context, token string, id int) e
 	return mErr
 }
 
+// CreateCircuitType creates a new circuit type via POST
+// /api/circuits/circuit-types/.
+func (c *Client) CreateCircuitType(ctx context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	payload, err := json.Marshal(circuitTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit type create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/circuit-types/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCircuitType(raw)
+}
+
+// UpdateCircuitType partially updates a circuit type via PATCH
+// /api/circuits/circuit-types/<id>/.
+func (c *Client) UpdateCircuitType(ctx context.Context, token string, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+	payload, err := json.Marshal(circuitTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit type update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/circuit-types/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalCircuitType(raw)
+}
+
+// DeleteCircuitType deletes a circuit type via DELETE
+// /api/circuits/circuit-types/<id>/.
+func (c *Client) DeleteCircuitType(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/circuits/circuit-types/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -2248,6 +2288,44 @@ func wireClusterGroupToDomain(w WireClusterGroup) domain.ClusterGroup {
 		Slug:         w.Slug,
 		Display:      w.Display,
 		Description:  w.Description,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func circuitTypeWriteToWire(in domain.CircuitTypeWrite) WireCircuitTypeWrite {
+	return WireCircuitTypeWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalCircuitType decodes a circuit type response body into a
+// domain.CircuitType.
+func unmarshalCircuitType(raw domain.RawObject) (*domain.CircuitType, error) {
+	var w WireCircuitType
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal circuit type: %w", err)
+	}
+	d := wireCircuitTypeToDomain(w)
+	return &d, nil
+}
+
+// wireCircuitTypeToDomain converts a wire circuit type to the domain model.
+func wireCircuitTypeToDomain(w WireCircuitType) domain.CircuitType {
+	return domain.CircuitType{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Slug:         w.Slug,
+		Display:      w.Display,
+		Description:  w.Description,
+		CircuitCount: w.CircuitCount,
 		Tags:         wireTagsToDomain(w.Tags),
 		CustomFields: w.CustomFields,
 		Created:      w.Created,

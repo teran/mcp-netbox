@@ -645,6 +645,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteClusterGroup = %v", err)
 		}
 	})
+	t.Run("CreateCircuitType", func(t *testing.T) {
+		got, err := (&MockRepo{CreateCircuitTypeFunc: func(_ context.Context, _ string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+			return &domain.CircuitType{ID: 1, Name: in.Name}, nil
+		}}).CreateCircuitType(context.Background(), "t", domain.CircuitTypeWrite{Name: "Fiber"})
+		if err != nil || got == nil || got.Name != "Fiber" {
+			t.Errorf("CreateCircuitType = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateCircuitType", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateCircuitTypeFunc: func(_ context.Context, _ string, id int, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+			return &domain.CircuitType{ID: id}, nil
+		}}).UpdateCircuitType(context.Background(), "t", 7, domain.CircuitTypeWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateCircuitType = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteCircuitType", func(t *testing.T) {
+		err := (&MockRepo{DeleteCircuitTypeFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteCircuitType(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteCircuitType = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -929,5 +956,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteClusterGroup(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteClusterGroup = %v", err)
+	}
+	if ct, err := repo.CreateCircuitType(ctx, "t", domain.CircuitTypeWrite{Name: "Fiber"}); err != nil || ct.Name != "Fiber" {
+		t.Errorf("CreateCircuitType = (%v, %v)", ct, err)
+	}
+	if ct, err := repo.UpdateCircuitType(ctx, "t", 7, domain.CircuitTypeWrite{Name: "Fiber"}); err != nil || ct.ID != 7 {
+		t.Errorf("UpdateCircuitType = (%v, %v)", ct, err)
+	}
+	if err := repo.DeleteCircuitType(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteCircuitType = %v", err)
 	}
 }

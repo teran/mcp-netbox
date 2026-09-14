@@ -930,6 +930,33 @@ type ClusterGroupDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the cluster group to delete,required"`
 }
 
+// CircuitTypeCreateInput represents the writable fields for creating a circuit
+// type. Name is required on create.
+type CircuitTypeCreateInput struct {
+	Name         string         `json:"name" jsonschema:"circuit type name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CircuitTypeUpdateInput represents the writable fields for updating a circuit
+// type. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type CircuitTypeUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the circuit type to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"circuit type name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CircuitTypeDeleteInput represents the input fields for deleting a circuit type.
+type CircuitTypeDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the circuit type to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -1050,6 +1077,12 @@ type ClusterTypeOutput struct {
 // tools.
 type ClusterGroupOutput struct {
 	Data domain.ClusterGroup `json:"data"`
+}
+
+// CircuitTypeOutput represents the output for the create/update circuit type
+// tools.
+type CircuitTypeOutput struct {
+	Data domain.CircuitType `json:"data"`
 }
 
 // — write helpers —
@@ -1789,6 +1822,32 @@ func clusterGroupWriteFromCreate(in ClusterGroupCreateInput) domain.ClusterGroup
 		Tags:         in.Tags,
 		CustomFields: in.CustomFields,
 	}
+}
+
+// circuitTypeWriteFromCreate builds a domain.CircuitTypeWrite from a create input.
+func circuitTypeWriteFromCreate(in CircuitTypeCreateInput) domain.CircuitTypeWrite {
+	return domain.CircuitTypeWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// circuitTypeWriteFromUpdate builds a domain.CircuitTypeWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func circuitTypeWriteFromUpdate(in CircuitTypeUpdateInput) domain.CircuitTypeWrite {
+	write := domain.CircuitTypeWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Slug = in.Slug
+	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
 }
 
 // clusterGroupWriteFromUpdate builds a domain.ClusterGroupWrite from an update
@@ -3557,6 +3616,71 @@ func NewDeleteClusterGroupHandler(svc *application.NetworkService) mcp.ToolHandl
 		}
 
 		if err := s.DeleteClusterGroup(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateCircuitTypeHandler creates a handler for the create_circuit_type tool.
+func NewCreateCircuitTypeHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTypeCreateInput, CircuitTypeOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTypeCreateInput) (*mcp.CallToolResult, CircuitTypeOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTypeOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, CircuitTypeOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateCircuitType(ctx, circuitTypeWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, CircuitTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitTypeOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateCircuitTypeHandler creates a handler for the update_circuit_type tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateCircuitTypeHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTypeUpdateInput, CircuitTypeOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTypeUpdateInput) (*mcp.CallToolResult, CircuitTypeOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTypeOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitTypeOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateCircuitType(ctx, in.ID, circuitTypeWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, CircuitTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitTypeOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteCircuitTypeHandler creates a handler for the delete_circuit_type tool.
+func NewDeleteCircuitTypeHandler(svc *application.NetworkService) mcp.ToolHandlerFor[CircuitTypeDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in CircuitTypeDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteCircuitType(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}
