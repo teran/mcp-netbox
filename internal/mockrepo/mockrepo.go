@@ -82,6 +82,9 @@ type MockRepo struct {
 	CreateClusterTypeFunc        func(ctx context.Context, token string, in domain.ClusterTypeWrite) (*domain.ClusterType, error)
 	UpdateClusterTypeFunc        func(ctx context.Context, token string, id int, in domain.ClusterTypeWrite) (*domain.ClusterType, error)
 	DeleteClusterTypeFunc        func(ctx context.Context, token string, id int) error
+	CreateClusterGroupFunc       func(ctx context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error)
+	UpdateClusterGroupFunc       func(ctx context.Context, token string, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error)
+	DeleteClusterGroupFunc       func(ctx context.Context, token string, id int) error
 }
 
 func (m *MockRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
@@ -366,6 +369,18 @@ func (m *MockRepo) UpdateClusterType(ctx context.Context, token string, id int, 
 
 func (m *MockRepo) DeleteClusterType(ctx context.Context, token string, id int) error {
 	return m.DeleteClusterTypeFunc(ctx, token, id)
+}
+
+func (m *MockRepo) CreateClusterGroup(ctx context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	return m.CreateClusterGroupFunc(ctx, token, in)
+}
+
+func (m *MockRepo) UpdateClusterGroup(ctx context.Context, token string, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	return m.UpdateClusterGroupFunc(ctx, token, id, in)
+}
+
+func (m *MockRepo) DeleteClusterGroup(ctx context.Context, token string, id int) error {
+	return m.DeleteClusterGroupFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -661,5 +676,17 @@ func (r *NilRepo) UpdateClusterType(ctx context.Context, token string, id int, i
 }
 
 func (r *NilRepo) DeleteClusterType(ctx context.Context, token string, id int) error {
+	return nil
+}
+
+func (r *NilRepo) CreateClusterGroup(ctx context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	return &domain.ClusterGroup{ID: 1, Name: in.Name}, nil
+}
+
+func (r *NilRepo) UpdateClusterGroup(ctx context.Context, token string, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	return &domain.ClusterGroup{ID: id, Name: in.Name}, nil
+}
+
+func (r *NilRepo) DeleteClusterGroup(ctx context.Context, token string, id int) error {
 	return nil
 }

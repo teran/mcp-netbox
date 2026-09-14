@@ -447,5 +447,23 @@ func toolDefs() []toolDef {
 			Description:  "WARNING: This operation is irreversible. Permanently deletes a cluster type from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the cluster type, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
 		},
+		{
+			Name:         "create_cluster_group",
+			Title:        "Create Cluster Group",
+			Description:  "Create a new cluster group in NetBox. name is required; all other fields are optional. Provide slug/description as strings, and tags as a list of tag names. Returns the created cluster group.",
+			Instructions: "Use only when the caller explicitly wants to create a cluster group and provides a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:         "update_cluster_group",
+			Title:        "Update Cluster Group",
+			Description:  "Partially update a cluster group in NetBox by its numeric ID. Only the fields you explicitly provide are changed (PATCH merge); omitted fields are left untouched. Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated cluster group.",
+			Instructions: "Use to modify one or more fields of an existing cluster group. Provide id plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:         "delete_cluster_group",
+			Title:        "Delete Cluster Group",
+			Description:  "WARNING: This operation is irreversible. Permanently deletes a cluster group from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they want to delete the cluster group, ideally by ID, and understands it is permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for explicit confirmation first.",
+		},
 	}
 }

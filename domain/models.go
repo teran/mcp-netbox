@@ -379,6 +379,21 @@ type (
 		Created      string         `json:"created"`
 		LastUpdated  string         `json:"last_updated"`
 	}
+
+	// ClusterGroup is a NetBox cluster group (a secondary entity: it has write
+	// tools but no read tool).
+	ClusterGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
 )
 
 type (
@@ -818,6 +833,21 @@ type LocationWrite struct {
 // pointers so that a partial-update (PATCH) can distinguish "not provided"
 // (nil) from "explicitly set to empty" (pointer to "").
 type ClusterTypeWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ClusterGroupWrite is the domain DTO for creating or updating a NetBox cluster
+// group. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty" (pointer to "").
+type ClusterGroupWrite struct {
 	Name         string         `json:"name,omitempty"`
 	Slug         *string        `json:"slug,omitempty"`
 	Description  *string        `json:"description,omitempty"`

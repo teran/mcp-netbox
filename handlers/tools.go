@@ -903,6 +903,33 @@ type ClusterTypeDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the cluster type to delete,required"`
 }
 
+// ClusterGroupCreateInput represents the writable fields for creating a cluster
+// group. Name is required on create.
+type ClusterGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"cluster group name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ClusterGroupUpdateInput represents the writable fields for updating a cluster
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type ClusterGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the cluster group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"cluster group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ClusterGroupDeleteInput represents the input fields for deleting a cluster group.
+type ClusterGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the cluster group to delete,required"`
+}
+
 // — output types —
 
 // PaginatedOutput is a generic paginated response used by all list-oriented tools.
@@ -1017,6 +1044,12 @@ type LocationOutput struct {
 // tools.
 type ClusterTypeOutput struct {
 	Data domain.ClusterType `json:"data"`
+}
+
+// ClusterGroupOutput represents the output for the create/update cluster group
+// tools.
+type ClusterGroupOutput struct {
+	Data domain.ClusterGroup `json:"data"`
 }
 
 // — write helpers —
@@ -1737,6 +1770,32 @@ func clusterTypeWriteFromCreate(in ClusterTypeCreateInput) domain.ClusterTypeWri
 // body is minimal.
 func clusterTypeWriteFromUpdate(in ClusterTypeUpdateInput) domain.ClusterTypeWrite {
 	write := domain.ClusterTypeWrite{}
+	if in.Name != nil {
+		write.Name = *in.Name
+	}
+	write.Slug = in.Slug
+	write.Description = in.Description
+	write.Tags = in.Tags
+	write.CustomFields = in.CustomFields
+	return write
+}
+
+// clusterGroupWriteFromCreate builds a domain.ClusterGroupWrite from a create input.
+func clusterGroupWriteFromCreate(in ClusterGroupCreateInput) domain.ClusterGroupWrite {
+	return domain.ClusterGroupWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// clusterGroupWriteFromUpdate builds a domain.ClusterGroupWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func clusterGroupWriteFromUpdate(in ClusterGroupUpdateInput) domain.ClusterGroupWrite {
+	write := domain.ClusterGroupWrite{}
 	if in.Name != nil {
 		write.Name = *in.Name
 	}
@@ -3433,6 +3492,71 @@ func NewDeleteClusterTypeHandler(svc *application.NetworkService) mcp.ToolHandle
 		}
 
 		if err := s.DeleteClusterType(ctx, in.ID); err != nil {
+			res, e := writeErrorResult(err)
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateClusterGroupHandler creates a handler for the create_cluster_group tool.
+func NewCreateClusterGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClusterGroupCreateInput, ClusterGroupOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ClusterGroupCreateInput) (*mcp.CallToolResult, ClusterGroupOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ClusterGroupOutput{}, errServiceNotAvailable
+		}
+		if in.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ClusterGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.CreateClusterGroup(ctx, clusterGroupWriteFromCreate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ClusterGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ClusterGroupOutput{Data: *p}, nil
+	}
+}
+
+// NewUpdateClusterGroupHandler creates a handler for the update_cluster_group tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateClusterGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClusterGroupUpdateInput, ClusterGroupOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ClusterGroupUpdateInput) (*mcp.CallToolResult, ClusterGroupOutput, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, ClusterGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ClusterGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&in))
+		p, err := s.UpdateClusterGroup(ctx, in.ID, clusterGroupWriteFromUpdate(in))
+		if err != nil {
+			res, e := writeErrorResult(err)
+			return res, ClusterGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ClusterGroupOutput{Data: *p}, nil
+	}
+}
+
+// NewDeleteClusterGroupHandler creates a handler for the delete_cluster_group tool.
+func NewDeleteClusterGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ClusterGroupDeleteInput, struct{}] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, in ClusterGroupDeleteInput) (*mcp.CallToolResult, struct{}, error) {
+		s := resolveService(ctx, svc)
+		if s == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(in.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := s.DeleteClusterGroup(ctx, in.ID); err != nil {
 			res, e := writeErrorResult(err)
 			return res, struct{}{}, e
 		}

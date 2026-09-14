@@ -618,6 +618,33 @@ func TestMockRepo_AllMethods(t *testing.T) {
 			t.Errorf("DeleteClusterType = %v", err)
 		}
 	})
+	t.Run("CreateClusterGroup", func(t *testing.T) {
+		got, err := (&MockRepo{CreateClusterGroupFunc: func(_ context.Context, _ string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+			return &domain.ClusterGroup{ID: 1, Name: in.Name}, nil
+		}}).CreateClusterGroup(context.Background(), "t", domain.ClusterGroupWrite{Name: "DC Clusters"})
+		if err != nil || got == nil || got.Name != "DC Clusters" {
+			t.Errorf("CreateClusterGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateClusterGroup", func(t *testing.T) {
+		got, err := (&MockRepo{UpdateClusterGroupFunc: func(_ context.Context, _ string, id int, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+			return &domain.ClusterGroup{ID: id}, nil
+		}}).UpdateClusterGroup(context.Background(), "t", 7, domain.ClusterGroupWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateClusterGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteClusterGroup", func(t *testing.T) {
+		err := (&MockRepo{DeleteClusterGroupFunc: func(_ context.Context, _ string, id int) error {
+			if id != 3 {
+				t.Errorf("id = %d, want 3", id)
+			}
+			return nil
+		}}).DeleteClusterGroup(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteClusterGroup = %v", err)
+		}
+	})
 	t.Run("CreateCircuit", func(t *testing.T) {
 		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
 			return &domain.Circuit{ID: 1, CID: in.CID}, nil
@@ -893,5 +920,14 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	}
 	if err := repo.DeleteClusterType(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteClusterType = %v", err)
+	}
+	if cg, err := repo.CreateClusterGroup(ctx, "t", domain.ClusterGroupWrite{Name: "DC Clusters"}); err != nil || cg.Name != "DC Clusters" {
+		t.Errorf("CreateClusterGroup = (%v, %v)", cg, err)
+	}
+	if cg, err := repo.UpdateClusterGroup(ctx, "t", 7, domain.ClusterGroupWrite{Name: "DC Clusters"}); err != nil || cg.ID != 7 {
+		t.Errorf("UpdateClusterGroup = (%v, %v)", cg, err)
+	}
+	if err := repo.DeleteClusterGroup(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteClusterGroup = %v", err)
 	}
 }

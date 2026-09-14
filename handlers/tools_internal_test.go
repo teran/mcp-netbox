@@ -295,6 +295,18 @@ func (s *stubRepo) DeleteClusterType(ctx context.Context, token string, id int) 
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) CreateClusterGroup(ctx context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateClusterGroup(ctx context.Context, token string, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteClusterGroup(ctx context.Context, token string, id int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) {
 	t.Parallel()
 

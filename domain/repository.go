@@ -126,4 +126,8 @@ type NetworkRepository interface {
 	CreateClusterType(ctx context.Context, token string, in ClusterTypeWrite) (*ClusterType, error)
 	UpdateClusterType(ctx context.Context, token string, id int, in ClusterTypeWrite) (*ClusterType, error)
 	DeleteClusterType(ctx context.Context, token string, id int) error
+
+	CreateClusterGroup(ctx context.Context, token string, in ClusterGroupWrite) (*ClusterGroup, error)
+	UpdateClusterGroup(ctx context.Context, token string, id int, in ClusterGroupWrite) (*ClusterGroup, error)
+	DeleteClusterGroup(ctx context.Context, token string, id int) error
 }

@@ -3207,3 +3207,146 @@ func TestNetworkService_DeleteClusterType(t *testing.T) {
 		}
 	})
 }
+
+func TestNetworkService_CreateClusterGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateClusterGroupFunc: func(_ context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+				return &domain.ClusterGroup{ID: 1, Name: in.Name}, nil
+			},
+		})
+		p, err := svc.CreateClusterGroup(context.Background(), domain.ClusterGroupWrite{Name: "DC Clusters"})
+		if err != nil {
+			t.Fatalf("CreateClusterGroup() returned error: %v", err)
+		}
+		if p.ID != 1 || p.Name != "DC Clusters" {
+			t.Errorf("p = %+v, want id 1 name 'DC Clusters'", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateClusterGroupFunc: func(_ context.Context, _ string, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.CreateClusterGroup(context.Background(), domain.ClusterGroupWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != ve {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateClusterGroupFunc: func(_ context.Context, _ string, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateClusterGroup(context.Background(), domain.ClusterGroupWrite{Name: "DC Clusters"})
+		if err == nil || !containsService(err.Error(), "create cluster group:") {
+			t.Errorf("err = %v, want it to contain 'create cluster group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateClusterGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateClusterGroupFunc: func(_ context.Context, _ string, id int, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+				return &domain.ClusterGroup{ID: id, Name: "DC Clusters"}, nil
+			},
+		})
+		p, err := svc.UpdateClusterGroup(context.Background(), 7, domain.ClusterGroupWrite{Name: "DC Clusters"})
+		if err != nil {
+			t.Fatalf("UpdateClusterGroup() returned error: %v", err)
+		}
+		if p.ID != 7 {
+			t.Errorf("p = %+v, want id 7", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateClusterGroupFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+				return nil, ve
+			},
+		})
+		_, err := svc.UpdateClusterGroup(context.Background(), 7, domain.ClusterGroupWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateClusterGroupFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateClusterGroup(context.Background(), 7, domain.ClusterGroupWrite{})
+		if err == nil || !containsService(err.Error(), "update cluster group:") {
+			t.Errorf("err = %v, want it to contain 'update cluster group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteClusterGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteClusterGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+				return nil
+			},
+		})
+		if err := svc.DeleteClusterGroup(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteClusterGroup() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteClusterGroupFunc: func(_ context.Context, _ string, _ int) error {
+				return ve
+			},
+		})
+		err := svc.DeleteClusterGroup(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != ve {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteClusterGroupFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteClusterGroup(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete cluster group:") {
+			t.Errorf("err = %v, want it to contain 'delete cluster group:'", err)
+		}
+	})
+}

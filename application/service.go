@@ -655,3 +655,31 @@ func (s *NetworkService) DeleteClusterType(ctx context.Context, id int) error {
 	}
 	return nil
 }
+
+// CreateClusterGroup relays a cluster group create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateClusterGroup(ctx context.Context, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	resp, err := s.repo.CreateClusterGroup(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create cluster group: %w", err)
+	}
+	return resp, nil
+}
+
+// UpdateClusterGroup relays a cluster group update to the repository.
+func (s *NetworkService) UpdateClusterGroup(ctx context.Context, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	resp, err := s.repo.UpdateClusterGroup(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update cluster group: %w", err)
+	}
+	return resp, nil
+}
+
+// DeleteClusterGroup relays a cluster group delete to the repository.
+func (s *NetworkService) DeleteClusterGroup(ctx context.Context, id int) error {
+	if err := s.repo.DeleteClusterGroup(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete cluster group: %w", err)
+	}
+	return nil
+}

@@ -1133,6 +1133,46 @@ func (c *Client) DeleteClusterType(ctx context.Context, token string, id int) er
 	return mErr
 }
 
+// CreateClusterGroup creates a new cluster group via POST
+// /api/virtualization/cluster-groups/.
+func (c *Client) CreateClusterGroup(ctx context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	payload, err := json.Marshal(clusterGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal cluster group create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/virtualization/cluster-groups/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalClusterGroup(raw)
+}
+
+// UpdateClusterGroup partially updates a cluster group via PATCH
+// /api/virtualization/cluster-groups/<id>/.
+func (c *Client) UpdateClusterGroup(ctx context.Context, token string, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+	payload, err := json.Marshal(clusterGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal cluster group update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/virtualization/cluster-groups/%d/", id)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+	return unmarshalClusterGroup(raw)
+}
+
+// DeleteClusterGroup deletes a cluster group via DELETE
+// /api/virtualization/cluster-groups/<id>/.
+func (c *Client) DeleteClusterGroup(ctx context.Context, token string, id int) error {
+	path := fmt.Sprintf("/api/virtualization/cluster-groups/%d/", id)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+	return mErr
+}
+
 // convertPaginated converts a paginated response from wire type W to domain type D.
 func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(W) D) *domain.PaginatedResponse[D] {
 	if resp == nil {
@@ -2165,6 +2205,43 @@ func unmarshalClusterType(raw domain.RawObject) (*domain.ClusterType, error) {
 // wireClusterTypeToDomain converts a wire cluster type to the domain model.
 func wireClusterTypeToDomain(w WireClusterType) domain.ClusterType {
 	return domain.ClusterType{
+		ID:           w.ID,
+		URL:          w.URL,
+		Name:         w.Name,
+		Slug:         w.Slug,
+		Display:      w.Display,
+		Description:  w.Description,
+		Tags:         wireTagsToDomain(w.Tags),
+		CustomFields: w.CustomFields,
+		Created:      w.Created,
+		LastUpdated:  w.LastUpdated,
+	}
+}
+
+func clusterGroupWriteToWire(in domain.ClusterGroupWrite) WireClusterGroupWrite {
+	return WireClusterGroupWrite{
+		Name:         in.Name,
+		Slug:         in.Slug,
+		Description:  in.Description,
+		Tags:         in.Tags,
+		CustomFields: in.CustomFields,
+	}
+}
+
+// unmarshalClusterGroup decodes a cluster group response body into a
+// domain.ClusterGroup.
+func unmarshalClusterGroup(raw domain.RawObject) (*domain.ClusterGroup, error) {
+	var w WireClusterGroup
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal cluster group: %w", err)
+	}
+	d := wireClusterGroupToDomain(w)
+	return &d, nil
+}
+
+// wireClusterGroupToDomain converts a wire cluster group to the domain model.
+func wireClusterGroupToDomain(w WireClusterGroup) domain.ClusterGroup {
+	return domain.ClusterGroup{
 		ID:           w.ID,
 		URL:          w.URL,
 		Name:         w.Name,
