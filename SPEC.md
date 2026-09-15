@@ -652,6 +652,21 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
   outputs where avoidable. The NetBox token is never logged, and its type
   implements safe redaction (`String`/`GoString`/`MarshalJSON`). URLs are logged
   via `url.Redacted()` to strip any embedded credentials.
+- **Structural redaction (S02):** the server does not rely on a literal
+  `secret:true` annotation plus a single central redaction helper. Instead,
+  redaction is **structural**:
+  - The NetBox auth token is never written to logs. The `Authorization` header
+    is excluded from the outbound request log, and the token type implements
+    safe `String`/`GoString`/`MarshalJSON` redaction so it cannot leak even if
+    logged indirectly.
+  - `domain.ValidationError.Error()` carries **only the HTTP status code** and
+    never the response body. The NetBox validation body is delivered to the
+    model exclusively via `structuredContent` (the `validation_errors` field),
+    so it never flows through the error string or any log line.
+  - Consequence: no secrets, tokens, or passwords appear in logs or in tool
+    output. Any secret-like value is excluded at the source (never logged,
+    never placed in the error string) rather than being scrubbed after the
+    fact.
 - **CRUD ordering (S3):** the read tools are grouped as **read** operations,
   and the write tools as typed create/update/delete operations. Read tools carry
   `readOnlyHint: true` and `destructiveHint: false`; create/update carry
