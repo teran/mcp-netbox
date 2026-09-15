@@ -27,8 +27,8 @@ func boolPtr(b bool) *bool {
 }
 
 // readOnlyTool returns tool annotations for one of the read-only NetBox query
-// tools. Every tool in this server is read-only and operates on a closed
-// domain (the NetBox inventory), so these hints are constant across tools.
+// tools. Every read tool operates on a closed domain (the NetBox inventory),
+// so these hints are constant across the read tools.
 func readOnlyTool(title string) *mcp.ToolAnnotations {
 	return &mcp.ToolAnnotations{
 		Title:           title,

@@ -248,9 +248,17 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 }
 
 // serverInstructions are the general usage rules advertised to MCP clients.
-const serverInstructions = `This server provides READ-ONLY access to the NetBox inventory.
+const serverInstructions = `This server provides CRUD access to the NetBox inventory.
 
-- All tools are read-only and safe to call; none of them modify NetBox.
+- Read tools (get_*) are safe and never modify NetBox.
+- Write tools create and update objects (create_* / update_*); they are not
+  idempotent. Update tools perform a partial PATCH merge: only the fields you
+  provide are changed.
+- Delete tools (delete_*) permanently and irreversibly remove an object and are
+  marked with a destructive hint. Never call a delete tool unless the user has
+  explicitly asked to delete that specific object.
+- Validation is enforced by NetBox: a rejected create/update returns the DRF
+  validation body to the model so it can correct the payload.
 - All list tools are paginated: use page (1-based) and page_size (max 1000)
   to navigate results. An empty results array means no objects matched your
   filters — it is not an error.

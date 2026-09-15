@@ -16,7 +16,7 @@ type toolDef struct {
 
 // toolDefs returns the ordered set of tool definitions registered by
 // RegisterTools. The order follows the read -> write/update -> delete grouping
-// (S3); every tool here is read-only.
+// (S3): the read tools appear first, followed by create/update and delete tools.
 //
 //nolint:maintidx // data-declaration function; the cyclomatic count is inherent to listing every tool
 func toolDefs() []toolDef {
