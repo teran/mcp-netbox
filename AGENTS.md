@@ -37,13 +37,17 @@ This document describes the agents/assistants involved in the development and op
 | `handlers/tools.go`                         | MCP tool handler factories + I/O types          |
 | `handlers/registration.go`                  | Tool registration via `RegisterTools()` (annotations + instructions); tool definitions in `handlers/tooldefs.go` |
 | `handlers/server.go`                        | HTTP mux builder, middleware chain assembly, service-per-request injection |
+| `handlers/validate.go`                      | Write-payload hygiene: positive-ID validation, CR/LF (CRLF) sanitization applied to every string field before marshalling |
+| `handlers/registration.go`                  | Tool registration via `RegisterTools()` (annotations + instructions); `registerWriteTool`/`registerDeleteTool` for create/update/delete; tool definitions in `handlers/tooldefs.go` |
 | `application/service.go`                    | Business logic / use case layer                 |
 | `domain/`                                   | Domain models + repository interfaces (ports), request_id context helpers (`WithRequestID`/`RequestIDFromContext`) |
+| `domain/errors.go`                          | `domain.ValidationError` — surfaces a NetBox 400 validation failure; `Error()` carries only the status code (never the body), the body goes to the model via structured content |
 | `domain/repository.go`                      | NetworkRepository interface (port), RawObject type for generic object retrieval |
 | `infrastructure/netbox/client.go`           | NetBox REST client via `resty.dev/v3` (DNS-rebinding dialer + circuit breaker transport), `X-Request-ID` forwarding + per-request outbound log |
 | `infrastructure/netbox/models.go`           | JSON wire models + `toDomain()` conversion      |
 | `internal/logging/logging.go`               | logrus setup: channel-by-transport, `LOG_LEVEL` gating, `LOG_FORMAT`/`LOG_FILENAME` |
 | `internal/logging/slog.go`                  | slog→logrus handler, `NewSlogLogger` (SDK logger wiring, L7/G10) |
+| `e2e/netbox_e2e_test.go`                    | End-to-end integration test against a real NetBox (via go-docker-testsuite), gated behind `MCP_NETBOX_E2E=1`; exercises CRUD over the full MCP protocol |
 
 ## Tool-to-Agent Mapping
 
@@ -63,6 +67,21 @@ This document describes the agents/assistants involved in the development and op
 | `get_circuit_terminations` | MCP Server | `GET /api/circuits/circuit-terminations/`         |
 | `get_cables`               | MCP Server | `GET /api/dcim/cables/`                           |
 | `get_object_by_id`         | MCP Server | `GET /api/*/<type>/<id>/`                         |
+
+In addition to the read tools above, the server registers **typed write tools**
+for every one of the **25 entities**: `create_<e>` (POST), `update_<e>`
+(partial PATCH), and `delete_<e>` (irreversible, `DestructiveHint: true`) —
+75 write tools in total (89 tools overall). The entity set is: `site`, `device`,
+`ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `rack`,
+`interface`, `circuit_termination`, `cable`, `vm_interface`, `provider`,
+`tenant`, `manufacturer`, `device_type`, `location`, `cluster_type`,
+`cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`.
+
+The write tools map to the corresponding NetBox endpoints (`POST`, `PATCH`,
+`DELETE`) under `/api/dcim/`, `/api/ipam/`, `/api/virtualization/`,
+`/api/circuits/`, and `/api/tenancy/`. Authorization and write-payload
+validation are delegated to NetBox; a NetBox 400 is surfaced to the model as a
+structured `ValidationError`.
 
 ## Metrics
 

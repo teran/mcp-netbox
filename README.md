@@ -15,15 +15,15 @@
 
 MCP (Model Context Protocol) server for [NetBox](https://netboxlabs.com/) — infrastructure source of truth.
 
-This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits data through the MCP protocol using a **hybrid** transport — **Streamable HTTP** (remote) or **STDIO** (local) — allowing AI assistants to query your NetBox instance.
+This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits data through the MCP protocol using a **hybrid** transport — **Streamable HTTP** (remote) or **STDIO** (local) — allowing AI assistants to query **and manage** your NetBox instance.
 
 ## Features
 
-- **Read-only** — only exposes `GET` operations. No create, update, or delete capabilities.
+- **Full CRUD** — 14 read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for all **25 entities** (89 tools total). `create_*` (POST) and `update_*` (partial PATCH) modify NetBox; `delete_*` is **irreversible** and each delete tool is flagged with `DestructiveHint: true`.
 - **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected via `TRANSPORT` (default `http`).
 - **Per-request token authentication (HTTP)** — the NetBox API token is passed in the `Authorization` header of each MCP request. No server-side token storage.
 - **Env-token authentication (STDIO)** — in STDIO mode the NetBox token is provided once via the `NETBOX_TOKEN` environment variable.
-- **Comprehensive NetBox coverage** — sites, devices, IP addresses, prefixes, VLANs, VMs, clusters, circuits, racks, cables, interfaces, circuit terminations, and generic `get_object_by_id`.
+- **Comprehensive NetBox coverage** — DCIM, IPAM, virtualization, tenancy, and circuits entities (sites, devices, IP addresses, prefixes, VLANs, VMs, clusters, circuits, racks, cables, interfaces, circuit terminations, and more), each available for read and, via typed write tools, for create/update/delete. Plus generic `get_object_by_id`.
 - **Prometheus metrics** — on a separate HTTP server (default `:8081`).
 - **Rate limiting** — configurable global and per-client rate limits.
 - **Circuit breaker** — protects NetBox from cascading failures when the upstream is unreachable.
@@ -31,6 +31,10 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 - **Pagination** — all list tools support `page` and `page_size` parameters (max 1000) with `next`/`previous` navigation URLs.
 
 ## Tools
+
+The server exposes **89 MCP tools**: **14 read-only** queries and **75 typed write tools** — `create_*`, `update_*` and `delete_*` for every one of the **25 entities**.
+
+### Read tools
 
 | Tool | Description |
 |------|-------------|
@@ -50,6 +54,16 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 | `get_object_by_id` | Get any object by type and ID (25+ supported types) |
 
 > All list tools support a `q` parameter for free-text search across all fields and a `tag` parameter for tag-based filtering.
+
+### Write tools — create / update
+
+For every entity `<e>` there is a **`create_<e>`** (POST, creates a new object) and an **`update_<e>`** (PATCH, **partial update** — only the fields you provide are changed). Write payloads are **validated on the NetBox side**: a NetBox 400 response is surfaced to the model as a structured `ValidationError` (the error string itself never includes the response body). The 25 entities are:
+
+`site`, `device`, `ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `rack`, `interface`, `circuit_termination`, `cable`, `vm_interface`, `provider`, `tenant`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`
+
+### Write tools — delete (destructive)
+
+For every entity `<e>` there is a **`delete_<e>`** tool that **permanently removes** the object. Deletion is **irreversible**, and every delete tool is annotated with **`DestructiveHint: true`** so MCP clients can require explicit confirmation before it runs. Ensure the object has no dependencies in NetBox before deleting.
 
 ## Configuration
 
@@ -136,6 +150,20 @@ go test -race -coverprofile=coverage.out -count=1 ./...
 go tool cover -func=coverage.out
 ```
 
+### End-to-end (e2e)
+
+An integration test (`e2e/netbox_e2e_test.go`) boots a **real NetBox** (via
+go-docker-testsuite) and drives the tools over the full MCP JSON-RPC protocol
+in-process, exercising CRUD across DCIM, IPAM, virtualization, circuits, and
+tenancy. It requires a **running Docker daemon** (it pulls a multi-container
+NetBox stack) and is **gated** behind an environment variable:
+
+```bash
+MCP_NETBOX_E2E=1 go test -race -count=1 ./e2e/...
+```
+
+CI runs `go test ./...` without Docker, so the e2e test **skips by default**.
+
 ## Linting
 
 ```bash
@@ -166,7 +194,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/teran/mcp-netb
 - **Token handling (HTTP)**: The NetBox API token is passed per-request in the `Authorization` header. It is never stored on the server, written to logs, or persisted between requests.
 - **Token handling (STDIO)**: The NetBox API token is provided once via the `NETBOX_TOKEN` environment variable at startup and is never logged.
 - **No OAuth2**: This server uses NetBox personal access tokens directly (Bearer in HTTP, env in STDIO). OAuth2 is not used; authentication and authorization are delegated entirely to NetBox.
-- **Read-only**: The server only exposes GET operations. No write access to NetBox.
+- **Full CRUD, authorization by NetBox**: The server exposes create/update/delete tools in addition to reads. The server itself **never validates** tokens or write payloads — NetBox enforces both. Write validation failures come back as a structured `ValidationError`. Delete tools are irreversible and flagged `DestructiveHint: true`; treat them accordingly.
 - **TLS**: Terminate TLS at a reverse proxy (nginx, Envoy) placed in front of the HTTP/SSE listener. TLS is never implemented inside the server.
 - **Rate limiting**: Built-in rate limiting prevents abuse (configurable via environment variables).
 - **Circuit breaker**: Built-in circuit breaker prevents cascading failures when NetBox is unreachable. After 5 consecutive transport-level failures, the circuit opens for 30 seconds.

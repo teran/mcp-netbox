@@ -3,7 +3,7 @@
 ## Overview
 
 An MCP (Model Context Protocol) server for [NetBox](https://netboxlabs.com/).
-This server exposes NetBox infrastructure data through the MCP protocol using **Streamable HTTP** transport (remote mode), allowing AI assistants to query DCIM, IPAM, virtualization, tenancy, and circuits data.
+This server exposes NetBox infrastructure data through the MCP protocol using **Streamable HTTP** transport (remote mode), allowing AI assistants to query and manage DCIM, IPAM, virtualization, tenancy, and circuits data.
 
 ## Repository Location (R5)
 
@@ -20,7 +20,7 @@ README badge URLs, the CI workflow triggers, and the image/release tagging schem
 - **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected via the `TRANSPORT` env var (default `http`).
 - **Token from request headers (HTTP)** — the NetBox API token is read from the `Authorization` header of each MCP request, not from an environment variable. This enables per-user authentication in multi-tenant setups.
 - **Token from environment (STDIO)** — in STDIO mode the NetBox token is read once from `NETBOX_TOKEN` at startup (there is no HTTP header to carry it per request).
-- **Read-only** — only exposes `GET` operations against NetBox. No create, update, or delete capabilities.
+- **Full CRUD** — 14 read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for all 25 entities (89 tools total). `create_*`/`update_*` modify NetBox (POST / partial PATCH); `delete_*` is **irreversible** and flagged `DestructiveHint: true`.
 - **Transparent token relay** — the MCP server never inspects or validates the token; it passes it through to NetBox, which handles all authentication and authorization.
 
 ## Transport Decision
@@ -52,10 +52,14 @@ NetBox REST API:
   the `NETBOX_TOKEN` environment variable at startup and used by a single shared
   NetBox client for the process lifetime.
 
-Authorization (which objects a token may read) is delegated entirely to NetBox.
-This server only relays the credential; it does not implement an authorization
-decision layer. This keeps the server simple (no OAuth2 machinery, token
-endpoints, or consent flow) and matches the existing NetBox security model.
+Authorization (which objects a token may read or modify, and which write
+operations it may perform) is delegated entirely to NetBox. This server only
+relays the credential and forwards the requested operation; it does not
+implement an authorization decision layer. The server likewise does not
+validate write payloads — NetBox is the source of truth for both authorization
+and data validation (a NetBox 400 is surfaced as a `ValidationError`). This
+keeps the server simple (no OAuth2 machinery, token endpoints, or consent flow)
+and matches the existing NetBox security model.
 
 ## Deployment Type: Hybrid
 
@@ -231,21 +235,22 @@ when `LOG_LEVEL` is set (L2).
 
 Every tool is registered with **Annotations** and per-tool **Instructions** metadata.
 
+The server exposes **89 tools**: 14 read-only queries and, for each of the 25
+entities, a `create_*`, an `update_*`, and a `delete_*` (75 write tools).
+
 The server-wide instructions (`ServerOptions.Instructions`) tell clients that
-the server is **read-only**, that all list tools are **paginated** (use `page`
-1-based and `page_size` max 1000, an empty array is not an error), that filters
-are **additive**, and that authentication is enforced entirely by NetBox (Bearer
-in HTTP, `NETBOX_TOKEN` env in STDIO).
+all **list** tools are **paginated** (use `page` 1-based and `page_size` max
+1000, an empty array is not an error), that filters are **additive**, and that
+authentication is enforced entirely by NetBox (Bearer in HTTP, `NETBOX_TOKEN`
+env in STDIO).
 
-All 14 tools share the same annotations because they are all read-only queries
-against the closed NetBox inventory domain:
+The tools split into three annotation groups:
 
-- `readOnlyHint: true` — the tool never mutates state.
-- `destructiveHint: false` — the tool is not destructive.
-- `idempotentHint: true` — repeated identical calls return the same result.
-- `openWorldHint: false` — the tool operates on a closed domain (the configured NetBox instance).
+- **Read tools** (14): `readOnlyHint: true`, `idempotentHint: true`, `destructiveHint: false`, `openWorldHint: false` — they never mutate state.
+- **Write tools — create/update** (50): `readOnlyHint: false`, `idempotentHint: false` (a create produces a new object each call), `destructiveHint: false`, `openWorldHint: false`.
+- **Write tools — delete** (25): `readOnlyHint: false`, `idempotentHint: true` (deleting a non-existent object is a no-op), `destructiveHint: true` (irreversible), `openWorldHint: false`.
 
-The per-tool `title` and `instructions` are listed under each tool below.
+The per-tool `title` and `instructions` are listed under each read tool below.
 
 ### 1. `get_sites`
 
@@ -475,7 +480,7 @@ Retrieve any NetBox object by its type and numeric ID.
 | `id`         | int    | yes      | Numeric ID of the object                       |
 | `params`     | map    | no       | Additional query parameters to pass to NetBox (optional) |
 
-**Output**: Full object detail.
+**Output**: Full object detail. The `data` field is of arbitrary type (`any`) because it mirrors the raw NetBox object of the requested type.
 
 **Annotations**: `title` — "Get Object by ID"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
 
@@ -647,9 +652,12 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
   outputs where avoidable. The NetBox token is never logged, and its type
   implements safe redaction (`String`/`GoString`/`MarshalJSON`). URLs are logged
   via `url.Redacted()` to strip any embedded credentials.
-- **Read-only ordering (S3):** all tools are grouped as **read** operations —
-  the server exposes only `GET` against NetBox and has no write/update/delete
-  capabilities. Tool metadata reflects this (`destructiveHint: false`).
+- **CRUD ordering (S3):** the read tools are grouped as **read** operations,
+  and the write tools as typed create/update/delete operations. Read tools carry
+  `readOnlyHint: true` and `destructiveHint: false`; create/update carry
+  `destructiveHint: false`; delete tools carry `destructiveHint: true` because
+  deletion is **irreversible**. Clients should treat delete tools with explicit
+  confirmation.
 - **Security-scan findings (S5/N8):** findings from security scanners
   (**gosec**, **govulncheck**) are **fixed rather than suppressed**. There are no
   blanket suppressions or default excludes; any `//nolint` is narrowly scoped
@@ -681,6 +689,7 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
 | Resource not found | `isError: true` |
 | NetBox unavailable | `isError: true` |
 | Invalid token | `isError: true` |
+| NetBox 400 validation on write (create/update/delete) | `ValidationError` — returned as structured content (field-level errors from the NetBox response body); the `Error()` string carries only the status code and never the body |
 
 ## Health Check
 
@@ -722,7 +731,16 @@ goreleaser build --snapshot --clean
 ```bash
 go test -race -coverprofile=coverage.out -count=1 ./...
 go tool cover -func=coverage.out   # total must be >= 95%
+
+# End-to-end against a real NetBox (requires Docker; gated):
+MCP_NETBOX_E2E=1 go test -race -count=1 ./e2e/...
 ```
+
+The e2e test (`e2e/netbox_e2e_test.go`) boots a real NetBox via
+go-docker-testsuite and drives CRUD over the full MCP protocol in-process. It is
+gated behind `MCP_NETBOX_E2E=1` because it needs a running Docker daemon and
+pulls a multi-container NetBox stack; CI runs `go test ./...` without Docker, so
+it skips by default.
 
 ### Linting
 ```bash
