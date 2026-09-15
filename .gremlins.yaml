@@ -21,11 +21,12 @@
 #                             (with ~200 covered mutants even one survivor gives
 #                             ~99.5%) and fails the build. This is the real hard
 #                             gate for C7/N15/N19.
-#   mutant-coverage: 75    -> below the observed ~82-91%, so the current code
-#                             passes with margin while still guarding against
-#                             large mutation-coverage regressions (new untested
+#   mutant-coverage: 80    -> at the spec floor (>= 80) and below the observed
+#                             ~82-91%, so the current code still passes with
+#                             margin while guarding against large
+#                             mutation-coverage regressions (new untested
 #                             branches).
 unleash:
   threshold:
     efficacy: 99.99
-    mutant-coverage: 75
+    mutant-coverage: 80
