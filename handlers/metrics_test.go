@@ -123,6 +123,60 @@ func TestMetricsMiddleware(t *testing.T) {
 	})
 }
 
+func TestSanitizeToolResult(t *testing.T) {
+	t.Parallel()
+
+	t.Run("populates sanitized JSON text content", func(t *testing.T) {
+		reg := prometheus.NewRegistry()
+		m := NewMetrics(reg)
+
+		handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
+			return &mcp.CallToolResult{}, testOutput{Result: "ok \x1b[31mred\x1b[0m"}, nil
+		})
+
+		result, _, err := handler(context.Background(), nil, testInput{})
+		if err != nil {
+			t.Fatalf("handler returned error: %v", err)
+		}
+		if result.IsError {
+			t.Fatal("result.IsError = true, want false")
+		}
+		if len(result.Content) != 1 {
+			t.Fatalf("len(result.Content) = %d, want 1", len(result.Content))
+		}
+		tc, ok := result.Content[0].(*mcp.TextContent)
+		if !ok {
+			t.Fatalf("Content[0] type = %T, want *mcp.TextContent", result.Content[0])
+		}
+		// json.Marshal escapes ESC as \u001b, so the text form is guaranteed free
+		// of raw ANSI/control bytes; the text is the marshalled output.
+		want := `{"result":"ok \u001b[31mred\u001b[0m"}`
+		if got := tc.Text; got != want {
+			t.Errorf("text = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("passes error results through untouched", func(t *testing.T) {
+		reg := prometheus.NewRegistry()
+		m := NewMetrics(reg)
+
+		handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
+			return &mcp.CallToolResult{IsError: true}, testOutput{Result: "\x1b[31mboom\x1b[0m"}, nil
+		})
+
+		result, _, err := handler(context.Background(), nil, testInput{})
+		if err != nil {
+			t.Fatalf("handler returned error: %v", err)
+		}
+		if !result.IsError {
+			t.Fatal("result.IsError = false, want true")
+		}
+		if len(result.Content) != 0 {
+			t.Errorf("len(result.Content) = %d, want 0 (error results untouched)", len(result.Content))
+		}
+	})
+}
+
 func TestRegisterMetricsOnRegistry(t *testing.T) {
 	t.Parallel()
 

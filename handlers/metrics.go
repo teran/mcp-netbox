@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -37,26 +38,48 @@ func NewMetrics(reg *prometheus.Registry) *Metrics {
 	return m
 }
 
-// WrapToolHandler wraps an MCP tool handler with metrics recording.
+// WrapToolHandler wraps an MCP tool handler with metrics recording and output
+// sanitization. The metrics recording is skipped when metrics is nil (used by
+// tests), but the text-form sanitization is always applied so tool output is
+// consistently scrubbed of ANSI/control characters regardless of caller.
 func WrapToolHandler[I, O any](metrics *Metrics, toolName string, handler mcp.ToolHandlerFor[I, O]) mcp.ToolHandlerFor[I, O] {
-	if metrics == nil {
-		return handler
-	}
 	return func(ctx context.Context, req *mcp.CallToolRequest, in I) (*mcp.CallToolResult, O, error) {
 		start := time.Now()
 		result, out, err := handler(ctx, req, in)
 		duration := time.Since(start)
 
-		statusClass := "2xx"
-		if err != nil || (result != nil && result.IsError) {
-			statusClass = "error"
+		if metrics != nil {
+			statusClass := "2xx"
+			if err != nil || (result != nil && result.IsError) {
+				statusClass = "error"
+			}
+
+			metrics.toolRequestsTotal.WithLabelValues(toolName, statusClass).Inc()
+			metrics.toolDuration.WithLabelValues(toolName).Observe(duration.Seconds())
 		}
 
-		metrics.toolRequestsTotal.WithLabelValues(toolName, statusClass).Inc()
-		metrics.toolDuration.WithLabelValues(toolName).Observe(duration.Seconds())
-
-		return result, out, err
+		return sanitizeToolResult(result, out), out, err
 	}
+}
+
+// sanitizeToolResult ensures the text form of a successful tool result is free
+// of ANSI escape sequences and control characters (S09/N23). The SDK derives
+// the text fallback from the same typed output it marshals into
+// StructuredContent; we pre-populate the sanitized text so that a crafted
+// string field in NetBox data can never inject terminal escapes into the model
+// output. The typed StructuredContent is left untouched (it remains the raw
+// JSON), so no valid data is corrupted. Error results and results that already
+// carry explicit content are passed through unchanged.
+func sanitizeToolResult(res *mcp.CallToolResult, out any) *mcp.CallToolResult {
+	if res == nil || res.IsError || res.Content != nil {
+		return res
+	}
+	jsonBytes, err := json.Marshal(out)
+	if err != nil {
+		return res
+	}
+	res.Content = []mcp.Content{&mcp.TextContent{Text: sanitizeOutput(string(jsonBytes))}}
+	return res
 }
 
 // MetricsMiddleware tracks active request count via gauge.

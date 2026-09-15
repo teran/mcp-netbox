@@ -25,6 +25,50 @@ func sanitizeControl(s string) string {
 	}, s)
 }
 
+// sanitizeOutput strips ANSI escape sequences and C0 control characters from
+// tool-result text (S09/N23). It is applied to the text form of a tool result
+// so that terminal escape sequences or control characters embedded in NetBox
+// data (e.g. in device names or descriptions) can never reach the model. It
+// operates on bytes: only ASCII control bytes (< 0x20, 0x7f) and whole ANSI
+// escape sequences are removed, so valid multi-byte UTF-8 and printable ASCII
+// pass through untouched.
+func sanitizeOutput(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	for i := 0; i < len(s); {
+		c := s[i]
+		if c == 0x1b { // ESC — ANSI escape sequence
+			// CSI: ESC '[' ... final byte in 0x40-0x7e.
+			if i+1 < len(s) && s[i+1] == '[' {
+				j := i + 2
+				for j < len(s) && (s[j] < 0x40 || s[j] > 0x7e) {
+					j++
+				}
+				if j < len(s) {
+					i = j + 1
+					continue
+				}
+				i = j
+				continue
+			}
+			// Two-character escape: ESC + a printable byte.
+			if i+1 < len(s) {
+				i += 2
+				continue
+			}
+			i++
+			continue
+		}
+		if c < 0x20 || c == 0x7f { // C0 control char or DEL
+			i++
+			continue
+		}
+		b.WriteByte(c)
+		i++
+	}
+	return b.String()
+}
+
 // sanitizeMapKeysValues applies sanitizeControl to every key and value of a
 // string map, returning a new map.
 func sanitizeMapKeysValues(m map[string]string) map[string]string {

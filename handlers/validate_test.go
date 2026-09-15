@@ -39,6 +39,35 @@ func TestSanitizeControl(t *testing.T) {
 	}
 }
 
+func TestSanitizeOutput(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{"plain text preserved", "plain", "plain"},
+		{"ANSI CSI sequence stripped", "\x1b[31mred\x1b[0m", "red"},
+		{"ANSI SGR with params stripped", "\x1b[1;31mBOLD\x1b[m", "BOLD"},
+		{"two-char escape stripped", "\x1b(AUTF", "AUTF"},
+		{"C0 control chars removed", "a\x00b\x07c", "abc"},
+		{"DEL removed", "a\x7fb", "ab"},
+		{"tab removed", "a\tb", "ab"},
+		{"newline removed", "a\nb", "ab"},
+		{"multibyte UTF-8 preserved", "привет", "привет"},
+		{"unicode with controls", "caf\x1b[35mé", "café"},
+		{"empty string", "", ""},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := sanitizeOutput(tc.in); got != tc.want {
+				t.Errorf("sanitizeOutput(%q) = %q, want %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestSanitizeMapKeysValues(t *testing.T) {
 	t.Parallel()
 
