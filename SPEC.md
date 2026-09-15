@@ -486,6 +486,17 @@ Retrieve any NetBox object by its type and numeric ID.
 
 **Instructions**: `object_type` is required (e.g. `site`, `device`, `prefix`, `ip_address`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `provider`, `tenant`, `rack`, `cable`, `interface`). Returns an error if the object does not exist or the token lacks permission.
 
+**Rationale (M07/N29):** this is the **single** generic read passthrough in the
+tool set, and it exists deliberately despite the "no generic CRUD/passthrough
+mega-tool" rule:
+- It maps to a real NetBox need: fetching an arbitrary object by numeric ID
+  across the generic `GET /api/*/<type>/<id>/` endpoint, where the object shape
+  is only known at runtime.
+- It is **read-only** (`readOnlyHint: true`), not a write or CRUD mega-tool, so
+  it does not weaken the write path.
+- All 75 write tools (`create_*`/`update_*`/`delete_*`) remain specific and
+  strongly typed; this generic tool never performs mutations.
+
 ---
 
 ### 10. `get_racks`
