@@ -1099,8 +1099,15 @@ type PaginatedOutput[D any] struct {
 }
 
 // GetObjectOutput represents the output for the get_object_by_id tool.
+//
+// Data is typed as `any` (rather than domain.RawObject) so the jsonschema
+// inferred for the tool's output accepts any JSON value. domain.RawObject is
+// json.RawMessage ([]byte), whose inferred schema only admits "null, array",
+// which would make the server reject object payloads during output validation.
+// The handler still stores a domain.RawObject here, whose MarshalJSON emits the
+// raw object inline.
 type GetObjectOutput struct {
-	Data domain.RawObject `json:"data"`
+	Data any `json:"data"`
 }
 
 // SiteOutput represents the output for the create/update site tools.

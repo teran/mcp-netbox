@@ -323,7 +323,7 @@ func TestClient_ListCircuits(t *testing.T) {
 					"id": 1,
 					"cid": "CIR-001",
 					"provider": {"id": 1, "name": "ATT", "url": "", "slug": "att"},
-					"circuit_type": {"id": 1, "name": "Dark Fiber", "url": "", "slug": "dark-fiber"},
+					"type": {"id": 1, "name": "Dark Fiber", "url": "", "slug": "dark-fiber"},
 					"status": {"value": "active", "label": "Active"},
 					"created": "",
 					"last_updated": ""

@@ -139,7 +139,7 @@ type WireClusterWrite struct {
 type WireCircuitWrite struct {
 	CID          string         `json:"cid,omitempty"`
 	Provider     *int           `json:"provider,omitempty"`
-	CircuitType  *int           `json:"circuit_type,omitempty"`
+	CircuitType  *int           `json:"type,omitempty"`
 	Tenant       *int           `json:"tenant,omitempty"`
 	Status       *string        `json:"status,omitempty"`
 	Description  *string        `json:"description,omitempty"`
@@ -549,7 +549,7 @@ type (
 		CID          string         `json:"cid"`
 		Display      string         `json:"display,omitempty"`
 		Provider     *WireNested    `json:"provider"`
-		CircuitType  *WireNested    `json:"circuit_type"`
+		CircuitType  *WireNested    `json:"type"`
 		Tenant       *WireNested    `json:"tenant"`
 		Status       *WireLabel     `json:"status"`
 		Description  string         `json:"description,omitempty"`

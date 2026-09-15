@@ -1598,7 +1598,7 @@ func TestClient_CreateCircuit(t *testing.T) {
 		if reqBody["provider"] != float64(2) {
 			t.Errorf("request body = %s, want provider 2", gotBody)
 		}
-		if reqBody["circuit_type"] != float64(3) {
+		if reqBody["type"] != float64(3) {
 			t.Errorf("request body = %s, want circuit_type 3", gotBody)
 		}
 		if circuit.ID != 1 || circuit.CID != "CIR-001" {
