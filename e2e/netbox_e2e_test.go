@@ -1,10 +1,15 @@
+//go:build e2e
+
 // Package e2e contains an end-to-end integration test that runs a real NetBox
 // (via go-docker-testsuite) and drives the MCP server's tools over the full MCP
 // JSON-RPC protocol, in-process and without OS IPC.
 //
-// The test is gated behind MCP_NETBOX_E2E=1 because it requires a running
-// Docker daemon and pulls a multi-container NetBox stack. CI runs `go test
-// ./...` without Docker, so this test skips by default.
+// This test is gated behind the `e2e` build tag because it requires a running
+// Docker daemon and pulls a multi-container NetBox stack. The default unit run
+// (`go test ./...`) builds without the tag, so this test is excluded; it is
+// exercised by `make test-e2e` / `go test -tags e2e ./...`. The runtime guard
+// (MCP_NETBOX_E2E=1) is kept as an additional safety check so the test is a
+// no-op skip unless the operator explicitly opts in.
 package e2e
 
 import (
