@@ -1892,8 +1892,11 @@ func TestClient_CreateCircuitTermination(t *testing.T) {
 		if reqBody["circuit"] != float64(2) {
 			t.Errorf("request body = %s, want circuit 2", gotBody)
 		}
-		if reqBody["site"] != float64(3) {
-			t.Errorf("request body = %s, want site 3", gotBody)
+		if reqBody["termination_type"] != "dcim.site" {
+			t.Errorf("request body = %s, want termination_type dcim.site", gotBody)
+		}
+		if reqBody["termination_id"] != float64(3) {
+			t.Errorf("request body = %s, want termination_id 3", gotBody)
 		}
 		if ct.ID != 1 || ct.TermSide != "A" {
 			t.Errorf("ct = %+v, want id 1 term_side A", ct)
@@ -2076,8 +2079,8 @@ func TestCircuitTerminationWriteToWire(t *testing.T) {
 	speed := 1000000
 	in := domain.CircuitTerminationWrite{TermSide: "A", Circuit: &circ, Site: &site, Speed: &speed}
 	w := circuitTerminationWriteToWire(in)
-	if w.TermSide != "A" || w.Circuit == nil || *w.Circuit != 2 || w.Site == nil || *w.Site != 3 || w.Speed == nil || *w.Speed != 1000000 {
-		t.Errorf("wire = %+v, want term_side A circuit 2 site 3 speed 1000000", w)
+	if w.TermSide != "A" || w.Circuit == nil || *w.Circuit != 2 || w.TerminationType != "dcim.site" || w.TerminationID == nil || *w.TerminationID != 3 || w.Speed == nil || *w.Speed != 1000000 {
+		t.Errorf("wire = %+v, want term_side A circuit 2 termination dcim.site 3 speed 1000000", w)
 	}
 }
 

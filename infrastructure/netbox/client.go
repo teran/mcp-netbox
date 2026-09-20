@@ -1701,15 +1701,23 @@ func unmarshalInterface(raw domain.RawObject) (*domain.Interface, error) {
 // domain side remain nil on the wire side so json.Marshal omits them (required
 // for a partial PATCH body).
 func circuitTerminationWriteToWire(in domain.CircuitTerminationWrite) WireCircuitTerminationWrite {
+	// NetBox 4.6 models a circuit termination's terminating object generically
+	// (termination_type/termination_id). The domain's Site maps to a dcim.site
+	// termination.
+	terminationType := ""
+	if in.Site != nil {
+		terminationType = "dcim.site"
+	}
 	return WireCircuitTerminationWrite{
-		Circuit:       in.Circuit,
-		TermSide:      in.TermSide,
-		Site:          in.Site,
-		Speed:         in.Speed,
-		UpstreamSpeed: in.UpstreamSpeed,
-		Description:   in.Description,
-		Tags:          in.Tags,
-		CustomFields:  in.CustomFields,
+		Circuit:         in.Circuit,
+		TermSide:        in.TermSide,
+		TerminationType: terminationType,
+		TerminationID:   in.Site,
+		Speed:           in.Speed,
+		UpstreamSpeed:   in.UpstreamSpeed,
+		Description:     in.Description,
+		Tags:            in.Tags,
+		CustomFields:    in.CustomFields,
 	}
 }
 
