@@ -63,7 +63,6 @@ func init() {
 	registerCRUD("circuit", circuitCRUD)
 }
 
-
 // TestNetBoxE2E spins up a real NetBox and exercises CRUD for representative
 // entities across NetBox applications (dcim, ipam, virtualization, circuits,
 // tenancy) through the MCP protocol.
@@ -87,7 +86,7 @@ func TestNetBoxE2E(t *testing.T) {
 	netboxClient := infra.NewClient(app.MustURL(), &http.Client{Timeout: 30 * time.Second})
 	svc := application.NewNetworkService(netboxClient, app.SuperuserAPIToken())
 
-	client := newE2E(t, svc)
+	client := newE2E(t, svc, app.MustURL(), app.SuperuserAPIToken())
 	defer client.close()
 
 	// tools/list must expose the full tool inventory, including the write tools.
@@ -121,6 +120,11 @@ func TestNetBoxE2E(t *testing.T) {
 type e2eClient struct {
 	t  *testing.T
 	cs *mcp.ClientSession
+	// baseURL and token let CRUD helpers reach the NetBox REST API directly
+	// for prerequisites that have no MCP tool (e.g. seeding a DCIM device
+	// role, which NetBox requires for device creation but no tool can create).
+	baseURL string
+	token   string
 	// sessCtx lives for the duration of the MCP session; derived from
 	// context.Background() so it is independent of the NetBox readiness ctx.
 	sessCtx    context.Context
@@ -129,7 +133,7 @@ type e2eClient struct {
 
 // newE2E wires an in-process MCP server (with all tools registered on a real
 // NetBox-backed service) to an SDK client over a pair of in-memory pipes.
-func newE2E(t *testing.T, svc *application.NetworkService) *e2eClient {
+func newE2E(t *testing.T, svc *application.NetworkService, baseURL, token string) *e2eClient {
 	t.Helper()
 
 	// Two pairs of pipes: requests flow client->server, responses server->client.
@@ -165,7 +169,7 @@ func newE2E(t *testing.T, svc *application.NetworkService) *e2eClient {
 		t.Fatalf("client connect: %v", err)
 	}
 
-	return &e2eClient{t: t, cs: cs, sessCtx: sessCtx, sessCancel: sessCancel}
+	return &e2eClient{t: t, cs: cs, baseURL: baseURL, token: token, sessCtx: sessCtx, sessCancel: sessCancel}
 }
 
 func (c *e2eClient) close() {
