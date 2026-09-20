@@ -24,10 +24,10 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 - **Per-request token authentication (HTTP)** — the NetBox API token is passed in the `Authorization` header of each MCP request. No server-side token storage.
 - **Env-token authentication (STDIO)** — in STDIO mode the NetBox token is provided once via the `NETBOX_TOKEN` environment variable.
 - **Comprehensive NetBox coverage** — DCIM, IPAM, virtualization, tenancy, and circuits entities (sites, devices, IP addresses, prefixes, VLANs, VMs, clusters, circuits, racks, cables, interfaces, circuit terminations, and more), each available for read and, via typed write tools, for create/update/delete. Plus generic `get_object_by_id`.
-- **Prometheus metrics** — on a separate HTTP server (default `:8081`).
+- **Prometheus metrics** — on a separate internal HTTP server (default `:8081`).
 - **Rate limiting** — configurable global and per-client rate limits.
 - **Circuit breaker** — protects NetBox from cascading failures when the upstream is unreachable.
-- **Health endpoints** — `GET /healthz` (liveness), `GET /readyz` (readiness with circuit breaker status).
+- **Observability endpoints** — on the internal address (`:8081`, separate from the MCP address `:8080`): `GET /metrics` (Prometheus), `GET /healthz` (liveness), `GET /readyz` (readiness with circuit breaker status), `GET /startup` (startup probe), and pprof profiles at `/debug/pprof/*`.
 - **Pagination** — all list tools support `page` and `page_size` parameters (max 1000) with `next`/`previous` navigation URLs.
 
 ## Tools
@@ -74,8 +74,8 @@ All configuration is via environment variables:
 | `NETBOX_URL` | Yes | — | Base URL of the NetBox instance |
 | `NETBOX_TOKEN` | STDIO only | `""` | NetBox API token for **STDIO** transport. Required when `TRANSPORT=stdio` (there is no HTTP `Authorization` header in this mode). Ignored for HTTP. |
 | `TRANSPORT` | No | `http` | MCP transport: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). |
-| `LISTEN_ADDR` | No | `:8080` | TCP address to listen on (HTTP transport) |
-| `PROMETHEUS_METRICS_ADDR` | No | `:8081` | Prometheus `/metrics` endpoint (HTTP transport) |
+| `LISTEN_ADDR` | No | `:8080` | TCP address for the MCP server (HTTP transport) |
+| `INTERNAL_ADDR` | No | `:8081` | Internal observability address (HTTP transport): Prometheus `/metrics`, pprof `/debug/pprof/*`, and `healthz`/`readyz`/`startup` probes |
 | `RATE_LIMIT_GLOBAL` | No | `100` | Global rate limit (requests/second) |
 | `RATE_LIMIT_PER_CLIENT` | No | `10` | Per-client IP rate limit |
 | `ALLOW_PRIVATE_NETBOX` | No | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
@@ -216,7 +216,7 @@ Rate limit exceeded. Increase `RATE_LIMIT_GLOBAL` or `RATE_LIMIT_PER_CLIENT`, or
 The circuit breaker is open — NetBox is unreachable. The server will automatically retry after 30 seconds.
 
 ### Connection issues
-Verify `NETBOX_URL` is reachable from the server. Check `GET /healthz` endpoint.
+Verify `NETBOX_URL` is reachable from the server. Check the `GET /healthz` probe on the internal address (`INTERNAL_ADDR`, default `:8081`).
 
 ### No results returned
 Verify the API token has sufficient permissions in NetBox. Some filters may not match any objects.

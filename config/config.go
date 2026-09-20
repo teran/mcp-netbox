@@ -45,19 +45,22 @@ const (
 )
 
 type Config struct {
-	NetBoxURL             string        `envconfig:"NETBOX_URL" required:"true"`
-	NetBoxToken           string        `envconfig:"NETBOX_TOKEN" default:""`
-	Transport             string        `envconfig:"TRANSPORT" default:"http"`
-	ListenAddr            string        `envconfig:"LISTEN_ADDR" default:":8080"`
-	PrometheusMetricsAddr string        `envconfig:"PROMETHEUS_METRICS_ADDR" default:":8081"`
-	RateLimitGlobal       int           `envconfig:"RATE_LIMIT_GLOBAL" default:"100"`
-	RateLimitPerClient    int           `envconfig:"RATE_LIMIT_PER_CLIENT" default:"10"`
-	TrustedProxy          string        `envconfig:"TRUSTED_PROXY" default:""`
-	WriteTimeout          time.Duration `envconfig:"WRITE_TIMEOUT" default:"300s"`
-	AllowPrivateNetBox    bool          `envconfig:"ALLOW_PRIVATE_NETBOX" default:"false"`
-	LogLevel              string        `envconfig:"LOG_LEVEL" default:""`
-	LogFormat             string        `envconfig:"LOG_FORMAT" default:"text"`
-	LogFilename           string        `envconfig:"LOG_FILENAME" default:"/tmp/mcp-netbox.log"`
+	NetBoxURL   string `envconfig:"NETBOX_URL" required:"true"`
+	NetBoxToken string `envconfig:"NETBOX_TOKEN" default:""`
+	Transport   string `envconfig:"TRANSPORT" default:"http"`
+	ListenAddr  string `envconfig:"LISTEN_ADDR" default:":8080"`
+	// InternalAddr is the internal observability endpoint (default :8081). It
+	// is separate from ListenAddr and serves Prometheus metrics, pprof, and the
+	// healthz/readyz/startup probes (O01/O04).
+	InternalAddr       string        `envconfig:"INTERNAL_ADDR" default:":8081"`
+	RateLimitGlobal    int           `envconfig:"RATE_LIMIT_GLOBAL" default:"100"`
+	RateLimitPerClient int           `envconfig:"RATE_LIMIT_PER_CLIENT" default:"10"`
+	TrustedProxy       string        `envconfig:"TRUSTED_PROXY" default:""`
+	WriteTimeout       time.Duration `envconfig:"WRITE_TIMEOUT" default:"300s"`
+	AllowPrivateNetBox bool          `envconfig:"ALLOW_PRIVATE_NETBOX" default:"false"`
+	LogLevel           string        `envconfig:"LOG_LEVEL" default:""`
+	LogFormat          string        `envconfig:"LOG_FORMAT" default:"text"`
+	LogFilename        string        `envconfig:"LOG_FILENAME" default:"/tmp/mcp-netbox.log"`
 }
 
 func (c Config) validate() error {

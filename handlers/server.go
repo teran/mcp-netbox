@@ -23,7 +23,10 @@ func ServiceFromContext(ctx context.Context) *application.NetworkService {
 	return nil
 }
 
-// NewMux builds the HTTP mux with all middleware and routes configured.
+// NewMux builds the MCP HTTP mux (served on LISTEN_ADDR, :8080) with all
+// middleware and routes configured. Only the MCP endpoint (/mcp) is served
+// here; observability (metrics, pprof, probes) lives on the separate internal
+// mux (see NewInternalMux) on INTERNAL_ADDR (:8081) (O01/O04).
 // Returns the mux and a stop function for background goroutines (e.g. rate limiter eviction).
 func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, cb *circuitbreaker.Breaker, mcpHandler http.Handler) (*http.ServeMux, func()) {
 	injectClientMW := injectClientMiddleware(cfg.NetBoxURL, sharedHTTPClient)
@@ -55,24 +58,6 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 	)
 
 	mux := http.NewServeMux()
-	mux.Handle("GET /healthz", RecoveryMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
-	})))
-	mux.Handle("GET /readyz", RecoveryMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		status := http.StatusOK
-		body := `{"status":"ok"}`
-		if cb != nil && cb.State() == circuitbreaker.StateOpen {
-			status = http.StatusServiceUnavailable
-			body = `{"status":"degraded","circuit_breaker":"open"}`
-		}
-
-		w.WriteHeader(status)
-		_, _ = w.Write([]byte(body))
-	})))
 	mux.Handle("/mcp", handler)
 
 	return mux, stopRateLimit

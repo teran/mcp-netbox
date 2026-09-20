@@ -67,15 +67,15 @@ func TestHealthEndpoint(t *testing.T) {
 
 func TestRun_HealthEndpoint(t *testing.T) {
 	addr := freePort()
-	metricsAddr := freePort()
+	internalAddr := freePort()
 
 	cfg := config.Config{
-		NetBoxURL:             "http://netbox.example.com",
-		ListenAddr:            addr,
-		PrometheusMetricsAddr: metricsAddr,
-		RateLimitGlobal:       1000,
-		RateLimitPerClient:    100,
-		WriteTimeout:          300 * time.Second,
+		NetBoxURL:          "http://netbox.example.com",
+		ListenAddr:         addr,
+		InternalAddr:       internalAddr,
+		RateLimitGlobal:    1000,
+		RateLimitPerClient: 100,
+		WriteTimeout:       300 * time.Second,
 	}
 
 	errCh := make(chan error, 1)
@@ -87,11 +87,11 @@ func TestRun_HealthEndpoint(t *testing.T) {
 		// Send SIGTERM to our own process (simplified)
 	})
 
-	if !waitForServer("http://"+addr+"/healthz", 2*time.Second) {
+	if !waitForServer("http://"+internalAddr+"/healthz", 2*time.Second) {
 		t.Fatal("Server did not start")
 	}
 
-	resp, err := http.Get("http://" + addr + "/healthz") //nolint:noctx
+	resp, err := http.Get("http://" + internalAddr + "/healthz") //nolint:noctx
 	if err != nil {
 		t.Fatalf("Health check failed: %v", err)
 	}
@@ -100,26 +100,34 @@ func TestRun_HealthEndpoint(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusOK)
 	}
+
+	// O01/O04: the liveness probe must NOT be served on the MCP address (:8080).
+	if resp, err := http.Get("http://" + addr + "/healthz"); err == nil { //nolint:noctx
+		defer func() { _ = resp.Body.Close() }()
+		if resp.StatusCode != http.StatusNotFound {
+			t.Errorf("MCP /healthz status = %d, want %d", resp.StatusCode, http.StatusNotFound)
+		}
+	}
 }
 
 func TestRun_MCPHandlerPing(t *testing.T) {
 	addr := freePort()
-	metricsAddr := freePort()
+	internalAddr := freePort()
 
 	cfg := config.Config{
-		NetBoxURL:             "http://netbox.example.com",
-		ListenAddr:            addr,
-		PrometheusMetricsAddr: metricsAddr,
-		RateLimitGlobal:       1000,
-		RateLimitPerClient:    100,
-		WriteTimeout:          300 * time.Second,
+		NetBoxURL:          "http://netbox.example.com",
+		ListenAddr:         addr,
+		InternalAddr:       internalAddr,
+		RateLimitGlobal:    1000,
+		RateLimitPerClient: 100,
+		WriteTimeout:       300 * time.Second,
 	}
 
 	go func() {
 		_ = Run(cfg)
 	}()
 
-	if !waitForServer("http://"+addr+"/healthz", 2*time.Second) {
+	if !waitForServer("http://"+internalAddr+"/healthz", 2*time.Second) {
 		t.Fatal("Server did not start")
 	}
 
@@ -150,15 +158,15 @@ func TestRun_MCPHandlerPing(t *testing.T) {
 
 func TestRun_ShutdownViaSignal(t *testing.T) {
 	addr := freePort()
-	metricsAddr := freePort()
+	internalAddr := freePort()
 
 	cfg := config.Config{
-		NetBoxURL:             "http://netbox.example.com",
-		ListenAddr:            addr,
-		PrometheusMetricsAddr: metricsAddr,
-		RateLimitGlobal:       1000,
-		RateLimitPerClient:    100,
-		WriteTimeout:          300 * time.Second,
+		NetBoxURL:          "http://netbox.example.com",
+		ListenAddr:         addr,
+		InternalAddr:       internalAddr,
+		RateLimitGlobal:    1000,
+		RateLimitPerClient: 100,
+		WriteTimeout:       300 * time.Second,
 	}
 
 	errCh := make(chan error, 1)
@@ -166,7 +174,7 @@ func TestRun_ShutdownViaSignal(t *testing.T) {
 		errCh <- Run(cfg)
 	}()
 
-	if !waitForServer("http://"+addr+"/healthz", 2*time.Second) {
+	if !waitForServer("http://"+internalAddr+"/healthz", 2*time.Second) {
 		t.Fatal("Server did not start")
 	}
 

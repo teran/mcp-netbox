@@ -143,9 +143,9 @@ Test files are excluded from architecture analysis.
 
 `cmd/server` reads `TRANSPORT` and dispatches at startup:
 
-- `http` → `runHTTP`: builds the Streamable HTTP handler (`/mcp`), the
-  Prometheus metrics server, and the full HTTP middleware chain; tokens are
-  injected per request.
+- `http` → `runHTTP`: builds the Streamable HTTP handler (`/mcp`), the full
+  HTTP middleware chain, and a separate internal observability server
+  (metrics, pprof, probes); tokens are injected per request.
 - `stdio` → `runStdio`: builds a single shared `NetworkService` from
   `NETBOX_TOKEN`, registers it directly, and serves over stdin/stdout via the
   SDK's `StdioTransport` (newline-delimited JSON).
@@ -163,7 +163,7 @@ The MCP `Server` is shared; only the transport wiring differs.
 | Tool Registration | `handlers/registration.go` — `RegisterTools()` function         |
 | Logging           | `github.com/sirupsen/logrus` — channel by transport, gated by `LOG_LEVEL`; SDK `slog` wired into logrus |
 | Outbound HTTP     | `resty.dev/v3` — NetBox client (DNS-rebinding dialer + circuit breaker transport preserved) |
-| Metrics           | Prometheus (Go runtime + custom MCP metrics) on port 8081       |
+| Metrics           | Prometheus (Go runtime + custom MCP metrics), pprof, and health/readiness/startup probes on the internal address port 8081 |
 
 ## Configuration (Environment Variables)
 
@@ -172,8 +172,8 @@ The MCP `Server` is shared; only the transport wiring differs.
 | `NETBOX_URL`           | Yes      | —       | Base URL of the NetBox instance (e.g. `http://netbox:8000`). Must be a valid HTTP(S) URL. Loopback, private, and link-local IP addresses are rejected for SSRF protection. |
 | `NETBOX_TOKEN`         | STDIO only | `""` | NetBox API token for **STDIO** transport. Required when `TRANSPORT=stdio`. Ignored for HTTP. |
 | `TRANSPORT`            | No       | `http`  | MCP transport: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). |
-| `LISTEN_ADDR`          | No       | `:8080` | TCP address to listen on (HTTP transport) |
-| `PROMETHEUS_METRICS_ADDR` | No    | `:8081` | TCP address for the Prometheus `/metrics` endpoint (HTTP transport) |
+| `LISTEN_ADDR`          | No       | `:8080` | TCP address for the MCP server (HTTP transport) |
+| `INTERNAL_ADDR`        | No       | `:8081` | Internal observability address (HTTP transport): Prometheus `/metrics`, pprof `/debug/pprof/*`, and `healthz`/`readyz`/`startup` probes |
 | `RATE_LIMIT_GLOBAL`    | No       | `100`   | Global rate limit (requests/second)  |
 | `RATE_LIMIT_PER_CLIENT`| No       | `10`    | Per-client IP rate limit (requests/second) |
 | `ALLOW_PRIVATE_NETBOX` | No       | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
@@ -719,7 +719,13 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
 
 ## Health Check
 
-`GET /healthz` — Returns `{"status":"ok"}` with HTTP 200. Used for liveness probes.
+The probes below are served on the internal observability address
+(`INTERNAL_ADDR`, default `:8081`), separate from the MCP address (`:8080`).
+
+- `GET /healthz` — Returns `{"status":"ok"}` with HTTP 200. Used for liveness probes.
+- `GET /readyz` — Returns `{"status":"ok"}` with HTTP 200, or `{"status":"degraded","circuit_breaker":"open"}` with HTTP 503 when the NetBox circuit breaker is open. Used for readiness probes.
+- `GET /startup` — Returns `{"status":"ok"}` with HTTP 200. Used for startup probes.
+- `GET /debug/pprof/*` — Standard `net/http/pprof` profiling endpoints (cmdline, profile, symbol, trace, and the named profiles). Registered only on the internal mux.
 
 ## Custom Metrics
 

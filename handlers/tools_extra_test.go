@@ -9,27 +9,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-
 	"github.com/teran/mcp-netbox/application"
-	"github.com/teran/mcp-netbox/config"
 	"github.com/teran/mcp-netbox/domain"
 	"github.com/teran/mcp-netbox/infrastructure/circuitbreaker"
 )
-
-// newTestMetrics returns a Metrics bound to a fresh registry.
-func newTestMetrics() *Metrics {
-	return NewMetrics(prometheus.NewRegistry())
-}
 
 func TestReadyz_Healthy(t *testing.T) {
 	t.Parallel()
 
 	// cb == nil -> readyz reports healthy.
-	mux, stop := NewMux(testConfig(), newTestMetrics(), http.DefaultClient, nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer stop()
+	mux := NewInternalMux(nil, nil)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/readyz", nil)
 	rr := httptest.NewRecorder()
@@ -48,10 +37,7 @@ func TestReadyz_DegradedWhenCircuitOpen(t *testing.T) {
 
 	cb := openCircuitBreaker(t)
 
-	mux, stop := NewMux(testConfig(), newTestMetrics(), http.DefaultClient, cb, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer stop()
+	mux := NewInternalMux(nil, cb)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/readyz", nil)
 	rr := httptest.NewRecorder()
@@ -98,10 +84,7 @@ func (failingRoundTripper) RoundTrip(*http.Request) (*http.Response, error) {
 func TestHealthz_Endpoint(t *testing.T) {
 	t.Parallel()
 
-	mux, stop := NewMux(testConfig(), newTestMetrics(), http.DefaultClient, nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer stop()
+	mux := NewInternalMux(nil, nil)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/healthz", nil)
 	rr := httptest.NewRecorder()
@@ -163,15 +146,6 @@ func TestExtractFirstIP_Empty(t *testing.T) {
 
 	if got := extractFirstIP(""); got != "" {
 		t.Errorf("extractFirstIP(\"\") = %q, want empty", got)
-	}
-}
-
-// testConfig returns a minimal Config suitable for NewMux.
-func testConfig() config.Config {
-	return config.Config{
-		NetBoxURL:          "http://netbox.example.com",
-		RateLimitGlobal:    100000,
-		RateLimitPerClient: 100000,
 	}
 }
 

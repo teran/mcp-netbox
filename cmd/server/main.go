@@ -157,8 +157,9 @@ func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport m
 	return conn.Wait()
 }
 
-// runHTTP runs the MCP server over Streamable HTTP plus a Prometheus metrics
-// server. Tokens are read per request from the Authorization header.
+// runHTTP runs the MCP server over Streamable HTTP plus a separate internal
+// observability server (metrics, pprof, probes). Tokens are read per request
+// from the Authorization header.
 func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	srv := newMCPServer(logger)
 
@@ -196,12 +197,11 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	}
 
 	metricsHandler := handlers.RegisterMetricsOnRegistry(promRegistry)
-	metricsMux := http.NewServeMux()
-	metricsMux.Handle("GET /metrics", metricsHandler)
+	internalMux := handlers.NewInternalMux(metricsHandler, breaker)
 
-	metricsServer := &http.Server{
-		Addr:              cfg.PrometheusMetricsAddr,
-		Handler:           metricsMux,
+	internalServer := &http.Server{
+		Addr:              cfg.InternalAddr,
+		Handler:           internalMux,
 		ReadHeaderTimeout: 10 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,
@@ -220,8 +220,8 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 		}
 	}()
 	go func() {
-		logger.WithField("addr", handlers.SanitizeLog(cfg.PrometheusMetricsAddr)).Info("metrics server listening")
-		if err := metricsServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.WithField("addr", handlers.SanitizeLog(cfg.InternalAddr)).Info("internal observability server listening")
+		if err := internalServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errCh <- err
 		}
 	}()
@@ -239,8 +239,8 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	if err := mainServer.Shutdown(shutdownCtx); err != nil {
 		logger.WithError(err).Error("main server shutdown error")
 	}
-	if err := metricsServer.Shutdown(shutdownCtx); err != nil {
-		logger.WithError(err).Error("metrics server shutdown error")
+	if err := internalServer.Shutdown(shutdownCtx); err != nil {
+		logger.WithError(err).Error("internal server shutdown error")
 	}
 
 	logger.Info("server stopped gracefully")
@@ -286,7 +286,7 @@ func newMCPServer(logger *logrus.Logger) *mcp.Server {
 
 // newNetBoxHTTPClient builds the shared HTTP client used to talk to NetBox,
 // with DNS-rebinding protection and a circuit breaker transport. It returns
-// the client and the circuit breaker (used by the HTTP readyz endpoint).
+// the client and the circuit breaker (used by the internal readyz endpoint).
 func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Breaker) {
 	dialer := newPrivateIPCheckingDialer(cfg.AllowPrivateNetBox)
 

@@ -157,19 +157,10 @@ func TestInjectClientMiddleware(t *testing.T) {
 func TestNewMux(t *testing.T) {
 	t.Parallel()
 
-	t.Run("/healthz returns 200 OK", func(t *testing.T) {
-		cfg := config.Config{
-			NetBoxURL:          "http://localhost:1",
-			RateLimitGlobal:    100,
-			RateLimitPerClient: 10,
-		}
-		metrics := handlers.NewMetrics(prometheus.NewRegistry())
-		mcpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			t.Error("MCP handler should not be called for /healthz")
-		})
-
-		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, mcpHandler)
-		defer stop()
+	t.Run("/healthz returns 200 OK on the internal mux", func(t *testing.T) {
+		// The liveness probe lives on the internal observability mux
+		// (NewInternalMux), not on the MCP mux.
+		mux := handlers.NewInternalMux(nil, nil)
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/healthz", http.NoBody)
 		rec := httptest.NewRecorder()
@@ -183,6 +174,31 @@ func TestNewMux(t *testing.T) {
 		}
 		if ct := rec.Header().Get("Content-Type"); ct != "application/json" {
 			t.Errorf("Content-Type = %q, want %q", ct, "application/json")
+		}
+	})
+
+	t.Run("MCP mux does not expose probes", func(t *testing.T) {
+		// O01/O04: probes must not be reachable on the MCP mux (:8080).
+		cfg := config.Config{
+			NetBoxURL:          "http://localhost:1",
+			RateLimitGlobal:    100,
+			RateLimitPerClient: 10,
+		}
+		metrics := handlers.NewMetrics(prometheus.NewRegistry())
+		mcpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		mux, stop := handlers.NewMux(cfg, metrics, http.DefaultClient, nil, mcpHandler)
+		defer stop()
+
+		for _, path := range []string{"/healthz", "/readyz", "/startup", "/metrics", "/debug/pprof/"} {
+			req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, path, http.NoBody)
+			rec := httptest.NewRecorder()
+			mux.ServeHTTP(rec, req)
+			if rec.Code != http.StatusNotFound {
+				t.Errorf("MCP mux %s = %d, want 404", path, rec.Code)
+			}
 		}
 	})
 
@@ -239,13 +255,15 @@ func TestNewMux(t *testing.T) {
 			t.Fatal("stop() did not return within 5 seconds — goroutine may leak")
 		}
 
-		// The mux should still work after stopping the rate limiter.
-		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/healthz", http.NoBody)
+		// The mux should still work after stopping the rate limiter. With no
+		// Authorization header the /mcp route returns 401, which proves the
+		// mux is still serving after stop().
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/mcp", http.NoBody)
 		rec := httptest.NewRecorder()
 		mux.ServeHTTP(rec, req)
 
-		if rec.Code != http.StatusOK {
-			t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
+		if rec.Code != http.StatusUnauthorized {
+			t.Errorf("status = %d, want %d", rec.Code, http.StatusUnauthorized)
 		}
 	})
 }
