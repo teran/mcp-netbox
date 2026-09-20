@@ -19,6 +19,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"testing"
 	"time"
@@ -32,6 +33,36 @@ import (
 )
 
 const netboxImage = "index.docker.io/netboxcommunity/netbox:v4.6-5.0.1"
+
+// crudCase represents one entity's CRUD e2e subtest registered in the global
+// registry. Entities may live in separate files; each registers itself via
+// registerCRUD in its own init().
+type crudCase struct {
+	name string
+	fn   func(t *testing.T, c *e2eClient, runID string)
+}
+
+// entityCRUD is the global registry of entity CRUD subtests.
+var entityCRUD []crudCase
+
+// registerCRUD appends an entity CRUD subtest to the global registry. Called
+// from each entity file's init() so entities can live in separate files without
+// editing TestNetBoxE2E.
+func registerCRUD(name string, fn func(t *testing.T, c *e2eClient, runID string)) {
+	entityCRUD = append(entityCRUD, crudCase{name: name, fn: fn})
+}
+
+// init registers the entity CRUD helpers defined in this file. Other entities
+// added in separate files register themselves in their own init().
+func init() {
+	registerCRUD("site", siteCRUD)
+	registerCRUD("prefix", prefixCRUD)
+	registerCRUD("ip_address", ipAddressCRUD)
+	registerCRUD("virtual_machine", virtualMachineCRUD)
+	registerCRUD("tenant", tenantCRUD)
+	registerCRUD("circuit", circuitCRUD)
+}
+
 
 // TestNetBoxE2E spins up a real NetBox and exercises CRUD for representative
 // entities across NetBox applications (dcim, ipam, virtualization, circuits,
@@ -69,12 +100,20 @@ func TestNetBoxE2E(t *testing.T) {
 	t.Logf("tools/list returned %d tools", len(tools))
 
 	runID := strconv.FormatInt(time.Now().UnixNano(), 36)
-	t.Run("site", func(t *testing.T) { siteCRUD(t, client, runID) })
-	t.Run("prefix", func(t *testing.T) { prefixCRUD(t, client, runID) })
-	t.Run("ip_address", func(t *testing.T) { ipAddressCRUD(t, client, runID) })
-	t.Run("virtual_machine", func(t *testing.T) { virtualMachineCRUD(t, client, runID) })
-	t.Run("tenant", func(t *testing.T) { tenantCRUD(t, client, runID) })
-	t.Run("circuit", func(t *testing.T) { circuitCRUD(t, client, runID) })
+
+	// Exercise every registered read list-tool against the real NetBox. This
+	// proves each read tool is registered, wired, and responds over the protocol.
+	t.Run("read_tools", func(t *testing.T) { readTools(t, client, runID) })
+
+	// Run every registered entity CRUD case. Sort by name so the execution order
+	// is stable regardless of the init() registration order across files.
+	sort.Slice(entityCRUD, func(i, j int) bool {
+		return entityCRUD[i].name < entityCRUD[j].name
+	})
+	for _, tc := range entityCRUD {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) { tc.fn(t, client, runID) })
+	}
 }
 
 // e2eClient is a thin typed wrapper over an MCP ClientSession that the CRUD
@@ -199,6 +238,22 @@ func (c *e2eClient) data(res *mcp.CallToolResult) map[string]interface{} {
 	return data
 }
 
+// list extracts the "results" array from a list tool's structured content. The
+// list tools return a paginated payload serialized as
+// {"count":..., "next":..., "previous":..., "results":[...]} (no "data" key).
+func (c *e2eClient) list(res *mcp.CallToolResult) []interface{} {
+	c.t.Helper()
+	m, ok := res.StructuredContent.(map[string]interface{})
+	if !ok {
+		c.t.Fatalf("structured content is not an object: %T (%v)", res.StructuredContent, res.StructuredContent)
+	}
+	results, ok := m["results"].([]interface{})
+	if !ok {
+		c.t.Fatalf("result has no results array: %v", m)
+	}
+	return results
+}
+
 // mustID returns the numeric id of a created/updated object.
 func (c *e2eClient) mustID(res *mcp.CallToolResult) int {
 	c.t.Helper()
@@ -253,6 +308,39 @@ func contains(list []string, s string) bool {
 		}
 	}
 	return false
+}
+
+// readTools invokes every registered read list-tool and asserts each call
+// succeeds and returns a list. It proves the read tool exists, is registered,
+// and answers through the real NetBox. get_object_by_id is deliberately excluded
+// here because each CRUD helper already exercises it via getByID.
+func readTools(t *testing.T, c *e2eClient, runID string) {
+	t.Helper()
+
+	readTools := []string{
+		"get_sites",
+		"get_racks",
+		"get_devices",
+		"get_interfaces",
+		"get_cables",
+		"get_ip_addresses",
+		"get_prefixes",
+		"get_vlans",
+		"get_circuits",
+		"get_circuit_terminations",
+		"get_virtual_machines",
+		"get_clusters",
+		"get_vm_interfaces",
+	}
+
+	for _, name := range readTools {
+		name := name
+		t.Run(name, func(t *testing.T) {
+			res := c.call(name, nil)
+			items := c.list(res)
+			t.Logf("%s returned %d items", name, len(items))
+		})
+	}
 }
 
 // --- CRUD helpers -----------------------------------------------------------
