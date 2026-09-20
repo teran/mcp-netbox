@@ -26,6 +26,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/teran/mcp-netbox/config"
+	"github.com/teran/mcp-netbox/internal/redact"
 )
 
 // DefaultLogFilename is used for the STDIO log file when LOG_FILENAME is unset.
@@ -60,6 +61,10 @@ func Setup(cfg config.Config) (*logrus.Logger, error) {
 	default:
 		return nil, fmt.Errorf("invalid LOG_FORMAT %q (want text or json)", cfg.LogFormat)
 	}
+
+	// S02: redact any struct-typed (secret:"true") field before it is written,
+	// so annotated secrets never leak into log lines.
+	l.AddHook(redact.NewLogrusHook())
 
 	// L1: output channel by transport.
 	out, err := outputForTransport(cfg)

@@ -663,21 +663,32 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
   outputs where avoidable. The NetBox token is never logged, and its type
   implements safe redaction (`String`/`GoString`/`MarshalJSON`). URLs are logged
   via `url.Redacted()` to strip any embedded credentials.
-- **Structural redaction (S02):** the server does not rely on a literal
-  `secret:true` annotation plus a single central redaction helper. Instead,
-  redaction is **structural**:
+- **Annotation-based redaction (S02):** secrets are masked with a single
+  central redaction helper driven by a `secret:"true"` struct-tag annotation,
+  backed by structural safeguards:
+  - `internal/redact` performs reflection-based deep redaction of arbitrary
+    values: any struct field tagged `secret:"true"` is replaced with
+    `***redacted***` in a deep copy. `Redact` never mutates its input and
+    handles nested structs, pointers, slices/arrays, maps, and interfaces;
+    unexported fields are never rewritten. It exposes `MarshalJSON`/`String`
+    and a logrus hook (`NewLogrusHook`) that is wired into the logger in
+    `internal/logging`.
+  - The tool output path (`handlers.WrapToolHandler`) redacts the successful
+    typed output before it is rendered to the model, so annotated secrets never
+    appear in tool output.
   - The NetBox auth token is never written to logs. The `Authorization` header
     is excluded from the outbound request log, and the token type implements
     safe `String`/`GoString`/`MarshalJSON` redaction so it cannot leak even if
-    logged indirectly.
+    logged indirectly. `config.Config.NetBoxToken` carries the `secret:"true"`
+    tag so it is redacted if the whole config is ever logged.
   - `domain.ValidationError.Error()` carries **only the HTTP status code** and
     never the response body. The NetBox validation body is delivered to the
     model exclusively via `structuredContent` (the `validation_errors` field),
     so it never flows through the error string or any log line.
   - Consequence: no secrets, tokens, or passwords appear in logs or in tool
-    output. Any secret-like value is excluded at the source (never logged,
-    never placed in the error string) rather than being scrubbed after the
-    fact.
+    output. Any secret-like value is either annotated (`secret:"true"`) or
+    excluded at the source (never logged, never placed in the error string)
+    rather than being scrubbed after the fact.
 - **CRUD ordering (S3):** the read tools are grouped as **read** operations,
   and the write tools as typed create/update/delete operations. Read tools carry
   `readOnlyHint: true` and `destructiveHint: false`; create/update carry

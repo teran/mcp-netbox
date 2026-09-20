@@ -1,15 +1,25 @@
 package logging
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/teran/mcp-netbox/application"
 	"github.com/teran/mcp-netbox/config"
 )
+
+// secretLog is a struct with a secret:"true" field used to verify the
+// redaction hook masks annotated secrets in log output.
+type secretLog struct {
+	Name  string `json:"name"`
+	Token string `json:"token" secret:"true"`
+}
 
 func baseConfig() config.Config {
 	return config.Config{
@@ -157,5 +167,101 @@ func TestSetup_StdioLogDirMissing(t *testing.T) {
 
 	if _, err := Setup(cfg); err == nil {
 		t.Fatal("Setup = nil, want error for missing log directory")
+	}
+}
+
+// captureLogger builds a logger via Setup(cfg) (so the redaction hook is
+// installed) and redirects its output to a buffer so assertions can inspect
+// the rendered text.
+func captureLogger(t *testing.T, format string) (*logrus.Logger, *bytes.Buffer) {
+	t.Helper()
+	cfg := baseConfig()
+	cfg.LogFormat = format
+	l, err := Setup(cfg)
+	if err != nil {
+		t.Fatalf("Setup = %v, want nil", err)
+	}
+	var buf bytes.Buffer
+	l.SetOutput(&buf)
+	return l, &buf
+}
+
+func TestHook_RedactsStructSecret(t *testing.T) {
+	t.Parallel()
+
+	t.Run("text format", func(t *testing.T) {
+		l, buf := captureLogger(t, "text")
+		l.WithField("obj", secretLog{Name: "srv", Token: "super-secret"}).Info("msg")
+
+		out := buf.String()
+		if strings.Contains(out, "super-secret") {
+			t.Errorf("text log leaks the secret: %s", out)
+		}
+		if !strings.Contains(out, "***redacted***") {
+			t.Errorf("text log missing mask: %s", out)
+		}
+		if !strings.Contains(out, "srv") {
+			t.Errorf("text log missing non-secret field: %s", out)
+		}
+	})
+
+	t.Run("json format", func(t *testing.T) {
+		l, buf := captureLogger(t, "json")
+		l.WithField("obj", secretLog{Name: "srv", Token: "super-secret"}).Info("msg")
+
+		out := buf.String()
+		if strings.Contains(out, "super-secret") {
+			t.Errorf("json log leaks the secret: %s", out)
+		}
+		if !strings.Contains(out, "***redacted***") {
+			t.Errorf("json log missing mask: %s", out)
+		}
+	})
+}
+
+func TestHook_RedactsApplicationToken(t *testing.T) {
+	t.Parallel()
+
+	tok := application.NewToken("tok-abc-123")
+	if tok == nil {
+		t.Fatal("NewToken returned nil")
+	}
+
+	t.Run("text format", func(t *testing.T) {
+		l, buf := captureLogger(t, "text")
+		l.WithField("token", tok).Info("msg")
+
+		out := buf.String()
+		if strings.Contains(out, "tok-abc-123") {
+			t.Errorf("text log leaks application.Token value: %s", out)
+		}
+		if !strings.Contains(out, "***redacted***") {
+			t.Errorf("text log missing mask for token: %s", out)
+		}
+	})
+
+	t.Run("json format", func(t *testing.T) {
+		l, buf := captureLogger(t, "json")
+		l.WithField("token", tok).Info("msg")
+
+		out := buf.String()
+		if strings.Contains(out, "tok-abc-123") {
+			t.Errorf("json log leaks application.Token value: %s", out)
+		}
+		if !strings.Contains(out, "***redacted***") {
+			t.Errorf("json log missing mask for token: %s", out)
+		}
+	})
+}
+
+func TestHook_LeavesFlatStringsUnchanged(t *testing.T) {
+	t.Parallel()
+
+	l, buf := captureLogger(t, "json")
+	l.WithField("plain", "just-a-string").Info("msg")
+
+	out := buf.String()
+	if !strings.Contains(out, "just-a-string") {
+		t.Errorf("json log modified flat string: %s", out)
 	}
 }

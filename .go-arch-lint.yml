@@ -43,6 +43,8 @@ components:
     in: handlers
   internal/logging:
     in: internal/logging
+  internal/redact:
+    in: internal/redact
   internal/mockrepo:
     in: internal/mockrepo
   cmd/server:
@@ -72,9 +74,13 @@ deps:
       - infrastructure/circuitbreaker
       - infrastructure/netbox
       - internal/mockrepo # test-only helper
+      - internal/redact
   internal/logging:
     mayDependOn:
       - config
+      - internal/redact
+  internal/redact:
+    anyVendorDeps: true
   internal/mockrepo:
     mayDependOn:
       - domain

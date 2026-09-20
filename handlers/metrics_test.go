@@ -21,6 +21,11 @@ type testOutput struct {
 	Result string `json:"result"`
 }
 
+type secretOutput struct {
+	Result string `json:"result"`
+	Token  string `json:"token" secret:"true"`
+}
+
 func TestNewMetrics(t *testing.T) {
 	t.Parallel()
 
@@ -176,6 +181,115 @@ func TestSanitizeToolResult(t *testing.T) {
 			t.Errorf("len(result.Content) = %d, want 0 (error results untouched)", len(result.Content))
 		}
 	})
+}
+
+func TestWrapToolHandler_RedactsSecret(t *testing.T) {
+	t.Parallel()
+
+	// S02: a successful result with a secret:"true" field must have the secret
+	// masked in the text form, and the secret must not appear anywhere.
+	reg := prometheus.NewRegistry()
+	m := NewMetrics(reg)
+
+	handler := WrapToolHandler[testInput, secretOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, secretOutput, error) {
+		return &mcp.CallToolResult{}, secretOutput{Result: "ok", Token: "super-secret-token"}, nil
+	})
+
+	result, out, err := handler(context.Background(), nil, testInput{})
+	if err != nil {
+		t.Fatalf("handler returned error: %v", err)
+	}
+	if result.IsError {
+		t.Fatal("result.IsError = true, want false")
+	}
+	// The typed out returned to the caller must be redacted too.
+	if out.Token != "***redacted***" {
+		t.Errorf("out.Token = %q, want %q", out.Token, "***redacted***")
+	}
+	if out.Result != "ok" {
+		t.Errorf("out.Result = %q, want %q", out.Result, "ok")
+	}
+
+	if len(result.Content) != 1 {
+		t.Fatalf("len(result.Content) = %d, want 1", len(result.Content))
+	}
+	tc, ok := result.Content[0].(*mcp.TextContent)
+	if !ok {
+		t.Fatalf("Content[0] type = %T, want *mcp.TextContent", result.Content[0])
+	}
+	if strings.Contains(tc.Text, "super-secret-token") {
+		t.Errorf("text leaks the secret: %s", tc.Text)
+	}
+	if !strings.Contains(tc.Text, "***redacted***") {
+		t.Errorf("text does not contain the mask: %s", tc.Text)
+	}
+}
+
+func TestWrapToolHandler_RedactsNonSecretUnchanged(t *testing.T) {
+	t.Parallel()
+
+	// A successful output with no secret field must be returned unchanged.
+	reg := prometheus.NewRegistry()
+	m := NewMetrics(reg)
+
+	handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
+		return &mcp.CallToolResult{}, testOutput{Result: "plain-value"}, nil
+	})
+
+	_, out, err := handler(context.Background(), nil, testInput{})
+	if err != nil {
+		t.Fatalf("handler returned error: %v", err)
+	}
+	if out.Result != "plain-value" {
+		t.Errorf("out.Result = %q, want %q", out.Result, "plain-value")
+	}
+}
+
+func TestWrapToolHandler_RedactionSkipsErrorResults(t *testing.T) {
+	t.Parallel()
+
+	// S02: error results are not redacted (redaction only applies to the
+	// success path); they must not panic and must be passed through.
+	reg := prometheus.NewRegistry()
+	m := NewMetrics(reg)
+
+	handler := WrapToolHandler[testInput, secretOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, secretOutput, error) {
+		return &mcp.CallToolResult{IsError: true}, secretOutput{Token: "should-stay"}, nil
+	})
+
+	result, _, err := handler(context.Background(), nil, testInput{})
+	if err != nil {
+		t.Fatalf("handler returned error: %v", err)
+	}
+	if !result.IsError {
+		t.Fatal("result.IsError = false, want true")
+	}
+	if len(result.Content) != 0 {
+		t.Errorf("len(result.Content) = %d, want 0 (error result untouched)", len(result.Content))
+	}
+}
+
+func TestWrapToolHandler_RedactsPointerOutput(t *testing.T) {
+	t.Parallel()
+
+	// Redaction must also handle pointer-typed tool output.
+	reg := prometheus.NewRegistry()
+	m := NewMetrics(reg)
+
+	handler := WrapToolHandler[testInput, *secretOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, *secretOutput, error) {
+		return &mcp.CallToolResult{}, &secretOutput{Result: "ok", Token: "ptr-secret"}, nil
+	})
+
+	_, out, err := handler(context.Background(), nil, testInput{})
+	if err != nil {
+		t.Fatalf("handler returned error: %v", err)
+	}
+	if out == nil {
+		t.Fatal("out = nil, want non-nil")
+	}
+	if out.Token != "***redacted***" {
+		t.Errorf("out.Token = %q, want %q", out.Token, "***redacted***")
+	}
 }
 
 func TestRegisterMetricsOnRegistry(t *testing.T) {

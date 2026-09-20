@@ -10,6 +10,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/teran/mcp-netbox/internal/redact"
 )
 
 type Metrics struct {
@@ -56,6 +58,17 @@ func WrapToolHandler[I, O any](metrics *Metrics, toolName string, handler mcp.To
 
 			metrics.toolRequestsTotal.WithLabelValues(toolName, statusClass).Inc()
 			metrics.toolDuration.WithLabelValues(toolName).Observe(duration.Seconds())
+		}
+
+		// S02: redact a deep copy of the successful typed output before it is
+		// turned into the tool's text form, so any secret:"true" field is masked
+		// in the model-visible output. The original out is not mutated. If the
+		// redaction cannot be asserted back to the concrete type O, the
+		// original value is kept.
+		if err == nil && result != nil && !result.IsError {
+			if redacted, ok := redact.Redact(out).(O); ok {
+				out = redacted
+			}
 		}
 
 		return sanitizeToolResult(result, out), out, err

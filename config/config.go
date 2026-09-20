@@ -46,7 +46,7 @@ const (
 
 type Config struct {
 	NetBoxURL   string `envconfig:"NETBOX_URL" required:"true"`
-	NetBoxToken string `envconfig:"NETBOX_TOKEN" default:""`
+	NetBoxToken string `envconfig:"NETBOX_TOKEN" default:"" secret:"true"`
 	Transport   string `envconfig:"TRANSPORT" default:"http"`
 	ListenAddr  string `envconfig:"LISTEN_ADDR" default:":8080"`
 	// InternalAddr is the internal observability endpoint (default :8081). It
