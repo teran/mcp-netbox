@@ -27,43 +27,20 @@ jobs:
           go-version: "1.27"
           cache: true
 
-      - name: govulncheck
-        uses: golang/govulncheck-action@v1.1.0 # SHA: 032d45514ae346b1db93c04b0c90b841c370344f
-        with:
-          go-version-input: "1.27"
-          check-latest: true
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-      - name: gosec
-        # Static security analysis. gosec exits non-zero on any finding, so
-        # this step fails the build if a G* issue (e.g. G304) is introduced.
-        run: go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -fmt=text ./...
+      # `make lint` runs golangci-lint + gosec + govulncheck + go-arch-lint.
+      # govulncheck is folded into the make interface (lint-vuln sub-target)
+      # rather than a separate GitHub action, so all static analysis lives
+      # behind a single `make <target>` entry point (R07).
+      - name: Lint (golangci + gosec + govulncheck + arch)
+        run: make lint
 
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9.3.0 # SHA: ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a
-        with:
-          version: latest
-          args: --config .golangci.yml
-
-      - name: go-arch-lint
-        # Pinned to a fixed version for reproducible CI; v1.19.0 is compatible
-        # with .go-arch-lint.yml (version: 2).
-        run: go run github.com/fe3dback/go-arch-lint@v1.19.0 check
-
-      - name: Run tests
-        run: go test -race -coverprofile=coverage.out -count=1 ./...
-
-      - name: Check coverage threshold
-        run: |
-          COVERAGE=$(go tool cover -func=coverage.out | grep '^total:' | awk '{print $3}' | sed 's/%//')
-          echo "### Coverage: ${COVERAGE}% (threshold: 95%)" >> "$GITHUB_STEP_SUMMARY"
-          echo "Coverage: ${COVERAGE}%"
-          THRESHOLD=95
-          if awk "BEGIN {exit !($COVERAGE < $THRESHOLD)}"; then
-            echo "❌ Coverage ${COVERAGE}% is below threshold of ${THRESHOLD}%"
-            echo "❌ Coverage ${COVERAGE}% is below threshold of ${THRESHOLD}%" >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
-          echo "✅ Coverage ${COVERAGE}% meets threshold of ${THRESHOLD}%"
+      # `make test` runs the race-enabled unit suite and enforces the >=95%
+      # coverage gate internally (R07), producing coverage.out for upload.
+      - name: Test with coverage gate
+        run: make test
 
       - name: Upload coverage profile
         uses: actions/upload-artifact@v7.0.1 # SHA: 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -75,7 +52,8 @@ jobs:
 
   # The e2e suite spins up a real NetBox via go-docker-testsuite, so it needs a
   # Docker-capable runner and is gated behind the `e2e` build tag (excluded from
-  # the default unit run) plus the MCP_NETBOX_E2E=1 runtime guard.
+  # the default unit run) plus the MCP_NETBOX_E2E=1 runtime guard. It is driven
+  # through `make e2e` (R07).
   e2e:
     runs-on: ubuntu-latest
 
@@ -94,4 +72,4 @@ jobs:
       - name: Run e2e tests
         env:
           MCP_NETBOX_E2E: "1"
-        run: make test-e2e
+        run: make e2e
