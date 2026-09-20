@@ -297,3 +297,75 @@ func TestLoad_EnvconfigError(t *testing.T) {
 		t.Error("Load() = nil, want error for invalid env value")
 	}
 }
+
+func TestValidateLogLevel(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		input     interface{}
+		wantError bool
+	}{
+		{"empty disables logging", "", false},
+		{"whitespace trimmed", "   ", false},
+		{"valid level", "debug", false},
+		{"valid uppercase level", "INFO", false},
+		{"invalid level", "bogus", true},
+		{"non-string input", 123, true},
+		{"non-string input (nil)", nil, true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validateLogLevel(tc.input)
+			if tc.wantError && err == nil {
+				t.Errorf("validateLogLevel(%v) = nil, want error", tc.input)
+			}
+			if !tc.wantError && err != nil {
+				t.Errorf("validateLogLevel(%v) = %v, want nil", tc.input, err)
+			}
+		})
+	}
+}
+
+func TestValidateLogFormat(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		input     interface{}
+		wantError bool
+	}{
+		{"empty defaults to text", "", false},
+		{"text", "text", false},
+		{"json", "json", false},
+		{"case-insensitive", "JSON", false},
+		{"invalid format", "xml", true},
+		{"non-string input", 123, true},
+		{"non-string input (nil)", nil, true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validateLogFormat(tc.input)
+			if tc.wantError && err == nil {
+				t.Errorf("validateLogFormat(%v) = nil, want error", tc.input)
+			}
+			if !tc.wantError && err != nil {
+				t.Errorf("validateLogFormat(%v) = %v, want nil", tc.input, err)
+			}
+		})
+	}
+}
+
+func TestValidateTransport_NonString(t *testing.T) {
+	t.Parallel()
+
+	v := validateTransport("token")
+	if err := v(123); err == nil {
+		t.Error("validateTransport(non-string) = nil, want error")
+	}
+	if err := v(nil); err == nil {
+		t.Error("validateTransport(nil) = nil, want error")
+	}
+}

@@ -146,3 +146,16 @@ func TestSetup_HTTPOutputsToStdout(t *testing.T) {
 		t.Errorf("logger output = %T, want os.Stdout", l.Out)
 	}
 }
+
+func TestSetup_StdioLogDirMissing(t *testing.T) {
+	// A stdio transport with a LOG_FILENAME whose parent directory does not
+	// exist must fail Setup (os.OpenRoot fails), surfacing the error path
+	// through outputForTransport.
+	cfg := baseConfig()
+	cfg.Transport = config.TransportStdio
+	cfg.LogFilename = filepath.Join(t.TempDir(), "does-not-exist", "mcp.log")
+
+	if _, err := Setup(cfg); err == nil {
+		t.Fatal("Setup = nil, want error for missing log directory")
+	}
+}

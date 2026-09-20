@@ -228,3 +228,31 @@ func TestRateLimitMiddleware(t *testing.T) {
 		}
 	})
 }
+
+func TestExtractClientIP_TrustedProxyRemoteNoPort(t *testing.T) {
+	t.Parallel()
+
+	// Trusted proxy is configured but RemoteAddr has no port -> SplitHostPort
+	// fails and RemoteAddr is returned as-is.
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	req.RemoteAddr = "10.0.0.1"
+	req.Header.Set("X-Forwarded-For", "192.168.1.1")
+
+	if got := extractClientIP(req, "10.0.0.0/8"); got != "10.0.0.1" {
+		t.Errorf("extractClientIP() = %q, want %q", got, "10.0.0.1")
+	}
+}
+
+func TestExtractClientIP_TrustedProxyUnparsableRemote(t *testing.T) {
+	t.Parallel()
+
+	// Trusted proxy configured, SplitHostPort succeeds but the host is not a
+	// parseable IP -> the raw host string is returned.
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	req.RemoteAddr = "not-an-ip:12345"
+	req.Header.Set("X-Forwarded-For", "192.168.1.1")
+
+	if got := extractClientIP(req, "10.0.0.0/8"); got != "not-an-ip" {
+		t.Errorf("extractClientIP() = %q, want %q", got, "not-an-ip")
+	}
+}

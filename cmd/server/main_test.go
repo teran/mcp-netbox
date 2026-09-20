@@ -320,3 +320,18 @@ func restoreBuildVars() {
 	appCommitHash = "none"
 	appTimestamp = "unknown"
 }
+
+func TestRun_SetupLoggingError(t *testing.T) {
+	// An invalid LOG_LEVEL makes logging.Setup fail, surfacing the error path
+	// in Run before any transport is started.
+	cfg := config.Config{
+		NetBoxURL:   "http://netbox.example.com",
+		Transport:   config.TransportHTTP,
+		LogLevel:    "bogus",
+		LogFormat:   "text",
+		LogFilename: "",
+	}
+	if err := Run(cfg); err == nil {
+		t.Fatal("Run() = nil, want error for invalid LOG_LEVEL")
+	}
+}

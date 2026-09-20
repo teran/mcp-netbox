@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -189,5 +190,57 @@ func TestRegisterMetricsOnRegistry(t *testing.T) {
 
 	if rec.Code != http.StatusOK {
 		t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
+	}
+}
+
+func TestSanitizeToolResult_MarshalError(t *testing.T) {
+	t.Parallel()
+
+	// A successful, content-free result whose out value cannot be marshalled
+	// must be passed through unchanged (the marshal error branch).
+	res := &mcp.CallToolResult{}
+	unmarshalable := make(chan int)
+	got := sanitizeToolResult(res, unmarshalable)
+	if got != res {
+		t.Error("sanitizeToolResult returned a different result")
+	}
+	if got.Content != nil {
+		t.Errorf("Content = %v, want nil", got.Content)
+	}
+}
+
+func TestSanitizeToolResult_Passthrough(t *testing.T) {
+	t.Parallel()
+
+	// Error results and results with existing content are never rewritten.
+	errRes := &mcp.CallToolResult{IsError: true}
+	if got := sanitizeToolResult(errRes, "x"); got != errRes {
+		t.Error("error result was modified")
+	}
+
+	withContent := &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "hi"}}}
+	if got := sanitizeToolResult(withContent, "x"); got != withContent {
+		t.Error("result with content was modified")
+	}
+
+	if got := sanitizeToolResult(nil, "x"); got != nil {
+		t.Error("nil result was modified")
+	}
+}
+
+func TestSanitizeToolResult_SetsSanitizedText(t *testing.T) {
+	t.Parallel()
+
+	res := &mcp.CallToolResult{}
+	got := sanitizeToolResult(res, map[string]string{"name": "srv\x1b[31m"})
+	if got.Content == nil {
+		t.Fatal("Content = nil, want sanitized text content")
+	}
+	text, ok := got.Content[0].(*mcp.TextContent)
+	if !ok {
+		t.Fatalf("Content[0] = %T, want *mcp.TextContent", got.Content[0])
+	}
+	if !strings.Contains(text.Text, "srv") {
+		t.Errorf("text = %q, want it to contain the sanitized field value", text.Text)
 	}
 }

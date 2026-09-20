@@ -155,3 +155,33 @@ func TestSanitizeAllStrings(t *testing.T) {
 		t.Errorf("InnerPtr.Note = %v, want 'note'", p.InnerPtr.Note)
 	}
 }
+
+func TestSanitizeOutput_EdgeCases(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{"incomplete CSI at end of string", "\x1b[31", ""},
+		{"lone ESC at end of string", "\x1b", ""},
+		{"ESC followed by incomplete two-char", "\x1bA", ""},
+		{"multiple escapes", "\x1b[1m\x1b[2mok", "ok"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := sanitizeOutput(tc.in); got != tc.want {
+				t.Errorf("sanitizeOutput(%q) = %q, want %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestSanitizeAllStrings_InvalidValue(t *testing.T) {
+	t.Parallel()
+
+	// A zero (invalid) reflect.Value must be a no-op rather than panicking.
+	var zero reflect.Value
+	sanitizeAllStrings(zero)
+}
