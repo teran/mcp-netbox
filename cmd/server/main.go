@@ -198,10 +198,11 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 
 	metricsHandler := handlers.RegisterMetricsOnRegistry(promRegistry)
 	internalMux := handlers.NewInternalMux(metricsHandler, breaker)
+	internalHandler := handlers.InstrumentInternalMux(promRegistry, internalMux)
 
 	internalServer := &http.Server{
 		Addr:              cfg.InternalAddr,
-		Handler:           internalMux,
+		Handler:           internalHandler,
 		ReadHeaderTimeout: 10 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,

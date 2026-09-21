@@ -113,3 +113,42 @@ func RegisterMetricsOnRegistry(reg *prometheus.Registry) http.Handler {
 	reg.MustRegister(collectors.NewGoCollector())
 	return promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 }
+
+// InstrumentInternalMux wraps the internal observability mux so every request
+// served on :8081 is observed by the standard net/http metrics (O02). It
+// registers the http_server_* collectors on the same registry that backs the
+// /metrics endpoint, so they are exposed without a duplicate registration.
+func InstrumentInternalMux(reg *prometheus.Registry, handler http.Handler) http.Handler {
+	const (
+		labelCode   = "code"
+		labelMethod = "method"
+	)
+	labels := []string{labelCode, labelMethod}
+
+	requests := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "http_server_requests_total",
+		Help: "Total number of HTTP requests processed, partitioned by status code and method.",
+	}, labels)
+	duration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "http_server_request_duration_seconds",
+		Help:    "Time spent processing HTTP requests, partitioned by status code and method.",
+		Buckets: prometheus.DefBuckets,
+	}, labels)
+	requestSize := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "http_server_request_size_bytes",
+		Help:    "Size of HTTP request bodies, partitioned by status code and method.",
+		Buckets: prometheus.ExponentialBuckets(100, 10, 8),
+	}, labels)
+	responseSize := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "http_server_response_size_bytes",
+		Help:    "Size of HTTP response bodies, partitioned by status code and method.",
+		Buckets: prometheus.ExponentialBuckets(100, 10, 8),
+	}, labels)
+
+	reg.MustRegister(requests, duration, requestSize, responseSize)
+
+	return promhttp.InstrumentHandlerResponseSize(responseSize,
+		promhttp.InstrumentHandlerRequestSize(requestSize,
+			promhttp.InstrumentHandlerDuration(duration,
+				promhttp.InstrumentHandlerCounter(requests, handler))))
+}

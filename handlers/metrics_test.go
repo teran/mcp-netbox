@@ -9,6 +9,7 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	_ "github.com/teran/mcp-netbox/domain"
 )
@@ -289,6 +290,43 @@ func TestWrapToolHandler_RedactsPointerOutput(t *testing.T) {
 	}
 	if out.Token != "***redacted***" {
 		t.Errorf("out.Token = %q, want %q", out.Token, "***redacted***")
+	}
+}
+
+func TestInstrumentInternalMux(t *testing.T) {
+	t.Parallel()
+
+	reg := prometheus.NewRegistry()
+	metricsHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
+	internalMux := NewInternalMux(metricsHandler, nil)
+	handler := InstrumentInternalMux(reg, internalMux)
+
+	// Exercise the wrapped mux so the http_server_* metrics are populated.
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/startup", http.NoBody)
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", rr.Code, http.StatusOK)
+	}
+
+	// Scrape /metrics through the wrapped handler and confirm the standard
+	// net/http metrics are exposed (O02).
+	scrape := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/metrics", http.NoBody)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, scrape)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("metrics status = %d, want %d", rec.Code, http.StatusOK)
+	}
+	body := rec.Body.String()
+	for _, metric := range []string{
+		"http_server_requests_total",
+		"http_server_request_duration_seconds",
+		"http_server_request_size_bytes",
+		"http_server_response_size_bytes",
+	} {
+		if !strings.Contains(body, metric) {
+			t.Errorf("metrics output missing %q", metric)
+		}
 	}
 }
 
