@@ -102,7 +102,7 @@ func TestInjectClientMiddleware_MissingToken(t *testing.T) {
 		w.WriteHeader(http.StatusTeapot)
 	})
 
-	mw := injectClientMiddleware("http://netbox.example.com", http.DefaultClient)
+	mw := injectClientMiddleware("http://netbox.example.com", http.DefaultClient, nil)
 	rr := httptest.NewRecorder()
 	mw(next).ServeHTTP(rr, httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/mcp", nil))
 
@@ -121,7 +121,7 @@ func TestInjectClientMiddleware_WithToken(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	mw := injectClientMiddleware("http://netbox.example.com", http.DefaultClient)
+	mw := injectClientMiddleware("http://netbox.example.com", http.DefaultClient, nil)
 	ctx := context.WithValue(context.Background(), tokenContextKey, application.NewToken("test-token"))
 	rr := httptest.NewRecorder()
 	mw(next).ServeHTTP(rr, httptest.NewRequestWithContext(ctx, http.MethodPost, "/mcp", nil))

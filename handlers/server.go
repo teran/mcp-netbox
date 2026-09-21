@@ -28,8 +28,8 @@ func ServiceFromContext(ctx context.Context) *application.NetworkService {
 // here; observability (metrics, pprof, probes) lives on the separate internal
 // mux (see NewInternalMux) on INTERNAL_ADDR (:8081) (O01/O04).
 // Returns the mux and a stop function for background goroutines (e.g. rate limiter eviction).
-func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, cb *circuitbreaker.Breaker, mcpHandler http.Handler) (*http.ServeMux, func()) {
-	injectClientMW := injectClientMiddleware(cfg.NetBoxURL, sharedHTTPClient)
+func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, cb *circuitbreaker.Breaker, mcpHandler http.Handler, upstreamMetrics *infra.UpstreamMetrics) (*http.ServeMux, func()) {
+	injectClientMW := injectClientMiddleware(cfg.NetBoxURL, sharedHTTPClient, upstreamMetrics)
 	rateLimitMW, stopRateLimit := RateLimitMiddleware(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(cfg.RateLimitGlobal),
 		GlobalBurst:    cfg.RateLimitGlobal * 2,
@@ -65,7 +65,7 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 
 // injectClientMiddleware creates a middleware that injects a per-request
 // NetBox API client and NetworkService into the request context.
-func injectClientMiddleware(netboxURL string, httpClient *http.Client) func(http.Handler) http.Handler {
+func injectClientMiddleware(netboxURL string, httpClient *http.Client, upstreamMetrics *infra.UpstreamMetrics) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			t, ok := r.Context().Value(tokenContextKey).(*application.Token)
@@ -74,7 +74,7 @@ func injectClientMiddleware(netboxURL string, httpClient *http.Client) func(http
 				return
 			}
 
-			netboxClient := infra.NewClient(netboxURL, httpClient)
+			netboxClient := infra.NewClientWithMetrics(netboxURL, httpClient, upstreamMetrics)
 			svc := application.NewNetworkService(netboxClient, t.Value())
 
 			ctx := context.WithValue(r.Context(), svcContextKey, svc)

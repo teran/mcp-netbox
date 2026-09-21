@@ -167,6 +167,7 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 
 	promRegistry := prometheus.NewRegistry()
 	metrics := handlers.NewMetrics(promRegistry)
+	upstreamMetrics := infra.NewUpstreamMetrics(promRegistry)
 
 	mcpHandler := mcp.NewStreamableHTTPHandler(
 		func(r *http.Request) *mcp.Server {
@@ -181,7 +182,7 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	// injected per request by the middleware chain using the request token.
 	handlers.RegisterTools(srv, metrics, nil)
 
-	mux, stopRateLimit := handlers.NewMux(cfg, metrics, sharedHTTPClient, breaker, mcpHandler)
+	mux, stopRateLimit := handlers.NewMux(cfg, metrics, sharedHTTPClient, breaker, mcpHandler, upstreamMetrics)
 	defer stopRateLimit()
 
 	// B5/L6: when logging is enabled, the startup banner is the very first log line.

@@ -59,18 +59,26 @@ const maxBodySize = 10 * 1024 * 1024
 
 // Client is an HTTP client for the NetBox API.
 type Client struct {
-	baseURL string
-	client  *resty.Client
+	baseURL  string
+	client   *resty.Client
+	upstream *UpstreamMetrics
 }
 
 // NewClient creates a new NetBox API client backed by resty. The supplied
 // *http.Client is wrapped via resty.NewWithClient so that its transport
 // (DNS-rebinding dialer + circuit breaker), timeout and redirect policy are
-// preserved.
+// preserved. Upstream metrics are disabled (nil).
 func NewClient(baseURL string, httpClient *http.Client) *Client {
+	return NewClientWithMetrics(baseURL, httpClient, nil)
+}
+
+// NewClientWithMetrics is NewClient with an optional upstream-metrics handle.
+// The handle is nil-safe; passing nil disables upstream metrics recording.
+func NewClientWithMetrics(baseURL string, httpClient *http.Client, upstream *UpstreamMetrics) *Client {
 	return &Client{
-		baseURL: strings.TrimSuffix(baseURL, "/"),
-		client:  resty.NewWithClient(httpClient),
+		baseURL:  strings.TrimSuffix(baseURL, "/"),
+		client:   resty.NewWithClient(httpClient),
+		upstream: upstream,
 	}
 }
 
@@ -102,6 +110,15 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 
 	resp, err := req.Execute(method, u.String())
 	duration := time.Since(start)
+
+	// O03: record upstream metrics (status counter, latency, response size).
+	// The observe method is nil-safe when metrics are not configured.
+	status := statusCodeOf(resp)
+	var size int
+	if resp != nil {
+		size = len(resp.Bytes())
+	}
+	c.upstream.observe(status, duration, size)
 
 	// Emit an outbound per-request log record tagged with the same request_id.
 	logger := getLogger()
