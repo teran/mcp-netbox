@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/teran/mcp-netbox/domain"
-	"github.com/teran/mcp-netbox/internal/mockrepo"
+	"github.com/teran/mcp-netbox/mockrepo"
 )
 
 func newTestService(repo *mockrepo.MockRepo) *NetworkService {

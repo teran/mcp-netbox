@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/teran/mcp-netbox/internal/redact"
+	"github.com/teran/mcp-netbox/redact"
 )
 
 type Metrics struct {

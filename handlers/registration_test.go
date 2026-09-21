@@ -7,7 +7,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/teran/mcp-netbox/application"
-	"github.com/teran/mcp-netbox/internal/mockrepo"
+	"github.com/teran/mcp-netbox/mockrepo"
 )
 
 // expectedToolCount is the number of MCP tools registered by RegisterTools.

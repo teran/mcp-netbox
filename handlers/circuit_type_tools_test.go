@@ -8,7 +8,7 @@ import (
 	"github.com/teran/mcp-netbox/application"
 	"github.com/teran/mcp-netbox/domain"
 	"github.com/teran/mcp-netbox/handlers"
-	"github.com/teran/mcp-netbox/internal/mockrepo"
+	"github.com/teran/mcp-netbox/mockrepo"
 )
 
 func TestCreateCircuitTypeHandler(t *testing.T) {

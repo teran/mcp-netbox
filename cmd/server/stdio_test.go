@@ -10,7 +10,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/teran/mcp-netbox/config"
-	"github.com/teran/mcp-netbox/internal/logging"
+	"github.com/teran/mcp-netbox/logging"
 )
 
 // stdioSession drives a runStdio server over an in-memory pair of pipes.

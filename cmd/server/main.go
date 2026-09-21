@@ -19,7 +19,7 @@ import (
 	"github.com/teran/mcp-netbox/handlers"
 	"github.com/teran/mcp-netbox/infrastructure/circuitbreaker"
 	infra "github.com/teran/mcp-netbox/infrastructure/netbox"
-	"github.com/teran/mcp-netbox/internal/logging"
+	"github.com/teran/mcp-netbox/logging"
 )
 
 // Build-time variables injected by goreleaser (via ldflags, B2).

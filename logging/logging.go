@@ -26,7 +26,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/teran/mcp-netbox/config"
-	"github.com/teran/mcp-netbox/internal/redact"
+	"github.com/teran/mcp-netbox/redact"
 )
 
 // DefaultLogFilename is used for the STDIO log file when LOG_FILENAME is unset.
