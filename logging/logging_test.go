@@ -29,10 +29,32 @@ func baseConfig() config.Config {
 	}
 }
 
-func TestSetup_EmptyLevelDisablesLogging(t *testing.T) {
+func TestSetup_HTTPEmptyLevelDefaultsToInfo(t *testing.T) {
 	t.Parallel()
 
 	cfg := baseConfig()
+	cfg.LogLevel = ""
+
+	l, err := Setup(cfg)
+	if err != nil {
+		t.Fatalf("Setup = %v, want nil", err)
+	}
+	if l == nil {
+		t.Fatal("Setup returned nil logger")
+	}
+	if l.Out == io.Discard {
+		t.Errorf("HTTP logger output = io.Discard, want enabled")
+	}
+	if l.GetLevel() != logrus.InfoLevel {
+		t.Errorf("level = %v, want info", l.GetLevel())
+	}
+}
+
+func TestSetup_StdioEmptyLevelDisablesLogging(t *testing.T) {
+	t.Parallel()
+
+	cfg := baseConfig()
+	cfg.Transport = config.TransportStdio
 	cfg.LogLevel = ""
 
 	l, err := Setup(cfg)

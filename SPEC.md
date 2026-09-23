@@ -192,8 +192,12 @@ when `TRANSPORT=http`.
 
 ## Logging
 
-Logging uses **logrus** and is **disabled by default** — logs are emitted only
-when `LOG_LEVEL` is set (L2).
+Logging uses **logrus**. Enablement follows the launch mode (L2):
+
+- **HTTP** mode — logging is **always enabled**, defaulting to level **`info`**
+  (overridable via `LOG_LEVEL`).
+- **STDIO** mode — logging is **enabled only when `LOG_LEVEL` is set** — unset
+  ⇒ **disabled**.
 
 - **Channel by transport (L1):**
   - **HTTP** → **stdout** (12-factor style).
@@ -206,8 +210,9 @@ when `LOG_LEVEL` is set (L2).
 - **Secrets (L5):** tokens, passwords and credentials are **never** logged. The
   token is redacted (see [Security](#security--secrets)) and URLs are logged via
   `url.Redacted()`.
-- **Startup banner (L6/B5):** when logging is enabled (`LOG_LEVEL` set), the
-  very first log line at startup is the banner
+- **Startup banner (L6/B5):** when logging is enabled (always in HTTP mode; in
+  STDIO only when `LOG_LEVEL` is set), the very first log line at startup is
+  the banner
   `Starting {appName}/{appVersion} (commit: {appCommitHash}; built at {appTimestamp}) ...`,
   built from ldflags-embedded metadata. No banner is emitted when logging is
   disabled.

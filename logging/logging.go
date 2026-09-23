@@ -3,7 +3,9 @@
 // The behaviour is driven by environment variables:
 //
 //   - LOG_LEVEL: logrus level (trace, debug, info, warn, error, fatal, panic).
-//     When empty, logging is disabled entirely (output goes to io.Discard).
+//     Enablement is launch-mode dependent (L2): in HTTP mode an empty LOG_LEVEL
+//     defaults to `info` (always enabled); in STDIO mode an empty LOG_LEVEL
+//     disables logging entirely (output goes to io.Discard).
 //   - LOG_FORMAT: "text" (default) or "json".
 //   - LOG_FILENAME: path of the log file used in STDIO mode. Ignored in HTTP
 //     mode. Defaults to /tmp/mcp-netbox.log. The file is created with mode
@@ -39,8 +41,13 @@ const DefaultLogFilename = "/tmp/mcp-netbox.log"
 func Setup(cfg config.Config) (*logrus.Logger, error) {
 	l := logrus.New()
 
-	// L2: an empty LOG_LEVEL disables logging entirely.
+	// L2: enablement is launch-mode dependent.
+	//   - HTTP: logging is ALWAYS enabled; an empty LOG_LEVEL defaults to info.
+	//   - STDIO: logging is enabled only when LOG_LEVEL is set; unset => disabled.
 	levelStr := strings.TrimSpace(cfg.LogLevel)
+	if cfg.Transport != config.TransportStdio && levelStr == "" {
+		levelStr = logrus.InfoLevel.String()
+	}
 	if levelStr == "" {
 		l.SetOutput(io.Discard)
 		return l, nil

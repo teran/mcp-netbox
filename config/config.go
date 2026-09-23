@@ -81,7 +81,8 @@ func (c Config) validate() error {
 }
 
 // validateLogLevel checks that LOG_LEVEL, when set, is a valid logrus level.
-// An empty value means logging is disabled.
+// An empty value means the launch-mode default applies (info in HTTP mode;
+// disabled in STDIO mode — see L2 in logging.Setup).
 func validateLogLevel(value interface{}) error {
 	s, ok := value.(string)
 	if !ok {

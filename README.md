@@ -81,7 +81,7 @@ All configuration is via environment variables:
 | `ALLOW_PRIVATE_NETBOX` | No | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
 | `TRUSTED_PROXY` | No | `""` | CIDR prefix of the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server extracts the client IP from the `X-Forwarded-For` header instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT` | No | `300s` (5 minutes) | HTTP write timeout (Go duration, minimum 1s). Note: 0 will fail validation; use a reverse proxy for no timeout. |
-| `LOG_LEVEL` | No | (unset) | Logrus level (`trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`). **Unset ⇒ logging disabled.** |
+| `LOG_LEVEL` | No | `info` (HTTP) / unset (STDIO) | Logrus level (`trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`). **HTTP:** always enabled, defaults to `info`. **STDIO:** unset ⇒ logging disabled. |
 | `LOG_FORMAT` | No | `text` | Log format: `text` (logrus text, full absolute timestamp) or `json`. |
 | `LOG_FILENAME` | No | `/tmp/mcp-netbox.log` | Log file path for **STDIO** transport (chmod 600). Ignored for HTTP (logs go to stdout, 12-factor). |
 
