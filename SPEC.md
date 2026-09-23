@@ -107,7 +107,7 @@ inner layers depend on nothing internal, outer layers may depend inward:
 | Application       | `application`                           | Use cases / `NetworkService` business logic          |
 | Domain            | `domain`                                | Domain models + repository interfaces (ports)        |
 | Config            | `config`                                | Env loading + validation (envconfig + ozzo-validation) |
-| Logging           | `internal/logging`                      | logrus setup, channel-by-transport (L1–L4), SDK `slog`→logrus handler |
+| Logging           | `logging`                          | logrus setup, channel-by-transport (L1–L4), SDK `slog`→logrus handler |
 | HTTP transport    | `handlers`                              | MCP tool handlers, middleware chain, metrics, registration |
 
 > **Layout note (A1):** this repository deliberately uses the Clean/DDD layered
@@ -132,7 +132,7 @@ Dependency rules are authored in `.go-arch-lint.yml` and enforced in CI by
 `go-arch-lint check` (C6). The direction is:
 
 ```
-domain  ←  application  ←  infrastructure, config, internal/logging  ←  handlers  ←  cmd/server
+domain  ←  application  ←  infrastructure, config, logging  ←  handlers  ←  cmd/server
 ```
 
 `domain` never imports `application`, `handlers`, `infrastructure`, or
@@ -157,7 +157,7 @@ The MCP `Server` is shared; only the transport wiring differs.
 | Component         | Choice                                                          |
 |-------------------|-----------------------------------------------------------------|
 | Language          | Go 1.27+                                                        |
-| MCP SDK           | `github.com/modelcontextprotocol/go-sdk` v1.7.0                 |
+| MCP SDK           | `github.com/modelcontextprotocol/go-sdk` v1.8.0                 |
 | Transport         | Hybrid — Streamable HTTP (MCP spec 2025-03-26+) and STDIO, selected via `-mode http|stdio` (default `stdio`; `TRANSPORT` override) |
 | HTTP Router       | `net/http` standard library + middleware pattern                |
 | Tool Registration | `handlers/registration.go` — `RegisterTools()` function         |
@@ -671,13 +671,13 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
 - **Annotation-based redaction (S02):** secrets are masked with a single
   central redaction helper driven by a `secret:"true"` struct-tag annotation,
   backed by structural safeguards:
-  - `internal/redact` performs reflection-based deep redaction of arbitrary
+  - `redact` performs reflection-based deep redaction of arbitrary
     values: any struct field tagged `secret:"true"` is replaced with
     `***redacted***` in a deep copy. `Redact` never mutates its input and
     handles nested structs, pointers, slices/arrays, maps, and interfaces;
     unexported fields are never rewritten. It exposes `MarshalJSON`/`String`
     and a logrus hook (`NewLogrusHook`) that is wired into the logger in
-    `internal/logging`.
+    `logging`.
   - The tool output path (`handlers.WrapToolHandler`) redacts the successful
     typed output before it is rendered to the model, so annotated secrets never
     appear in tool output.

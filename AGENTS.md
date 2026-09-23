@@ -45,8 +45,8 @@ This document describes the agents/assistants involved in the development and op
 | `domain/repository.go`                      | NetworkRepository interface (port), RawObject type for generic object retrieval |
 | `infrastructure/netbox/client.go`           | NetBox REST client via `resty.dev/v3` (DNS-rebinding dialer + circuit breaker transport), `X-Request-ID` forwarding + per-request outbound log |
 | `infrastructure/netbox/models.go`           | JSON wire models + `toDomain()` conversion      |
-| `internal/logging/logging.go`               | logrus setup: channel-by-transport, `LOG_LEVEL` gating, `LOG_FORMAT`/`LOG_FILENAME` |
-| `internal/logging/slog.go`                  | slog→logrus handler, `NewSlogLogger` (SDK logger wiring, L7/G10) |
+| `logging/logging.go`               | logrus setup: channel-by-transport, `LOG_LEVEL` gating, `LOG_FORMAT`/`LOG_FILENAME` |
+| `logging/slog.go`                  | slog→logrus handler, `NewSlogLogger` (SDK logger wiring, L7/G10) |
 | `e2e/netbox_e2e_test.go`                    | End-to-end integration test against a real NetBox (via go-docker-testsuite), gated behind `MCP_NETBOX_E2E=1`; exercises CRUD over the full MCP protocol |
 
 ## Tool-to-Agent Mapping
