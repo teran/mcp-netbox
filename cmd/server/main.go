@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -42,14 +43,35 @@ func bannerString() string {
 }
 
 func main() {
+	mode := flag.String("mode", "", "launch mode: http or stdio (default stdio; overrides TRANSPORT)")
+	flag.Parse()
+
 	cfg, err := config.Load()
 	if err != nil {
 		logrus.Fatalf("Failed to load configuration: %v", err)
 	}
+	cfg.Transport = resolveTransport(*mode)
 
 	if err := Run(*cfg); err != nil {
 		logrus.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// resolveTransport returns the effective launch mode (M6). Precedence:
+//
+//  1. An explicit -mode flag wins.
+//  2. Otherwise an explicitly-set TRANSPORT environment variable is used.
+//  3. Otherwise the default is stdio.
+//
+// The empty string is never returned.
+func resolveTransport(modeFlag string) string {
+	if modeFlag != "" {
+		return modeFlag
+	}
+	if t, ok := os.LookupEnv("TRANSPORT"); ok && t != "" {
+		return t
+	}
+	return config.TransportStdio
 }
 
 // newPrivateIPCheckingDialer returns a net.Dialer whose DialContext rejects

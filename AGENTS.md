@@ -14,7 +14,7 @@ This document describes the agents/assistants involved in the development and op
 ### MCP Server (`mcp-netbox`)
 - **Role**: Mediator between the AI assistant and NetBox.
 - **Scope**: Translates MCP tool invocations into NetBox REST API calls.
-- **Transport**: **Hybrid** — Streamable HTTP (remote) or STDIO (local), selected via `TRANSPORT` (default `http`).
+- **Transport**: **Hybrid** — Streamable HTTP (remote) or STDIO (local), selected at startup via `-mode http|stdio` (default `stdio`); the `TRANSPORT` env var remains a backward-compatible override.
 - **Responsible for**: Transparent token relay, request routing, response formatting.
 - **Token handling**: HTTP → per-request `Authorization: Bearer` header; STDIO → `NETBOX_TOKEN` env var at startup.
 - **Does not validate tokens** — authentication and authorization are delegated entirely to the NetBox backend.

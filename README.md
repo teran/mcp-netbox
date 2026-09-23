@@ -20,7 +20,7 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 ## Features
 
 - **Full CRUD** — 14 read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for all **25 entities** (89 tools total). `create_*` (POST) and `update_*` (partial PATCH) modify NetBox; `delete_*` is **irreversible** and each delete tool is flagged with `DestructiveHint: true`.
-- **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected via `TRANSPORT` (default `http`).
+- **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected at startup via `-mode http|stdio` (default `stdio`); the `TRANSPORT` env var remains a backward-compatible override.
 - **Per-request token authentication (HTTP)** — the NetBox API token is passed in the `Authorization` header of each MCP request. No server-side token storage.
 - **Env-token authentication (STDIO)** — in STDIO mode the NetBox token is provided once via the `NETBOX_TOKEN` environment variable.
 - **Comprehensive NetBox coverage** — DCIM, IPAM, virtualization, tenancy, and circuits entities (sites, devices, IP addresses, prefixes, VLANs, VMs, clusters, circuits, racks, cables, interfaces, circuit terminations, and more), each available for read and, via typed write tools, for create/update/delete. Plus generic `get_object_by_id`.
@@ -73,7 +73,7 @@ All configuration is via environment variables:
 |----------|----------|---------|-------------|
 | `NETBOX_URL` | Yes | — | Base URL of the NetBox instance |
 | `NETBOX_TOKEN` | STDIO only | `""` | NetBox API token for **STDIO** transport. Required when `TRANSPORT=stdio` (there is no HTTP `Authorization` header in this mode). Ignored for HTTP. |
-| `TRANSPORT` | No | `http` | MCP transport: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). |
+| `TRANSPORT` | No | `stdio` | MCP transport override: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). Overridden by the `-mode` flag; defaults to `stdio`. |
 | `LISTEN_ADDR` | No | `:8080` | TCP address for the MCP server (HTTP transport) |
 | `INTERNAL_ADDR` | No | `:8081` | Internal observability address (HTTP transport): Prometheus `/metrics`, pprof `/debug/pprof/*`, and `healthz`/`readyz`/`startup` probes |
 | `RATE_LIMIT_GLOBAL` | No | `100` | Global rate limit (requests/second) |
@@ -89,9 +89,13 @@ The NetBox API token is supplied per-request in the `Authorization` header as `B
 
 ## MCP Client Configuration
 
-The server supports two transports, selected via `TRANSPORT`.
+The server supports two transports, selected via the `-mode http|stdio` flag
+(or the `TRANSPORT` env override).
 
 ### Remote (Streamable HTTP, default)
+
+Run the server with `-mode http` (or `TRANSPORT=http`), then configure the
+client:
 
 ```json
 {
@@ -110,8 +114,8 @@ The server supports two transports, selected via `TRANSPORT`.
 
 ### Local (stdio)
 
-Start the server with `TRANSPORT=stdio` and `NETBOX_TOKEN` set, then reference it
-as a stdio command:
+Start the server with `-mode stdio` (or `TRANSPORT=stdio`) and `NETBOX_TOKEN`
+set, then reference it as a stdio command:
 
 ```json
 {

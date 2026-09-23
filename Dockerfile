@@ -19,7 +19,7 @@ EXPOSE 8080
 EXPOSE 8081
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/healthz || exit 1
-ENTRYPOINT ["/mcp-netbox"]
+ENTRYPOINT ["/mcp-netbox", "-mode", "http"]
 LABEL org.opencontainers.image.source="https://github.com/teran/mcp-netbox"
 LABEL org.opencontainers.image.description="Remote MCP server for NetBox"
 LABEL org.opencontainers.image.licenses="Apache-2.0"

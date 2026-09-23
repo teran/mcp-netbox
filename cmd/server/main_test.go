@@ -343,3 +343,27 @@ func TestRun_SetupLoggingError(t *testing.T) {
 		t.Fatal("Run() = nil, want error for invalid LOG_LEVEL")
 	}
 }
+
+func TestResolveTransport_ModeFlagWins(t *testing.T) {
+	t.Setenv("TRANSPORT", config.TransportHTTP)
+	if got := resolveTransport(config.TransportStdio); got != config.TransportStdio {
+		t.Errorf("resolveTransport(stdio with TRANSPORT=http) = %q, want stdio (flag wins)", got)
+	}
+	if got := resolveTransport(config.TransportHTTP); got != config.TransportHTTP {
+		t.Errorf("resolveTransport(http) = %q, want http", got)
+	}
+}
+
+func TestResolveTransport_EnvOverride(t *testing.T) {
+	t.Setenv("TRANSPORT", config.TransportHTTP)
+	if got := resolveTransport(""); got != config.TransportHTTP {
+		t.Errorf("resolveTransport(\"\") with TRANSPORT=http = %q, want http", got)
+	}
+}
+
+func TestResolveTransport_DefaultStdio(t *testing.T) {
+	t.Setenv("TRANSPORT", "")
+	if got := resolveTransport(""); got != config.TransportStdio {
+		t.Errorf("resolveTransport(\"\") with TRANSPORT unset = %q, want stdio (M6 default)", got)
+	}
+}

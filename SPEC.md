@@ -17,7 +17,7 @@ README badge URLs, the CI workflow triggers, and the image/release tagging schem
 
 ## Key Differentiators
 
-- **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected via the `TRANSPORT` env var (default `http`).
+- **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected at startup via the `-mode http|stdio` flag (default `stdio`); the `TRANSPORT` env var remains a backward-compatible override.
 - **Token from request headers (HTTP)** — the NetBox API token is read from the `Authorization` header of each MCP request, not from an environment variable. This enables per-user authentication in multi-tenant setups.
 - **Token from environment (STDIO)** — in STDIO mode the NetBox token is read once from `NETBOX_TOKEN` at startup (there is no HTTP header to carry it per request).
 - **Full CRUD** — 14 read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for all 25 entities (89 tools total). `create_*`/`update_*` modify NetBox (POST / partial PATCH); `delete_*` is **irreversible** and flagged `DestructiveHint: true`.
@@ -30,7 +30,7 @@ MCP servers choose between **STDIO** and **HTTP/SSE** transports based on the de
 - **HTTP/SSE (remote)** — the default. Streamable HTTP lets many AI assistants / MCP clients connect to a shared NetBox instance over the network, each authenticating with its **own** NetBox token via the `Authorization: Bearer` header (per-request, per-user auth in multi-tenant setups). This is the deployment shape that also requires a container image.
 - **STDIO (local)** — runs as a local child process of an MCP client (e.g. a desktop assistant or CLI). The client launches the server with `TRANSPORT=stdio` and passes the NetBox token via the `NETBOX_TOKEN` environment variable. Because there is no HTTP layer, per-request headers do not exist; a single shared token is used for the process lifetime.
 
-The choice is driven by the task: NetBox is an infrastructure source of truth that is frequently shared and queried by many assistants, which favors the remote HTTP transport; but a local, single-tenant, zero-network-footprint mode (STDIO) is valuable for development and desktop use. Supporting both with one codebase (Hybrid) covers both without duplicating the tool surface. The transport is selected at startup via `TRANSPORT=stdio|http` (default `http`).
+The choice is driven by the task: NetBox is an infrastructure source of truth that is frequently shared and queried by many assistants, which favors the remote HTTP transport; but a local, single-tenant, zero-network-footprint mode (STDIO) is valuable for development and desktop use. Supporting both with one codebase (Hybrid) covers both without duplicating the tool surface. The transport (launch mode) is selected at startup via the `-mode http|stdio` flag (default `stdio`); the `TRANSPORT` environment variable is honoured as a backward-compatible override (`-mode` wins).
 
 ## Auth Decision (OAuth2)
 
@@ -141,7 +141,7 @@ Test files are excluded from architecture analysis.
 
 ### Transport Wiring
 
-`cmd/server` reads `TRANSPORT` and dispatches at startup:
+`cmd/server` reads the launch mode (`-mode` flag, else the `TRANSPORT` env var) and dispatches at startup:
 
 - `http` → `runHTTP`: builds the Streamable HTTP handler (`/mcp`), the full
   HTTP middleware chain, and a separate internal observability server
@@ -158,7 +158,7 @@ The MCP `Server` is shared; only the transport wiring differs.
 |-------------------|-----------------------------------------------------------------|
 | Language          | Go 1.27+                                                        |
 | MCP SDK           | `github.com/modelcontextprotocol/go-sdk` v1.7.0                 |
-| Transport         | Hybrid — Streamable HTTP (MCP spec 2025-03-26+) and STDIO, selected via `TRANSPORT` |
+| Transport         | Hybrid — Streamable HTTP (MCP spec 2025-03-26+) and STDIO, selected via `-mode http|stdio` (default `stdio`; `TRANSPORT` override) |
 | HTTP Router       | `net/http` standard library + middleware pattern                |
 | Tool Registration | `handlers/registration.go` — `RegisterTools()` function         |
 | Logging           | `github.com/sirupsen/logrus` — channel by transport, gated by `LOG_LEVEL`; SDK `slog` wired into logrus |
@@ -171,7 +171,7 @@ The MCP `Server` is shared; only the transport wiring differs.
 |------------------------|----------|---------|--------------------------------------|
 | `NETBOX_URL`           | Yes      | —       | Base URL of the NetBox instance (e.g. `http://netbox:8000`). Must be a valid HTTP(S) URL. Loopback, private, and link-local IP addresses are rejected for SSRF protection. |
 | `NETBOX_TOKEN`         | STDIO only | `""` | NetBox API token for **STDIO** transport. Required when `TRANSPORT=stdio`. Ignored for HTTP. |
-| `TRANSPORT`            | No       | `http`  | MCP transport: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). |
+| `TRANSPORT`            | No       | `stdio` | MCP transport override: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). Overridden by the `-mode` flag; defaults to `stdio`. |
 | `LISTEN_ADDR`          | No       | `:8080` | TCP address for the MCP server (HTTP transport) |
 | `INTERNAL_ADDR`        | No       | `:8081` | Internal observability address (HTTP transport): Prometheus `/metrics`, pprof `/debug/pprof/*`, and `healthz`/`readyz`/`startup` probes |
 | `RATE_LIMIT_GLOBAL`    | No       | `100`   | Global rate limit (requests/second)  |
@@ -188,7 +188,7 @@ The NetBox API token is supplied per-request in the `Authorization` header as
 startup (there is no HTTP header to carry it per request).
 
 The MCP server listens on the `/mcp` HTTP path via the Streamable HTTP handler
-when `TRANSPORT=http`.
+when the launch mode is `http` (`-mode http` or `TRANSPORT=http`).
 
 ## Logging
 
