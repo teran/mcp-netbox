@@ -168,6 +168,8 @@ func TestSanitizeOutput_EdgeCases(t *testing.T) {
 		{"lone ESC at end of string", "\x1b", ""},
 		{"ESC followed by incomplete two-char", "\x1bA", ""},
 		{"multiple escapes", "\x1b[1m\x1b[2mok", "ok"},
+		{"CSI final byte at lower bound 0x40 '@'", "\x1b[@X", "X"},
+		{"CSI final byte at upper bound 0x7e '~'", "\x1b[~X", "X"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

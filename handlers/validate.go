@@ -38,25 +38,19 @@ func sanitizeOutput(s string) string {
 	for i := 0; i < len(s); {
 		c := s[i]
 		if c == 0x1b { // ESC — ANSI escape sequence
-			// CSI: ESC '[' ... final byte in 0x40-0x7e.
+			// CSI: ESC '[' ... final byte in 0x40-0x7e. When no final byte is
+			// present before the end of the string, the whole remainder is part
+			// of the incomplete escape and is dropped.
 			if i+1 < len(s) && s[i+1] == '[' {
 				j := i + 2
 				for j < len(s) && (s[j] < 0x40 || s[j] > 0x7e) {
 					j++
 				}
-				if j < len(s) {
-					i = j + 1
-					continue
-				}
-				i = j
+				i = j + 1
 				continue
 			}
 			// Two-character escape: ESC + a printable byte.
-			if i+1 < len(s) {
-				i += 2
-				continue
-			}
-			i++
+			i += 2
 			continue
 		}
 		if c < 0x20 || c == 0x7f { // C0 control char or DEL
