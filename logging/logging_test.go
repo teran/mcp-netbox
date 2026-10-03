@@ -79,8 +79,12 @@ func TestSetup_LevelAndTextFormat(t *testing.T) {
 	if l.GetLevel() != logrus.InfoLevel {
 		t.Errorf("level = %v, want info", l.GetLevel())
 	}
-	if _, ok := l.Formatter.(*logrus.TextFormatter); !ok {
-		t.Errorf("formatter = %T, want TextFormatter", l.Formatter)
+	f, ok := l.Formatter.(*requestIDFormatter)
+	if !ok {
+		t.Fatalf("formatter = %T, want *requestIDFormatter", l.Formatter)
+	}
+	if f.inner == nil {
+		t.Error("wrapped TextFormatter is nil")
 	}
 }
 

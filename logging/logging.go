@@ -62,7 +62,7 @@ func Setup(cfg config.Config) (*logrus.Logger, error) {
 	// L4: log format, text by default.
 	switch strings.ToLower(strings.TrimSpace(cfg.LogFormat)) {
 	case "", "text":
-		l.SetFormatter(&logrus.TextFormatter{FullTimestamp: true})
+		l.SetFormatter(&requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}})
 	case "json":
 		l.SetFormatter(&logrus.JSONFormatter{})
 	default:
