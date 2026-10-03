@@ -76,13 +76,22 @@ func toolDefIndex() map[string]toolDef {
 	return idx
 }
 
-// registerTool is a helper that builds and registers a single read-only tool,
-// combining its description with the per-tool instructions.
-func registerTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, name string, handler mcp.ToolHandlerFor[I, O]) {
+// toolDescription combines a tool definition's base Description with its
+// per-tool Instructions (M4), which the SDK surfaces through the Description
+// channel. When a tool carries no instructions the base description is
+// returned unchanged.
+func toolDescription(def toolDef) string {
 	description := def.Description
 	if def.Instructions != "" {
 		description = description + "\n\nInstructions: " + def.Instructions
 	}
+	return description
+}
+
+// registerTool is a helper that builds and registers a single read-only tool,
+// combining its description with the per-tool instructions.
+func registerTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, name string, handler mcp.ToolHandlerFor[I, O]) {
+	description := toolDescription(def)
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        name,
 		Description: description,
@@ -93,10 +102,7 @@ func registerTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, name s
 // registerWriteTool registers a non-destructive write tool with writeTool
 // annotations.
 func registerWriteTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, name string, handler mcp.ToolHandlerFor[I, O]) {
-	description := def.Description
-	if def.Instructions != "" {
-		description = description + "\n\nInstructions: " + def.Instructions
-	}
+	description := toolDescription(def)
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        name,
 		Description: description,
@@ -107,10 +113,7 @@ func registerWriteTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, n
 // registerDeleteTool registers a destructive tool with destructiveTool
 // annotations.
 func registerDeleteTool[I, O any](s *mcp.Server, def toolDef, metrics *Metrics, name string, handler mcp.ToolHandlerFor[I, O]) {
-	description := def.Description
-	if def.Instructions != "" {
-		description = description + "\n\nInstructions: " + def.Instructions
-	}
+	description := toolDescription(def)
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        name,
 		Description: description,

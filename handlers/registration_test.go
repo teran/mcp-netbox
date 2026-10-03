@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -85,4 +86,26 @@ func TestRegisterTools(t *testing.T) {
 			t.Errorf("registered %d tools, want %d", got, expectedToolCount)
 		}
 	})
+}
+
+func TestToolDescription(t *testing.T) {
+	t.Parallel()
+
+	// A tool definition carrying Instructions must append them to the base
+	// description (kills the CONDITIONALS_NEGATION on `def.Instructions != ""`).
+	withInstr := toolDef{Name: "x", Title: "X", Description: "base description", Instructions: "use with care"}
+	got := toolDescription(withInstr)
+	if !strings.Contains(got, "base description") {
+		t.Errorf("toolDescription = %q, want it to keep the base description", got)
+	}
+	if !strings.Contains(got, "Instructions: use with care") {
+		t.Errorf("toolDescription = %q, want it to append the instructions", got)
+	}
+
+	// A tool definition without instructions must return the base description
+	// unchanged.
+	noInstr := toolDef{Name: "y", Title: "Y", Description: "plain description"}
+	if got := toolDescription(noInstr); got != "plain description" {
+		t.Errorf("toolDescription(no instructions) = %q, want %q", got, "plain description")
+	}
 }
