@@ -223,7 +223,7 @@ func TestClient_DeleteSite(t *testing.T) {
 		}
 	})
 
-	t.Run("not found 404", func(t *testing.T) {
+	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
@@ -231,8 +231,8 @@ func TestClient_DeleteSite(t *testing.T) {
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		if err := client.DeleteSite(context.Background(), "tok", 999); err == nil {
-			t.Fatal("expected error, got nil")
+		if err := client.DeleteSite(context.Background(), "tok", 999); err != nil {
+			t.Fatalf("DeleteSite() returned error: %v", err)
 		}
 	})
 }
@@ -490,7 +490,7 @@ func TestClient_DeleteDevice(t *testing.T) {
 		}
 	})
 
-	t.Run("not found 404", func(t *testing.T) {
+	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
@@ -498,8 +498,8 @@ func TestClient_DeleteDevice(t *testing.T) {
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		if err := client.DeleteDevice(context.Background(), "tok", 999); err == nil {
-			t.Fatal("expected error, got nil")
+		if err := client.DeleteDevice(context.Background(), "tok", 999); err != nil {
+			t.Fatalf("DeleteDevice() returned error: %v", err)
 		}
 	})
 }
@@ -730,7 +730,7 @@ func TestClient_DeleteIPAddress(t *testing.T) {
 		}
 	})
 
-	t.Run("not found 404", func(t *testing.T) {
+	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
@@ -738,8 +738,8 @@ func TestClient_DeleteIPAddress(t *testing.T) {
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		if err := client.DeleteIPAddress(context.Background(), "tok", 999); err == nil {
-			t.Fatal("expected error, got nil")
+		if err := client.DeleteIPAddress(context.Background(), "tok", 999); err != nil {
+			t.Fatalf("DeleteIPAddress() returned error: %v", err)
 		}
 	})
 }
@@ -2057,7 +2057,7 @@ func TestClient_DeleteCircuitTermination(t *testing.T) {
 		}
 	})
 
-	t.Run("not found 404", func(t *testing.T) {
+	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
@@ -2065,8 +2065,8 @@ func TestClient_DeleteCircuitTermination(t *testing.T) {
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		if err := client.DeleteCircuitTermination(context.Background(), "tok", 999); err == nil {
-			t.Fatal("expected error, got nil")
+		if err := client.DeleteCircuitTermination(context.Background(), "tok", 999); err != nil {
+			t.Fatalf("DeleteCircuitTermination() returned error: %v", err)
 		}
 	})
 }
@@ -3606,7 +3606,7 @@ func TestClient_DeleteInterface(t *testing.T) {
 		}
 	})
 
-	t.Run("not found 404", func(t *testing.T) {
+	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
@@ -3614,8 +3614,8 @@ func TestClient_DeleteInterface(t *testing.T) {
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		if err := client.DeleteInterface(context.Background(), "tok", 999); err == nil {
-			t.Fatal("expected error, got nil")
+		if err := client.DeleteInterface(context.Background(), "tok", 999); err != nil {
+			t.Fatalf("DeleteInterface() returned error: %v", err)
 		}
 	})
 }
@@ -3837,7 +3837,7 @@ func TestClient_DeleteRack(t *testing.T) {
 		}
 	})
 
-	t.Run("not found 404", func(t *testing.T) {
+	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
@@ -3845,8 +3845,8 @@ func TestClient_DeleteRack(t *testing.T) {
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		if err := client.DeleteRack(context.Background(), "tok", 999); err == nil {
-			t.Fatal("expected error, got nil")
+		if err := client.DeleteRack(context.Background(), "tok", 999); err != nil {
+			t.Fatalf("DeleteRack() returned error: %v", err)
 		}
 	})
 }

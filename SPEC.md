@@ -729,7 +729,8 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
 
 | Scenario | MCP Error |
 |----------|-----------|
-| Resource not found | `isError: true` |
+| Resource not found (read/update) | `isError: true` |
+| Resource not found on delete | `isError: false` — idempotent no-op: a 404 from a `delete_*` call means the object is already gone and is treated as a successful delete (matches `idempotentHint: true`) |
 | NetBox unavailable | `isError: true` |
 | Invalid token | `isError: true` |
 | NetBox 400 validation on write (create/update/delete) | `ValidationError` — returned as structured content (field-level errors from the NetBox response body); the `Error()` string carries only the status code and never the body |

@@ -25,6 +25,10 @@ import (
 	"github.com/teran/mcp-netbox/domain"
 )
 
+// ErrNotFound is returned by the client when NetBox responds 404 (resource not
+// found). Delete operations treat it as a successful no-op (idempotent delete).
+var ErrNotFound = errors.New("not found")
+
 var objectTypeToEndpoint = map[string]string{
 	"site":                "/api/dcim/sites/",
 	"device":              "/api/dcim/devices/",
@@ -144,7 +148,7 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 		return nil, fmt.Errorf("unauthorized: invalid token or insufficient permissions")
 	}
 	if resp.StatusCode() == http.StatusNotFound {
-		return nil, fmt.Errorf("not found")
+		return nil, ErrNotFound
 	}
 	if resp.StatusCode() == http.StatusForbidden {
 		return nil, fmt.Errorf("forbidden: token lacks required permissions")
@@ -209,7 +213,14 @@ func (c *Client) patch(ctx context.Context, token, path string, body []byte) ([]
 }
 
 func (c *Client) delete(ctx context.Context, token, path string) ([]byte, error) {
-	return c.doRequest(ctx, token, http.MethodDelete, path, nil, nil)
+	body, err := c.doRequest(ctx, token, http.MethodDelete, path, nil, nil)
+	// Idempotent delete (N25): a 404 means the object is already gone, which
+	// from the caller's perspective is a successful no-op. Treating it as such
+	// makes repeated delete calls safe to retry (matching IdempotentHint: true).
+	if errors.Is(err, ErrNotFound) {
+		return nil, nil
+	}
+	return body, err
 }
 
 // mapWriteStatus maps a write HTTP status to a result or error. 201/200 yield
