@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -24,6 +25,25 @@ func histogramSampleCount(c prometheus.Collector) uint64 {
 		for _, m := range mf.GetMetric() {
 			if h := m.GetHistogram(); h != nil {
 				return h.GetSampleCount()
+			}
+		}
+	}
+	return 0
+}
+
+// histogramSum gathers a histogram collector and returns the sum of all
+// observed samples, so tests can assert the magnitude of recorded values.
+func histogramSum(c prometheus.Collector) float64 {
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(c)
+	mfs, err := reg.Gather()
+	if err != nil {
+		return 0
+	}
+	for _, mf := range mfs {
+		for _, m := range mf.GetMetric() {
+			if h := m.GetHistogram(); h != nil {
+				return h.GetSampleSum()
 			}
 		}
 	}
@@ -97,6 +117,31 @@ func TestClient_UpstreamMetrics(t *testing.T) {
 	}
 	if got := histogramSampleCount(um.responseSize); got != 2 {
 		t.Errorf("response_size histogram sample count = %d, want 2", got)
+	}
+}
+
+func TestClient_UpstreamRecordsResponseSize(t *testing.T) {
+	t.Parallel()
+
+	// A non-empty response body must be recorded in the upstream response_size
+	// histogram with its real byte count. Kills the CONDITIONALS_NEGATION on
+	// `resp != nil` (whose mutant would always record size 0).
+	reg := prometheus.NewRegistry()
+	um := NewUpstreamMetrics(reg)
+	body := []byte(`{"data":"` + strings.Repeat("x", 5000) + `"}`)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write(body)
+	}))
+	defer srv.Close()
+
+	client := NewClientWithMetrics(srv.URL, http.DefaultClient, um)
+	if _, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil); err != nil {
+		t.Fatalf("doRequest() returned error: %v", err)
+	}
+	if got := histogramSum(um.responseSize); got < 1024 {
+		t.Errorf("response_size histogram sum = %v, want >= 1024 (records the real body size)", got)
 	}
 }
 
