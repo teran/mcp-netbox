@@ -3,10 +3,12 @@ package handlers
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/teran/mcp-netbox/application"
 	"github.com/teran/mcp-netbox/domain"
+	"github.com/teran/mcp-netbox/mockrepo"
 )
 
 type stubRepo struct{}
@@ -420,6 +422,25 @@ func TestPaginationParams(t *testing.T) {
 			t.Errorf("limit = %q, want %q", params["limit"], "25")
 		}
 	})
+
+	t.Run("page=0 with non-zero pageSize clamps to page 1", func(t *testing.T) {
+		// Exactly zero page must be treated as page 1 (offset 0), not page 0
+		// (which would produce a negative offset). Kills the CONDITIONALS_BOUNDARY
+		// on `page <= 0`.
+		params := paginationParams(0, 25)
+		if params["offset"] != "0" {
+			t.Errorf("offset = %q, want %q", params["offset"], "0")
+		}
+	})
+
+	t.Run("pageSize=1 stays 1", func(t *testing.T) {
+		// A pageSize of exactly 1 must be preserved (limit 1), not bumped to the
+		// default of 25. Kills the CONDITIONALS_BOUNDARY on `pageSize < 1`.
+		params := paginationParams(1, 1)
+		if params["limit"] != "1" {
+			t.Errorf("limit = %q, want %q", params["limit"], "1")
+		}
+	})
 }
 
 func TestAddIntParam(t *testing.T) {
@@ -555,6 +576,81 @@ func TestGetObjectByID_CRLFSanitization(t *testing.T) {
 			t.Error("expected error for zero id")
 		}
 	})
+}
+
+func TestGetObjectByID_ZeroIDRejectedBeforeService(t *testing.T) {
+	t.Parallel()
+
+	// An ID of exactly 0 must be rejected with the "id must be a positive
+	// integer" error and must never reach the repository. Kills the
+	// CONDITIONALS_BOUNDARY on `in.ID <= 0`, whose mutant would let ID=0
+	// through to the service call.
+	var serviceCalled bool
+	svc := application.NewNetworkService(&mockrepo.MockRepo{
+		GetObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (domain.RawObject, error) {
+			serviceCalled = true
+			return nil, errors.New("service should not be called")
+		},
+	}, "token")
+	handler := NewGetObjectByIDHandler(svc)
+
+	_, _, err := handler(context.Background(), nil, GetObjectInput{ObjectType: "site", ID: 0})
+	if err == nil {
+		t.Fatal("expected error for zero id, got nil")
+	}
+	if !strings.Contains(err.Error(), "id must be a positive integer") {
+		t.Errorf("error = %q, want it to contain 'id must be a positive integer'", err.Error())
+	}
+	if serviceCalled {
+		t.Error("GetObject was called for ID=0; it must be rejected before reaching the service")
+	}
+}
+
+func TestGetObjectByID_CRLFParamsSanitizedBeforeService(t *testing.T) {
+	t.Parallel()
+
+	// The params map handed to the repository must be fully CRLF/control-char
+	// free, while ordinary key/value pairs are preserved. This kills the
+	// CONDITIONALS_NEGATION (r=='\r' / r=='\n') and INVERT_NEGATIVES /
+	// ARITHMETIC_BASE (return -1) mutants in the get_object_by_id sanitizer.
+	var gotParams map[string]string
+	svc := application.NewNetworkService(&mockrepo.MockRepo{
+		GetObjectFunc: func(_ context.Context, _ string, _ string, _ int, params map[string]string) (domain.RawObject, error) {
+			gotParams = params
+			return domain.RawObject(`{}`), nil
+		},
+	}, "token")
+	handler := NewGetObjectByIDHandler(svc)
+
+	_, _, err := handler(context.Background(), nil, GetObjectInput{
+		ObjectType: "site",
+		ID:         1,
+		Params: map[string]string{
+			"hello":    "world",
+			"key\r\n1": "value\r\n1",
+			"clean":    "ok",
+		},
+	})
+	if err != nil {
+		t.Fatalf("handler returned error: %v", err)
+	}
+	if gotParams == nil {
+		t.Fatal("params were not forwarded to the service")
+	}
+	if gotParams["hello"] != "world" {
+		t.Errorf("params['hello'] = %q, want 'world'", gotParams["hello"])
+	}
+	if gotParams["clean"] != "ok" {
+		t.Errorf("params['clean'] = %q, want 'ok'", gotParams["clean"])
+	}
+	if gotParams["key1"] != "value1" {
+		t.Errorf("params['key1'] = %q, want 'value1'", gotParams["key1"])
+	}
+	for k, v := range gotParams {
+		if strings.ContainsAny(k, "\r\n\x01") || strings.ContainsAny(v, "\r\n\x01") {
+			t.Errorf("sanitized params still contain control characters: key=%q value=%q", k, v)
+		}
+	}
 }
 
 func TestAddParam(t *testing.T) {

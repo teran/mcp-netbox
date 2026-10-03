@@ -2160,7 +2160,7 @@ const maxPageSize = 1000
 
 func paginationParams(page, pageSize int) map[string]string {
 	params := make(map[string]string)
-	if page < 1 {
+	if page <= 0 {
 		page = 1
 	}
 	if pageSize < 1 {
