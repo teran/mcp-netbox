@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 
 	_ "github.com/teran/mcp-netbox/domain"
 )
@@ -394,5 +396,53 @@ func TestSanitizeToolResult_SetsSanitizedText(t *testing.T) {
 	}
 	if !strings.Contains(text.Text, "srv") {
 		t.Errorf("text = %q, want it to contain the sanitized field value", text.Text)
+	}
+}
+
+func TestWrapToolHandler_RecordsErrorClassForErr(t *testing.T) {
+	t.Parallel()
+
+	// An err != nil (with a nil result) must be recorded with status_class=error
+	// (kills the CONDITIONALS_NEGATION on `err != nil` in WrapToolHandler).
+	reg := prometheus.NewRegistry()
+	m := NewMetrics(reg)
+
+	handler := WrapToolHandler[testInput, testOutput](m, "err_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
+		return nil, testOutput{}, errors.New("boom")
+	})
+
+	_, _, err := handler(context.Background(), nil, testInput{})
+	if err == nil {
+		t.Fatal("handler returned nil error, want non-nil")
+	}
+	if got := testutil.ToFloat64(m.toolRequestsTotal.WithLabelValues("err_tool", "error")); got != 1 {
+		t.Errorf("requests_total{tool=err_tool,status=error} = %v, want 1", got)
+	}
+	if got := testutil.ToFloat64(m.toolRequestsTotal.WithLabelValues("err_tool", "2xx")); got != 0 {
+		t.Errorf("requests_total{tool=err_tool,status=2xx} = %v, want 0", got)
+	}
+}
+
+func TestWrapToolHandler_RecordsErrorClassForIsErrorResult(t *testing.T) {
+	t.Parallel()
+
+	// A non-nil result with IsError=true (and err == nil) must be recorded with
+	// status_class=error (kills the CONDITIONALS_NEGATION on `result != nil`).
+	reg := prometheus.NewRegistry()
+	m := NewMetrics(reg)
+
+	handler := WrapToolHandler[testInput, testOutput](m, "iserr_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
+		return &mcp.CallToolResult{IsError: true}, testOutput{}, nil
+	})
+
+	_, _, err := handler(context.Background(), nil, testInput{})
+	if err != nil {
+		t.Fatalf("handler returned error: %v", err)
+	}
+	if got := testutil.ToFloat64(m.toolRequestsTotal.WithLabelValues("iserr_tool", "error")); got != 1 {
+		t.Errorf("requests_total{tool=iserr_tool,status=error} = %v, want 1", got)
+	}
+	if got := testutil.ToFloat64(m.toolRequestsTotal.WithLabelValues("iserr_tool", "2xx")); got != 0 {
+		t.Errorf("requests_total{tool=iserr_tool,status=2xx} = %v, want 0", got)
 	}
 }
