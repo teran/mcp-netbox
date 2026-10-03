@@ -1433,6 +1433,28 @@ func TestDoRequest_UnexpectedStatus(t *testing.T) {
 	}
 }
 
+func TestDoRequest_Status300IsError(t *testing.T) {
+	t.Parallel()
+
+	// A 300 status is outside the 2xx range and must be treated as an error.
+	// Kills the CONDITIONALS_BOUNDARY on `statusCode >= 300` (whose mutant would
+	// let exactly 300 through as a success).
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMultipleChoices)
+		_, _ = w.Write([]byte(`{"detail":"multiple choices"}`))
+	}))
+	defer srv.Close()
+
+	client := NewClient(srv.URL, http.DefaultClient)
+	_, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil)
+	if err == nil {
+		t.Fatal("Expected error for 300, got nil")
+	}
+	if !contains(err.Error(), "unexpected status 300") {
+		t.Errorf("error = %q, want it to contain 'unexpected status 300'", err.Error())
+	}
+}
+
 func TestDoRequest_QueryParams(t *testing.T) {
 	t.Parallel()
 
