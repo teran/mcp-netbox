@@ -575,7 +575,7 @@ func TestRequestArgs_Empty(t *testing.T) {
 	}
 }
 
-func TestLoggingMiddleware_DebugLevelWithFields(t *testing.T) {
+func TestLoggingMiddleware_InfoLevelWithFields(t *testing.T) {
 	t.Cleanup(func() {
 		SetLogger(nil)
 	})
@@ -583,7 +583,9 @@ func TestLoggingMiddleware_DebugLevelWithFields(t *testing.T) {
 	var buf bytes.Buffer
 	l := logrus.New()
 	l.SetOutput(&buf)
-	l.SetLevel(logrus.DebugLevel)
+	// L8: the per-request access log must be visible at the default info level
+	// (no debug gate), so it is tested at InfoLevel.
+	l.SetLevel(logrus.InfoLevel)
 	SetLogger(l)
 
 	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

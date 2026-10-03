@@ -244,9 +244,11 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 
 // LoggingMiddleware logs MCP requests with tool, source, duration, byte sizes,
 // and outcome. It never logs the Authorization header content. When logging is
-// enabled (LOG_LEVEL set), it emits a per-tool-call trace line at debug level
-// (L8) with structured fields: tool, args (non-sensitive), source, duration,
-// in_bytes, out_bytes, outcome — plus the request_id added by WithSession.
+// enabled (LOG_LEVEL set), it emits a per-tool-call access-log line at info
+// level (L8) with structured fields: tool, args (non-sensitive), source,
+// duration, in_bytes, out_bytes, outcome — plus the request_id added by
+// WithSession. The info level (not debug) keeps the access log visible whenever
+// logging is enabled (L02), matching the L8 requirement of no debug gate.
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -294,7 +296,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			"http_method": r.Method,
 			"path":        r.URL.Path,
 			"status":      lrw.statusCode,
-		}).Debug("mcp_request")
+		}).Info("mcp_request")
 	})
 }
 

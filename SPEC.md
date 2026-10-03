@@ -222,7 +222,8 @@ Logging uses **logrus**. Enablement follows the launch mode (L2):
   tool-call results and errors, protocol warnings — are visible in the server
   logs at the configured level.
 - **Per-request trace logging (L8):** when logging is enabled, each MCP tool
-  call emits a log line at debug/trace level with structured fields: `tool`,
+  call emits an access-log line at info level (not gated behind debug — it is
+  visible whenever logging is on, L2) with structured fields: `tool`,
   `args` (only non-sensitive request params, never the Authorization token),
   `source` (derived for HTTP from `X-Real-IP` → `X-Forwarded-For` → `RemoteAddr`,
   comma-joined so all proxy hops are visible; `"STDIO"` for stdio), `duration`,
@@ -636,7 +637,7 @@ The server applies ten middleware layers to every HTTP request, executed in this
 5. **MetricsMiddleware** — tracks in-flight requests via gauge
 6. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
 7. **BodyLimitMiddleware** — 1 MB request body limit
-8. **LoggingMiddleware** — logs MCP tool, source, duration, byte sizes, outcome, and `request_id` at debug level (never logs token) (L8)
+8. **LoggingMiddleware** — logs MCP tool, source, duration, byte sizes, outcome, and `request_id` at info level (never logs token) (L8)
 9. **TokenMiddleware** — extracts token from `Authorization` header, stores as `*application.Token` in context (safe redaction via String/GoString/MarshalJSON)
 10. **injectClientMiddleware** — creates NetBox API client with per-request token, stores service in context
 
