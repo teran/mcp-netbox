@@ -166,6 +166,41 @@ func TestIsConnectionError(t *testing.T) {
 	}
 }
 
+func TestDefaultConfig(t *testing.T) {
+	t.Parallel()
+
+	// Kills the ARITHMETIC_BASE mutant on `30 * time.Second` (which would
+	// produce a 30ns timeout).
+	cfg := DefaultConfig()
+	if cfg.FailureThreshold != 5 {
+		t.Errorf("FailureThreshold = %d, want 5", cfg.FailureThreshold)
+	}
+	if cfg.Timeout != 30*time.Second {
+		t.Errorf("Timeout = %v, want %v", cfg.Timeout, 30*time.Second)
+	}
+}
+
+func TestBreaker_NotHalfOpenAtExactTimeout(t *testing.T) {
+	t.Parallel()
+
+	// The circuit transitions to half-open only strictly after Timeout has
+	// elapsed; at exactly Timeout it must remain open. Kills the
+	// CONDITIONALS_BOUNDARY on `now().Sub(b.lastFailureTime) > b.config.Timeout`.
+	base := time.Now()
+	b := &Breaker{
+		config:          Config{FailureThreshold: 1, Timeout: 10 * time.Second},
+		state:           StateOpen,
+		lastFailureTime: base.Add(-10 * time.Second),
+		now:             func() time.Time { return base },
+	}
+	if err := b.Allow(); err != ErrCircuitOpen {
+		t.Errorf("Allow() = %v, want %v (exactly at timeout boundary)", err, ErrCircuitOpen)
+	}
+	if b.State() != StateOpen {
+		t.Errorf("state = %d, want %d", b.State(), StateOpen)
+	}
+}
+
 func TestRoundTripper_FailsFastWhenOpen(t *testing.T) {
 	b := &Breaker{
 		config:          Config{FailureThreshold: 1, Timeout: 1 * time.Hour},

@@ -52,6 +52,9 @@ type Breaker struct {
 	state           State
 	failureCount    int
 	lastFailureTime time.Time
+	// now is an injectable clock used by Allow; when nil, time.Now is used.
+	// Tests set it to a fixed value so the timeout boundary is deterministic.
+	now func() time.Time
 }
 
 // State returns the current circuit breaker state.
@@ -69,7 +72,11 @@ func (b *Breaker) Allow() error {
 
 	switch b.state {
 	case StateOpen:
-		if time.Since(b.lastFailureTime) > b.config.Timeout {
+		now := b.now
+		if now == nil {
+			now = time.Now
+		}
+		if now().Sub(b.lastFailureTime) > b.config.Timeout {
 			b.state = StateHalfOpen
 			return nil
 		}
