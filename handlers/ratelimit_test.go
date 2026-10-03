@@ -139,6 +139,37 @@ func TestRateLimiter_EvictExpired(t *testing.T) {
 	}
 }
 
+func TestRateLimiter_NotEvictedAtExactTTL(t *testing.T) {
+	t.Parallel()
+
+	// A client whose lastSeen is exactly clientTTL in the past must NOT be
+	// evicted: the check is strict (>) and only strictly-older entries are
+	// removed. Kills the CONDITIONALS_BOUNDARY on `> clientTTL`.
+	base := time.Now()
+	rl := &rateLimiter{
+		config: RateLimiterConfig{
+			GlobalLimit:    rate.Limit(100),
+			GlobalBurst:    200,
+			PerClientLimit: rate.Limit(10),
+			PerClientBurst: 20,
+		},
+		global:  rate.NewLimiter(rate.Limit(100), 200),
+		clients: make(map[string]*clientLimiter),
+		stopCh:  make(chan struct{}),
+		now:     func() time.Time { return base },
+	}
+
+	rl.clients["boundary"] = &clientLimiter{
+		limiter:  rate.NewLimiter(rate.Limit(10), 20),
+		lastSeen: base.Add(-clientTTL),
+	}
+
+	rl.evictStaleClients()
+	if _, ok := rl.clients["boundary"]; !ok {
+		t.Error("client at exactly clientTTL was evicted; only strictly-older clients should be evicted")
+	}
+}
+
 func TestRateLimiter_DefaultBurst(t *testing.T) {
 	t.Parallel()
 

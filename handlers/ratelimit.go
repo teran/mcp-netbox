@@ -35,6 +35,9 @@ type rateLimiter struct {
 	mu        sync.Mutex
 	stopCh    chan struct{}
 	closeOnce sync.Once
+	// now is an injectable clock used by eviction; when nil, time.Now is used.
+	// Tests set it to a fixed value so the clientTTL boundary is deterministic.
+	now func() time.Time
 }
 
 func NewRateLimiter(config RateLimiterConfig) *rateLimiter {
@@ -94,9 +97,13 @@ func (rl *rateLimiter) evictStaleClients() {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 
-	now := time.Now()
+	now := rl.now
+	if now == nil {
+		now = time.Now
+	}
+	nowVal := now()
 	for ip, cl := range rl.clients {
-		if now.Sub(cl.lastSeen) > clientTTL {
+		if nowVal.Sub(cl.lastSeen) > clientTTL {
 			delete(rl.clients, ip)
 		}
 	}
