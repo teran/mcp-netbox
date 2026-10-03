@@ -987,7 +987,7 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	if c, err := repo.CreateCable(ctx, "t", domain.CableWrite{Label: &label}); err != nil || c.Label != "link-01" {
 		t.Errorf("CreateCable = (%v, %v)", c, err)
 	}
-	if c, err := repo.UpdateCable(ctx, "t", 7, domain.CableWrite{Label: &label}); err != nil || c.ID != 7 {
+	if c, err := repo.UpdateCable(ctx, "t", 7, domain.CableWrite{Label: &label}); err != nil || c.ID != 7 || c.Label != "link-01" {
 		t.Errorf("UpdateCable = (%v, %v)", c, err)
 	}
 	if err := repo.DeleteCable(ctx, "t", 3); err != nil {

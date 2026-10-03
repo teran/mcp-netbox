@@ -30,7 +30,7 @@ func (f *requestIDFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		return f.inner.Format(entry)
 	}
 
-	copyData := make(logrus.Fields, len(entry.Data)-1)
+	copyData := make(logrus.Fields)
 	for k, v := range entry.Data {
 		if k != requestIDKey {
 			copyData[k] = v
