@@ -213,6 +213,17 @@ func TestCheckBatchSize(t *testing.T) {
 		t.Error("checkBatchSize(large batch) = nil, want error")
 	}
 
+	// A batch with exactly MaxBatchSize items must be accepted (the boundary
+	// check is strict: only more than MaxBatchSize is rejected).
+	exact := make([]string, MaxBatchSize)
+	for i := range exact {
+		exact[i] = `{}`
+	}
+	exactBody := []byte(`[` + strings.Join(exact, ",") + `]`)
+	if err := checkBatchSize(exactBody); err != nil {
+		t.Errorf("checkBatchSize(batch of exactly MaxBatchSize) = %v, want nil", err)
+	}
+
 	// Test invalid JSON body
 	if err := checkBatchSize([]byte("[")); err == nil {
 		t.Error("checkBatchSize(invalid JSON) = nil, want error")
@@ -382,6 +393,21 @@ func TestTokenMiddleware(t *testing.T) {
 			t.Errorf("status = %d, want %d", rec.Code, http.StatusUnauthorized)
 		}
 	})
+
+	t.Run("token at max length is accepted", func(t *testing.T) {
+		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+		req.Header.Set("Authorization", "Bearer "+strings.Repeat("a", MaxTokenLength))
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Errorf("status = %d, want %d (token of exactly MaxTokenLength must be allowed)", rec.Code, http.StatusOK)
+		}
+	})
 }
 
 func TestHostValidationMiddleware(t *testing.T) {
@@ -529,6 +555,21 @@ func TestWithSession_NoRequestID(t *testing.T) {
 	}
 }
 
+func TestWithSession_NoSessionIDField(t *testing.T) {
+	t.Parallel()
+
+	l := logrus.New()
+	l.SetOutput(io.Discard)
+
+	// No session id is present in the context, so WithSession must NOT attach a
+	// session_id field to the entry (kills the CONDITIONALS_NEGATION on the
+	// `sid != ""` check, whose mutant would add an empty session_id field).
+	entry := WithSession(context.Background(), l)
+	if _, ok := entry.Data["session_id"]; ok {
+		t.Error("WithSession attached a session_id field when no session id is present")
+	}
+}
+
 func TestRequestSource_Chain(t *testing.T) {
 	t.Parallel()
 
@@ -607,5 +648,33 @@ func TestLoggingMiddleware_InfoLevelWithFields(t *testing.T) {
 	}
 	if strings.Contains(out, "Authorization") {
 		t.Errorf("log output must not contain Authorization header; got: %s", out)
+	}
+}
+
+func TestLoggingMiddleware_OutcomeErrorOnExactly400(t *testing.T) {
+	t.Cleanup(func() {
+		SetLogger(nil)
+	})
+
+	var buf bytes.Buffer
+	l := logrus.New()
+	l.SetOutput(&buf)
+	l.SetLevel(logrus.InfoLevel)
+	SetLogger(l)
+
+	// A response with status exactly 400 must be classified as outcome=error
+	// (kills the CONDITIONALS_BOUNDARY on `statusCode >= 400`, whose mutant
+	// would treat 400 as success).
+	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/mcp", strings.NewReader(`{"method":"x"}`))
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	out := buf.String()
+	if !strings.Contains(out, "outcome=error") {
+		t.Errorf("log output = %q, want it to contain outcome=error for a 400 response", out)
 	}
 }
