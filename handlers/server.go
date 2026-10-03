@@ -23,6 +23,13 @@ func ServiceFromContext(ctx context.Context) *application.NetworkService {
 	return nil
 }
 
+// burstForLimit computes the token-bucket burst for a given per-second limit.
+// The burst is double the limit so that short request spikes are absorbed
+// without tripping the rate limiter while the steady-state rate stays capped.
+func burstForLimit(limit int) int {
+	return limit * 2
+}
+
 // NewMux builds the MCP HTTP mux (served on LISTEN_ADDR, :8080) with all
 // middleware and routes configured. Only the MCP endpoint (/mcp) is served
 // here; observability (metrics, pprof, probes) lives on the separate internal
@@ -32,9 +39,9 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 	injectClientMW := injectClientMiddleware(cfg.NetBoxURL, sharedHTTPClient, upstreamMetrics)
 	rateLimitMW, stopRateLimit := RateLimitMiddleware(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(cfg.RateLimitGlobal),
-		GlobalBurst:    cfg.RateLimitGlobal * 2,
+		GlobalBurst:    burstForLimit(cfg.RateLimitGlobal),
 		PerClientLimit: rate.Limit(cfg.RateLimitPerClient),
-		PerClientBurst: cfg.RateLimitPerClient * 2,
+		PerClientBurst: burstForLimit(cfg.RateLimitPerClient),
 	}, cfg.TrustedProxy)
 
 	handler := RequestIDMiddleware(
