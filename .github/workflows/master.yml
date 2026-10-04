@@ -43,7 +43,7 @@ jobs:
           echo "tags=${IMAGE}:master-${SHORTCOMMIT} ${IMAGE}:master-${TIMESTAMP} ${IMAGE}:master-${SHORTCOMMIT}-${TIMESTAMP}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4.4.0 # SHA: af1e73f918a031802d376d3c8bbc3fe56130a9b0
+        uses: docker/login-action@v4.6.0 # SHA: af1e73f918a031802d376d3c8bbc3fe56130a9b0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
