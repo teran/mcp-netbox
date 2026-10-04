@@ -4,6 +4,7 @@ import (
 	"net"
 	"net/netip"
 	"testing"
+	"time"
 )
 
 func TestValidateURLScheme(t *testing.T) {
@@ -155,6 +156,7 @@ func TestValidateConfig(t *testing.T) {
 			NetBoxURL:          "http://google.com",
 			RateLimitGlobal:    100,
 			RateLimitPerClient: 10,
+			WriteTimeout:       300 * time.Second,
 		}
 		if err := cfg.validate(); err != nil {
 			t.Errorf("validate() = %v, want nil", err)
