@@ -50,7 +50,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4.2.0 # SHA: bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
+        uses: docker/setup-buildx-action@v4.4.1 # SHA: bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
 
       # `make container-image push=true` builds the image from the dist/
       # artifact produced by `make build` and pushes it (R07).
