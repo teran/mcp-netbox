@@ -15,7 +15,7 @@ jobs:
         with:
           go-version: "1.27"
           cache: true
-      - uses: go-gremlins/gremlins-action@v1.0.1 # SHA: e5dc59ad56bda9b70d8b64f9499c44d0fa318a08
+      - uses: go-gremlins/gremlins-action@v1.0.3 # SHA: e5dc59ad56bda9b70d8b64f9499c44d0fa318a08
         with:
           version: latest
           # Thresholds (efficacy/mcover) live in .gremlins.yaml at the repo
