@@ -5,14 +5,14 @@
 An MCP (Model Context Protocol) server for [NetBox](https://netboxlabs.com/).
 This server exposes NetBox infrastructure data through the MCP protocol using **Streamable HTTP** transport (remote mode), allowing AI assistants to query and manage DCIM, IPAM, virtualization, tenancy, and circuits data.
 
-## Repository Location (R5)
+## Repository Location (R05)
 
 The repository is hosted **publicly on GitHub.com** at
 `github.com/teran/mcp-netbox` (module path `github.com/teran/mcp-netbox`,
 container image `ghcr.io/teran/mcp-netbox`). Because the repository is **public**
-(not an internal Forgejo host), the public module path is used and the S6
+(not an internal Forgejo host), the public module path is used and the S06
 local-only-naming restriction does **not** apply. The default branch is `master`
-(R2). This location was fixed before development and drives the module path, the
+(R02). This location was fixed before development and drives the module path, the
 README badge URLs, the CI workflow triggers, and the image/release tagging scheme.
 
 ## Key Differentiators
@@ -93,7 +93,7 @@ transport (see [Logging](#logging)).
                                                     └───────────────────────┘
 ```
 
-> **TLS termination** is expected to be handled by a reverse proxy (e.g., nginx, Envoy) placed in front of the MCP server. The server itself does not serve HTTPS directly. This also applies to the HTTP/SSE transport: TLS is never implemented inside the server (N1).
+> **TLS termination** is expected to be handled by a reverse proxy (e.g., nginx, Envoy) placed in front of the MCP server. The server itself does not serve HTTPS directly. This also applies to the HTTP/SSE transport: TLS is never implemented inside the server (N01).
 
 ### Package Layout (Clean / DDD)
 
@@ -107,14 +107,14 @@ inner layers depend on nothing internal, outer layers may depend inward:
 | Application       | `application`                           | Use cases / `NetworkService` business logic          |
 | Domain            | `domain`                                | Domain models + repository interfaces (ports)        |
 | Config            | `config`                                | Env loading + validation (envconfig + ozzo-validation) |
-| Logging           | `logging`                          | logrus setup, channel-by-transport (L1–L4), SDK `slog`→logrus handler |
+| Logging           | `logging`                          | logrus setup, channel-by-transport (L01–L04), SDK `slog`→logrus handler |
 | HTTP transport    | `handlers`                              | MCP tool handlers, middleware chain, metrics, registration |
 
-> **Layout note (A1):** this repository deliberately uses the Clean/DDD layered
+> **Layout note (A01):** this repository deliberately uses the Clean/DDD layered
 > layout above (composition root + layered packages) rather than the skill's
 > default simple single-package layout. This is an explicit, documented choice
 > for this project; dependency boundaries are enforced by `.go-arch-lint.yml`
-> (C6).
+> (C07GO).
 
 ### Tool Registry
 
@@ -129,7 +129,7 @@ single shared service is passed directly to `RegisterTools`.
 ### Dependency Boundaries
 
 Dependency rules are authored in `.go-arch-lint.yml` and enforced in CI by
-`go-arch-lint check` (C6). The direction is:
+`go-arch-lint check` (C07GO). The direction is:
 
 ```
 domain  ←  application  ←  infrastructure, config, logging  ←  handlers  ←  cmd/server
@@ -192,43 +192,43 @@ when the launch mode is `http` (`-mode http` or `TRANSPORT=http`).
 
 ## Logging
 
-Logging uses **logrus**. Enablement follows the launch mode (L2):
+Logging uses **logrus**. Enablement follows the launch mode (L02):
 
 - **HTTP** mode — logging is **always enabled**, defaulting to level **`info`**
   (overridable via `LOG_LEVEL`).
 - **STDIO** mode — logging is **enabled only when `LOG_LEVEL` is set** — unset
   ⇒ **disabled**.
 
-- **Channel by transport (L1):**
+- **Channel by transport (L01):**
   - **HTTP** → **stdout** (12-factor style).
   - **STDIO** → a log file, because stdout carries the MCP protocol itself and
     must not be polluted with log lines. Default path `/tmp/mcp-netbox.log`,
     created with mode `0600`.
-- **Path override (L3):** `LOG_FILENAME` changes the STDIO log file path.
-- **Format (L4):** `LOG_FORMAT` — default `text` (logrus text, full absolute
+- **Path override (L03):** `LOG_FILENAME` changes the STDIO log file path.
+- **Format (L04):** `LOG_FORMAT` — default `text` (logrus text, full absolute
   timestamp) or `json`.
-- **Secrets (L5):** tokens, passwords and credentials are **never** logged. The
+- **Secrets (L05):** tokens, passwords and credentials are **never** logged. The
   token is redacted (see [Security](#security--secrets)) and URLs are logged via
   `url.Redacted()`.
-- **Startup banner (L6/B5):** when logging is enabled (always in HTTP mode; in
+- **Startup banner (L06/B05):** when logging is enabled (always in HTTP mode; in
   STDIO only when `LOG_LEVEL` is set), the very first log line at startup is
   the banner
   `Starting {appName}/{appVersion} (commit: {appCommitHash}; built at {appTimestamp}) ...`,
   built from ldflags-embedded metadata. No banner is emitted when logging is
   disabled.
-- **SDK logger (L7/G10):** the MCP go-sdk's internal `slog` logger is wired into
+- **SDK logger (L07/L03GO):** the MCP go-sdk's internal `slog` logger is wired into
   the server's logrus logger via `ServerOptions.Logger` (an `slog.Handler`
   forwarding to logrus), so SDK-level MCP events — session connect/end,
   tool-call results and errors, protocol warnings — are visible in the server
   logs at the configured level.
-- **Per-request trace logging (L8):** when logging is enabled, each MCP tool
+- **Per-request trace logging (L08):** when logging is enabled, each MCP tool
   call emits an access-log line at info level (not gated behind debug — it is
-  visible whenever logging is on, L2) with structured fields: `tool`,
+  visible whenever logging is on, L02) with structured fields: `tool`,
   `args` (only non-sensitive request params, never the Authorization token),
   `source` (derived for HTTP from `X-Real-IP` → `X-Forwarded-For` → `RemoteAddr`,
   comma-joined so all proxy hops are visible; `"STDIO"` for stdio), `duration`,
   `in_bytes`, `out_bytes`, and `outcome` (success/error).
-- **Correlation via request_id (L9/G11):** every incoming request is assigned a
+- **Correlation via request_id (L09/L04GO):** every incoming request is assigned a
   unique `request_id` (reusing an inbound `X-Request-ID` when present), injected
   into the request context via `domain.WithRequestID`. A context-aware entry
   builder (`WithSession`) decorates all request-scoped log lines with
@@ -630,14 +630,14 @@ List cables in NetBox with optional filters.
 
 The server applies ten middleware layers to every HTTP request, executed in this order (outermost first):
 
-1. **RequestIDMiddleware** — injects a per-request `request_id` into the context (reusing an inbound `X-Request-ID` when present) for correlation (L9/G11)
+1. **RequestIDMiddleware** — injects a per-request `request_id` into the context (reusing an inbound `X-Request-ID` when present) for correlation (L09/L04GO)
 2. **RecoveryMiddleware** — catches panics, returns 500
 3. **SecurityHeadersMiddleware** — sets security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
 4. **HostValidationMiddleware** — rejects requests with empty or malformed `Host` headers
 5. **MetricsMiddleware** — tracks in-flight requests via gauge
 6. **RateLimitMiddleware** — global (100 rps) + per-client (10 rps) token bucket
 7. **BodyLimitMiddleware** — 1 MB request body limit
-8. **LoggingMiddleware** — logs MCP tool, source, duration, byte sizes, outcome, and `request_id` at info level (never logs token) (L8)
+8. **LoggingMiddleware** — logs MCP tool, source, duration, byte sizes, outcome, and `request_id` at info level (never logs token) (L08)
 9. **TokenMiddleware** — extracts token from `Authorization` header, stores as `*application.Token` in context (safe redaction via String/GoString/MarshalJSON)
 10. **injectClientMiddleware** — creates NetBox API client with per-request token, stores service in context
 
@@ -662,10 +662,10 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
 
 ## Security
 
-- **TLS (S1/N1):** TLS is **never** implemented inside the server. For the
+- **TLS (S01/N01):** TLS is **never** implemented inside the server. For the
   HTTP/SSE transport it is always the reverse proxy's job (nginx, Caddy,
   ingress). The server serves plain HTTP on its listener.
-- **Secret hygiene (S2/N2):** tools never leak tokens, passwords, or secrets in
+- **Secret hygiene (S02/N02):** tools never leak tokens, passwords, or secrets in
   outputs where avoidable. The NetBox token is never logged, and its type
   implements safe redaction (`String`/`GoString`/`MarshalJSON`). URLs are logged
   via `url.Redacted()` to strip any embedded credentials.
@@ -695,13 +695,13 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
     output. Any secret-like value is either annotated (`secret:"true"`) or
     excluded at the source (never logged, never placed in the error string)
     rather than being scrubbed after the fact.
-- **CRUD ordering (S3):** the read tools are grouped as **read** operations,
+- **CRUD ordering (S03):** the read tools are grouped as **read** operations,
   and the write tools as typed create/update/delete operations. Read tools carry
   `readOnlyHint: true` and `destructiveHint: false`; create/update carry
   `destructiveHint: false`; delete tools carry `destructiveHint: true` because
   deletion is **irreversible**. Clients should treat delete tools with explicit
   confirmation.
-- **Security-scan findings (S5/N8):** findings from security scanners
+- **Security-scan findings (S05):** findings from security scanners
   (**gosec**, **govulncheck**) are **fixed rather than suppressed**. There are no
   blanket suppressions or default excludes; any `//nolint` is narrowly scoped
   and justified (best effort).
@@ -802,24 +802,24 @@ govulncheck ./...         # findings must be fixed
 ### CI Gates
 CI enforces, and **fails the build** when any gate is not met:
 
-- **Coverage >= 95%** (C1/N6) — `go test -race` with a coverage threshold that
+- **Coverage >= 95%** (C01/N06) — `go test -race` with a coverage threshold that
   fails the build below 95%.
-- **Mutation testing (gremlins)** as a **hard gate** (C8/N19) — survivors fail
+- **Mutation testing (gremlins)** as a **hard gate** (C02/N15) — survivors fail
   the build; it is not informational/continue-on-error.
-- **go-arch-lint** (C6) — dependency architecture is enforced.
-- **golangci-lint** (C2) with gofumpt/gci formatting.
-- **gosec** (C4) and **govulncheck** (C5) — findings are **fixed**, not
-  suppressed (S5).
+- **go-arch-lint** (C07GO) — dependency architecture is enforced.
+- **golangci-lint** (C03GO) with gofumpt/gci formatting.
+- **gosec** (C05GO) and **govulncheck** (C06GO) — findings are **fixed**, not
+  suppressed (S05).
 
 ## Release & Container Images
 
 Because the server supports the **HTTP (remote)** transport it is classified as
-Hybrid, so a **container image is required** (R1/N17). CI/CD publishes a
+Hybrid, so a **container image is required** (R01/N17). CI/CD publishes a
 multi-arch image (`linux/amd64`, `linux/arm64`) to `ghcr.io/teran/mcp-netbox`
 on every commit to `master` and on every release tag.
 
-- **On each git tag `X`** (release): image tags `X`, `X-{ts}`, `X-{commit}`, `X-{commit}-{ts}` (R3).
-- **On each commit to `master`**: image tags `master-{commit}`, `master-{ts}`, `master-{commit}-{ts}` (R4).
+- **On each git tag `X`** (release): image tags `X`, `X-{ts}`, `X-{commit}`, `X-{commit}-{ts}` (R03).
+- **On each commit to `master`**: image tags `master-{commit}`, `master-{ts}`, `master-{commit}-{ts}` (R04).
 
 There is **no `latest` tag**; deployments pin an immutable commit/timestamp tag.
-The default branch is `master` (R2).
+The default branch is `master` (R02).
