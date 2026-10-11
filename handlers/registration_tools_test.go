@@ -18,15 +18,15 @@ func TestToolDefs_EachHasInstructions(t *testing.T) {
 		t.Fatal("toolDefs() returned no tools")
 	}
 
-	for _, d := range defs {
-		if strings.TrimSpace(d.Name) == "" {
-			t.Errorf("tool %q: empty name", d.Name)
+	for _, def := range defs {
+		if strings.TrimSpace(def.Name) == "" {
+			t.Errorf("tool %q: empty name", def.Name)
 		}
-		if strings.TrimSpace(d.Description) == "" {
-			t.Errorf("tool %q: empty description", d.Name)
+		if strings.TrimSpace(def.Description) == "" {
+			t.Errorf("tool %q: empty description", def.Name)
 		}
-		if strings.TrimSpace(d.Instructions) == "" {
-			t.Errorf("tool %q: empty instructions", d.Name)
+		if strings.TrimSpace(def.Instructions) == "" {
+			t.Errorf("tool %q: empty instructions", def.Name)
 		}
 	}
 }

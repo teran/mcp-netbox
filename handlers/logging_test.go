@@ -13,14 +13,14 @@ func TestSetLoggerAndGetLogger(t *testing.T) {
 		SetLogger(nil)
 	})
 
-	l := logrus.New()
-	l.SetOutput(io.Discard)
-	l.SetLevel(logrus.DebugLevel)
+	logger := logrus.New()
+	logger.SetOutput(io.Discard)
+	logger.SetLevel(logrus.DebugLevel)
 
-	SetLogger(l)
+	SetLogger(logger)
 
-	if got := getLogger(); got != l {
-		t.Errorf("getLogger() = %p, want %p", got, l)
+	if got := getLogger(); got != logger {
+		t.Errorf("getLogger() = %p, want %p", got, logger)
 	}
 }
 

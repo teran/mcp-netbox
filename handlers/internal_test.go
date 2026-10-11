@@ -47,14 +47,14 @@ func TestNewInternalMux_StartupProbe(t *testing.T) {
 	mux := NewInternalMux(nil, nil)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/startup", http.NoBody)
-	rr := httptest.NewRecorder()
-	mux.ServeHTTP(rr, req)
+	recorder := httptest.NewRecorder()
+	mux.ServeHTTP(recorder, req)
 
-	if rr.Code != http.StatusOK {
-		t.Errorf("startup status = %d, want %d", rr.Code, http.StatusOK)
+	if recorder.Code != http.StatusOK {
+		t.Errorf("startup status = %d, want %d", recorder.Code, http.StatusOK)
 	}
-	if rr.Body.String() != `{"status":"ok"}` {
-		t.Errorf("startup body = %q, want %q", rr.Body.String(), `{"status":"ok"}`)
+	if recorder.Body.String() != `{"status":"ok"}` {
+		t.Errorf("startup body = %q, want %q", recorder.Body.String(), `{"status":"ok"}`)
 	}
 }
 

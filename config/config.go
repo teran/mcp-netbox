@@ -19,7 +19,8 @@ import (
 // IsPrivateAddr reports whether addr is a loopback, private, link-local, or
 // unspecified address. It uses netip.Addr which is the modern Go IP type.
 func IsPrivateAddr(addr netip.Addr) bool {
-	return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsLinkLocalMulticast() || addr.IsUnspecified()
+	return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() ||
+		addr.IsLinkLocalMulticast() || addr.IsUnspecified()
 }
 
 // IsPrivateIP reports whether ip is a loopback, private, link-local, or
@@ -32,6 +33,7 @@ func IsPrivateIP(ip net.IP) bool {
 	if err != nil {
 		return false
 	}
+
 	return IsPrivateAddr(a)
 }
 
@@ -44,6 +46,8 @@ const (
 	TransportStdio = "stdio"
 )
 
+// Config holds the server's runtime configuration, loaded from environment
+// variables by Load (via envconfig) and validated by validate.
 type Config struct {
 	NetBoxURL   string `envconfig:"NETBOX_URL" required:"true"`
 	NetBoxToken string `envconfig:"NETBOX_TOKEN" default:"" secret:"true"`
@@ -83,32 +87,33 @@ func (c Config) validate() error {
 // validateLogLevel checks that LOG_LEVEL, when set, is a valid logrus level.
 // An empty value means the launch-mode default applies (info in HTTP mode;
 // disabled in STDIO mode — see L2 in logging.Setup).
-func validateLogLevel(value interface{}) error {
-	s, ok := value.(string)
+func validateLogLevel(value any) error {
+	str, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("must be a string")
 	}
-	s = strings.TrimSpace(s)
-	if s == "" {
+	str = strings.TrimSpace(str)
+	if str == "" {
 		return nil
 	}
-	if _, err := logrus.ParseLevel(s); err != nil {
-		return fmt.Errorf("invalid log level %q (want one of trace, debug, info, warn, error, fatal, panic)", s)
+	if _, err := logrus.ParseLevel(str); err != nil {
+		return fmt.Errorf("invalid log level %q (want one of trace, debug, info, warn, error, fatal, panic)", str)
 	}
+
 	return nil
 }
 
 // validateLogFormat checks that LOG_FORMAT is one of the supported formats.
-func validateLogFormat(value interface{}) error {
-	s, ok := value.(string)
+func validateLogFormat(value any) error {
+	str, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("must be a string")
 	}
-	switch strings.ToLower(strings.TrimSpace(s)) {
+	switch strings.ToLower(strings.TrimSpace(str)) {
 	case "", "text", "json":
 		return nil
 	default:
-		return fmt.Errorf("invalid log format %q (want text or json)", s)
+		return fmt.Errorf("invalid log format %q (want text or json)", str)
 	}
 }
 
@@ -116,28 +121,29 @@ func validateLogFormat(value interface{}) error {
 // and that a NETBOX_TOKEN is provided for the STDIO transport (which has no
 // HTTP Authorization header to carry it per request).
 func validateTransport(netboxToken string) validation.RuleFunc {
-	return func(value interface{}) error {
-		s, ok := value.(string)
+	return func(value any) error {
+		str, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("must be a string")
 		}
 		// The empty value means HTTP, which is the default and is what callers
 		// constructing config.Config directly (without envconfig defaults) get.
-		switch s {
+		switch str {
 		case "", TransportHTTP:
 			return nil
 		case TransportStdio:
 			if strings.TrimSpace(netboxToken) == "" {
 				return fmt.Errorf("%s transport requires NETBOX_TOKEN to be set", TransportStdio)
 			}
+
 			return nil
 		default:
-			return fmt.Errorf("must be %q or %q (got %q)", TransportHTTP, TransportStdio, s)
+			return fmt.Errorf("must be %q or %q (got %q)", TransportHTTP, TransportStdio, str)
 		}
 	}
 }
 
-func validatePositiveInt(value interface{}) error {
+func validatePositiveInt(value any) error {
 	n, ok := value.(int)
 	if !ok {
 		return fmt.Errorf("must be an integer")
@@ -145,54 +151,58 @@ func validatePositiveInt(value interface{}) error {
 	if n < 1 {
 		return fmt.Errorf("must be at least 1 (got %d)", n)
 	}
+
 	return nil
 }
 
-func validateURLScheme(value interface{}) error {
-	s, ok := value.(string)
+func validateURLScheme(value any) error {
+	str, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("must be a string")
 	}
-	u, err := url.Parse(s)
+	u, err := url.Parse(str)
 	if err != nil {
 		return err
 	}
 	if u.Scheme != "http" && u.Scheme != "https" {
 		return fmt.Errorf("must use http or https scheme (got %q)", u.Scheme)
 	}
+
 	return nil
 }
 
-func validateURLHost(value interface{}) error {
-	s, ok := value.(string)
+func validateURLHost(value any) error {
+	str, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("must be a string")
 	}
-	u, err := url.Parse(s)
+	u, err := url.Parse(str)
 	if err != nil {
 		return err
 	}
 	if u.Host == "" {
 		return fmt.Errorf("must include a host (e.g. http://netbox:8000)")
 	}
+
 	return nil
 }
 
 func validateURLNotPrivate(allowPrivate bool) validation.RuleFunc {
-	return func(value interface{}) error {
+	return func(value any) error {
 		if allowPrivate {
 			return nil
 		}
+
 		return validateURLNotPrivateCheck(value)
 	}
 }
 
-func validateURLNotPrivateCheck(value interface{}) error {
-	s, ok := value.(string)
+func validateURLNotPrivateCheck(value any) error {
+	str, ok := value.(string)
 	if !ok {
 		return fmt.Errorf("must be a string")
 	}
-	u, err := url.Parse(s)
+	u, err := url.Parse(str)
 	if err != nil {
 		return err
 	}
@@ -202,8 +212,8 @@ func validateURLNotPrivateCheck(value interface{}) error {
 	host = strings.Trim(host, "[]")
 
 	// Try to parse as IP address
-	ip := net.ParseIP(host)
-	if ip == nil {
+	addr := net.ParseIP(host)
+	if addr == nil {
 		// Hostname — resolve DNS to check for private IPs.
 		// This prevents SSRF bypass where a hostname resolves to a private IP.
 		ips, err := net.DefaultResolver.LookupNetIP(context.Background(), "ip", host)
@@ -214,28 +224,34 @@ func validateURLNotPrivateCheck(value interface{}) error {
 		}
 		for _, resolvedIP := range ips {
 			if IsPrivateAddr(resolvedIP) {
-				return fmt.Errorf("hostname %q resolves to private/reserved IP %q (set ALLOW_PRIVATE_NETBOX=true to bypass)", host, resolvedIP)
+				return fmt.Errorf(
+					"hostname %q resolves to private/reserved IP %q (set ALLOW_PRIVATE_NETBOX=true to bypass)",
+					host, resolvedIP,
+				)
 			}
 		}
+
 		return nil
 	}
 
-	if ip.IsLoopback() {
+	if addr.IsLoopback() {
 		return fmt.Errorf("must not be a loopback address (got %q)", host)
 	}
-	if ip.IsPrivate() {
+	if addr.IsPrivate() {
 		return fmt.Errorf("must not be a private IP address (got %q)", host)
 	}
-	if ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+	if addr.IsLinkLocalUnicast() || addr.IsLinkLocalMulticast() {
 		return fmt.Errorf("must not be a link-local address (got %q)", host)
 	}
-	if ip.IsUnspecified() {
+	if addr.IsUnspecified() {
 		return fmt.Errorf("must not be an unspecified address (got %q)", host)
 	}
 
 	return nil
 }
 
+// Load reads and validates the server configuration from environment
+// variables (via envconfig), returning a fully-populated Config or an error.
 func Load() (*Config, error) {
 	var cfg Config
 	if err := envconfig.Process("", &cfg); err != nil {
@@ -244,5 +260,6 @@ func Load() (*Config, error) {
 	if err := cfg.validate(); err != nil {
 		return nil, fmt.Errorf("config validation: %w", err)
 	}
+
 	return &cfg, nil
 }

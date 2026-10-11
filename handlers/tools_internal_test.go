@@ -13,363 +13,431 @@ import (
 
 type stubRepo struct{}
 
-func (s *stubRepo) ListSites(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+func (s *stubRepo) ListSites(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Site], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListDevices(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+func (s *stubRepo) ListDevices(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Device], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListIPAddresses(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+func (s *stubRepo) ListIPAddresses(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.IPAddress], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListPrefixes(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+func (s *stubRepo) ListPrefixes(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Prefix], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListVLANs(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+func (s *stubRepo) ListVLANs(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VLAN], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListVirtualMachines(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+func (s *stubRepo) ListVirtualMachines(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListClusters(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+func (s *stubRepo) ListClusters(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Cluster], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListCircuits(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+func (s *stubRepo) ListCircuits(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Circuit], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListRacks(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+func (s *stubRepo) ListRacks(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Rack], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListCircuitTerminations(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+func (s *stubRepo) ListCircuitTerminations(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListCables(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+func (s *stubRepo) ListCables(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Cable], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+func (s *stubRepo) ListInterfaces(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Interface], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) ListVMInterfaces(ctx context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+func (s *stubRepo) ListVMInterfaces(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VMInterface], error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) GetObject(ctx context.Context, token string, objectType string, id int, params map[string]string) (domain.RawObject, error) {
+func (s *stubRepo) GetObject(
+	_ context.Context, _ string, _ string, _ int, _ map[string]string,
+) (domain.RawObject, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateSite(ctx context.Context, token string, in domain.SiteWrite) (*domain.Site, error) {
+func (s *stubRepo) CreateSite(_ context.Context, _ string, _ domain.SiteWrite) (*domain.Site, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateSite(ctx context.Context, token string, id int, in domain.SiteWrite) (*domain.Site, error) {
+func (s *stubRepo) UpdateSite(_ context.Context, _ string, _ int, _ domain.SiteWrite) (*domain.Site, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteSite(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteSite(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateDevice(ctx context.Context, token string, in domain.DeviceWrite) (*domain.Device, error) {
+func (s *stubRepo) CreateDevice(_ context.Context, _ string, _ domain.DeviceWrite) (*domain.Device, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateDevice(ctx context.Context, token string, id int, in domain.DeviceWrite) (*domain.Device, error) {
+func (s *stubRepo) UpdateDevice(_ context.Context, _ string, _ int, _ domain.DeviceWrite) (*domain.Device, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteDevice(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteDevice(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateIPAddress(ctx context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+func (s *stubRepo) CreateIPAddress(_ context.Context, _ string, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateIPAddress(ctx context.Context, token string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+func (s *stubRepo) UpdateIPAddress(
+	_ context.Context, _ string, _ int, _ domain.IPAddressWrite,
+) (*domain.IPAddress, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteIPAddress(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteIPAddress(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreatePrefix(ctx context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error) {
+func (s *stubRepo) CreatePrefix(_ context.Context, _ string, _ domain.PrefixWrite) (*domain.Prefix, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdatePrefix(ctx context.Context, token string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
+func (s *stubRepo) UpdatePrefix(_ context.Context, _ string, _ int, _ domain.PrefixWrite) (*domain.Prefix, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeletePrefix(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeletePrefix(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateVLAN(ctx context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error) {
+func (s *stubRepo) CreateVLAN(_ context.Context, _ string, _ domain.VLANWrite) (*domain.VLAN, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateVLAN(ctx context.Context, token string, id int, in domain.VLANWrite) (*domain.VLAN, error) {
+func (s *stubRepo) UpdateVLAN(_ context.Context, _ string, _ int, _ domain.VLANWrite) (*domain.VLAN, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteVLAN(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteVLAN(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateVirtualMachine(ctx context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+func (s *stubRepo) CreateVirtualMachine(
+	_ context.Context, _ string, _ domain.VirtualMachineWrite,
+) (*domain.VirtualMachine, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateVirtualMachine(ctx context.Context, token string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+func (s *stubRepo) UpdateVirtualMachine(
+	_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite,
+) (*domain.VirtualMachine, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteVirtualMachine(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteVirtualMachine(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateCluster(ctx context.Context, token string, in domain.ClusterWrite) (*domain.Cluster, error) {
+func (s *stubRepo) CreateCluster(_ context.Context, _ string, _ domain.ClusterWrite) (*domain.Cluster, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateCluster(ctx context.Context, token string, id int, in domain.ClusterWrite) (*domain.Cluster, error) {
+func (s *stubRepo) UpdateCluster(_ context.Context, _ string, _ int, _ domain.ClusterWrite) (*domain.Cluster, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteCluster(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteCluster(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateCircuit(ctx context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error) {
+func (s *stubRepo) CreateCircuit(_ context.Context, _ string, _ domain.CircuitWrite) (*domain.Circuit, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateCircuit(ctx context.Context, token string, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
+func (s *stubRepo) UpdateCircuit(_ context.Context, _ string, _ int, _ domain.CircuitWrite) (*domain.Circuit, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteCircuit(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteCircuit(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateRack(ctx context.Context, token string, in domain.RackWrite) (*domain.Rack, error) {
+func (s *stubRepo) CreateRack(_ context.Context, _ string, _ domain.RackWrite) (*domain.Rack, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateRack(ctx context.Context, token string, id int, in domain.RackWrite) (*domain.Rack, error) {
+func (s *stubRepo) UpdateRack(_ context.Context, _ string, _ int, _ domain.RackWrite) (*domain.Rack, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteRack(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteRack(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateInterface(ctx context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error) {
+func (s *stubRepo) CreateInterface(_ context.Context, _ string, _ domain.InterfaceWrite) (*domain.Interface, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateInterface(ctx context.Context, token string, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
+func (s *stubRepo) UpdateInterface(
+	_ context.Context, _ string, _ int, _ domain.InterfaceWrite,
+) (*domain.Interface, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteInterface(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteInterface(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateCircuitTermination(ctx context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+func (s *stubRepo) CreateCircuitTermination(
+	_ context.Context, _ string, _ domain.CircuitTerminationWrite,
+) (*domain.CircuitTermination, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateCircuitTermination(ctx context.Context, token string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+func (s *stubRepo) UpdateCircuitTermination(
+	_ context.Context, _ string, _ int, _ domain.CircuitTerminationWrite,
+) (*domain.CircuitTermination, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteCircuitTermination(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteCircuitTermination(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateCable(ctx context.Context, token string, in domain.CableWrite) (*domain.Cable, error) {
+func (s *stubRepo) CreateCable(_ context.Context, _ string, _ domain.CableWrite) (*domain.Cable, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateCable(ctx context.Context, token string, id int, in domain.CableWrite) (*domain.Cable, error) {
+func (s *stubRepo) UpdateCable(_ context.Context, _ string, _ int, _ domain.CableWrite) (*domain.Cable, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteCable(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteCable(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateVMInterface(ctx context.Context, token string, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+func (s *stubRepo) CreateVMInterface(
+	_ context.Context, _ string, _ domain.VMInterfaceWrite,
+) (*domain.VMInterface, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateVMInterface(ctx context.Context, token string, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+func (s *stubRepo) UpdateVMInterface(
+	_ context.Context, _ string, _ int, _ domain.VMInterfaceWrite,
+) (*domain.VMInterface, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteVMInterface(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteVMInterface(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateProvider(ctx context.Context, token string, in domain.ProviderWrite) (*domain.Provider, error) {
+func (s *stubRepo) CreateProvider(_ context.Context, _ string, _ domain.ProviderWrite) (*domain.Provider, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateProvider(ctx context.Context, token string, id int, in domain.ProviderWrite) (*domain.Provider, error) {
+func (s *stubRepo) UpdateProvider(
+	_ context.Context, _ string, _ int, _ domain.ProviderWrite,
+) (*domain.Provider, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteProvider(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteProvider(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateTenant(ctx context.Context, token string, in domain.TenantWrite) (*domain.Tenant, error) {
+func (s *stubRepo) CreateTenant(_ context.Context, _ string, _ domain.TenantWrite) (*domain.Tenant, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateTenant(ctx context.Context, token string, id int, in domain.TenantWrite) (*domain.Tenant, error) {
+func (s *stubRepo) UpdateTenant(_ context.Context, _ string, _ int, _ domain.TenantWrite) (*domain.Tenant, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteTenant(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteTenant(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateManufacturer(ctx context.Context, token string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+func (s *stubRepo) CreateManufacturer(
+	_ context.Context, _ string, _ domain.ManufacturerWrite,
+) (*domain.Manufacturer, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateManufacturer(ctx context.Context, token string, id int, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+func (s *stubRepo) UpdateManufacturer(
+	_ context.Context, _ string, _ int, _ domain.ManufacturerWrite,
+) (*domain.Manufacturer, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteManufacturer(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteManufacturer(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateDeviceType(ctx context.Context, token string, in domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+func (s *stubRepo) CreateDeviceType(_ context.Context, _ string, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateDeviceType(ctx context.Context, token string, id int, in domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+func (s *stubRepo) UpdateDeviceType(
+	_ context.Context, _ string, _ int, _ domain.DeviceTypeWrite,
+) (*domain.DeviceType, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteDeviceType(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteDeviceType(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateLocation(ctx context.Context, token string, in domain.LocationWrite) (*domain.Location, error) {
+func (s *stubRepo) CreateLocation(_ context.Context, _ string, _ domain.LocationWrite) (*domain.Location, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateLocation(ctx context.Context, token string, id int, in domain.LocationWrite) (*domain.Location, error) {
+func (s *stubRepo) UpdateLocation(
+	_ context.Context, _ string, _ int, _ domain.LocationWrite,
+) (*domain.Location, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteLocation(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteLocation(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateClusterType(ctx context.Context, token string, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+func (s *stubRepo) CreateClusterType(
+	_ context.Context, _ string, _ domain.ClusterTypeWrite,
+) (*domain.ClusterType, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateClusterType(ctx context.Context, token string, id int, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+func (s *stubRepo) UpdateClusterType(
+	_ context.Context, _ string, _ int, _ domain.ClusterTypeWrite,
+) (*domain.ClusterType, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteClusterType(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteClusterType(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateClusterGroup(ctx context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+func (s *stubRepo) CreateClusterGroup(
+	_ context.Context, _ string, _ domain.ClusterGroupWrite,
+) (*domain.ClusterGroup, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateClusterGroup(ctx context.Context, token string, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+func (s *stubRepo) UpdateClusterGroup(
+	_ context.Context, _ string, _ int, _ domain.ClusterGroupWrite,
+) (*domain.ClusterGroup, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteClusterGroup(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteClusterGroup(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateCircuitType(ctx context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+func (s *stubRepo) CreateCircuitType(
+	_ context.Context, _ string, _ domain.CircuitTypeWrite,
+) (*domain.CircuitType, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateCircuitType(ctx context.Context, token string, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+func (s *stubRepo) UpdateCircuitType(
+	_ context.Context, _ string, _ int, _ domain.CircuitTypeWrite,
+) (*domain.CircuitType, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteCircuitType(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteCircuitType(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateVrf(ctx context.Context, token string, in domain.VrfWrite) (*domain.Vrf, error) {
+func (s *stubRepo) CreateVrf(_ context.Context, _ string, _ domain.VrfWrite) (*domain.Vrf, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateVrf(ctx context.Context, token string, id int, in domain.VrfWrite) (*domain.Vrf, error) {
+func (s *stubRepo) UpdateVrf(_ context.Context, _ string, _ int, _ domain.VrfWrite) (*domain.Vrf, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteVrf(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteVrf(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateVlanGroup(ctx context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+func (s *stubRepo) CreateVlanGroup(_ context.Context, _ string, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateVlanGroup(ctx context.Context, token string, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+func (s *stubRepo) UpdateVlanGroup(
+	_ context.Context, _ string, _ int, _ domain.VlanGroupWrite,
+) (*domain.VlanGroup, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteVlanGroup(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteVlanGroup(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateRole(ctx context.Context, token string, in domain.RoleWrite) (*domain.Role, error) {
+func (s *stubRepo) CreateRole(_ context.Context, _ string, _ domain.RoleWrite) (*domain.Role, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateRole(ctx context.Context, token string, id int, in domain.RoleWrite) (*domain.Role, error) {
+func (s *stubRepo) UpdateRole(_ context.Context, _ string, _ int, _ domain.RoleWrite) (*domain.Role, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteRole(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteRole(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func (s *stubRepo) CreateContact(ctx context.Context, token string, in domain.ContactWrite) (*domain.Contact, error) {
+func (s *stubRepo) CreateContact(_ context.Context, _ string, _ domain.ContactWrite) (*domain.Contact, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) UpdateContact(ctx context.Context, token string, id int, in domain.ContactWrite) (*domain.Contact, error) {
+func (s *stubRepo) UpdateContact(_ context.Context, _ string, _ int, _ domain.ContactWrite) (*domain.Contact, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *stubRepo) DeleteContact(ctx context.Context, token string, id int) error {
+func (s *stubRepo) DeleteContact(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
-func TestPaginationParams(t *testing.T) {
+func TestPaginationParams(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 
 	t.Run("default values when page=0 and pageSize=0", func(t *testing.T) {
@@ -492,10 +560,9 @@ func TestResolveService(t *testing.T) {
 	})
 }
 
-func TestGetObjectByID_CRLFSanitization(t *testing.T) {
+func TestGetObjectByID_CRLFSanitization(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
-
-	t.Run("strips CRLF from param keys", func(t *testing.T) {
+	t.Run("strips CRLF from param keys", func(_ *testing.T) {
 		svc := application.NewNetworkService(&stubRepo{}, "token")
 		handler := NewGetObjectByIDHandler(svc)
 
@@ -509,7 +576,7 @@ func TestGetObjectByID_CRLFSanitization(t *testing.T) {
 		})
 	})
 
-	t.Run("strips CRLF from param values", func(t *testing.T) {
+	t.Run("strips CRLF from param values", func(_ *testing.T) {
 		svc := application.NewNetworkService(&stubRepo{}, "token")
 		handler := NewGetObjectByIDHandler(svc)
 
@@ -523,7 +590,7 @@ func TestGetObjectByID_CRLFSanitization(t *testing.T) {
 		})
 	})
 
-	t.Run("strips nested CRLF from multiple params", func(t *testing.T) {
+	t.Run("strips nested CRLF from multiple params", func(_ *testing.T) {
 		svc := application.NewNetworkService(&stubRepo{}, "token")
 		handler := NewGetObjectByIDHandler(svc)
 
@@ -539,7 +606,7 @@ func TestGetObjectByID_CRLFSanitization(t *testing.T) {
 		})
 	})
 
-	t.Run("empty params map is handled gracefully", func(t *testing.T) {
+	t.Run("empty params map is handled gracefully", func(_ *testing.T) {
 		svc := application.NewNetworkService(&stubRepo{}, "token")
 		handler := NewGetObjectByIDHandler(svc)
 
@@ -589,6 +656,7 @@ func TestGetObjectByID_ZeroIDRejectedBeforeService(t *testing.T) {
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
 		GetObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (domain.RawObject, error) {
 			serviceCalled = true
+
 			return nil, errors.New("service should not be called")
 		},
 	}, "token")
@@ -615,8 +683,11 @@ func TestGetObjectByID_CRLFParamsSanitizedBeforeService(t *testing.T) {
 	// ARITHMETIC_BASE (return -1) mutants in the get_object_by_id sanitizer.
 	var gotParams map[string]string
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		GetObjectFunc: func(_ context.Context, _ string, _ string, _ int, params map[string]string) (domain.RawObject, error) {
+		GetObjectFunc: func(
+			_ context.Context, _ string, _ string, _ int, params map[string]string,
+		) (domain.RawObject, error) {
 			gotParams = params
+
 			return domain.RawObject(`{}`), nil
 		},
 	}, "token")

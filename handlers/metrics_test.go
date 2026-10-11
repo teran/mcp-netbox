@@ -46,9 +46,11 @@ func TestWrapToolHandler(t *testing.T) {
 		reg := prometheus.NewRegistry()
 		m := NewMetrics(reg)
 
-		handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
-			return &mcp.CallToolResult{}, testOutput{Result: "ok"}, nil
-		})
+		handler := WrapToolHandler[testInput, testOutput](
+			m, "test_tool",
+			func(_ context.Context, _ *mcp.CallToolRequest, _ testInput) (*mcp.CallToolResult, testOutput, error) {
+				return &mcp.CallToolResult{}, testOutput{Result: "ok"}, nil
+			})
 
 		result, out, err := handler(context.Background(), nil, testInput{Name: "test"})
 		if err != nil {
@@ -66,9 +68,11 @@ func TestWrapToolHandler(t *testing.T) {
 		reg := prometheus.NewRegistry()
 		m := NewMetrics(reg)
 
-		handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
-			return &mcp.CallToolResult{IsError: true}, testOutput{}, nil
-		})
+		handler := WrapToolHandler[testInput, testOutput](
+			m, "test_tool",
+			func(_ context.Context, _ *mcp.CallToolRequest, _ testInput) (*mcp.CallToolResult, testOutput, error) {
+				return &mcp.CallToolResult{IsError: true}, testOutput{}, nil
+			})
 
 		result, _, err := handler(context.Background(), nil, testInput{})
 		if err != nil {
@@ -80,9 +84,11 @@ func TestWrapToolHandler(t *testing.T) {
 	})
 
 	t.Run("nil metrics safety", func(t *testing.T) {
-		handler := WrapToolHandler[testInput, testOutput](nil, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
-			return &mcp.CallToolResult{}, testOutput{Result: "ok"}, nil
-		})
+		handler := WrapToolHandler[testInput, testOutput](
+			nil, "test_tool",
+			func(_ context.Context, _ *mcp.CallToolRequest, _ testInput) (*mcp.CallToolResult, testOutput, error) {
+				return &mcp.CallToolResult{}, testOutput{Result: "ok"}, nil
+			})
 
 		result, out, err := handler(context.Background(), nil, testInput{})
 		if err != nil {
@@ -103,7 +109,7 @@ func TestMetricsMiddleware(t *testing.T) {
 		m := NewMetrics(reg)
 
 		mw := MetricsMiddleware(m)
-		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 
@@ -118,7 +124,7 @@ func TestMetricsMiddleware(t *testing.T) {
 
 	t.Run("nil metrics safety", func(t *testing.T) {
 		mw := MetricsMiddleware(nil)
-		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 
@@ -139,9 +145,11 @@ func TestSanitizeToolResult(t *testing.T) {
 		reg := prometheus.NewRegistry()
 		m := NewMetrics(reg)
 
-		handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
-			return &mcp.CallToolResult{}, testOutput{Result: "ok \x1b[31mred\x1b[0m"}, nil
-		})
+		handler := WrapToolHandler[testInput, testOutput](
+			m, "test_tool",
+			func(_ context.Context, _ *mcp.CallToolRequest, _ testInput) (*mcp.CallToolResult, testOutput, error) {
+				return &mcp.CallToolResult{}, testOutput{Result: "ok \x1b[31mred\x1b[0m"}, nil
+			})
 
 		result, _, err := handler(context.Background(), nil, testInput{})
 		if err != nil {
@@ -153,14 +161,14 @@ func TestSanitizeToolResult(t *testing.T) {
 		if len(result.Content) != 1 {
 			t.Fatalf("len(result.Content) = %d, want 1", len(result.Content))
 		}
-		tc, ok := result.Content[0].(*mcp.TextContent)
+		textContent, ok := result.Content[0].(*mcp.TextContent)
 		if !ok {
 			t.Fatalf("Content[0] type = %T, want *mcp.TextContent", result.Content[0])
 		}
 		// json.Marshal escapes ESC as \u001b, so the text form is guaranteed free
 		// of raw ANSI/control bytes; the text is the marshalled output.
 		want := `{"result":"ok \u001b[31mred\u001b[0m"}`
-		if got := tc.Text; got != want {
+		if got := textContent.Text; got != want {
 			t.Errorf("text = %q, want %q", got, want)
 		}
 	})
@@ -169,9 +177,11 @@ func TestSanitizeToolResult(t *testing.T) {
 		reg := prometheus.NewRegistry()
 		m := NewMetrics(reg)
 
-		handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
-			return &mcp.CallToolResult{IsError: true}, testOutput{Result: "\x1b[31mboom\x1b[0m"}, nil
-		})
+		handler := WrapToolHandler[testInput, testOutput](
+			m, "test_tool",
+			func(_ context.Context, _ *mcp.CallToolRequest, _ testInput) (*mcp.CallToolResult, testOutput, error) {
+				return &mcp.CallToolResult{IsError: true}, testOutput{Result: "\x1b[31mboom\x1b[0m"}, nil
+			})
 
 		result, _, err := handler(context.Background(), nil, testInput{})
 		if err != nil {
@@ -194,7 +204,9 @@ func TestWrapToolHandler_RedactsSecret(t *testing.T) {
 	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
 
-	handler := WrapToolHandler[testInput, secretOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, secretOutput, error) {
+	handler := WrapToolHandler[testInput, secretOutput](m, "test_tool", func(
+		_ context.Context, _ *mcp.CallToolRequest, _ testInput,
+	) (*mcp.CallToolResult, secretOutput, error) {
 		return &mcp.CallToolResult{}, secretOutput{Result: "ok", Token: "super-secret-token"}, nil
 	})
 
@@ -216,15 +228,15 @@ func TestWrapToolHandler_RedactsSecret(t *testing.T) {
 	if len(result.Content) != 1 {
 		t.Fatalf("len(result.Content) = %d, want 1", len(result.Content))
 	}
-	tc, ok := result.Content[0].(*mcp.TextContent)
+	textContent, ok := result.Content[0].(*mcp.TextContent)
 	if !ok {
 		t.Fatalf("Content[0] type = %T, want *mcp.TextContent", result.Content[0])
 	}
-	if strings.Contains(tc.Text, "super-secret-token") {
-		t.Errorf("text leaks the secret: %s", tc.Text)
+	if strings.Contains(textContent.Text, "super-secret-token") {
+		t.Errorf("text leaks the secret: %s", textContent.Text)
 	}
-	if !strings.Contains(tc.Text, "***redacted***") {
-		t.Errorf("text does not contain the mask: %s", tc.Text)
+	if !strings.Contains(textContent.Text, "***redacted***") {
+		t.Errorf("text does not contain the mask: %s", textContent.Text)
 	}
 }
 
@@ -235,7 +247,9 @@ func TestWrapToolHandler_RedactsNonSecretUnchanged(t *testing.T) {
 	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
 
-	handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
+	handler := WrapToolHandler[testInput, testOutput](m, "test_tool", func(
+		_ context.Context, _ *mcp.CallToolRequest, _ testInput,
+	) (*mcp.CallToolResult, testOutput, error) {
 		return &mcp.CallToolResult{}, testOutput{Result: "plain-value"}, nil
 	})
 
@@ -256,7 +270,9 @@ func TestWrapToolHandler_RedactionSkipsErrorResults(t *testing.T) {
 	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
 
-	handler := WrapToolHandler[testInput, secretOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, secretOutput, error) {
+	handler := WrapToolHandler[testInput, secretOutput](m, "test_tool", func(
+		_ context.Context, _ *mcp.CallToolRequest, _ testInput,
+	) (*mcp.CallToolResult, secretOutput, error) {
 		return &mcp.CallToolResult{IsError: true}, secretOutput{Token: "should-stay"}, nil
 	})
 
@@ -279,7 +295,9 @@ func TestWrapToolHandler_RedactsPointerOutput(t *testing.T) {
 	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
 
-	handler := WrapToolHandler[testInput, *secretOutput](m, "test_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, *secretOutput, error) {
+	handler := WrapToolHandler[testInput, *secretOutput](m, "test_tool", func(
+		_ context.Context, _ *mcp.CallToolRequest, _ testInput,
+	) (*mcp.CallToolResult, *secretOutput, error) {
 		return &mcp.CallToolResult{}, &secretOutput{Result: "ok", Token: "ptr-secret"}, nil
 	})
 
@@ -405,20 +423,23 @@ func TestWrapToolHandler_RecordsErrorClassForErr(t *testing.T) {
 	// An err != nil (with a nil result) must be recorded with status_class=error
 	// (kills the CONDITIONALS_NEGATION on `err != nil` in WrapToolHandler).
 	reg := prometheus.NewRegistry()
-	m := NewMetrics(reg)
+	metrics := NewMetrics(reg)
 
-	handler := WrapToolHandler[testInput, testOutput](m, "err_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
-		return nil, testOutput{}, errors.New("boom")
-	})
+	handler := WrapToolHandler[testInput, testOutput](
+		metrics, "err_tool",
+		func(_ context.Context, _ *mcp.CallToolRequest, _ testInput) (*mcp.CallToolResult, testOutput, error) {
+			return nil, testOutput{}, errors.New("boom")
+		},
+	)
 
 	_, _, err := handler(context.Background(), nil, testInput{})
 	if err == nil {
 		t.Fatal("handler returned nil error, want non-nil")
 	}
-	if got := testutil.ToFloat64(m.toolRequestsTotal.WithLabelValues("err_tool", "error")); got != 1 {
+	if got := testutil.ToFloat64(metrics.toolRequestsTotal.WithLabelValues("err_tool", "error")); got != 1 {
 		t.Errorf("requests_total{tool=err_tool,status=error} = %v, want 1", got)
 	}
-	if got := testutil.ToFloat64(m.toolRequestsTotal.WithLabelValues("err_tool", "2xx")); got != 0 {
+	if got := testutil.ToFloat64(metrics.toolRequestsTotal.WithLabelValues("err_tool", "2xx")); got != 0 {
 		t.Errorf("requests_total{tool=err_tool,status=2xx} = %v, want 0", got)
 	}
 }
@@ -429,9 +450,11 @@ func TestWrapToolHandler_RecordsErrorClassForIsErrorResult(t *testing.T) {
 	// A non-nil result with IsError=true (and err == nil) must be recorded with
 	// status_class=error (kills the CONDITIONALS_NEGATION on `result != nil`).
 	reg := prometheus.NewRegistry()
-	m := NewMetrics(reg)
+	metrics := NewMetrics(reg)
 
-	handler := WrapToolHandler[testInput, testOutput](m, "iserr_tool", func(ctx context.Context, req *mcp.CallToolRequest, in testInput) (*mcp.CallToolResult, testOutput, error) {
+	handler := WrapToolHandler[testInput, testOutput](metrics, "iserr_tool", func(
+		_ context.Context, _ *mcp.CallToolRequest, _ testInput,
+	) (*mcp.CallToolResult, testOutput, error) {
 		return &mcp.CallToolResult{IsError: true}, testOutput{}, nil
 	})
 
@@ -439,10 +462,10 @@ func TestWrapToolHandler_RecordsErrorClassForIsErrorResult(t *testing.T) {
 	if err != nil {
 		t.Fatalf("handler returned error: %v", err)
 	}
-	if got := testutil.ToFloat64(m.toolRequestsTotal.WithLabelValues("iserr_tool", "error")); got != 1 {
+	if got := testutil.ToFloat64(metrics.toolRequestsTotal.WithLabelValues("iserr_tool", "error")); got != 1 {
 		t.Errorf("requests_total{tool=iserr_tool,status=error} = %v, want 1", got)
 	}
-	if got := testutil.ToFloat64(m.toolRequestsTotal.WithLabelValues("iserr_tool", "2xx")); got != 0 {
+	if got := testutil.ToFloat64(metrics.toolRequestsTotal.WithLabelValues("iserr_tool", "2xx")); got != 0 {
 		t.Errorf("requests_total{tool=iserr_tool,status=2xx} = %v, want 0", got)
 	}
 }

@@ -11,12 +11,15 @@ import (
 	"github.com/teran/mcp-netbox/mockrepo"
 )
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestCreateVirtualMachineHandler(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			CreateVirtualMachineFunc: func(_ context.Context, _ string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			CreateVirtualMachineFunc: func(
+				_ context.Context, _ string, in domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
 				return &domain.VirtualMachine{ID: 1, Name: in.Name}, nil
 			},
 		}, "token")
@@ -46,7 +49,9 @@ func TestCreateVirtualMachineHandler(t *testing.T) {
 	t.Run("validation error in structured content", func(t *testing.T) {
 		body := []byte(`{"name":["This field is required."]}`)
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			CreateVirtualMachineFunc: func(_ context.Context, _ string, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			CreateVirtualMachineFunc: func(
+				_ context.Context, _ string, _ domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
 				return nil, &domain.ValidationError{StatusCode: 400, Body: body}
 			},
 		}, "token")
@@ -62,13 +67,13 @@ func TestCreateVirtualMachineHandler(t *testing.T) {
 		if result.StructuredContent == nil {
 			t.Fatal("StructuredContent is nil, want validation_errors")
 		}
-		sc, ok := result.StructuredContent.(map[string]any)
+		structuredContent, ok := result.StructuredContent.(map[string]any)
 		if !ok {
 			t.Fatalf("StructuredContent type = %T, want map", result.StructuredContent)
 		}
-		raw, ok := sc["validation_errors"].(json.RawMessage)
+		raw, ok := structuredContent["validation_errors"].(json.RawMessage)
 		if !ok {
-			t.Fatalf("validation_errors type = %T, want json.RawMessage", sc["validation_errors"])
+			t.Fatalf("validation_errors type = %T, want json.RawMessage", structuredContent["validation_errors"])
 		}
 		if string(raw) != string(body) {
 			t.Errorf("validation_errors = %s, want %s", raw, body)
@@ -77,7 +82,9 @@ func TestCreateVirtualMachineHandler(t *testing.T) {
 
 	t.Run("generic error", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			CreateVirtualMachineFunc: func(_ context.Context, _ string, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			CreateVirtualMachineFunc: func(
+				_ context.Context, _ string, _ domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
 				return nil, &domain.ValidationError{StatusCode: 500, Body: []byte(`{}`)}
 			},
 		}, "token")
@@ -94,7 +101,9 @@ func TestUpdateVirtualMachineHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			UpdateVirtualMachineFunc: func(_ context.Context, _ string, id int, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			UpdateVirtualMachineFunc: func(
+				_ context.Context, _ string, id int, _ domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
 				return &domain.VirtualMachine{ID: id, Name: "Renamed"}, nil
 			},
 		}, "token")
@@ -121,7 +130,9 @@ func TestUpdateVirtualMachineHandler(t *testing.T) {
 	t.Run("validation error in structured content", func(t *testing.T) {
 		body := []byte(`{"status":["This field is required."]}`)
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			UpdateVirtualMachineFunc: func(_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			UpdateVirtualMachineFunc: func(
+				_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
 				return nil, &domain.ValidationError{StatusCode: 400, Body: body}
 			},
 		}, "token")
@@ -145,6 +156,7 @@ func TestDeleteVirtualMachineHandler(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		}, "token")

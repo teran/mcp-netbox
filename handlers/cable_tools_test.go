@@ -11,11 +11,12 @@ import (
 	"github.com/teran/mcp-netbox/mockrepo"
 )
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestCreateCableHandler(t *testing.T) {
 	t.Parallel()
 
-	ta := &handlers.CableTerminationInput{ObjectType: "dcim.interface", ObjectID: 101}
-	tb := &handlers.CableTerminationInput{ObjectType: "dcim.interface", ObjectID: 102}
+	terminationA := &handlers.CableTerminationInput{ObjectType: "dcim.interface", ObjectID: 101}
+	terminationB := &handlers.CableTerminationInput{ObjectType: "dcim.interface", ObjectID: 102}
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
@@ -26,7 +27,9 @@ func TestCreateCableHandler(t *testing.T) {
 
 		handler := handlers.NewCreateCableHandler(svc)
 		label := "link-01"
-		result, out, err := handler(context.Background(), nil, handlers.CableCreateInput{TerminationA: ta, TerminationB: tb, Label: &label})
+		result, out, err := handler(context.Background(), nil, handlers.CableCreateInput{
+			TerminationA: terminationA, TerminationB: terminationB, Label: &label,
+		})
 		if err != nil {
 			t.Fatalf("handler returned error: %v", err)
 		}
@@ -41,7 +44,7 @@ func TestCreateCableHandler(t *testing.T) {
 	t.Run("termination_a required", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.NilRepo{}, "token")
 		handler := handlers.NewCreateCableHandler(svc)
-		result, _, _ := handler(context.Background(), nil, handlers.CableCreateInput{TerminationB: tb})
+		result, _, _ := handler(context.Background(), nil, handlers.CableCreateInput{TerminationB: terminationB})
 		if !result.IsError {
 			t.Error("result.IsError = false, want true for missing termination_a")
 		}
@@ -50,7 +53,7 @@ func TestCreateCableHandler(t *testing.T) {
 	t.Run("termination_b required", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.NilRepo{}, "token")
 		handler := handlers.NewCreateCableHandler(svc)
-		result, _, _ := handler(context.Background(), nil, handlers.CableCreateInput{TerminationA: ta})
+		result, _, _ := handler(context.Background(), nil, handlers.CableCreateInput{TerminationA: terminationA})
 		if !result.IsError {
 			t.Error("result.IsError = false, want true for missing termination_b")
 		}
@@ -65,7 +68,9 @@ func TestCreateCableHandler(t *testing.T) {
 		}, "token")
 
 		handler := handlers.NewCreateCableHandler(svc)
-		result, _, err := handler(context.Background(), nil, handlers.CableCreateInput{TerminationA: ta, TerminationB: tb})
+		result, _, err := handler(context.Background(), nil, handlers.CableCreateInput{
+			TerminationA: terminationA, TerminationB: terminationB,
+		})
 		if err != nil {
 			t.Fatalf("handler returned non-nil error, want structured result: %v", err)
 		}
@@ -75,13 +80,13 @@ func TestCreateCableHandler(t *testing.T) {
 		if result.StructuredContent == nil {
 			t.Fatal("StructuredContent is nil, want validation_errors")
 		}
-		sc, ok := result.StructuredContent.(map[string]any)
+		structuredContent, ok := result.StructuredContent.(map[string]any)
 		if !ok {
 			t.Fatalf("StructuredContent type = %T, want map", result.StructuredContent)
 		}
-		raw, ok := sc["validation_errors"].(json.RawMessage)
+		raw, ok := structuredContent["validation_errors"].(json.RawMessage)
 		if !ok {
-			t.Fatalf("validation_errors type = %T, want json.RawMessage", sc["validation_errors"])
+			t.Fatalf("validation_errors type = %T, want json.RawMessage", structuredContent["validation_errors"])
 		}
 		if string(raw) != string(body) {
 			t.Errorf("validation_errors = %s, want %s", raw, body)
@@ -95,7 +100,9 @@ func TestCreateCableHandler(t *testing.T) {
 			},
 		}, "token")
 		handler := handlers.NewCreateCableHandler(svc)
-		result, _, _ := handler(context.Background(), nil, handlers.CableCreateInput{TerminationA: ta, TerminationB: tb})
+		result, _, _ := handler(context.Background(), nil, handlers.CableCreateInput{
+			TerminationA: terminationA, TerminationB: terminationB,
+		})
 		if !result.IsError {
 			t.Error("result.IsError = false, want true")
 		}
@@ -158,6 +165,7 @@ func TestDeleteCableHandler(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		}, "token")

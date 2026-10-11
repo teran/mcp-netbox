@@ -11,7 +11,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func TestExtractClientIP(t *testing.T) {
+func TestExtractClientIP(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 
 	tests := []struct {
@@ -23,31 +23,59 @@ func TestExtractClientIP(t *testing.T) {
 	}{
 		{"RemoteAddr parsed", nil, "10.0.0.2:56789", "", "10.0.0.2"},
 		{"RemoteAddr no port", nil, "10.0.0.3", "", "10.0.0.3"},
-		{"X-Forwarded-For overridden by RemoteAddr", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "10.0.0.4:12345", "", "10.0.0.4"},
-		{"X-Client-IP overridden by RemoteAddr", map[string]string{"X-Client-IP": "10.0.0.1"}, "10.0.0.5:12345", "", "10.0.0.5"},
-		{"trusted proxy X-Forwarded-For", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "10.0.0.1:12345", "10.0.0.0/8", "192.168.1.1"},
-		{"trusted proxy invalid IP in X-Forwarded-For", map[string]string{"X-Forwarded-For": "invalid-ip"}, "10.0.0.1:12345", "10.0.0.0/8", "10.0.0.1"},
+		{
+			"X-Forwarded-For overridden by RemoteAddr",
+			map[string]string{"X-Forwarded-For": "192.168.1.1"},
+			"10.0.0.4:12345", "", "10.0.0.4",
+		},
+		{
+			"X-Client-IP overridden by RemoteAddr",
+			map[string]string{"X-Client-IP": "10.0.0.1"},
+			"10.0.0.5:12345", "", "10.0.0.5",
+		},
+		{
+			"trusted proxy X-Forwarded-For",
+			map[string]string{"X-Forwarded-For": "192.168.1.1"},
+			"10.0.0.1:12345", "10.0.0.0/8", "192.168.1.1",
+		},
+		{
+			"trusted proxy invalid IP in X-Forwarded-For",
+			map[string]string{"X-Forwarded-For": "invalid-ip"},
+			"10.0.0.1:12345", "10.0.0.0/8", "10.0.0.1",
+		},
 		{"trusted proxy no X-Forwarded-For", nil, "10.0.0.1:12345", "10.0.0.0/8", "10.0.0.1"},
-		{"trusted proxy non-matching remote", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "192.168.1.1:12345", "10.0.0.0/8", "192.168.1.1"},
+		{
+			"trusted proxy non-matching remote",
+			map[string]string{"X-Forwarded-For": "192.168.1.1"},
+			"192.168.1.1:12345", "10.0.0.0/8", "192.168.1.1",
+		},
 		{"trusted proxy empty string", map[string]string{"X-Forwarded-For": "10.0.0.2"}, "10.0.0.1:12345", "", "10.0.0.1"},
-		{"trusted proxy invalid CIDR", map[string]string{"X-Forwarded-For": "10.0.0.2"}, "10.0.0.1:12345", "not-a-cidr", "10.0.0.1"},
+		{
+			"trusted proxy invalid CIDR",
+			map[string]string{"X-Forwarded-For": "10.0.0.2"},
+			"10.0.0.1:12345", "not-a-cidr", "10.0.0.1",
+		},
 		{"IPv6 remote address", nil, "[2001:db8::1]:443", "", "2001:db8::1"},
 		{"IPv6 loopback", nil, "[::1]:8080", "", "::1"},
-		{"IPv6 with trusted proxy", map[string]string{"X-Forwarded-For": "192.168.1.1"}, "[2001:db8::1]:443", "2001:db8::0/32", "192.168.1.1"},
+		{
+			"IPv6 with trusted proxy",
+			map[string]string{"X-Forwarded-For": "192.168.1.1"},
+			"[2001:db8::1]:443", "2001:db8::0/32", "192.168.1.1",
+		},
 		{"IPv6 with trusted proxy no XFF", nil, "[2001:db8::1]:443", "2001:db8::0/32", "2001:db8::1"},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
 			req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
-			for k, v := range tc.headers {
+			for k, v := range testCase.headers {
 				req.Header.Set(k, v)
 			}
-			req.RemoteAddr = tc.remote
+			req.RemoteAddr = testCase.remote
 
-			got := extractClientIP(req, tc.trustedProxy)
-			if got != tc.expected {
-				t.Errorf("extractClientIP() = %q, want %q", got, tc.expected)
+			got := extractClientIP(req, testCase.trustedProxy)
+			if got != testCase.expected {
+				t.Errorf("extractClientIP() = %q, want %q", got, testCase.expected)
 			}
 		})
 	}
@@ -56,15 +84,15 @@ func TestExtractClientIP(t *testing.T) {
 func TestNewRateLimiter(t *testing.T) {
 	t.Parallel()
 
-	rl := NewRateLimiter(RateLimiterConfig{
+	limiter := newRateLimiter(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(100),
 		GlobalBurst:    200,
 		PerClientLimit: rate.Limit(10),
 		PerClientBurst: 20,
 	})
-	defer rl.Stop()
+	defer limiter.Stop()
 
-	if !rl.Allow("127.0.0.1") {
+	if !limiter.Allow("127.0.0.1") {
 		t.Error("Allow() = false, want true")
 	}
 }
@@ -72,19 +100,19 @@ func TestNewRateLimiter(t *testing.T) {
 func TestRateLimiter_GlobalLimit(t *testing.T) {
 	t.Parallel()
 
-	rl := NewRateLimiter(RateLimiterConfig{
+	limiter := newRateLimiter(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(1),
 		GlobalBurst:    1,
 		PerClientLimit: rate.Limit(100),
 		PerClientBurst: 200,
 	})
-	defer rl.Stop()
+	defer limiter.Stop()
 
-	if !rl.Allow("client-1") {
+	if !limiter.Allow("client-1") {
 		t.Error("Allow() = false, want true")
 	}
 	// Second request should be rate limited
-	if rl.Allow("client-2") {
+	if limiter.Allow("client-2") {
 		t.Error("Allow() = true, want false (global limit)")
 	}
 }
@@ -92,23 +120,23 @@ func TestRateLimiter_GlobalLimit(t *testing.T) {
 func TestRateLimiter_PerClientLimit(t *testing.T) {
 	t.Parallel()
 
-	rl := NewRateLimiter(RateLimiterConfig{
+	limiter := newRateLimiter(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(100),
 		GlobalBurst:    200,
 		PerClientLimit: rate.Limit(1),
 		PerClientBurst: 1,
 	})
-	defer rl.Stop()
+	defer limiter.Stop()
 
-	if !rl.Allow("client-1") {
+	if !limiter.Allow("client-1") {
 		t.Error("Allow() = false, want true")
 	}
-	if rl.Allow("client-1") {
+	if limiter.Allow("client-1") {
 		t.Error("Allow() = true, want false (per-client limit)")
 	}
 
 	// Different client should be allowed
-	if !rl.Allow("client-2") {
+	if !limiter.Allow("client-2") {
 		t.Error("Allow() = false, want true (different client)")
 	}
 }
@@ -116,7 +144,7 @@ func TestRateLimiter_PerClientLimit(t *testing.T) {
 func TestRateLimiter_EvictExpired(t *testing.T) {
 	t.Parallel()
 
-	rl := &rateLimiter{
+	limiter := &rateLimiter{
 		config: RateLimiterConfig{
 			GlobalLimit:    rate.Limit(100),
 			GlobalBurst:    200,
@@ -128,13 +156,13 @@ func TestRateLimiter_EvictExpired(t *testing.T) {
 		stopCh:  make(chan struct{}),
 	}
 
-	rl.clients["stale"] = &clientLimiter{
+	limiter.clients["stale"] = &clientLimiter{
 		limiter:  rate.NewLimiter(rate.Limit(10), 20),
 		lastSeen: time.Now().Add(-clientTTL - time.Minute),
 	}
 
-	rl.evictStaleClients()
-	if _, ok := rl.clients["stale"]; ok {
+	limiter.evictStaleClients()
+	if _, ok := limiter.clients["stale"]; ok {
 		t.Error("stale client was not evicted")
 	}
 }
@@ -146,7 +174,7 @@ func TestRateLimiter_NotEvictedAtExactTTL(t *testing.T) {
 	// evicted: the check is strict (>) and only strictly-older entries are
 	// removed. Kills the CONDITIONALS_BOUNDARY on `> clientTTL`.
 	base := time.Now()
-	rl := &rateLimiter{
+	limiter := &rateLimiter{
 		config: RateLimiterConfig{
 			GlobalLimit:    rate.Limit(100),
 			GlobalBurst:    200,
@@ -159,13 +187,13 @@ func TestRateLimiter_NotEvictedAtExactTTL(t *testing.T) {
 		now:     func() time.Time { return base },
 	}
 
-	rl.clients["boundary"] = &clientLimiter{
+	limiter.clients["boundary"] = &clientLimiter{
 		limiter:  rate.NewLimiter(rate.Limit(10), 20),
 		lastSeen: base.Add(-clientTTL),
 	}
 
-	rl.evictStaleClients()
-	if _, ok := rl.clients["boundary"]; !ok {
+	limiter.evictStaleClients()
+	if _, ok := limiter.clients["boundary"]; !ok {
 		t.Error("client at exactly clientTTL was evicted; only strictly-older clients should be evicted")
 	}
 }
@@ -173,30 +201,28 @@ func TestRateLimiter_NotEvictedAtExactTTL(t *testing.T) {
 func TestRateLimiter_DefaultBurst(t *testing.T) {
 	t.Parallel()
 
-	rl := NewRateLimiter(RateLimiterConfig{
+	limiter := newRateLimiter(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(100),
 		GlobalBurst:    200,
 		PerClientLimit: rate.Limit(10),
 		PerClientBurst: 20,
 	})
-	defer rl.Stop()
+	defer limiter.Stop()
 
-	var wg sync.WaitGroup
-	mu := sync.Mutex{}
+	var waitGroup sync.WaitGroup
+	mutex := sync.Mutex{}
 	allowed := 0
 
 	for range 50 {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if rl.Allow("test-client") {
-				mu.Lock()
+		waitGroup.Go(func() {
+			if limiter.Allow("test-client") {
+				mutex.Lock()
 				allowed++
-				mu.Unlock()
+				mutex.Unlock()
 			}
-		}()
+		})
 	}
-	wg.Wait()
+	waitGroup.Wait()
 
 	if allowed == 0 {
 		t.Error("no requests were allowed")
@@ -207,7 +233,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 	t.Parallel()
 
 	t.Run("200 within limit", func(t *testing.T) {
-		mw, stop := RateLimitMiddleware(RateLimiterConfig{
+		middleware, stop := RateLimitMiddleware(RateLimiterConfig{
 			GlobalLimit:    rate.Limit(1000),
 			GlobalBurst:    2000,
 			PerClientLimit: rate.Limit(1000),
@@ -215,7 +241,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 		}, "")
 		defer stop()
 
-		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 
@@ -230,7 +256,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 	})
 
 	t.Run("429 when rate limited", func(t *testing.T) {
-		mw, stop := RateLimitMiddleware(RateLimiterConfig{
+		middleware, stop := RateLimitMiddleware(RateLimiterConfig{
 			GlobalLimit:    rate.Limit(1),
 			GlobalBurst:    1,
 			PerClientLimit: rate.Limit(1000),
@@ -238,7 +264,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 		}, "")
 		defer stop()
 
-		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 

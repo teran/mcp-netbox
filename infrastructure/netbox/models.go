@@ -1,11 +1,11 @@
 package netbox
 
+// WireSiteWrite is the wire request model for site create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields.
+//
 // Wire types mirror NetBox JSON API responses. The domain.PaginatedResponse
 // type is used for both deserialization and output — wire types are embedded
 // via type parameter instantiation (e.g. domain.PaginatedResponse[WireSite]).
-//
-// WireSiteWrite is the wire request model for site create/update (POST/PATCH
-// body). Its json tags intentionally mirror NetBox's writable fields.
 type WireSiteWrite struct {
 	Name            string         `json:"name,omitempty"`
 	Slug            *string        `json:"slug,omitempty"`
@@ -399,7 +399,9 @@ type WireContactWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// Wire types mirror the NetBox JSON API response objects.
 type (
+	// WireSite mirrors the corresponding NetBox JSON API response object.
 	WireSite struct {
 		ID              int            `json:"id"`
 		URL             string         `json:"url"`
@@ -421,6 +423,7 @@ type (
 		LastUpdated     string         `json:"last_updated"`
 	}
 
+	// WireDevice mirrors the corresponding NetBox JSON API response object.
 	WireDevice struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -445,6 +448,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireIPAddress mirrors the corresponding NetBox JSON API response object.
 	WireIPAddress struct {
 		ID                 int              `json:"id"`
 		URL                string           `json:"url"`
@@ -466,6 +470,7 @@ type (
 		LastUpdated        string           `json:"last_updated"`
 	}
 
+	// WirePrefix mirrors the corresponding NetBox JSON API response object.
 	WirePrefix struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -489,6 +494,7 @@ type (
 		Family       *WireFamily    `json:"family"`
 	}
 
+	// WireVLAN mirrors the corresponding NetBox JSON API response object.
 	WireVLAN struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -508,6 +514,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireVirtualMachine mirrors the corresponding NetBox JSON API response object.
 	WireVirtualMachine struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -529,6 +536,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireCluster mirrors the corresponding NetBox JSON API response object.
 	WireCluster struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -546,6 +554,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireCircuit mirrors the corresponding NetBox JSON API response object.
 	WireCircuit struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -565,6 +574,7 @@ type (
 		CommitRate   int            `json:"commit_rate,omitempty"`
 	}
 
+	// WireRack mirrors the corresponding NetBox JSON API response object.
 	WireRack struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -588,6 +598,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireCircuitTermination mirrors the corresponding NetBox JSON API response object.
 	WireCircuitTermination struct {
 		ID            int            `json:"id"`
 		URL           string         `json:"url"`
@@ -604,6 +615,7 @@ type (
 		LastUpdated   string         `json:"last_updated"`
 	}
 
+	// WireCable mirrors the corresponding NetBox JSON API response object.
 	WireCable struct {
 		ID           int                   `json:"id"`
 		URL          string                `json:"url"`
@@ -623,6 +635,7 @@ type (
 		LastUpdated  string                `json:"last_updated"`
 	}
 
+	// WireCableTermination mirrors the corresponding NetBox JSON API response object.
 	WireCableTermination struct {
 		ID   int    `json:"id"`
 		URL  string `json:"url"`
@@ -630,6 +643,7 @@ type (
 		Type string `json:"_type"`
 	}
 
+	// WireInterface mirrors the corresponding NetBox JSON API response object.
 	WireInterface struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -648,6 +662,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireVMInterface mirrors the corresponding NetBox JSON API response object.
 	WireVMInterface struct {
 		ID             int            `json:"id"`
 		URL            string         `json:"url"`
@@ -664,6 +679,7 @@ type (
 		LastUpdated    string         `json:"last_updated"`
 	}
 
+	// WireProvider mirrors the corresponding NetBox JSON API response object.
 	WireProvider struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -682,6 +698,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireTenant mirrors the corresponding NetBox JSON API response object.
 	WireTenant struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -696,6 +713,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireManufacturer mirrors the corresponding NetBox JSON API response object.
 	WireManufacturer struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -709,6 +727,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireDeviceType mirrors the corresponding NetBox JSON API response object.
 	WireDeviceType struct {
 		ID            int            `json:"id"`
 		URL           string         `json:"url"`
@@ -727,6 +746,7 @@ type (
 		LastUpdated   string         `json:"last_updated"`
 	}
 
+	// WireLocation mirrors the corresponding NetBox JSON API response object.
 	WireLocation struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -743,6 +763,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireClusterType mirrors the corresponding NetBox JSON API response object.
 	WireClusterType struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -756,6 +777,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireClusterGroup mirrors the corresponding NetBox JSON API response object.
 	WireClusterGroup struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -769,6 +791,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireCircuitType mirrors the corresponding NetBox JSON API response object.
 	WireCircuitType struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -783,6 +806,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireVrf mirrors the corresponding NetBox JSON API response object.
 	WireVrf struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -797,6 +821,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireVlanGroup mirrors the corresponding NetBox JSON API response object.
 	WireVlanGroup struct {
 		ID           int                 `json:"id"`
 		URL          string              `json:"url"`
@@ -813,11 +838,13 @@ type (
 		LastUpdated  string              `json:"last_updated"`
 	}
 
+	// WireVlanGroupScope mirrors the corresponding NetBox JSON API response object.
 	WireVlanGroupScope struct {
 		ObjectType string `json:"object_type"`
 		ObjectID   int    `json:"object_id"`
 	}
 
+	// WireRole mirrors the corresponding NetBox JSON API response object.
 	WireRole struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -831,6 +858,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// WireContact mirrors the corresponding NetBox JSON API response object.
 	WireContact struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url"`
@@ -850,7 +878,10 @@ type (
 	}
 )
 
+// Wire types for the small nested, label and tag sub-objects embedded in the
+// response objects above.
 type (
+	// WireNested mirrors the corresponding NetBox JSON API response object.
 	WireNested struct {
 		ID   int    `json:"id"`
 		URL  string `json:"url"`
@@ -858,11 +889,13 @@ type (
 		Slug string `json:"slug,omitempty"`
 	}
 
+	// WireLabel mirrors the corresponding NetBox JSON API response object.
 	WireLabel struct {
 		Value string `json:"value"`
 		Label string `json:"label"`
 	}
 
+	// WireTag mirrors the corresponding NetBox JSON API response object.
 	WireTag struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
@@ -870,6 +903,7 @@ type (
 		URL  string `json:"url"`
 	}
 
+	// WireAssignedObj mirrors the corresponding NetBox JSON API response object.
 	WireAssignedObj struct {
 		ID     int         `json:"id"`
 		URL    string      `json:"url"`
@@ -877,6 +911,7 @@ type (
 		Name   string      `json:"name"`
 	}
 
+	// WireFamily mirrors the corresponding NetBox JSON API response object.
 	WireFamily struct {
 		Value int    `json:"value"`
 		Label string `json:"label"`

@@ -14,14 +14,26 @@ import (
 	"github.com/teran/mcp-netbox/redact"
 )
 
+// Metrics collects Prometheus metrics for MCP tool invocations and internal
+// HTTP traffic.
 type Metrics struct {
 	toolRequestsTotal *prometheus.CounterVec
 	toolDuration      *prometheus.HistogramVec
 	activeRequests    prometheus.Gauge
 }
 
+// sizeBucketStart is the first bucket of the request/response size histograms.
+const sizeBucketStart = 100
+
+// sizeBucketBase is the multiplicative factor between consecutive histogram buckets.
+const sizeBucketBase = 10
+
+// sizeBucketCount is the number of buckets in the request/response size histograms.
+const sizeBucketCount = 8
+
+// NewMetrics creates and registers the tool metrics on the given registry.
 func NewMetrics(reg *prometheus.Registry) *Metrics {
-	m := &Metrics{
+	metrics := &Metrics{
 		toolRequestsTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "mcp_tool_requests_total",
 			Help: "Per-tool request count.",
@@ -36,19 +48,28 @@ func NewMetrics(reg *prometheus.Registry) *Metrics {
 			Help: "Current in-flight MCP requests.",
 		}),
 	}
-	reg.MustRegister(m.toolRequestsTotal, m.toolDuration, m.activeRequests)
-	return m
+	reg.MustRegister(metrics.toolRequestsTotal, metrics.toolDuration, metrics.activeRequests)
+
+	return metrics
 }
 
 // WrapToolHandler wraps an MCP tool handler with metrics recording and output
 // sanitization. The metrics recording is skipped when metrics is nil (used by
 // tests), but the text-form sanitization is always applied so tool output is
 // consistently scrubbed of ANSI/control characters regardless of caller.
-func WrapToolHandler[I, O any](metrics *Metrics, toolName string, handler mcp.ToolHandlerFor[I, O]) mcp.ToolHandlerFor[I, O] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, in I) (*mcp.CallToolResult, O, error) {
+func WrapToolHandler[I, O any](
+	metrics *Metrics,
+	toolName string,
+	handler mcp.ToolHandlerFor[I, O],
+) mcp.ToolHandlerFor[I, O] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, input I) (*mcp.CallToolResult, O, error) {
 		start := time.Now()
-		result, out, err := handler(ctx, req, in)
+		result, out, err := handler(ctx, req, input)
 		duration := time.Since(start)
+
+		if toolAccessLogEnabled.Load() {
+			logToolAccess(ctx, toolName, input, duration, err, result)
+		}
 
 		if metrics != nil {
 			statusClass := "2xx"
@@ -92,6 +113,7 @@ func sanitizeToolResult(res *mcp.CallToolResult, out any) *mcp.CallToolResult {
 		return res
 	}
 	res.Content = []mcp.Content{&mcp.TextContent{Text: sanitizeOutput(string(jsonBytes))}}
+
 	return res
 }
 
@@ -111,6 +133,7 @@ func MetricsMiddleware(metrics *Metrics) func(http.Handler) http.Handler {
 // RegisterMetricsOnRegistry registers Go runtime metrics and returns an HTTP handler.
 func RegisterMetricsOnRegistry(reg *prometheus.Registry) http.Handler {
 	reg.MustRegister(collectors.NewGoCollector())
+
 	return promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 }
 
@@ -137,12 +160,12 @@ func InstrumentInternalMux(reg *prometheus.Registry, handler http.Handler) http.
 	requestSize := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "http_server_request_size_bytes",
 		Help:    "Size of HTTP request bodies, partitioned by status code and method.",
-		Buckets: prometheus.ExponentialBuckets(100, 10, 8),
+		Buckets: prometheus.ExponentialBuckets(sizeBucketStart, sizeBucketBase, sizeBucketCount),
 	}, labels)
 	responseSize := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "http_server_response_size_bytes",
 		Help:    "Size of HTTP response bodies, partitioned by status code and method.",
-		Buckets: prometheus.ExponentialBuckets(100, 10, 8),
+		Buckets: prometheus.ExponentialBuckets(sizeBucketStart, sizeBucketBase, sizeBucketCount),
 	}, labels)
 
 	reg.MustRegister(requests, duration, requestSize, responseSize)

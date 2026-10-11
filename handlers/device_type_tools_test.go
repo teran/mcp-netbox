@@ -11,6 +11,7 @@ import (
 	"github.com/teran/mcp-netbox/mockrepo"
 )
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestCreateDeviceTypeHandler(t *testing.T) {
 	t.Parallel()
 
@@ -23,7 +24,9 @@ func TestCreateDeviceTypeHandler(t *testing.T) {
 
 		handler := handlers.NewCreateDeviceTypeHandler(svc)
 		mf := 3
-		result, out, err := handler(context.Background(), nil, handlers.DeviceTypeCreateInput{Manufacturer: &mf, Model: "C9300"})
+		result, out, err := handler(context.Background(), nil, handlers.DeviceTypeCreateInput{
+			Manufacturer: &mf, Model: "C9300",
+		})
 		if err != nil {
 			t.Fatalf("handler returned error: %v", err)
 		}
@@ -64,7 +67,9 @@ func TestCreateDeviceTypeHandler(t *testing.T) {
 
 		handler := handlers.NewCreateDeviceTypeHandler(svc)
 		mf := 3
-		result, _, err := handler(context.Background(), nil, handlers.DeviceTypeCreateInput{Manufacturer: &mf, Model: "C9300"})
+		result, _, err := handler(context.Background(), nil, handlers.DeviceTypeCreateInput{
+			Manufacturer: &mf, Model: "C9300",
+		})
 		if err != nil {
 			t.Fatalf("handler returned non-nil error, want structured result: %v", err)
 		}
@@ -74,13 +79,13 @@ func TestCreateDeviceTypeHandler(t *testing.T) {
 		if result.StructuredContent == nil {
 			t.Fatal("StructuredContent is nil, want validation_errors")
 		}
-		sc, ok := result.StructuredContent.(map[string]any)
+		structuredContent, ok := result.StructuredContent.(map[string]any)
 		if !ok {
 			t.Fatalf("StructuredContent type = %T, want map", result.StructuredContent)
 		}
-		raw, ok := sc["validation_errors"].(json.RawMessage)
+		raw, ok := structuredContent["validation_errors"].(json.RawMessage)
 		if !ok {
-			t.Fatalf("validation_errors type = %T, want json.RawMessage", sc["validation_errors"])
+			t.Fatalf("validation_errors type = %T, want json.RawMessage", structuredContent["validation_errors"])
 		}
 		if string(raw) != string(body) {
 			t.Errorf("validation_errors = %s, want %s", raw, body)
@@ -107,7 +112,9 @@ func TestUpdateDeviceTypeHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			UpdateDeviceTypeFunc: func(_ context.Context, _ string, id int, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+			UpdateDeviceTypeFunc: func(
+				_ context.Context, _ string, id int, _ domain.DeviceTypeWrite,
+			) (*domain.DeviceType, error) {
 				return &domain.DeviceType{ID: id, Model: "C9300-2"}, nil
 			},
 		}, "token")
@@ -134,7 +141,9 @@ func TestUpdateDeviceTypeHandler(t *testing.T) {
 	t.Run("validation error in structured content", func(t *testing.T) {
 		body := []byte(`{"slug":["This field is required."]}`)
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			UpdateDeviceTypeFunc: func(_ context.Context, _ string, _ int, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+			UpdateDeviceTypeFunc: func(
+				_ context.Context, _ string, _ int, _ domain.DeviceTypeWrite,
+			) (*domain.DeviceType, error) {
 				return nil, &domain.ValidationError{StatusCode: 400, Body: body}
 			},
 		}, "token")
@@ -158,6 +167,7 @@ func TestDeleteDeviceTypeHandler(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		}, "token")

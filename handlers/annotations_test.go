@@ -9,10 +9,10 @@ import (
 func TestBoolPtr(t *testing.T) {
 	t.Parallel()
 
-	if b := boolPtr(true); b == nil || !*b {
+	if b := new(true); b == nil || !*b {
 		t.Errorf("boolPtr(true) = %v, want pointer to true", b)
 	}
-	if b := boolPtr(false); b == nil || *b {
+	if b := new(false); b == nil || *b {
 		t.Errorf("boolPtr(false) = %v, want pointer to false", b)
 	}
 }
@@ -20,72 +20,72 @@ func TestBoolPtr(t *testing.T) {
 func TestReadOnlyToolAnnotations(t *testing.T) {
 	t.Parallel()
 
-	a := readOnlyTool("List Sites")
-	if a == nil {
+	annotations := readOnlyTool("List Sites")
+	if annotations == nil {
 		t.Fatal("readOnlyTool returned nil")
 	}
-	if a.Title != "List Sites" {
-		t.Errorf("Title = %q, want %q", a.Title, "List Sites")
+	if annotations.Title != "List Sites" {
+		t.Errorf("Title = %q, want %q", annotations.Title, "List Sites")
 	}
-	if !a.ReadOnlyHint {
+	if !annotations.ReadOnlyHint {
 		t.Error("ReadOnlyHint = false, want true")
 	}
-	if !a.IdempotentHint {
+	if !annotations.IdempotentHint {
 		t.Error("IdempotentHint = false, want true")
 	}
-	if a.DestructiveHint == nil || *a.DestructiveHint {
-		t.Errorf("DestructiveHint = %v, want false", a.DestructiveHint)
+	if annotations.DestructiveHint == nil || *annotations.DestructiveHint {
+		t.Errorf("DestructiveHint = %v, want false", annotations.DestructiveHint)
 	}
-	if a.OpenWorldHint == nil || *a.OpenWorldHint {
-		t.Errorf("OpenWorldHint = %v, want false (closed world)", a.OpenWorldHint)
+	if annotations.OpenWorldHint == nil || *annotations.OpenWorldHint {
+		t.Errorf("OpenWorldHint = %v, want false (closed world)", annotations.OpenWorldHint)
 	}
 }
 
 func TestWriteToolAnnotations(t *testing.T) {
 	t.Parallel()
 
-	a := writeTool("Create Site")
-	if a == nil {
+	annotations := writeTool("Create Site")
+	if annotations == nil {
 		t.Fatal("writeTool returned nil")
 	}
-	if a.Title != "Create Site" {
-		t.Errorf("Title = %q, want %q", a.Title, "Create Site")
+	if annotations.Title != "Create Site" {
+		t.Errorf("Title = %q, want %q", annotations.Title, "Create Site")
 	}
-	if a.ReadOnlyHint {
+	if annotations.ReadOnlyHint {
 		t.Error("ReadOnlyHint = true, want false")
 	}
-	if a.IdempotentHint {
+	if annotations.IdempotentHint {
 		t.Error("IdempotentHint = true, want false (create is not idempotent)")
 	}
-	if a.DestructiveHint == nil || *a.DestructiveHint {
-		t.Errorf("DestructiveHint = %v, want false", a.DestructiveHint)
+	if annotations.DestructiveHint == nil || *annotations.DestructiveHint {
+		t.Errorf("DestructiveHint = %v, want false", annotations.DestructiveHint)
 	}
-	if a.OpenWorldHint == nil || *a.OpenWorldHint {
-		t.Errorf("OpenWorldHint = %v, want false (closed world)", a.OpenWorldHint)
+	if annotations.OpenWorldHint == nil || *annotations.OpenWorldHint {
+		t.Errorf("OpenWorldHint = %v, want false (closed world)", annotations.OpenWorldHint)
 	}
 }
 
 func TestDestructiveToolAnnotations(t *testing.T) {
 	t.Parallel()
 
-	a := destructiveTool("Delete Site")
-	if a == nil {
+	annotations := destructiveTool("Delete Site")
+	if annotations == nil {
 		t.Fatal("destructiveTool returned nil")
 	}
-	if a.Title != "Delete Site" {
-		t.Errorf("Title = %q, want %q", a.Title, "Delete Site")
+	if annotations.Title != "Delete Site" {
+		t.Errorf("Title = %q, want %q", annotations.Title, "Delete Site")
 	}
-	if a.ReadOnlyHint {
+	if annotations.ReadOnlyHint {
 		t.Error("ReadOnlyHint = true, want false")
 	}
-	if !a.IdempotentHint {
+	if !annotations.IdempotentHint {
 		t.Error("IdempotentHint = false, want true (delete is idempotent)")
 	}
-	if a.DestructiveHint == nil || !*a.DestructiveHint {
-		t.Errorf("DestructiveHint = %v, want true", a.DestructiveHint)
+	if annotations.DestructiveHint == nil || !*annotations.DestructiveHint {
+		t.Errorf("DestructiveHint = %v, want true", annotations.DestructiveHint)
 	}
-	if a.OpenWorldHint == nil || *a.OpenWorldHint {
-		t.Errorf("OpenWorldHint = %v, want false (closed world)", a.OpenWorldHint)
+	if annotations.OpenWorldHint == nil || *annotations.OpenWorldHint {
+		t.Errorf("OpenWorldHint = %v, want false (closed world)", annotations.OpenWorldHint)
 	}
 }
 
@@ -95,15 +95,15 @@ func TestDestructiveToolAnnotations(t *testing.T) {
 func TestDeleteToolAnnotationJSON(t *testing.T) {
 	t.Parallel()
 
-	a := destructiveTool("Delete Site")
-	b, err := json.Marshal(a)
+	annotations := destructiveTool("Delete Site")
+	data, err := json.Marshal(annotations)
 	if err != nil {
 		t.Fatalf("Marshal annotations: %v", err)
 	}
-	if !strings.Contains(string(b), `"destructiveHint":true`) {
-		t.Errorf("annotations JSON = %s, want destructiveHint:true", b)
+	if !strings.Contains(string(data), `"destructiveHint":true`) {
+		t.Errorf("annotations JSON = %s, want destructiveHint:true", data)
 	}
-	if strings.Contains(string(b), `"readOnlyHint":true`) {
-		t.Errorf("annotations JSON = %s, want readOnlyHint not true", b)
+	if strings.Contains(string(data), `"readOnlyHint":true`) {
+		t.Errorf("annotations JSON = %s, want readOnlyHint not true", data)
 	}
 }

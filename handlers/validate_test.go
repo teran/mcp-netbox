@@ -122,7 +122,7 @@ func TestSanitizeAllStrings(t *testing.T) {
 
 	note := "note\r\n"
 	desc := "line1\nline2\r"
-	p := payload{
+	sample := payload{
 		Name:     "name\r\nx",
 		Desc:     &desc,
 		Tags:     []string{"t\r\n1", "ok"},
@@ -133,26 +133,26 @@ func TestSanitizeAllStrings(t *testing.T) {
 		InnerPtr: &nested{Note: &note},
 	}
 
-	sanitizeAllStrings(reflect.ValueOf(&p))
+	sanitizeAllStrings(reflect.ValueOf(&sample))
 
-	if p.Name != "namex" {
-		t.Errorf("Name = %q, want 'namex'", p.Name)
+	if sample.Name != "namex" {
+		t.Errorf("Name = %q, want 'namex'", sample.Name)
 	}
-	if p.Desc == nil || *p.Desc != "line1line2" {
-		t.Errorf("Desc = %v, want 'line1line2'", p.Desc)
+	if sample.Desc == nil || *sample.Desc != "line1line2" {
+		t.Errorf("Desc = %v, want 'line1line2'", sample.Desc)
 	}
 	// slices/maps are not sanitized by the struct walker
-	if p.Tags[0] != "t\r\n1" {
-		t.Errorf("Tags[0] = %q, want untouched 't\\r\\n1'", p.Tags[0])
+	if sample.Tags[0] != "t\r\n1" {
+		t.Errorf("Tags[0] = %q, want untouched 't\\r\\n1'", sample.Tags[0])
 	}
-	if p.Count != 5 || !p.Enabled {
+	if sample.Count != 5 || !sample.Enabled {
 		t.Error("non-string fields must be left intact")
 	}
-	if p.Inner.Note == nil || *p.Inner.Note != "note" {
-		t.Errorf("Inner.Note = %v, want 'note'", p.Inner.Note)
+	if sample.Inner.Note == nil || *sample.Inner.Note != "note" {
+		t.Errorf("Inner.Note = %v, want 'note'", sample.Inner.Note)
 	}
-	if p.InnerPtr.Note == nil || *p.InnerPtr.Note != "note" {
-		t.Errorf("InnerPtr.Note = %v, want 'note'", p.InnerPtr.Note)
+	if sample.InnerPtr.Note == nil || *sample.InnerPtr.Note != "note" {
+		t.Errorf("InnerPtr.Note = %v, want 'note'", sample.InnerPtr.Note)
 	}
 }
 

@@ -43,7 +43,7 @@ func TestSanitizeLog(t *testing.T) {
 func TestRecoveryMiddleware(t *testing.T) {
 	t.Parallel()
 
-	handler := RecoveryMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RecoveryMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 		panic("test panic")
 	}))
 
@@ -66,7 +66,7 @@ func TestBodyLimitMiddleware(t *testing.T) {
 	t.Parallel()
 
 	t.Run("within limit", func(t *testing.T) {
-		handler := BodyLimitMiddleware(1024)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := BodyLimitMiddleware(1024)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 
@@ -80,18 +80,21 @@ func TestBodyLimitMiddleware(t *testing.T) {
 	})
 
 	t.Run("exceeds limit", func(t *testing.T) {
-		handler := BodyLimitMiddleware(10)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := BodyLimitMiddleware(10)(http.HandlerFunc(func(writer http.ResponseWriter, r *http.Request) {
 			_, err := io.ReadAll(r.Body)
 			if err != nil {
 				if MaxBytesError(err) {
-					http.Error(w, "request too large", http.StatusRequestEntityTooLarge)
+					http.Error(writer, "request too large", http.StatusRequestEntityTooLarge)
+
 					return
 				}
 			}
-			w.WriteHeader(http.StatusOK)
+			writer.WriteHeader(http.StatusOK)
 		}))
 
-		req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/", strings.NewReader("this body is way too long for the limit"))
+		req := httptest.NewRequestWithContext(
+			context.Background(), http.MethodPost, "/", strings.NewReader("this body is way too long for the limit"),
+		)
 		rec := httptest.NewRecorder()
 		handler.ServeHTTP(rec, req)
 
@@ -143,7 +146,7 @@ func TestLoggingMiddleware(t *testing.T) {
 	t.Parallel()
 
 	t.Run("logs request", func(t *testing.T) {
-		handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"result":"ok"}`))
 		}))
@@ -159,7 +162,7 @@ func TestLoggingMiddleware(t *testing.T) {
 	})
 
 	t.Run("rejects large batch", func(t *testing.T) {
-		handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 
@@ -178,12 +181,14 @@ func TestLoggingMiddleware(t *testing.T) {
 	})
 
 	t.Run("tracks response size and status", func(t *testing.T) {
-		handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 			_, _ = w.Write([]byte(`{"error":"not found"}`))
 		}))
 
-		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", strings.NewReader(`{"method":"test"}`))
+		req := httptest.NewRequestWithContext(
+			context.Background(), http.MethodGet, "/", strings.NewReader(`{"method":"test"}`),
+		)
 		rec := httptest.NewRecorder()
 		handler.ServeHTTP(rec, req)
 
@@ -234,12 +239,14 @@ func TestLoggingMiddleware_BodyTooLarge(t *testing.T) {
 	t.Parallel()
 
 	handler := BodyLimitMiddleware(10)(
-		LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})),
 	)
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/", strings.NewReader("this body is way too long"))
+	req := httptest.NewRequestWithContext(
+		context.Background(), http.MethodPost, "/", strings.NewReader("this body is way too long"),
+	)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 
@@ -256,7 +263,7 @@ func TestLoggingResponseWriter(t *testing.T) {
 		lrw := &loggingResponseWriter{ResponseWriter: rec, statusCode: http.StatusOK}
 
 		lrw.WriteHeader(http.StatusTeapot)
-		n, err := lrw.Write([]byte("hello"))
+		written, err := lrw.Write([]byte("hello"))
 		if err != nil {
 			t.Fatalf("Write() returned error: %v", err)
 		}
@@ -267,25 +274,29 @@ func TestLoggingResponseWriter(t *testing.T) {
 		if lrw.bodySize.Load() != 5 {
 			t.Errorf("bodySize = %d, want %d", lrw.bodySize.Load(), 5)
 		}
-		if n != 5 {
-			t.Errorf("Write returned %d, want %d", n, 5)
+		if written != 5 {
+			t.Errorf("Write returned %d, want %d", written, 5)
 		}
 	})
 }
 
-func TestTokenMiddleware(t *testing.T) {
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
+func TestTokenMiddleware(t *testing.T) { //nolint:gocognit // High cognitive complexity of a large table-driven test.
 	t.Parallel()
 
 	t.Run("valid bearer token", func(t *testing.T) {
-		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := r.Context().Value(tokenContextKey).(*application.Token)
+		handler := TokenMiddleware(http.HandlerFunc(func(writer http.ResponseWriter, r *http.Request) {
+			token, ok := r.Context().Value(tokenContextKey).(*application.Token)
+			if !ok {
+				t.Fatal("token missing from context")
+			}
 			if token == nil {
 				t.Fatal("token is nil")
 			}
 			if token.Value() != "test-token" {
 				t.Errorf("token = %q, want %q", token.Value(), "test-token")
 			}
-			w.WriteHeader(http.StatusOK)
+			writer.WriteHeader(http.StatusOK)
 		}))
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
@@ -299,15 +310,18 @@ func TestTokenMiddleware(t *testing.T) {
 	})
 
 	t.Run("valid token scheme", func(t *testing.T) {
-		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := r.Context().Value(tokenContextKey).(*application.Token)
+		handler := TokenMiddleware(http.HandlerFunc(func(writer http.ResponseWriter, r *http.Request) {
+			token, ok := r.Context().Value(tokenContextKey).(*application.Token)
+			if !ok {
+				t.Fatal("token missing from context")
+			}
 			if token == nil {
 				t.Fatal("token is nil")
 			}
 			if token.Value() != "tok-value" {
 				t.Errorf("token = %q, want %q", token.Value(), "tok-value")
 			}
-			w.WriteHeader(http.StatusOK)
+			writer.WriteHeader(http.StatusOK)
 		}))
 
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
@@ -321,7 +335,7 @@ func TestTokenMiddleware(t *testing.T) {
 	})
 
 	t.Run("missing header", func(t *testing.T) {
-		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := TokenMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("handler should not be called")
 		}))
 
@@ -335,7 +349,7 @@ func TestTokenMiddleware(t *testing.T) {
 	})
 
 	t.Run("empty token", func(t *testing.T) {
-		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := TokenMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("handler should not be called")
 		}))
 
@@ -350,7 +364,7 @@ func TestTokenMiddleware(t *testing.T) {
 	})
 
 	t.Run("unsupported scheme", func(t *testing.T) {
-		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := TokenMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("handler should not be called")
 		}))
 
@@ -365,7 +379,7 @@ func TestTokenMiddleware(t *testing.T) {
 	})
 
 	t.Run("no space after scheme", func(t *testing.T) {
-		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := TokenMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("handler should not be called")
 		}))
 
@@ -380,7 +394,7 @@ func TestTokenMiddleware(t *testing.T) {
 	})
 
 	t.Run("token too long", func(t *testing.T) {
-		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := TokenMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("handler should not be called")
 		}))
 
@@ -395,7 +409,7 @@ func TestTokenMiddleware(t *testing.T) {
 	})
 
 	t.Run("token at max length is accepted", func(t *testing.T) {
-		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := TokenMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 
@@ -414,7 +428,7 @@ func TestHostValidationMiddleware(t *testing.T) {
 	t.Parallel()
 
 	t.Run("empty host returns 400", func(t *testing.T) {
-		handler := HostValidationMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := HostValidationMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("handler should not be called when host is empty")
 		}))
 
@@ -450,7 +464,7 @@ func TestHostValidationMiddleware(t *testing.T) {
 func TestSecurityHeadersMiddleware(t *testing.T) {
 	t.Parallel()
 
-	handler := SecurityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := SecurityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -475,11 +489,13 @@ func TestSecurityHeadersMiddleware(t *testing.T) {
 func TestLoggingMiddleware_ToolCallMethod(t *testing.T) {
 	t.Parallel()
 
-	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/mcp", strings.NewReader(`{"method":"tools/call/get_sites"}`))
+	req := httptest.NewRequestWithContext(
+		context.Background(), http.MethodPost, "/mcp", strings.NewReader(`{"method":"tools/call/get_sites"}`),
+	)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 
@@ -492,7 +508,7 @@ func TestRequestIDMiddleware_GeneratesID(t *testing.T) {
 	t.Parallel()
 
 	var got string
-	handler := RequestIDMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RequestIDMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		got = domain.RequestIDFromContext(r.Context())
 	}))
 
@@ -509,7 +525,7 @@ func TestRequestIDMiddleware_ReusesInboundHeader(t *testing.T) {
 	t.Parallel()
 
 	var got string
-	handler := RequestIDMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RequestIDMiddleware(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		got = domain.RequestIDFromContext(r.Context())
 	}))
 
@@ -558,13 +574,13 @@ func TestWithSession_NoRequestID(t *testing.T) {
 func TestWithSession_NoSessionIDField(t *testing.T) {
 	t.Parallel()
 
-	l := logrus.New()
-	l.SetOutput(io.Discard)
+	logger := logrus.New()
+	logger.SetOutput(io.Discard)
 
 	// No session id is present in the context, so WithSession must NOT attach a
 	// session_id field to the entry (kills the CONDITIONALS_NEGATION on the
 	// `sid != ""` check, whose mutant would add an empty session_id field).
-	entry := WithSession(context.Background(), l)
+	entry := WithSession(context.Background(), logger)
 	if _, ok := entry.Data["session_id"]; ok {
 		t.Error("WithSession attached a session_id field when no session id is present")
 	}
@@ -600,7 +616,11 @@ func TestRequestArgs_ExtractsParams(t *testing.T) {
 
 	body := []byte(`{"method":"tools/call/get_sites","params":{"q":"dc"}}`)
 	got := requestArgs(body)
-	if string(got.(json.RawMessage)) != `{"q":"dc"}` {
+	rawMsg, ok := got.(json.RawMessage)
+	if !ok {
+		t.Fatalf("requestArgs type = %T, want json.RawMessage", got)
+	}
+	if string(rawMsg) != `{"q":"dc"}` {
 		t.Errorf("requestArgs = %s, want params object", got)
 	}
 }
@@ -629,7 +649,7 @@ func TestLoggingMiddleware_InfoLevelWithFields(t *testing.T) {
 	l.SetLevel(logrus.InfoLevel)
 	SetLogger(l)
 
-	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"result":"ok"}`))
 	}))
@@ -665,11 +685,13 @@ func TestLoggingMiddleware_OutcomeErrorOnExactly400(t *testing.T) {
 	// A response with status exactly 400 must be classified as outcome=error
 	// (kills the CONDITIONALS_BOUNDARY on `statusCode >= 400`, whose mutant
 	// would treat 400 as success).
-	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}))
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/mcp", strings.NewReader(`{"method":"x"}`))
+	req := httptest.NewRequestWithContext(
+		context.Background(), http.MethodPost, "/mcp", strings.NewReader(`{"method":"x"}`),
+	)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 

@@ -21,14 +21,14 @@ func TestReadyz_Healthy(t *testing.T) {
 	mux := NewInternalMux(nil, nil)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/readyz", nil)
-	rr := httptest.NewRecorder()
-	mux.ServeHTTP(rr, req)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
 
-	if rr.Code != http.StatusOK {
-		t.Errorf("readyz status = %d, want %d", rr.Code, http.StatusOK)
+	if rec.Code != http.StatusOK {
+		t.Errorf("readyz status = %d, want %d", rec.Code, http.StatusOK)
 	}
-	if !bytes.Contains(rr.Body.Bytes(), []byte("ok")) {
-		t.Errorf("readyz body = %q, want to contain 'ok'", rr.Body.String())
+	if !bytes.Contains(rec.Body.Bytes(), []byte("ok")) {
+		t.Errorf("readyz body = %q, want to contain 'ok'", rec.Body.String())
 	}
 }
 
@@ -40,14 +40,14 @@ func TestReadyz_DegradedWhenCircuitOpen(t *testing.T) {
 	mux := NewInternalMux(nil, cb)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/readyz", nil)
-	rr := httptest.NewRecorder()
-	mux.ServeHTTP(rr, req)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
 
-	if rr.Code != http.StatusServiceUnavailable {
-		t.Errorf("readyz status = %d, want %d", rr.Code, http.StatusServiceUnavailable)
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Errorf("readyz status = %d, want %d", rec.Code, http.StatusServiceUnavailable)
 	}
-	if !bytes.Contains(rr.Body.Bytes(), []byte("degraded")) {
-		t.Errorf("readyz body = %q, want to contain 'degraded'", rr.Body.String())
+	if !bytes.Contains(rec.Body.Bytes(), []byte("degraded")) {
+		t.Errorf("readyz body = %q, want to contain 'degraded'", rec.Body.String())
 	}
 }
 
@@ -56,22 +56,23 @@ func openCircuitBreaker(t *testing.T) *circuitbreaker.Breaker {
 	t.Helper()
 
 	failing := failingRoundTripper{}
-	rt := circuitbreaker.NewRoundTripper(failing, circuitbreaker.Config{
+	roundTripper := circuitbreaker.NewRoundTripper(failing, circuitbreaker.Config{
 		FailureThreshold: 1,
 		Timeout:          1 * time.Hour,
 	})
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "http://example.com", nil)
-	resp, err := rt.RoundTrip(req)
+	resp, err := roundTripper.RoundTrip(req)
 	if err == nil {
 		if resp != nil {
 			_ = resp.Body.Close()
 		}
 		t.Fatal("expected failing RoundTrip to return error")
 	}
-	if rt.Breaker().State() != circuitbreaker.StateOpen {
+	if roundTripper.Breaker().State() != circuitbreaker.StateOpen {
 		t.Fatal("breaker did not open after failure")
 	}
-	return rt.Breaker()
+
+	return roundTripper.Breaker()
 }
 
 // failingRoundTripper always fails to satisfy http.RoundTripper.
@@ -98,7 +99,7 @@ func TestHealthz_Endpoint(t *testing.T) {
 func TestInjectClientMiddleware_MissingToken(t *testing.T) {
 	t.Parallel()
 
-	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusTeapot)
 	})
 
@@ -154,7 +155,7 @@ func TestNewListHandler_NoService(t *testing.T) {
 
 	h := NewGetSitesHandler(nil)
 	_, _, err := h(context.Background(), nil, SitesInput{})
-	if err != errServiceNotAvailable {
+	if !errors.Is(err, errServiceNotAvailable) {
 		t.Errorf("err = %v, want %v", err, errServiceNotAvailable)
 	}
 }
@@ -162,7 +163,7 @@ func TestNewListHandler_NoService(t *testing.T) {
 func TestNewListHandler_NilResponse(t *testing.T) {
 	t.Parallel()
 
-	h := newListHandler[struct{}, domain.Site](listHandlerConfig[struct{}, domain.Site]{
+	handler := newListHandler[struct{}, domain.Site](listHandlerConfig[struct{}, domain.Site]{
 		svc: application.NewNetworkService(&stubRepo{}, "t"),
 		listFunc: func(context.Context, map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
 			//nolint:nilnil // intentional: simulate a nil response with no error to exercise the guard
@@ -172,7 +173,7 @@ func TestNewListHandler_NilResponse(t *testing.T) {
 		errorLabel:  "list sites",
 	})
 
-	_, _, err := h(context.Background(), nil, struct{}{})
+	_, _, err := handler(context.Background(), nil, struct{}{})
 	if err == nil {
 		t.Fatal("err = nil, want error for nil response")
 	}
@@ -183,7 +184,7 @@ func TestNewGetObjectByIDHandler_NoService(t *testing.T) {
 
 	h := NewGetObjectByIDHandler(nil)
 	_, _, err := h(context.Background(), nil, GetObjectInput{ObjectType: "site", ID: 1})
-	if err != errServiceNotAvailable {
+	if !errors.Is(err, errServiceNotAvailable) {
 		t.Errorf("err = %v, want %v", err, errServiceNotAvailable)
 	}
 }
@@ -193,13 +194,13 @@ func TestBuildParams_Branches(t *testing.T) {
 
 	svc := application.NewNetworkService(&stubRepo{}, "t")
 
-	t.Run("prefixes family set", func(t *testing.T) {
+	t.Run("prefixes family set", func(_ *testing.T) {
 		four := 4
 		// Must not panic and must route the family param into buildParams.
 		_, _, _ = NewGetPrefixesHandler(svc)(context.Background(), nil, PrefixesInput{Family: &four})
 	})
 
-	t.Run("interfaces enabled set", func(t *testing.T) {
+	t.Run("interfaces enabled set", func(_ *testing.T) {
 		enabled := true
 		_, _, _ = NewGetInterfacesHandler(svc)(context.Background(), nil, InterfacesInput{Enabled: &enabled})
 	})

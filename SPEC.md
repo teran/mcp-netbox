@@ -626,6 +626,20 @@ List cables in NetBox with optional filters.
 
 **Instructions**: Filter by `type`, `status`, `site`, `color`, or `label`, or use `q`. Paginated; an empty array means no cables match.
 
+## Protocol surface
+
+`mcp-netbox` implements a subset of the MCP client-server capabilities. The
+following table states what is implemented versus out of scope:
+
+| Capability | Status | Notes |
+|------------|--------|-------|
+| `tools` | **Implemented** | 89 tools — 14 read + 75 typed write (see [MCP Tools](#mcp-tools)) |
+| `resources` | **Implemented** | Read-only markdown guidance served under the namespaced URI `netbox://guidance/*`; unknown URIs return not-found. Content is secrets-safe and ANSI-safe; application data flows **only** through tools, never resources (M08/M09/N37) |
+| `prompts` | Out of scope | No prompt templates exposed |
+| `sampling` | Out of scope | The server never requests model sampling |
+| `roots` | Out of scope | The server does not consume client filesystem roots |
+| `logging` | Server-side logging handled | See [Logging](#logging) — this is the server's own observability logging, not the MCP client-logging capability |
+
 ## Middleware Chain (HTTP transport)
 
 The server applies ten middleware layers to every HTTP request, executed in this order (outermost first):
@@ -711,6 +725,10 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
   (`ALLOW_PRIVATE_NETBOX` overrides for private networks).
 - **Rate limiting & body limit:** global/per-client rate limits and a 1 MB body
   limit guard the HTTP listener against abuse.
+
+## Data & state
+
+> **State model (X01):** `mcp-netbox` is a **stateless** relay. It holds no application state between requests, persists nothing to disk or a database, and each request is served independently. Statelessness is also signaled to the transport via `StreamableHTTPOptions{Stateless: true}`. **Write idempotency (X02):** read tools are `idempotentHint:true`; create/update tools are `idempotentHint:false` (a create produces a new object each call); delete tools are `idempotentHint:true` with a real mechanism — a NetBox 404 on delete is treated as a successful no-op. **Upstream connection & limits (X03):** explicit 30s HTTP client timeout + dialer timeout; failures are returned to the model and logged, never silently retried (a 429 is surfaced as an error). **Persistence (X04):** not applicable — the server is stateless, no storage, no encryption-at-rest, no migrations. **Concurrency (X05):** not applicable — no shared mutable state; HTTP mode injects a service per request; no file writes.
 
 ## Error Handling
 
@@ -823,3 +841,15 @@ on every commit to `master` and on every release tag.
 
 There is **no `latest` tag**; deployments pin an immutable commit/timestamp tag.
 The default branch is `master` (R02).
+
+## Docs
+
+Documentation policy follows D01–D04:
+
+- **README (D01/D02):** the primary documentation lives in `README.md`, written
+  in **English** by default. It opens with the **AI-Generated Content
+  disclaimer** as its first line and carries the required badge set directly
+  under the title.
+- **SPEC/AGENTS (D02/D04):** `SPEC.md` and `AGENTS.md` are strictly **English**;
+  no translations are maintained for these documents. This file (`SPEC.md`) is
+  the authoritative design/architecture reference.

@@ -8,9 +8,9 @@
 [![MCP](https://img.shields.io/badge/MCP-Server-blue)](https://modelcontextprotocol.io)
 [![Go Reference](https://pkg.go.dev/badge/github.com/teran/mcp-netbox)](https://pkg.go.dev/github.com/teran/mcp-netbox)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/teran/mcp-netbox)](go.mod)
-[![Coverage](https://img.shields.io/github/actions/workflow/status/teran/mcp-netbox/ci.yml)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
-[![gosec](https://img.shields.io/github/actions/workflow/status/teran/mcp-netbox/ci.yml)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
-[![govulncheck](https://img.shields.io/github/actions/workflow/status/teran/mcp-netbox/ci.yml)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A595%25-brightgreen)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
+[![gosec](https://img.shields.io/badge/gosec-passing-brightgreen)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
+[![govulncheck](https://img.shields.io/badge/govulncheck-passing-brightgreen)](https://github.com/teran/mcp-netbox/actions/workflows/ci.yml)
 [![gremlins](https://img.shields.io/github/actions/workflow/status/teran/mcp-netbox/gremlins.yml)](https://github.com/teran/mcp-netbox/actions/workflows/gremlins.yml)
 
 MCP (Model Context Protocol) server for [NetBox](https://netboxlabs.com/) — infrastructure source of truth.

@@ -12,6 +12,7 @@ import (
 	"github.com/teran/mcp-netbox/domain"
 )
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateSite(t *testing.T) {
 	t.Parallel()
 
@@ -19,15 +20,16 @@ func TestClient_CreateSite(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"Site A","slug":"site-a","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"Site A","slug":"site-a","created":"2024-01-01","last_updated":"2024-01` +
+				`-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
@@ -61,10 +63,10 @@ func TestClient_CreateSite(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -73,22 +75,22 @@ func TestClient_CreateSite(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -97,16 +99,15 @@ func TestClient_CreateSite(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 
 	t.Run("unauthorized 401", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusUnauthorized)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusUnauthorized)
 		}))
 		defer srv.Close()
 
@@ -125,13 +126,13 @@ func TestClient_UpdateSite(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"Renamed","slug":"renamed","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"Renamed","slug":"renamed","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
@@ -160,20 +161,20 @@ func TestClient_UpdateSite(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateSite(context.Background(), "tok", 7, domain.SiteWrite{Name: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -184,10 +185,10 @@ func TestClient_DeleteSite(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -206,27 +207,27 @@ func TestClient_DeleteSite(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteSite(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -269,12 +270,12 @@ func TestMapWriteStatus(t *testing.T) {
 
 	t.Run("bad request 400 returns validation error", func(t *testing.T) {
 		_, err := mapWriteStatus(http.StatusBadRequest, []byte(`{"e":["x"]}`))
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != `{"e":["x"]}` {
-			t.Errorf("Body = %s, want body", ve.Body)
+		if string(validationErr.Body) != `{"e":["x"]}` {
+			t.Errorf("Body = %s, want body", validationErr.Body)
 		}
 	})
 
@@ -286,22 +287,22 @@ func TestMapWriteStatus(t *testing.T) {
 	})
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateDevice(t *testing.T) {
 	t.Parallel()
-
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"router1","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"router1","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
@@ -339,10 +340,10 @@ func TestClient_CreateDevice(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -351,22 +352,22 @@ func TestClient_CreateDevice(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -375,9 +376,8 @@ func TestClient_CreateDevice(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -389,13 +389,13 @@ func TestClient_UpdateDevice(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"router1","serial":"SN-X","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"router1","serial":"SN-X","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
@@ -427,20 +427,20 @@ func TestClient_UpdateDevice(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"role":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateDevice(context.Background(), "tok", 7, domain.DeviceWrite{Name: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -451,10 +451,10 @@ func TestClient_DeleteDevice(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -473,27 +473,27 @@ func TestClient_DeleteDevice(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteDevice(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -507,10 +507,10 @@ func TestClient_DeleteDevice(t *testing.T) {
 func TestSiteWriteToWire(t *testing.T) {
 	t.Parallel()
 
-	in := domain.SiteWrite{Name: "A", Slug: ptrStr("a")}
-	w := siteWriteToWire(in)
-	if w.Name != "A" || w.Slug == nil || *w.Slug != "a" {
-		t.Errorf("wire = %+v, want name A slug a", w)
+	in := domain.SiteWrite{Name: "A", Slug: ptrStr("a")} //nolint:modernize // new("a") is wrong.
+	wire := siteWriteToWire(in)
+	if wire.Name != "A" || wire.Slug == nil || *wire.Slug != "a" {
+		t.Errorf("wire = %+v, want name A slug a", wire)
 	}
 }
 
@@ -520,12 +520,13 @@ func TestDeviceWriteToWire(t *testing.T) {
 	dt := 2
 	serial := "SN"
 	in := domain.DeviceWrite{Name: "A", DeviceType: &dt, Serial: &serial}
-	w := deviceWriteToWire(in)
-	if w.Name != "A" || w.DeviceType == nil || *w.DeviceType != 2 || w.Serial == nil || *w.Serial != "SN" {
-		t.Errorf("wire = %+v, want name A device_type 2 serial SN", w)
+	wire := deviceWriteToWire(in)
+	if wire.Name != "A" || wire.DeviceType == nil || *wire.DeviceType != 2 || wire.Serial == nil || *wire.Serial != "SN" {
+		t.Errorf("wire = %+v, want name A device_type 2 serial SN", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateIPAddress(t *testing.T) {
 	t.Parallel()
 
@@ -533,21 +534,25 @@ func TestClient_CreateIPAddress(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"address":"192.168.1.1/24","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"address":"192.168.1.1/24","created":"2024-01-01","last_updated":"2024-01-01T0` +
+				`0:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		vrf := 2
-		ip, err := client.CreateIPAddress(context.Background(), "tok", domain.IPAddressWrite{Address: "192.168.1.1/24", VRF: &vrf})
+		ipAddress, err := client.CreateIPAddress(context.Background(), "tok", domain.IPAddressWrite{
+			Address: "192.168.1.1/24",
+			VRF:     &vrf,
+		})
 		if err != nil {
 			t.Fatalf("CreateIPAddress() returned error: %v", err)
 		}
@@ -571,18 +576,18 @@ func TestClient_CreateIPAddress(t *testing.T) {
 		if reqBody["vrf"] != float64(2) {
 			t.Errorf("request body = %s, want vrf 2", gotBody)
 		}
-		if ip.ID != 1 || ip.Address != "192.168.1.1/24" {
-			t.Errorf("ip = %+v, want id 1 address 192.168.1.1/24", ip)
+		if ipAddress.ID != 1 || ipAddress.Address != "192.168.1.1/24" {
+			t.Errorf("ipAddress = %+v, want id 1 address 192.168.1.1/24", ipAddress)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"address":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -591,22 +596,22 @@ func TestClient_CreateIPAddress(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -615,9 +620,8 @@ func TestClient_CreateIPAddress(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -629,19 +633,19 @@ func TestClient_UpdateIPAddress(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"address":"10.0.0.1/32","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"address":"10.0.0.1/32","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "updated"
-		ip, err := client.UpdateIPAddress(context.Background(), "tok", 7, domain.IPAddressWrite{Description: &desc})
+		ipAddress, err := client.UpdateIPAddress(context.Background(), "tok", 7, domain.IPAddressWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateIPAddress() returned error: %v", err)
 		}
@@ -651,8 +655,8 @@ func TestClient_UpdateIPAddress(t *testing.T) {
 		if gotPath != "/api/ipam/ip-addresses/7/" {
 			t.Errorf("path = %q, want /api/ipam/ip-addresses/7/", gotPath)
 		}
-		if ip.ID != 7 {
-			t.Errorf("ip = %+v, want id 7", ip)
+		if ipAddress.ID != 7 {
+			t.Errorf("ipAddress = %+v, want id 7", ipAddress)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -667,20 +671,20 @@ func TestClient_UpdateIPAddress(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"dns_name":["Enter a valid hostname."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateIPAddress(context.Background(), "tok", 7, domain.IPAddressWrite{Address: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -691,10 +695,10 @@ func TestClient_DeleteIPAddress(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -713,27 +717,27 @@ func TestClient_DeleteIPAddress(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteIPAddress(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -750,12 +754,13 @@ func TestIPAddressWriteToWire(t *testing.T) {
 	vrf := 2
 	dns := "host.example.com"
 	in := domain.IPAddressWrite{Address: "10.0.0.1/32", VRF: &vrf, DNSName: &dns}
-	w := ipAddressWriteToWire(in)
-	if w.Address != "10.0.0.1/32" || w.VRF == nil || *w.VRF != 2 || w.DNSName == nil || *w.DNSName != dns {
-		t.Errorf("wire = %+v, want address 10.0.0.1/32 vrf 2 dns %s", w, dns)
+	wire := ipAddressWriteToWire(in)
+	if wire.Address != "10.0.0.1/32" || wire.VRF == nil || *wire.VRF != 2 || wire.DNSName == nil || *wire.DNSName != dns {
+		t.Errorf("wire = %+v, want address 10.0.0.1/32 vrf 2 dns %s", wire, dns)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreatePrefix(t *testing.T) {
 	t.Parallel()
 
@@ -763,21 +768,25 @@ func TestClient_CreatePrefix(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"prefix":"10.0.0.0/24","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"prefix":"10.0.0.0/24","created":"2024-01-01","last_updated":"2024-01-01T00:00` +
+				`:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		site := 2
-		prefix, err := client.CreatePrefix(context.Background(), "tok", domain.PrefixWrite{Prefix: "10.0.0.0/24", Site: &site})
+		prefix, err := client.CreatePrefix(context.Background(), "tok", domain.PrefixWrite{
+			Prefix: "10.0.0.0/24",
+			Site:   &site,
+		})
 		if err != nil {
 			t.Fatalf("CreatePrefix() returned error: %v", err)
 		}
@@ -809,10 +818,10 @@ func TestClient_CreatePrefix(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"prefix":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -821,15 +830,15 @@ func TestClient_CreatePrefix(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -841,13 +850,13 @@ func TestClient_UpdatePrefix(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"prefix":"10.0.0.0/24","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"prefix":"10.0.0.0/24","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
@@ -879,20 +888,20 @@ func TestClient_UpdatePrefix(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"status":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdatePrefix(context.Background(), "tok", 7, domain.PrefixWrite{Prefix: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -903,10 +912,10 @@ func TestClient_DeletePrefix(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -925,20 +934,20 @@ func TestClient_DeletePrefix(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeletePrefix(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -949,12 +958,13 @@ func TestPrefixWriteToWire(t *testing.T) {
 	site := 2
 	pool := true
 	in := domain.PrefixWrite{Prefix: "10.0.0.0/24", Site: &site, IsPool: &pool}
-	w := prefixWriteToWire(in)
-	if w.Prefix != "10.0.0.0/24" || w.Site == nil || *w.Site != 2 || w.IsPool == nil || !*w.IsPool {
-		t.Errorf("wire = %+v, want prefix 10.0.0.0/24 site 2 is_pool true", w)
+	wire := prefixWriteToWire(in)
+	if wire.Prefix != "10.0.0.0/24" || wire.Site == nil || *wire.Site != 2 || wire.IsPool == nil || !*wire.IsPool {
+		t.Errorf("wire = %+v, want prefix 10.0.0.0/24 site 2 is_pool true", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateVLAN(t *testing.T) {
 	t.Parallel()
 
@@ -962,15 +972,16 @@ func TestClient_CreateVLAN(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"vid":100,"name":"mgmt","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"vid":100,"name":"mgmt","created":"2024-01-01","last_updated":"2024-01-01T00:0` +
+				`0:00Z"}`))
 		}))
 		defer srv.Close()
 
@@ -1011,10 +1022,10 @@ func TestClient_CreateVLAN(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -1023,15 +1034,15 @@ func TestClient_CreateVLAN(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1043,13 +1054,13 @@ func TestClient_UpdateVLAN(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"vid":200,"name":"Renamed","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"vid":200,"name":"Renamed","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
@@ -1081,20 +1092,20 @@ func TestClient_UpdateVLAN(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"status":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateVLAN(context.Background(), "tok", 7, domain.VLANWrite{Name: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1105,10 +1116,10 @@ func TestClient_DeleteVLAN(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -1127,20 +1138,20 @@ func TestClient_DeleteVLAN(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteVLAN(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1150,12 +1161,14 @@ func TestVLANWriteToWire(t *testing.T) {
 
 	site := 2
 	in := domain.VLANWrite{VID: 100, Name: "mgmt", Site: &site}
-	w := vlanWriteToWire(in)
-	if w.VID != 100 || w.Name != "mgmt" || w.Site == nil || *w.Site != 2 {
-		t.Errorf("wire = %+v, want vid 100 name mgmt site 2", w)
+	wire := vlanWriteToWire(in)
+
+	if wire.VID != 100 || wire.Name != "mgmt" || wire.Site == nil || *wire.Site != 2 {
+		t.Errorf("wire = %+v, want vid 100 name mgmt site 2", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateVirtualMachine(t *testing.T) {
 	t.Parallel()
 
@@ -1163,21 +1176,24 @@ func TestClient_CreateVirtualMachine(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"web-01","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"web-01","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		cluster := 2
-		vm, err := client.CreateVirtualMachine(context.Background(), "tok", domain.VirtualMachineWrite{Name: "web-01", Cluster: &cluster})
+		virtualMachine, err := client.CreateVirtualMachine(context.Background(), "tok", domain.VirtualMachineWrite{
+			Name:    "web-01",
+			Cluster: &cluster,
+		})
 		if err != nil {
 			t.Fatalf("CreateVirtualMachine() returned error: %v", err)
 		}
@@ -1201,18 +1217,18 @@ func TestClient_CreateVirtualMachine(t *testing.T) {
 		if reqBody["cluster"] != float64(2) {
 			t.Errorf("request body = %s, want cluster 2", gotBody)
 		}
-		if vm.ID != 1 || vm.Name != "web-01" {
-			t.Errorf("vm = %+v, want id 1 name web-01", vm)
+		if virtualMachine.ID != 1 || virtualMachine.Name != "web-01" {
+			t.Errorf("virtualMachine = %+v, want id 1 name web-01", virtualMachine)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -1221,19 +1237,20 @@ func TestClient_CreateVirtualMachine(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
 
+//nolint:funlen // table-driven test; splitting is not sensible.
 func TestClient_UpdateVirtualMachine(t *testing.T) {
 	t.Parallel()
 
@@ -1241,19 +1258,21 @@ func TestClient_UpdateVirtualMachine(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"Renamed","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"Renamed","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		mem := 8192
-		vm, err := client.UpdateVirtualMachine(context.Background(), "tok", 7, domain.VirtualMachineWrite{Memory: &mem})
+		virtualMachine, err := client.UpdateVirtualMachine(context.Background(), "tok", 7, domain.VirtualMachineWrite{
+			Memory: &mem,
+		})
 		if err != nil {
 			t.Fatalf("UpdateVirtualMachine() returned error: %v", err)
 		}
@@ -1263,8 +1282,8 @@ func TestClient_UpdateVirtualMachine(t *testing.T) {
 		if gotPath != "/api/virtualization/virtual-machines/7/" {
 			t.Errorf("path = %q, want /api/virtualization/virtual-machines/7/", gotPath)
 		}
-		if vm.ID != 7 {
-			t.Errorf("vm = %+v, want id 7", vm)
+		if virtualMachine.ID != 7 {
+			t.Errorf("virtualMachine = %+v, want id 7", virtualMachine)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -1279,20 +1298,20 @@ func TestClient_UpdateVirtualMachine(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"status":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateVirtualMachine(context.Background(), "tok", 7, domain.VirtualMachineWrite{Name: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1303,10 +1322,10 @@ func TestClient_DeleteVirtualMachine(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -1325,20 +1344,20 @@ func TestClient_DeleteVirtualMachine(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteVirtualMachine(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1348,12 +1367,14 @@ func TestVirtualMachineWriteToWire(t *testing.T) {
 
 	cluster := 2
 	in := domain.VirtualMachineWrite{Name: "web-01", Cluster: &cluster}
-	w := virtualMachineWriteToWire(in)
-	if w.Name != "web-01" || w.Cluster == nil || *w.Cluster != 2 {
-		t.Errorf("wire = %+v, want name web-01 cluster 2", w)
+
+	wire := virtualMachineWriteToWire(in)
+	if wire.Name != "web-01" || wire.Cluster == nil || *wire.Cluster != 2 {
+		t.Errorf("wire = %+v, want name web-01 cluster 2", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateCluster(t *testing.T) {
 	t.Parallel()
 
@@ -1361,21 +1382,24 @@ func TestClient_CreateCluster(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"prod","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"prod","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		ct := 5
-		cluster, err := client.CreateCluster(context.Background(), "tok", domain.ClusterWrite{Name: "prod", ClusterType: &ct})
+		circuitTermination := 5
+		cluster, err := client.CreateCluster(context.Background(), "tok", domain.ClusterWrite{
+			Name:        "prod",
+			ClusterType: &circuitTermination,
+		})
 		if err != nil {
 			t.Fatalf("CreateCluster() returned error: %v", err)
 		}
@@ -1407,10 +1431,10 @@ func TestClient_CreateCluster(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -1419,15 +1443,15 @@ func TestClient_CreateCluster(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1439,13 +1463,13 @@ func TestClient_UpdateCluster(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"Renamed","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"Renamed","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
@@ -1477,20 +1501,20 @@ func TestClient_UpdateCluster(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"type":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateCluster(context.Background(), "tok", 7, domain.ClusterWrite{Name: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1501,10 +1525,10 @@ func TestClient_DeleteCluster(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -1523,20 +1547,20 @@ func TestClient_DeleteCluster(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteCluster(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1544,14 +1568,16 @@ func TestClient_DeleteCluster(t *testing.T) {
 func TestClusterWriteToWire(t *testing.T) {
 	t.Parallel()
 
-	ct := 5
-	in := domain.ClusterWrite{Name: "prod", ClusterType: &ct}
-	w := clusterWriteToWire(in)
-	if w.Name != "prod" || w.ClusterType == nil || *w.ClusterType != 5 {
-		t.Errorf("wire = %+v, want name prod type 5", w)
+	circuitTermination := 5
+
+	in := domain.ClusterWrite{Name: "prod", ClusterType: &circuitTermination}
+	wire := clusterWriteToWire(in)
+	if wire.Name != "prod" || wire.ClusterType == nil || *wire.ClusterType != 5 {
+		t.Errorf("wire = %+v, want name prod type 5", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateCircuit(t *testing.T) {
 	t.Parallel()
 
@@ -1559,22 +1585,26 @@ func TestClient_CreateCircuit(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"cid":"CIR-001","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"cid":"CIR-001","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		prov := 2
-		ct := 3
-		circuit, err := client.CreateCircuit(context.Background(), "tok", domain.CircuitWrite{CID: "CIR-001", Provider: &prov, CircuitType: &ct})
+		circuitTermination := 3
+		circuit, err := client.CreateCircuit(context.Background(), "tok", domain.CircuitWrite{
+			CID:         "CIR-001",
+			Provider:    &prov,
+			CircuitType: &circuitTermination,
+		})
 		if err != nil {
 			t.Fatalf("CreateCircuit() returned error: %v", err)
 		}
@@ -1609,10 +1639,10 @@ func TestClient_CreateCircuit(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"cid":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -1621,15 +1651,15 @@ func TestClient_CreateCircuit(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1641,13 +1671,13 @@ func TestClient_UpdateCircuit(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"cid":"Renamed","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"cid":"Renamed","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
@@ -1679,20 +1709,20 @@ func TestClient_UpdateCircuit(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"provider":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateCircuit(context.Background(), "tok", 7, domain.CircuitWrite{CID: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1703,10 +1733,10 @@ func TestClient_DeleteCircuit(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -1725,20 +1755,20 @@ func TestClient_DeleteCircuit(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteCircuit(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -1747,11 +1777,15 @@ func TestCircuitWriteToWire(t *testing.T) {
 	t.Parallel()
 
 	prov := 2
-	ct := 3
-	in := domain.CircuitWrite{CID: "CIR-001", Provider: &prov, CircuitType: &ct}
-	w := circuitWriteToWire(in)
-	if w.CID != "CIR-001" || w.Provider == nil || *w.Provider != 2 || w.CircuitType == nil || *w.CircuitType != 3 {
-		t.Errorf("wire = %+v, want cid CIR-001 provider 2 circuit_type 3", w)
+	circuitTermination := 3
+	in := domain.CircuitWrite{CID: "CIR-001", Provider: &prov, CircuitType: &circuitTermination}
+	wire := circuitWriteToWire(in)
+	if wire.CID != "CIR-001" ||
+		wire.Provider == nil ||
+		*wire.Provider != 2 ||
+		wire.CircuitType == nil ||
+		*wire.CircuitType != 3 {
+		t.Errorf("wire = %+v, want cid CIR-001 provider 2 circuit_type 3", wire)
 	}
 }
 
@@ -1761,11 +1795,12 @@ func unmarshalableCustomFields() map[string]any {
 	return map[string]any{"bad": make(chan int)}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_WriteMarshalErrors(t *testing.T) {
 	t.Parallel()
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
+	srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.WriteHeader(http.StatusInternalServerError)
 	}))
 	defer srv.Close()
 
@@ -1837,6 +1872,7 @@ func TestClient_WriteMarshalErrors(t *testing.T) {
 	}
 
 	badCT := domain.CircuitTerminationWrite{TermSide: "A", CustomFields: unmarshalableCustomFields()}
+
 	if _, err := client.CreateCircuitTermination(ctx, "tok", badCT); err == nil {
 		t.Error("CreateCircuitTermination: expected marshal error, got nil")
 	}
@@ -1845,7 +1881,7 @@ func TestClient_WriteMarshalErrors(t *testing.T) {
 	}
 }
 
-//nolint:gocognit // exhaustive per-path write test
+//nolint:gocognit,funlen // exhaustive per-path write test; splitting is not sensible.
 func TestClient_CreateCircuitTermination(t *testing.T) {
 	t.Parallel()
 
@@ -1853,22 +1889,28 @@ func TestClient_CreateCircuitTermination(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"term_side":"A","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"term_side":"A","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		circ := 2
 		site := 3
-		ct, err := client.CreateCircuitTermination(context.Background(), "tok", domain.CircuitTerminationWrite{TermSide: "A", Circuit: &circ, Site: &site})
+		circuitTermination, err := client.CreateCircuitTermination(
+			context.Background(), "tok", domain.CircuitTerminationWrite{
+				TermSide: "A",
+				Circuit:  &circ,
+				Site:     &site,
+			},
+		)
 		if err != nil {
 			t.Fatalf("CreateCircuitTermination() returned error: %v", err)
 		}
@@ -1898,18 +1940,18 @@ func TestClient_CreateCircuitTermination(t *testing.T) {
 		if reqBody["termination_id"] != float64(3) {
 			t.Errorf("request body = %s, want termination_id 3", gotBody)
 		}
-		if ct.ID != 1 || ct.TermSide != "A" {
-			t.Errorf("ct = %+v, want id 1 term_side A", ct)
+		if circuitTermination.ID != 1 || circuitTermination.TermSide != "A" {
+			t.Errorf("circuitTermination = %+v, want id 1 term_side A", circuitTermination)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"term_side":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -1918,22 +1960,22 @@ func TestClient_CreateCircuitTermination(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -1942,13 +1984,13 @@ func TestClient_CreateCircuitTermination(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
 
+//nolint:funlen // table-driven test; splitting is not sensible.
 func TestClient_UpdateCircuitTermination(t *testing.T) {
 	t.Parallel()
 
@@ -1956,19 +1998,23 @@ func TestClient_UpdateCircuitTermination(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"term_side":"A","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"term_side":"A","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		speed := 1000000
-		ct, err := client.UpdateCircuitTermination(context.Background(), "tok", 7, domain.CircuitTerminationWrite{Speed: &speed})
+		circuitTermination, err := client.UpdateCircuitTermination(
+			context.Background(), "tok", 7, domain.CircuitTerminationWrite{
+				Speed: &speed,
+			},
+		)
 		if err != nil {
 			t.Fatalf("UpdateCircuitTermination() returned error: %v", err)
 		}
@@ -1978,8 +2024,8 @@ func TestClient_UpdateCircuitTermination(t *testing.T) {
 		if gotPath != "/api/circuits/circuit-terminations/7/" {
 			t.Errorf("path = %q, want /api/circuits/circuit-terminations/7/", gotPath)
 		}
-		if ct.ID != 7 {
-			t.Errorf("ct = %+v, want id 7", ct)
+		if circuitTermination.ID != 7 {
+			t.Errorf("circuitTermination = %+v, want id 7", circuitTermination)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -1994,20 +2040,22 @@ func TestClient_UpdateCircuitTermination(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"site":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		_, err := client.UpdateCircuitTermination(context.Background(), "tok", 7, domain.CircuitTerminationWrite{TermSide: "A"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		_, err := client.UpdateCircuitTermination(context.Background(), "tok", 7, domain.CircuitTerminationWrite{
+			TermSide: "A",
+		})
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -2018,10 +2066,10 @@ func TestClient_DeleteCircuitTermination(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -2040,27 +2088,27 @@ func TestClient_DeleteCircuitTermination(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteCircuitTermination(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -2078,9 +2126,16 @@ func TestCircuitTerminationWriteToWire(t *testing.T) {
 	site := 3
 	speed := 1000000
 	in := domain.CircuitTerminationWrite{TermSide: "A", Circuit: &circ, Site: &site, Speed: &speed}
-	w := circuitTerminationWriteToWire(in)
-	if w.TermSide != "A" || w.Circuit == nil || *w.Circuit != 2 || w.TerminationType != "dcim.site" || w.TerminationID == nil || *w.TerminationID != 3 || w.Speed == nil || *w.Speed != 1000000 {
-		t.Errorf("wire = %+v, want term_side A circuit 2 termination dcim.site 3 speed 1000000", w)
+	wire := circuitTerminationWriteToWire(in)
+	if wire.TermSide != "A" ||
+		wire.Circuit == nil ||
+		*wire.Circuit != 2 ||
+		wire.TerminationType != "dcim.site" ||
+		wire.TerminationID == nil ||
+		*wire.TerminationID != 3 ||
+		wire.Speed == nil ||
+		*wire.Speed != 1000000 {
+		t.Errorf("wire = %+v, want term_side A circuit 2 termination dcim.site 3 speed 1000000", wire)
 	}
 }
 
@@ -2092,18 +2147,19 @@ func TestCableWriteToWire(t *testing.T) {
 	label := "link-01"
 	length := 10.5
 	in := domain.CableWrite{TerminationA: ta, TerminationB: tb, Label: &label, Length: &length}
-	w := cableWriteToWire(in)
-	if w.TerminationA == nil || w.TerminationA.ObjectType != "dcim.interface" || w.TerminationA.ObjectID != 101 {
-		t.Errorf("TerminationA = %+v, want dcim.interface 101", w.TerminationA)
+	wire := cableWriteToWire(in)
+	if wire.TerminationA == nil || wire.TerminationA.ObjectType != "dcim.interface" || wire.TerminationA.ObjectID != 101 {
+		t.Errorf("TerminationA = %+v, want dcim.interface 101", wire.TerminationA)
 	}
-	if w.TerminationB == nil || w.TerminationB.ObjectID != 102 {
-		t.Errorf("TerminationB = %+v, want object_id 102", w.TerminationB)
+	if wire.TerminationB == nil || wire.TerminationB.ObjectID != 102 {
+		t.Errorf("TerminationB = %+v, want object_id 102", wire.TerminationB)
 	}
-	if w.Label == nil || *w.Label != "link-01" || w.Length == nil || *w.Length != 10.5 {
-		t.Errorf("wire = %+v, want label link-01 length 10.5", w)
+	if wire.Label == nil || *wire.Label != "link-01" || wire.Length == nil || *wire.Length != 10.5 {
+		t.Errorf("wire = %+v, want label link-01 length 10.5", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateCable(t *testing.T) {
 	t.Parallel()
 
@@ -2111,15 +2167,16 @@ func TestClient_CreateCable(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"label":"link-01","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"label":"link-01","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"` +
+				`}`))
 		}))
 		defer srv.Close()
 
@@ -2127,7 +2184,11 @@ func TestClient_CreateCable(t *testing.T) {
 		ta := &domain.CableTerminationWrite{ObjectType: "dcim.interface", ObjectID: 101}
 		tb := &domain.CableTerminationWrite{ObjectType: "dcim.interface", ObjectID: 102}
 		label := "link-01"
-		c, err := client.CreateCable(context.Background(), "tok", domain.CableWrite{TerminationA: ta, TerminationB: tb, Label: &label})
+		cable, err := client.CreateCable(context.Background(), "tok", domain.CableWrite{
+			TerminationA: ta,
+			TerminationB: tb,
+			Label:        &label,
+		})
 		if err != nil {
 			t.Fatalf("CreateCable() returned error: %v", err)
 		}
@@ -2149,18 +2210,18 @@ func TestClient_CreateCable(t *testing.T) {
 		if !ok || taMap["object_id"] != float64(101) {
 			t.Errorf("request body = %s, want termination_a object_id 101", gotBody)
 		}
-		if c.ID != 1 || c.Label != "link-01" {
-			t.Errorf("c = %+v, want id 1 label link-01", c)
+		if cable.ID != 1 || cable.Label != "link-01" {
+			t.Errorf("cable = %+v, want id 1 label link-01", cable)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"termination_a":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -2169,22 +2230,22 @@ func TestClient_CreateCable(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -2193,9 +2254,8 @@ func TestClient_CreateCable(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -2207,19 +2267,19 @@ func TestClient_UpdateCable(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"label":"link-02","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"label":"link-02","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		label := "link-02"
-		c, err := client.UpdateCable(context.Background(), "tok", 7, domain.CableWrite{Label: &label})
+		cable, err := client.UpdateCable(context.Background(), "tok", 7, domain.CableWrite{Label: &label})
 		if err != nil {
 			t.Fatalf("UpdateCable() returned error: %v", err)
 		}
@@ -2229,8 +2289,8 @@ func TestClient_UpdateCable(t *testing.T) {
 		if gotPath != "/api/dcim/cables/7/" {
 			t.Errorf("path = %q, want /api/dcim/cables/7/", gotPath)
 		}
-		if c.ID != 7 {
-			t.Errorf("c = %+v, want id 7", c)
+		if cable.ID != 7 {
+			t.Errorf("cable = %+v, want id 7", cable)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -2245,20 +2305,20 @@ func TestClient_UpdateCable(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"status":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateCable(context.Background(), "tok", 7, domain.CableWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -2269,10 +2329,10 @@ func TestClient_DeleteCable(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -2291,20 +2351,20 @@ func TestClient_DeleteCable(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteCable(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -2312,15 +2372,20 @@ func TestClient_DeleteCable(t *testing.T) {
 func TestVMInterfaceWriteToWire(t *testing.T) {
 	t.Parallel()
 
-	vm := 5
+	virtualMachine := 5
 	mtu := 1500
-	in := domain.VMInterfaceWrite{Name: "eth0", VirtualMachine: &vm, MTU: &mtu}
-	w := vmInterfaceWriteToWire(in)
-	if w.Name != "eth0" || w.VirtualMachine == nil || *w.VirtualMachine != 5 || w.MTU == nil || *w.MTU != 1500 {
-		t.Errorf("wire = %+v, want name eth0 virtual_machine 5 mtu 1500", w)
+	in := domain.VMInterfaceWrite{Name: "eth0", VirtualMachine: &virtualMachine, MTU: &mtu}
+	wire := vmInterfaceWriteToWire(in)
+	if wire.Name != "eth0" ||
+		wire.VirtualMachine == nil ||
+		*wire.VirtualMachine != 5 ||
+		wire.MTU == nil ||
+		*wire.MTU != 1500 {
+		t.Errorf("wire = %+v, want name eth0 virtual_machine 5 mtu 1500", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateVMInterface(t *testing.T) {
 	t.Parallel()
 
@@ -2328,21 +2393,24 @@ func TestClient_CreateVMInterface(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"eth0","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"eth0","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		vm := 5
-		vi, err := client.CreateVMInterface(context.Background(), "tok", domain.VMInterfaceWrite{Name: "eth0", VirtualMachine: &vm})
+		virtualMachine := 5
+		vmInterface, err := client.CreateVMInterface(context.Background(), "tok", domain.VMInterfaceWrite{
+			Name:           "eth0",
+			VirtualMachine: &virtualMachine,
+		})
 		if err != nil {
 			t.Fatalf("CreateVMInterface() returned error: %v", err)
 		}
@@ -2363,18 +2431,18 @@ func TestClient_CreateVMInterface(t *testing.T) {
 		if reqBody["name"] != "eth0" || reqBody["virtual_machine"] != float64(5) {
 			t.Errorf("request body = %s, want name eth0 virtual_machine 5", gotBody)
 		}
-		if vi.ID != 1 || vi.Name != "eth0" {
-			t.Errorf("vi = %+v, want id 1 name eth0", vi)
+		if vmInterface.ID != 1 || vmInterface.Name != "eth0" {
+			t.Errorf("vmInterface = %+v, want id 1 name eth0", vmInterface)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -2383,22 +2451,22 @@ func TestClient_CreateVMInterface(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -2407,9 +2475,8 @@ func TestClient_CreateVMInterface(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -2421,19 +2488,19 @@ func TestClient_UpdateVMInterface(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"eth1","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"eth1","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		mtu := 9000
-		vi, err := client.UpdateVMInterface(context.Background(), "tok", 7, domain.VMInterfaceWrite{MTU: &mtu})
+		vmInterface, err := client.UpdateVMInterface(context.Background(), "tok", 7, domain.VMInterfaceWrite{MTU: &mtu})
 		if err != nil {
 			t.Fatalf("UpdateVMInterface() returned error: %v", err)
 		}
@@ -2443,8 +2510,8 @@ func TestClient_UpdateVMInterface(t *testing.T) {
 		if gotPath != "/api/virtualization/interfaces/7/" {
 			t.Errorf("path = %q, want /api/virtualization/interfaces/7/", gotPath)
 		}
-		if vi.ID != 7 {
-			t.Errorf("vi = %+v, want id 7", vi)
+		if vmInterface.ID != 7 {
+			t.Errorf("vmInterface = %+v, want id 7", vmInterface)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -2459,20 +2526,20 @@ func TestClient_UpdateVMInterface(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"mac_address":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateVMInterface(context.Background(), "tok", 7, domain.VMInterfaceWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -2483,10 +2550,10 @@ func TestClient_DeleteVMInterface(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -2505,20 +2572,20 @@ func TestClient_DeleteVMInterface(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteVMInterface(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -2528,9 +2595,9 @@ func TestProviderWriteToWire(t *testing.T) {
 
 	asn := 64512
 	in := domain.ProviderWrite{Name: "ACME", Asn: &asn}
-	w := providerWriteToWire(in)
-	if w.Name != "ACME" || w.Asn == nil || *w.Asn != 64512 {
-		t.Errorf("wire = %+v, want name ACME asn 64512", w)
+	wire := providerWriteToWire(in)
+	if wire.Name != "ACME" || wire.Asn == nil || *wire.Asn != 64512 {
+		t.Errorf("wire = %+v, want name ACME asn 64512", wire)
 	}
 }
 
@@ -2563,9 +2630,9 @@ func TestDeviceTypeWriteToWire(t *testing.T) {
 
 	mf := 3
 	in := domain.DeviceTypeWrite{Manufacturer: &mf, Model: "C9300"}
-	w := deviceTypeWriteToWire(in)
-	if w.Model != "C9300" || w.Manufacturer == nil || *w.Manufacturer != 3 {
-		t.Errorf("wire = %+v, want model C9300 manufacturer 3", w)
+	wire := deviceTypeWriteToWire(in)
+	if wire.Model != "C9300" || wire.Manufacturer == nil || *wire.Manufacturer != 3 {
+		t.Errorf("wire = %+v, want model C9300 manufacturer 3", wire)
 	}
 }
 
@@ -2574,9 +2641,9 @@ func TestManufacturerWriteToWire(t *testing.T) {
 
 	slug := "cisco"
 	in := domain.ManufacturerWrite{Name: "Cisco", Slug: &slug}
-	w := manufacturerWriteToWire(in)
-	if w.Name != "Cisco" || w.Slug == nil || *w.Slug != "cisco" {
-		t.Errorf("wire = %+v, want name Cisco slug cisco", w)
+	wire := manufacturerWriteToWire(in)
+	if wire.Name != "Cisco" || wire.Slug == nil || *wire.Slug != "cisco" {
+		t.Errorf("wire = %+v, want name Cisco slug cisco", wire)
 	}
 }
 
@@ -2585,12 +2652,13 @@ func TestTenantWriteToWire(t *testing.T) {
 
 	slug := "acme"
 	in := domain.TenantWrite{Name: "ACME", Slug: &slug}
-	w := tenantWriteToWire(in)
-	if w.Name != "ACME" || w.Slug == nil || *w.Slug != "acme" {
-		t.Errorf("wire = %+v, want name ACME slug acme", w)
+	wire := tenantWriteToWire(in)
+	if wire.Name != "ACME" || wire.Slug == nil || *wire.Slug != "acme" {
+		t.Errorf("wire = %+v, want name ACME slug acme", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateProvider(t *testing.T) {
 	t.Parallel()
 
@@ -2598,20 +2666,20 @@ func TestClient_CreateProvider(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"ACME","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"ACME","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateProvider(context.Background(), "tok", domain.ProviderWrite{Name: "ACME"})
+		result, err := client.CreateProvider(context.Background(), "tok", domain.ProviderWrite{Name: "ACME"})
 		if err != nil {
 			t.Fatalf("CreateProvider() returned error: %v", err)
 		}
@@ -2632,18 +2700,18 @@ func TestClient_CreateProvider(t *testing.T) {
 		if reqBody["name"] != "ACME" {
 			t.Errorf("request body = %s, want name ACME", gotBody)
 		}
-		if p.ID != 1 || p.Name != "ACME" {
-			t.Errorf("p = %+v, want id 1 name ACME", p)
+		if result.ID != 1 || result.Name != "ACME" {
+			t.Errorf("result = %+v, want id 1 name ACME", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -2652,22 +2720,22 @@ func TestClient_CreateProvider(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -2676,9 +2744,8 @@ func TestClient_CreateProvider(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -2690,19 +2757,19 @@ func TestClient_UpdateProvider(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"ACME2","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"ACME2","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		asn := 64513
-		p, err := client.UpdateProvider(context.Background(), "tok", 7, domain.ProviderWrite{Asn: &asn})
+		result, err := client.UpdateProvider(context.Background(), "tok", 7, domain.ProviderWrite{Asn: &asn})
 		if err != nil {
 			t.Fatalf("UpdateProvider() returned error: %v", err)
 		}
@@ -2712,8 +2779,8 @@ func TestClient_UpdateProvider(t *testing.T) {
 		if gotPath != "/api/circuits/providers/7/" {
 			t.Errorf("path = %q, want /api/circuits/providers/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -2728,20 +2795,20 @@ func TestClient_UpdateProvider(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateProvider(context.Background(), "tok", 7, domain.ProviderWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -2752,10 +2819,10 @@ func TestClient_DeleteProvider(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -2774,24 +2841,25 @@ func TestClient_DeleteProvider(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteProvider(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateTenant(t *testing.T) {
 	t.Parallel()
 
@@ -2799,20 +2867,20 @@ func TestClient_CreateTenant(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"ACME","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"ACME","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateTenant(context.Background(), "tok", domain.TenantWrite{Name: "ACME"})
+		result, err := client.CreateTenant(context.Background(), "tok", domain.TenantWrite{Name: "ACME"})
 		if err != nil {
 			t.Fatalf("CreateTenant() returned error: %v", err)
 		}
@@ -2833,18 +2901,18 @@ func TestClient_CreateTenant(t *testing.T) {
 		if reqBody["name"] != "ACME" {
 			t.Errorf("request body = %s, want name ACME", gotBody)
 		}
-		if p.ID != 1 || p.Name != "ACME" {
-			t.Errorf("p = %+v, want id 1 name ACME", p)
+		if result.ID != 1 || result.Name != "ACME" {
+			t.Errorf("result = %+v, want id 1 name ACME", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -2853,22 +2921,22 @@ func TestClient_CreateTenant(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -2877,9 +2945,8 @@ func TestClient_CreateTenant(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -2891,19 +2958,19 @@ func TestClient_UpdateTenant(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"ACME2","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"ACME2","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "new desc"
-		p, err := client.UpdateTenant(context.Background(), "tok", 7, domain.TenantWrite{Description: &desc})
+		result, err := client.UpdateTenant(context.Background(), "tok", 7, domain.TenantWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateTenant() returned error: %v", err)
 		}
@@ -2913,8 +2980,8 @@ func TestClient_UpdateTenant(t *testing.T) {
 		if gotPath != "/api/tenancy/tenants/7/" {
 			t.Errorf("path = %q, want /api/tenancy/tenants/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -2929,20 +2996,20 @@ func TestClient_UpdateTenant(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateTenant(context.Background(), "tok", 7, domain.TenantWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -2953,10 +3020,10 @@ func TestClient_DeleteTenant(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -2975,24 +3042,26 @@ func TestClient_DeleteTenant(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
+
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteTenant(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateManufacturer(t *testing.T) {
 	t.Parallel()
 
@@ -3000,20 +3069,20 @@ func TestClient_CreateManufacturer(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"Cisco","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"Cisco","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateManufacturer(context.Background(), "tok", domain.ManufacturerWrite{Name: "Cisco"})
+		result, err := client.CreateManufacturer(context.Background(), "tok", domain.ManufacturerWrite{Name: "Cisco"})
 		if err != nil {
 			t.Fatalf("CreateManufacturer() returned error: %v", err)
 		}
@@ -3034,18 +3103,18 @@ func TestClient_CreateManufacturer(t *testing.T) {
 		if reqBody["name"] != "Cisco" {
 			t.Errorf("request body = %s, want name Cisco", gotBody)
 		}
-		if p.ID != 1 || p.Name != "Cisco" {
-			t.Errorf("p = %+v, want id 1 name Cisco", p)
+		if result.ID != 1 || result.Name != "Cisco" {
+			t.Errorf("result = %+v, want id 1 name Cisco", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -3054,22 +3123,22 @@ func TestClient_CreateManufacturer(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -3078,9 +3147,8 @@ func TestClient_CreateManufacturer(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -3092,19 +3160,19 @@ func TestClient_UpdateManufacturer(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"Cisco2","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"Cisco2","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "new desc"
-		p, err := client.UpdateManufacturer(context.Background(), "tok", 7, domain.ManufacturerWrite{Description: &desc})
+		result, err := client.UpdateManufacturer(context.Background(), "tok", 7, domain.ManufacturerWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateManufacturer() returned error: %v", err)
 		}
@@ -3114,8 +3182,8 @@ func TestClient_UpdateManufacturer(t *testing.T) {
 		if gotPath != "/api/dcim/manufacturers/7/" {
 			t.Errorf("path = %q, want /api/dcim/manufacturers/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -3130,20 +3198,20 @@ func TestClient_UpdateManufacturer(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateManufacturer(context.Background(), "tok", 7, domain.ManufacturerWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -3154,10 +3222,10 @@ func TestClient_DeleteManufacturer(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -3176,24 +3244,25 @@ func TestClient_DeleteManufacturer(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteManufacturer(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateDeviceType(t *testing.T) {
 	t.Parallel()
 
@@ -3201,21 +3270,26 @@ func TestClient_CreateDeviceType(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"model":"C9300","manufacturer":{"id":3,"name":"Cisco"},"created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"model":"C9300",` +
+				`"manufacturer":{"id":3,"name":"Cisco"},` +
+				`"created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		mf := 3
-		p, err := client.CreateDeviceType(context.Background(), "tok", domain.DeviceTypeWrite{Manufacturer: &mf, Model: "C9300"})
+		result, err := client.CreateDeviceType(context.Background(), "tok", domain.DeviceTypeWrite{
+			Manufacturer: &mf,
+			Model:        "C9300",
+		})
 		if err != nil {
 			t.Fatalf("CreateDeviceType() returned error: %v", err)
 		}
@@ -3236,18 +3310,18 @@ func TestClient_CreateDeviceType(t *testing.T) {
 		if reqBody["model"] != "C9300" {
 			t.Errorf("request body = %s, want model C9300", gotBody)
 		}
-		if p.ID != 1 || p.Model != "C9300" || p.Manufacturer == nil || p.Manufacturer.ID != 3 {
-			t.Errorf("p = %+v, want id 1 model C9300 manufacturer 3", p)
+		if result.ID != 1 || result.Model != "C9300" || result.Manufacturer == nil || result.Manufacturer.ID != 3 {
+			t.Errorf("result = %+v, want id 1 model C9300 manufacturer 3", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"model":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -3256,34 +3330,36 @@ func TestClient_CreateDeviceType(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		mf := 3
-		_, err := client.CreateDeviceType(context.Background(), "tok", domain.DeviceTypeWrite{Manufacturer: &mf, Model: "C9300"})
+		_, err := client.CreateDeviceType(context.Background(), "tok", domain.DeviceTypeWrite{
+			Manufacturer: &mf,
+			Model:        "C9300",
+		})
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -3295,19 +3371,19 @@ func TestClient_UpdateDeviceType(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"model":"C9300-2","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"model":"C9300-2","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		part := "PN-1"
-		p, err := client.UpdateDeviceType(context.Background(), "tok", 7, domain.DeviceTypeWrite{PartNumber: &part})
+		result, err := client.UpdateDeviceType(context.Background(), "tok", 7, domain.DeviceTypeWrite{PartNumber: &part})
 		if err != nil {
 			t.Fatalf("UpdateDeviceType() returned error: %v", err)
 		}
@@ -3317,8 +3393,8 @@ func TestClient_UpdateDeviceType(t *testing.T) {
 		if gotPath != "/api/dcim/device-types/7/" {
 			t.Errorf("path = %q, want /api/dcim/device-types/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -3333,20 +3409,20 @@ func TestClient_UpdateDeviceType(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateDeviceType(context.Background(), "tok", 7, domain.DeviceTypeWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -3357,10 +3433,10 @@ func TestClient_DeleteDeviceType(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -3379,25 +3455,25 @@ func TestClient_DeleteDeviceType(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteDeviceType(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
 
-//nolint:gocognit // exhaustive per-path write test
+//nolint:gocognit,funlen // exhaustive per-path write test; splitting is not sensible.
 func TestClient_CreateInterface(t *testing.T) {
 	t.Parallel()
 
@@ -3405,22 +3481,26 @@ func TestClient_CreateInterface(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"eth0","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"eth0","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		dev := 5
 		typ := "1000base-t"
-		iface, err := client.CreateInterface(context.Background(), "tok", domain.InterfaceWrite{Name: "eth0", Device: &dev, Type: &typ})
+		iface, err := client.CreateInterface(context.Background(), "tok", domain.InterfaceWrite{
+			Name:   "eth0",
+			Device: &dev,
+			Type:   &typ,
+		})
 		if err != nil {
 			t.Fatalf("CreateInterface() returned error: %v", err)
 		}
@@ -3455,10 +3535,10 @@ func TestClient_CreateInterface(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -3467,22 +3547,22 @@ func TestClient_CreateInterface(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -3491,9 +3571,8 @@ func TestClient_CreateInterface(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -3505,13 +3584,13 @@ func TestClient_UpdateInterface(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"eth0","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"eth0","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
@@ -3543,20 +3622,20 @@ func TestClient_UpdateInterface(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"type":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateInterface(context.Background(), "tok", 7, domain.InterfaceWrite{Name: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -3567,10 +3646,10 @@ func TestClient_DeleteInterface(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -3589,27 +3668,27 @@ func TestClient_DeleteInterface(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteInterface(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -3627,12 +3706,19 @@ func TestInterfaceWriteToWire(t *testing.T) {
 	typ := "1000base-t"
 	enabled := true
 	in := domain.InterfaceWrite{Name: "eth0", Device: &dev, Type: &typ, Enabled: &enabled}
-	w := interfaceWriteToWire(in)
-	if w.Name != "eth0" || w.Device == nil || *w.Device != 5 || w.Type == nil || *w.Type != typ || w.Enabled == nil || !*w.Enabled {
-		t.Errorf("wire = %+v, want name eth0 device 5 type %s enabled true", w, typ)
+	wire := interfaceWriteToWire(in)
+	if wire.Name != "eth0" ||
+		wire.Device == nil ||
+		*wire.Device != 5 ||
+		wire.Type == nil ||
+		*wire.Type != typ ||
+		wire.Enabled == nil ||
+		!*wire.Enabled {
+		t.Errorf("wire = %+v, want name eth0 device 5 type %s enabled true", wire, typ)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateRack(t *testing.T) {
 	t.Parallel()
 
@@ -3640,15 +3726,15 @@ func TestClient_CreateRack(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"R1","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"R1","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
@@ -3686,10 +3772,10 @@ func TestClient_CreateRack(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -3698,22 +3784,22 @@ func TestClient_CreateRack(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -3722,9 +3808,8 @@ func TestClient_CreateRack(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -3736,13 +3821,13 @@ func TestClient_UpdateRack(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"R1","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"R1","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
@@ -3774,20 +3859,20 @@ func TestClient_UpdateRack(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"status":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateRack(context.Background(), "tok", 7, domain.RackWrite{Name: "X"})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -3798,10 +3883,10 @@ func TestClient_DeleteRack(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -3820,27 +3905,27 @@ func TestClient_DeleteRack(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteRack(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -3857,12 +3942,15 @@ func TestRackWriteToWire(t *testing.T) {
 	site := 2
 	status := "active"
 	in := domain.RackWrite{Name: "R1", Site: &site, Status: &status}
-	w := rackWriteToWire(in)
-	if w.Name != "R1" || w.Site == nil || *w.Site != 2 || w.Status == nil || *w.Status != "active" {
-		t.Errorf("wire = %+v, want name R1 site 2 status active", w)
+	wire := rackWriteToWire(in)
+	if wire.Name != "R1" || wire.Site == nil || *wire.Site != 2 || wire.Status == nil || *wire.Status != "active" {
+		t.Errorf("wire = %+v, want name R1 site 2 status active", wire)
 	}
 }
 
+//
+//go:fix inline
+//nolint:modernize // newexpr suggests new(s), which is wrong for non-zero literals.
 func ptrStr(s string) *string { return &s }
 
 func TestLocationWriteToWire(t *testing.T) {
@@ -3870,12 +3958,13 @@ func TestLocationWriteToWire(t *testing.T) {
 
 	site := 5
 	in := domain.LocationWrite{Name: "Row A", Site: &site}
-	w := locationWriteToWire(in)
-	if w.Name != "Row A" || w.Site == nil || *w.Site != 5 {
-		t.Errorf("wire = %+v, want name 'Row A' site 5", w)
+	wire := locationWriteToWire(in)
+	if wire.Name != "Row A" || wire.Site == nil || *wire.Site != 5 {
+		t.Errorf("wire = %+v, want name 'Row A' site 5", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateLocation(t *testing.T) {
 	t.Parallel()
 
@@ -3883,21 +3972,23 @@ func TestClient_CreateLocation(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"Row A","site":{"id":5,"name":"DC1"},"created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"Row A",` +
+				`"site":{"id":5,"name":"DC1"},` +
+				`"created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		site := 5
-		p, err := client.CreateLocation(context.Background(), "tok", domain.LocationWrite{Name: "Row A", Site: &site})
+		result, err := client.CreateLocation(context.Background(), "tok", domain.LocationWrite{Name: "Row A", Site: &site})
 		if err != nil {
 			t.Fatalf("CreateLocation() returned error: %v", err)
 		}
@@ -3918,18 +4009,18 @@ func TestClient_CreateLocation(t *testing.T) {
 		if reqBody["name"] != "Row A" || reqBody["site"] != float64(5) {
 			t.Errorf("request body = %s, want name 'Row A' site 5", gotBody)
 		}
-		if p.ID != 1 || p.Name != "Row A" || p.Site == nil || p.Site.ID != 5 {
-			t.Errorf("p = %+v, want id 1 name 'Row A' site 5", p)
+		if result.ID != 1 || result.Name != "Row A" || result.Site == nil || result.Site.ID != 5 {
+			t.Errorf("result = %+v, want id 1 name 'Row A' site 5", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"site":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -3938,22 +4029,22 @@ func TestClient_CreateLocation(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if ve.StatusCode != http.StatusBadRequest {
-			t.Errorf("StatusCode = %d, want 400", ve.StatusCode)
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %domainResult, want 400", validationErr.StatusCode)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -3963,9 +4054,8 @@ func TestClient_CreateLocation(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -3977,19 +4067,19 @@ func TestClient_UpdateLocation(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"Row A","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"Row A","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "updated"
-		p, err := client.UpdateLocation(context.Background(), "tok", 7, domain.LocationWrite{Description: &desc})
+		result, err := client.UpdateLocation(context.Background(), "tok", 7, domain.LocationWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateLocation() returned error: %v", err)
 		}
@@ -3999,8 +4089,8 @@ func TestClient_UpdateLocation(t *testing.T) {
 		if gotPath != "/api/dcim/locations/7/" {
 			t.Errorf("path = %q, want /api/dcim/locations/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4015,20 +4105,20 @@ func TestClient_UpdateLocation(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateLocation(context.Background(), "tok", 7, domain.LocationWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4039,10 +4129,10 @@ func TestClient_DeleteLocation(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -4061,20 +4151,21 @@ func TestClient_DeleteLocation(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
+
 		err := client.DeleteLocation(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4083,12 +4174,13 @@ func TestClusterTypeWriteToWire(t *testing.T) {
 	t.Parallel()
 
 	in := domain.ClusterTypeWrite{Name: "KVM"}
-	w := clusterTypeWriteToWire(in)
-	if w.Name != "KVM" {
-		t.Errorf("wire = %+v, want name 'KVM'", w)
+	wire := clusterTypeWriteToWire(in)
+	if wire.Name != "KVM" {
+		t.Errorf("wire = %+v, want name 'KVM'", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateClusterType(t *testing.T) {
 	t.Parallel()
 
@@ -4096,20 +4188,20 @@ func TestClient_CreateClusterType(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"KVM","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"KVM","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateClusterType(context.Background(), "tok", domain.ClusterTypeWrite{Name: "KVM"})
+		result, err := client.CreateClusterType(context.Background(), "tok", domain.ClusterTypeWrite{Name: "KVM"})
 		if err != nil {
 			t.Fatalf("CreateClusterType() returned error: %v", err)
 		}
@@ -4130,18 +4222,18 @@ func TestClient_CreateClusterType(t *testing.T) {
 		if reqBody["name"] != "KVM" {
 			t.Errorf("request body = %s, want name 'KVM'", gotBody)
 		}
-		if p.ID != 1 || p.Name != "KVM" {
-			t.Errorf("p = %+v, want id 1 name 'KVM'", p)
+		if result.ID != 1 || result.Name != "KVM" {
+			t.Errorf("result = %+v, want id 1 name 'KVM'", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -4150,19 +4242,19 @@ func TestClient_CreateClusterType(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -4171,9 +4263,8 @@ func TestClient_CreateClusterType(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -4185,19 +4276,19 @@ func TestClient_UpdateClusterType(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"KVM","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"KVM","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "updated"
-		p, err := client.UpdateClusterType(context.Background(), "tok", 7, domain.ClusterTypeWrite{Description: &desc})
+		result, err := client.UpdateClusterType(context.Background(), "tok", 7, domain.ClusterTypeWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateClusterType() returned error: %v", err)
 		}
@@ -4207,8 +4298,8 @@ func TestClient_UpdateClusterType(t *testing.T) {
 		if gotPath != "/api/virtualization/cluster-types/7/" {
 			t.Errorf("path = %q, want /api/virtualization/cluster-types/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4223,20 +4314,20 @@ func TestClient_UpdateClusterType(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateClusterType(context.Background(), "tok", 7, domain.ClusterTypeWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4247,10 +4338,10 @@ func TestClient_DeleteClusterType(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -4269,20 +4360,20 @@ func TestClient_DeleteClusterType(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteClusterType(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4291,12 +4382,13 @@ func TestClusterGroupWriteToWire(t *testing.T) {
 	t.Parallel()
 
 	in := domain.ClusterGroupWrite{Name: "DC Clusters"}
-	w := clusterGroupWriteToWire(in)
-	if w.Name != "DC Clusters" {
-		t.Errorf("wire = %+v, want name 'DC Clusters'", w)
+	wire := clusterGroupWriteToWire(in)
+	if wire.Name != "DC Clusters" {
+		t.Errorf("wire = %+v, want name 'DC Clusters'", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateClusterGroup(t *testing.T) {
 	t.Parallel()
 
@@ -4304,20 +4396,21 @@ func TestClient_CreateClusterGroup(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"DC Clusters","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"DC Clusters","created":"2024-01-01","last_updated":"2024-01-01T00:00:0` +
+				`0Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateClusterGroup(context.Background(), "tok", domain.ClusterGroupWrite{Name: "DC Clusters"})
+		result, err := client.CreateClusterGroup(context.Background(), "tok", domain.ClusterGroupWrite{Name: "DC Clusters"})
 		if err != nil {
 			t.Fatalf("CreateClusterGroup() returned error: %v", err)
 		}
@@ -4338,18 +4431,18 @@ func TestClient_CreateClusterGroup(t *testing.T) {
 		if reqBody["name"] != "DC Clusters" {
 			t.Errorf("request body = %s, want name 'DC Clusters'", gotBody)
 		}
-		if p.ID != 1 || p.Name != "DC Clusters" {
-			t.Errorf("p = %+v, want id 1 name 'DC Clusters'", p)
+		if result.ID != 1 || result.Name != "DC Clusters" {
+			t.Errorf("result = %+v, want id 1 name 'DC Clusters'", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -4358,19 +4451,19 @@ func TestClient_CreateClusterGroup(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -4379,9 +4472,8 @@ func TestClient_CreateClusterGroup(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -4393,19 +4485,19 @@ func TestClient_UpdateClusterGroup(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"DC Clusters","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"DC Clusters","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "updated"
-		p, err := client.UpdateClusterGroup(context.Background(), "tok", 7, domain.ClusterGroupWrite{Description: &desc})
+		result, err := client.UpdateClusterGroup(context.Background(), "tok", 7, domain.ClusterGroupWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateClusterGroup() returned error: %v", err)
 		}
@@ -4415,8 +4507,8 @@ func TestClient_UpdateClusterGroup(t *testing.T) {
 		if gotPath != "/api/virtualization/cluster-groups/7/" {
 			t.Errorf("path = %q, want /api/virtualization/cluster-groups/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4431,20 +4523,20 @@ func TestClient_UpdateClusterGroup(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateClusterGroup(context.Background(), "tok", 7, domain.ClusterGroupWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4455,10 +4547,10 @@ func TestClient_DeleteClusterGroup(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -4477,20 +4569,20 @@ func TestClient_DeleteClusterGroup(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteClusterGroup(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4499,12 +4591,13 @@ func TestCircuitTypeWriteToWire(t *testing.T) {
 	t.Parallel()
 
 	in := domain.CircuitTypeWrite{Name: "Fiber"}
-	w := circuitTypeWriteToWire(in)
-	if w.Name != "Fiber" {
-		t.Errorf("wire = %+v, want name 'Fiber'", w)
+	wire := circuitTypeWriteToWire(in)
+	if wire.Name != "Fiber" {
+		t.Errorf("wire = %+v, want name 'Fiber'", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateCircuitType(t *testing.T) {
 	t.Parallel()
 
@@ -4512,20 +4605,21 @@ func TestClient_CreateCircuitType(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"Fiber","circuit_count":0,"created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"Fiber","circuit_count":0,"created":"2024-01-01","last_updated":"2024-0` +
+				`1-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateCircuitType(context.Background(), "tok", domain.CircuitTypeWrite{Name: "Fiber"})
+		result, err := client.CreateCircuitType(context.Background(), "tok", domain.CircuitTypeWrite{Name: "Fiber"})
 		if err != nil {
 			t.Fatalf("CreateCircuitType() returned error: %v", err)
 		}
@@ -4546,18 +4640,18 @@ func TestClient_CreateCircuitType(t *testing.T) {
 		if reqBody["name"] != "Fiber" {
 			t.Errorf("request body = %s, want name 'Fiber'", gotBody)
 		}
-		if p.ID != 1 || p.Name != "Fiber" {
-			t.Errorf("p = %+v, want id 1 name 'Fiber'", p)
+		if result.ID != 1 || result.Name != "Fiber" {
+			t.Errorf("result = %+v, want id 1 name 'Fiber'", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -4566,19 +4660,19 @@ func TestClient_CreateCircuitType(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -4587,9 +4681,8 @@ func TestClient_CreateCircuitType(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -4601,19 +4694,19 @@ func TestClient_UpdateCircuitType(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"Fiber","circuit_count":0,"created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"Fiber","circuit_count":0,"created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "updated"
-		p, err := client.UpdateCircuitType(context.Background(), "tok", 7, domain.CircuitTypeWrite{Description: &desc})
+		result, err := client.UpdateCircuitType(context.Background(), "tok", 7, domain.CircuitTypeWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateCircuitType() returned error: %v", err)
 		}
@@ -4623,8 +4716,8 @@ func TestClient_UpdateCircuitType(t *testing.T) {
 		if gotPath != "/api/circuits/circuit-types/7/" {
 			t.Errorf("path = %q, want /api/circuits/circuit-types/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4639,20 +4732,20 @@ func TestClient_UpdateCircuitType(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateCircuitType(context.Background(), "tok", 7, domain.CircuitTypeWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4663,10 +4756,10 @@ func TestClient_DeleteCircuitType(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -4685,20 +4778,21 @@ func TestClient_DeleteCircuitType(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
+
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteCircuitType(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4707,12 +4801,13 @@ func TestVrfWriteToWire(t *testing.T) {
 	t.Parallel()
 
 	in := domain.VrfWrite{Name: "prod", Rd: "65000:1"}
-	w := vrfWriteToWire(in)
-	if w.Name != "prod" || w.Rd != "65000:1" {
-		t.Errorf("wire = %+v, want name 'prod' rd '65000:1'", w)
+	wire := vrfWriteToWire(in)
+	if wire.Name != "prod" || wire.Rd != "65000:1" {
+		t.Errorf("wire = %+v, want name 'prod' rd '65000:1'", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateVrf(t *testing.T) {
 	t.Parallel()
 
@@ -4720,20 +4815,21 @@ func TestClient_CreateVrf(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"prod","rd":"65000:1","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"prod","rd":"65000:1","created":"2024-01-01","last_updated":"2024-01-01` +
+				`T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateVrf(context.Background(), "tok", domain.VrfWrite{Name: "prod", Rd: "65000:1"})
+		result, err := client.CreateVrf(context.Background(), "tok", domain.VrfWrite{Name: "prod", Rd: "65000:1"})
 		if err != nil {
 			t.Fatalf("CreateVrf() returned error: %v", err)
 		}
@@ -4754,18 +4850,18 @@ func TestClient_CreateVrf(t *testing.T) {
 		if reqBody["name"] != "prod" || reqBody["rd"] != "65000:1" {
 			t.Errorf("request body = %s, want name 'prod' rd '65000:1'", gotBody)
 		}
-		if p.ID != 1 || p.Name != "prod" || p.Rd != "65000:1" {
-			t.Errorf("p = %+v, want id 1 name 'prod' rd '65000:1'", p)
+		if result.ID != 1 || result.Name != "prod" || result.Rd != "65000:1" {
+			t.Errorf("result = %+v, want id 1 name 'prod' rd '65000:1'", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -4774,19 +4870,19 @@ func TestClient_CreateVrf(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -4795,9 +4891,8 @@ func TestClient_CreateVrf(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -4809,19 +4904,19 @@ func TestClient_UpdateVrf(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"prod","rd":"65000:1","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"prod","rd":"65000:1","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "updated"
-		p, err := client.UpdateVrf(context.Background(), "tok", 7, domain.VrfWrite{Description: &desc})
+		result, err := client.UpdateVrf(context.Background(), "tok", 7, domain.VrfWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateVrf() returned error: %v", err)
 		}
@@ -4831,8 +4926,8 @@ func TestClient_UpdateVrf(t *testing.T) {
 		if gotPath != "/api/ipam/vrfs/7/" {
 			t.Errorf("path = %q, want /api/ipam/vrfs/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4847,20 +4942,20 @@ func TestClient_UpdateVrf(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"rd":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateVrf(context.Background(), "tok", 7, domain.VrfWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4871,10 +4966,10 @@ func TestClient_DeleteVrf(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -4893,20 +4988,20 @@ func TestClient_DeleteVrf(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteVrf(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -4915,12 +5010,13 @@ func TestVlanGroupWriteToWire(t *testing.T) {
 	t.Parallel()
 
 	in := domain.VlanGroupWrite{Name: "DC VLANs"}
-	w := vlanGroupWriteToWire(in)
-	if w.Name != "DC VLANs" {
-		t.Errorf("wire = %+v, want name 'DC VLANs'", w)
+	wire := vlanGroupWriteToWire(in)
+	if wire.Name != "DC VLANs" {
+		t.Errorf("wire = %+v, want name 'DC VLANs'", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateVlanGroup(t *testing.T) {
 	t.Parallel()
 
@@ -4928,20 +5024,20 @@ func TestClient_CreateVlanGroup(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"DC VLANs","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"DC VLANs","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"` +
+				`}`))
 		}))
 		defer srv.Close()
-
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateVlanGroup(context.Background(), "tok", domain.VlanGroupWrite{Name: "DC VLANs"})
+		result, err := client.CreateVlanGroup(context.Background(), "tok", domain.VlanGroupWrite{Name: "DC VLANs"})
 		if err != nil {
 			t.Fatalf("CreateVlanGroup() returned error: %v", err)
 		}
@@ -4962,18 +5058,18 @@ func TestClient_CreateVlanGroup(t *testing.T) {
 		if reqBody["name"] != "DC VLANs" {
 			t.Errorf("request body = %s, want name 'DC VLANs'", gotBody)
 		}
-		if p.ID != 1 || p.Name != "DC VLANs" {
-			t.Errorf("p = %+v, want id 1 name 'DC VLANs'", p)
+		if result.ID != 1 || result.Name != "DC VLANs" {
+			t.Errorf("result = %+v, want id 1 name 'DC VLANs'", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -4982,19 +5078,19 @@ func TestClient_CreateVlanGroup(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -5003,9 +5099,8 @@ func TestClient_CreateVlanGroup(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -5017,19 +5112,19 @@ func TestClient_UpdateVlanGroup(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"DC VLANs","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"DC VLANs","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "updated"
-		p, err := client.UpdateVlanGroup(context.Background(), "tok", 7, domain.VlanGroupWrite{Description: &desc})
+		result, err := client.UpdateVlanGroup(context.Background(), "tok", 7, domain.VlanGroupWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateVlanGroup() returned error: %v", err)
 		}
@@ -5039,8 +5134,8 @@ func TestClient_UpdateVlanGroup(t *testing.T) {
 		if gotPath != "/api/ipam/vlan-groups/7/" {
 			t.Errorf("path = %q, want /api/ipam/vlan-groups/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -5055,20 +5150,20 @@ func TestClient_UpdateVlanGroup(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"slug":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateVlanGroup(context.Background(), "tok", 7, domain.VlanGroupWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -5079,10 +5174,10 @@ func TestClient_DeleteVlanGroup(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -5101,20 +5196,20 @@ func TestClient_DeleteVlanGroup(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteVlanGroup(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -5136,7 +5231,7 @@ func TestWireVlanGroupToDomain(t *testing.T) {
 	t.Parallel()
 
 	minVID, maxVID := 100, 200
-	w := WireVlanGroup{
+	wire := WireVlanGroup{
 		ID:           1,
 		Name:         "DC VLANs",
 		Scope:        &WireVlanGroupScope{ObjectType: "dcim.site", ObjectID: 5},
@@ -5144,18 +5239,21 @@ func TestWireVlanGroupToDomain(t *testing.T) {
 		MaxVID:       &maxVID,
 		CustomFields: map[string]any{"env": "prod"},
 	}
-	d := wireVlanGroupToDomain(w)
-	if d.ID != 1 || d.Name != "DC VLANs" {
-		t.Errorf("d = %+v, want id 1 name 'DC VLANs'", d)
+	domainResult := wireVlanGroupToDomain(wire)
+	if domainResult.ID != 1 || domainResult.Name != "DC VLANs" {
+		t.Errorf("domainResult = %+v, want id 1 name 'DC VLANs'", domainResult)
 	}
-	if d.Scope == nil || d.Scope.ObjectID != 5 || d.Scope.ObjectType != "dcim.site" {
-		t.Errorf("d.Scope = %+v, want dcim.site/5", d.Scope)
+	if domainResult.Scope == nil || domainResult.Scope.ObjectID != 5 || domainResult.Scope.ObjectType != "dcim.site" {
+		t.Errorf("domainResult.Scope = %+v, want dcim.site/5", domainResult.Scope)
 	}
-	if d.MinVID == nil || *d.MinVID != 100 || d.MaxVID == nil || *d.MaxVID != 200 {
-		t.Errorf("d.MinVID/MaxVID = %v/%v, want 100/200", d.MinVID, d.MaxVID)
+	if domainResult.MinVID == nil ||
+		*domainResult.MinVID != 100 ||
+		domainResult.MaxVID == nil ||
+		*domainResult.MaxVID != 200 {
+		t.Errorf("domainResult.MinVID/MaxVID = %v/%v, want 100/200", domainResult.MinVID, domainResult.MaxVID)
 	}
-	if d.CustomFields["env"] != "prod" {
-		t.Errorf("d.CustomFields = %+v, want env=prod", d.CustomFields)
+	if domainResult.CustomFields["env"] != "prod" {
+		t.Errorf("domainResult.CustomFields = %+v, want env=prod", domainResult.CustomFields)
 	}
 }
 
@@ -5178,12 +5276,13 @@ func TestRoleWriteToWire(t *testing.T) {
 	t.Parallel()
 
 	in := domain.RoleWrite{Name: "prod"}
-	w := roleWriteToWire(in)
-	if w.Name != "prod" {
-		t.Errorf("wire = %+v, want name 'prod'", w)
+	wire := roleWriteToWire(in)
+	if wire.Name != "prod" {
+		t.Errorf("wire = %+v, want name 'prod'", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateRole(t *testing.T) {
 	t.Parallel()
 
@@ -5191,20 +5290,20 @@ func TestClient_CreateRole(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"prod","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"prod","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateRole(context.Background(), "tok", domain.RoleWrite{Name: "prod"})
+		result, err := client.CreateRole(context.Background(), "tok", domain.RoleWrite{Name: "prod"})
 		if err != nil {
 			t.Fatalf("CreateRole() returned error: %v", err)
 		}
@@ -5225,18 +5324,18 @@ func TestClient_CreateRole(t *testing.T) {
 		if reqBody["name"] != "prod" {
 			t.Errorf("request body = %s, want name 'prod'", gotBody)
 		}
-		if p.ID != 1 || p.Name != "prod" {
-			t.Errorf("p = %+v, want id 1 name 'prod'", p)
+		if result.ID != 1 || result.Name != "prod" {
+			t.Errorf("result = %+v, want id 1 name 'prod'", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -5245,19 +5344,19 @@ func TestClient_CreateRole(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -5266,9 +5365,8 @@ func TestClient_CreateRole(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -5280,19 +5378,19 @@ func TestClient_UpdateRole(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"prod","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"prod","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		desc := "updated"
-		p, err := client.UpdateRole(context.Background(), "tok", 7, domain.RoleWrite{Description: &desc})
+		result, err := client.UpdateRole(context.Background(), "tok", 7, domain.RoleWrite{Description: &desc})
 		if err != nil {
 			t.Fatalf("UpdateRole() returned error: %v", err)
 		}
@@ -5302,8 +5400,8 @@ func TestClient_UpdateRole(t *testing.T) {
 		if gotPath != "/api/ipam/roles/7/" {
 			t.Errorf("path = %q, want /api/ipam/roles/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -5318,20 +5416,20 @@ func TestClient_UpdateRole(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateRole(context.Background(), "tok", 7, domain.RoleWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -5342,10 +5440,10 @@ func TestClient_DeleteRole(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -5364,20 +5462,20 @@ func TestClient_DeleteRole(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteRole(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -5386,12 +5484,13 @@ func TestContactWriteToWire(t *testing.T) {
 	t.Parallel()
 
 	in := domain.ContactWrite{Name: "ops"}
-	w := contactWriteToWire(in)
-	if w.Name != "ops" {
-		t.Errorf("wire = %+v, want name 'ops'", w)
+	wire := contactWriteToWire(in)
+	if wire.Name != "ops" {
+		t.Errorf("wire = %+v, want name 'ops'", wire)
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestClient_CreateContact(t *testing.T) {
 	t.Parallel()
 
@@ -5399,20 +5498,20 @@ func TestClient_CreateContact(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath, gotCT, gotAuth string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotCT = r.Header.Get("Content-Type")
-			gotAuth = r.Header.Get("Authorization")
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = w.Write([]byte(`{"id":1,"name":"ops","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"ops","created":"2024-01-01","last_updated":"2024-01-01T00:00:00Z"}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
-		p, err := client.CreateContact(context.Background(), "tok", domain.ContactWrite{Name: "ops"})
+		result, err := client.CreateContact(context.Background(), "tok", domain.ContactWrite{Name: "ops"})
 		if err != nil {
 			t.Fatalf("CreateContact() returned error: %v", err)
 		}
@@ -5433,18 +5532,18 @@ func TestClient_CreateContact(t *testing.T) {
 		if reqBody["name"] != "ops" {
 			t.Errorf("request body = %s, want name 'ops'", gotBody)
 		}
-		if p.ID != 1 || p.Name != "ops" {
-			t.Errorf("p = %+v, want id 1 name 'ops'", p)
+		if result.ID != 1 || result.Name != "ops" {
+			t.Errorf("result = %+v, want id 1 name 'ops'", result)
 		}
 	})
 
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
@@ -5453,19 +5552,19 @@ func TestClient_CreateContact(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 
 	t.Run("not found 404", func(t *testing.T) {
 		t.Parallel()
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusNotFound)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
 		}))
 		defer srv.Close()
 
@@ -5474,9 +5573,8 @@ func TestClient_CreateContact(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
-		var ve *domain.ValidationError
-		if errors.As(err, &ve) {
-			t.Errorf("err = %+v, want NOT a ValidationError for 404", ve)
+		if validationErr, ok := errors.AsType[*domain.ValidationError](err); ok {
+			t.Errorf("err = %+v, want NOT a ValidationError for 404", validationErr)
 		}
 	})
 }
@@ -5488,19 +5586,19 @@ func TestClient_UpdateContact(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
 		var gotBody []byte
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			gotBody, _ = io.ReadAll(r.Body)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":7,"name":"ops","created":"","last_updated":""}`))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"ops","created":"","last_updated":""}`))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		phone := "+1000"
-		p, err := client.UpdateContact(context.Background(), "tok", 7, domain.ContactWrite{Phone: &phone})
+		result, err := client.UpdateContact(context.Background(), "tok", 7, domain.ContactWrite{Phone: &phone})
 		if err != nil {
 			t.Fatalf("UpdateContact() returned error: %v", err)
 		}
@@ -5510,8 +5608,8 @@ func TestClient_UpdateContact(t *testing.T) {
 		if gotPath != "/api/tenancy/contacts/7/" {
 			t.Errorf("path = %q, want /api/tenancy/contacts/7/", gotPath)
 		}
-		if p.ID != 7 {
-			t.Errorf("p = %+v, want id 7", p)
+		if result.ID != 7 {
+			t.Errorf("result = %+v, want id 7", result)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -5526,20 +5624,20 @@ func TestClient_UpdateContact(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"name":["This field is required."]}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		_, err := client.UpdateContact(context.Background(), "tok", 7, domain.ContactWrite{})
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }
@@ -5550,10 +5648,10 @@ func TestClient_DeleteContact(t *testing.T) {
 	t.Run("success 204", func(t *testing.T) {
 		t.Parallel()
 		var gotMethod, gotPath string
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			gotMethod = r.Method
-			gotPath = r.URL.Path
-			w.WriteHeader(http.StatusNoContent)
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
 		}))
 		defer srv.Close()
 
@@ -5572,20 +5670,20 @@ func TestClient_DeleteContact(t *testing.T) {
 	t.Run("validation error 400", func(t *testing.T) {
 		t.Parallel()
 		body := `{"detail":"Cannot delete object with dependent objects."}`
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(body))
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
 		}))
 		defer srv.Close()
 
 		client := NewClient(srv.URL, http.DefaultClient)
 		err := client.DeleteContact(context.Background(), "tok", 3)
-		var ve *domain.ValidationError
-		if !errors.As(err, &ve) {
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
 			t.Fatalf("err = %v, want *domain.ValidationError", err)
 		}
-		if string(ve.Body) != body {
-			t.Errorf("Body = %s, want %s", ve.Body, body)
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
 		}
 	})
 }

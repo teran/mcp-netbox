@@ -91,7 +91,9 @@ func TestNetBoxE2E(t *testing.T) {
 
 	// tools/list must expose the full tool inventory, including the write tools.
 	tools := client.listToolNames()
-	for _, want := range []string{"get_sites", "create_site", "update_site", "delete_site", "create_circuit", "delete_tenant"} {
+	for _, want := range []string{
+		"get_sites", "create_site", "update_site", "delete_site", "create_circuit", "delete_tenant",
+	} {
 		if !contains(tools, want) {
 			t.Fatalf("tools/list missing %q; got %d tools", want, len(tools))
 		}
@@ -477,7 +479,9 @@ func circuitCRUD(t *testing.T, c *e2eClient, runID string) {
 	// NetBox 4.6 requires an explicit slug for provider and circuit_type.
 	provider := c.call("create_provider", map[string]interface{}{"name": "e2e-prov-" + runID, "slug": "e2e-prov-" + runID})
 	providerID := c.mustID(provider)
-	circuitType := c.call("create_circuit_type", map[string]interface{}{"name": "e2e-ct-" + runID, "slug": "e2e-ct-" + runID})
+	circuitType := c.call("create_circuit_type", map[string]interface{}{
+		"name": "e2e-ct-" + runID, "slug": "e2e-ct-" + runID,
+	})
 	circuitTypeID := c.mustID(circuitType)
 
 	// Ensure the supporting objects are cleaned up too.

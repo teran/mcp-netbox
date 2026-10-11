@@ -12,7 +12,7 @@ func TestValidateURLScheme(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     interface{}
+		input     any
 		wantError bool
 	}{
 		{"valid http", "http://netbox:8000", false},
@@ -23,14 +23,14 @@ func TestValidateURLScheme(t *testing.T) {
 		{"invalid URL", "://invalid", true},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := validateURLScheme(tc.input)
-			if tc.wantError && err == nil {
-				t.Errorf("validateURLScheme(%v) = nil, want error", tc.input)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := validateURLScheme(testCase.input)
+			if testCase.wantError && err == nil {
+				t.Errorf("validateURLScheme(%v) = nil, want error", testCase.input)
 			}
-			if !tc.wantError && err != nil {
-				t.Errorf("validateURLScheme(%v) = %v, want nil", tc.input, err)
+			if !testCase.wantError && err != nil {
+				t.Errorf("validateURLScheme(%v) = %v, want nil", testCase.input, err)
 			}
 		})
 	}
@@ -41,7 +41,7 @@ func TestValidateURLHost(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     interface{}
+		input     any
 		wantError bool
 	}{
 		{"valid URL", "http://netbox:8000", false},
@@ -51,14 +51,14 @@ func TestValidateURLHost(t *testing.T) {
 		{"invalid URL", "://invalid", true},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := validateURLHost(tc.input)
-			if tc.wantError && err == nil {
-				t.Errorf("validateURLHost(%v) = nil, want error", tc.input)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := validateURLHost(testCase.input)
+			if testCase.wantError && err == nil {
+				t.Errorf("validateURLHost(%v) = nil, want error", testCase.input)
 			}
-			if !tc.wantError && err != nil {
-				t.Errorf("validateURLHost(%v) = %v, want nil", tc.input, err)
+			if !testCase.wantError && err != nil {
+				t.Errorf("validateURLHost(%v) = %v, want nil", testCase.input, err)
 			}
 		})
 	}
@@ -69,7 +69,7 @@ func TestValidatePositiveInt(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     interface{}
+		input     any
 		wantError bool
 	}{
 		{"positive int", 1, false},
@@ -78,14 +78,14 @@ func TestValidatePositiveInt(t *testing.T) {
 		{"non-int input (string)", "abc", true},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := validatePositiveInt(tc.input)
-			if tc.wantError && err == nil {
-				t.Errorf("validatePositiveInt(%v) = nil, want error", tc.input)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := validatePositiveInt(testCase.input)
+			if testCase.wantError && err == nil {
+				t.Errorf("validatePositiveInt(%v) = nil, want error", testCase.input)
 			}
-			if !tc.wantError && err != nil {
-				t.Errorf("validatePositiveInt(%v) = %v, want nil", tc.input, err)
+			if !testCase.wantError && err != nil {
+				t.Errorf("validatePositiveInt(%v) = %v, want nil", testCase.input, err)
 			}
 		})
 	}
@@ -99,7 +99,7 @@ func TestValidateURLNotPrivate(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     interface{}
+		input     any
 		wantError bool
 	}{
 		{"public IP", "http://8.8.8.8:8000", false},
@@ -120,14 +120,14 @@ func TestValidateURLNotPrivate(t *testing.T) {
 		{"invalid URL", "://invalid", true},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := strictValidator(tc.input)
-			if tc.wantError && err == nil {
-				t.Errorf("validateURLNotPrivate(%v) = nil, want error", tc.input)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := strictValidator(testCase.input)
+			if testCase.wantError && err == nil {
+				t.Errorf("validateURLNotPrivate(%v) = nil, want error", testCase.input)
 			}
-			if !tc.wantError && err != nil {
-				t.Errorf("validateURLNotPrivate(%v) = %v, want nil", tc.input, err)
+			if !testCase.wantError && err != nil {
+				t.Errorf("validateURLNotPrivate(%v) = %v, want nil", testCase.input, err)
 			}
 		})
 	}
@@ -205,11 +205,11 @@ func TestIsPrivateAddr(t *testing.T) {
 		{"public v6", "2606:4700:4700::1111", false},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			addr := mustParseAddr(t, tc.addr)
-			if got := IsPrivateAddr(addr); got != tc.want {
-				t.Errorf("IsPrivateAddr(%s) = %v, want %v", tc.addr, got, tc.want)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			addr := mustParseAddr(t, testCase.addr)
+			if got := IsPrivateAddr(addr); got != testCase.want {
+				t.Errorf("IsPrivateAddr(%s) = %v, want %v", testCase.addr, got, testCase.want)
 			}
 		})
 	}
@@ -230,14 +230,14 @@ func TestIsPrivateIP(t *testing.T) {
 		{"invalid", "not-an-ip", false},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
 			var ip net.IP
-			if tc.ip != "" {
-				ip = net.ParseIP(tc.ip)
+			if testCase.ip != "" {
+				ip = net.ParseIP(testCase.ip)
 			}
-			if got := IsPrivateIP(ip); got != tc.want {
-				t.Errorf("IsPrivateIP(%v) = %v, want %v", tc.ip, got, tc.want)
+			if got := IsPrivateIP(ip); got != testCase.want {
+				t.Errorf("IsPrivateIP(%v) = %v, want %v", testCase.ip, got, testCase.want)
 			}
 		})
 	}
@@ -286,6 +286,7 @@ func mustParseAddr(t *testing.T, s string) netip.Addr {
 	if err != nil {
 		t.Fatalf("ParseAddr(%q) error: %v", s, err)
 	}
+
 	return a
 }
 
@@ -305,7 +306,7 @@ func TestValidateLogLevel(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     interface{}
+		input     any
 		wantError bool
 	}{
 		{"empty disables logging", "", false},
@@ -317,14 +318,14 @@ func TestValidateLogLevel(t *testing.T) {
 		{"non-string input (nil)", nil, true},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := validateLogLevel(tc.input)
-			if tc.wantError && err == nil {
-				t.Errorf("validateLogLevel(%v) = nil, want error", tc.input)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := validateLogLevel(testCase.input)
+			if testCase.wantError && err == nil {
+				t.Errorf("validateLogLevel(%v) = nil, want error", testCase.input)
 			}
-			if !tc.wantError && err != nil {
-				t.Errorf("validateLogLevel(%v) = %v, want nil", tc.input, err)
+			if !testCase.wantError && err != nil {
+				t.Errorf("validateLogLevel(%v) = %v, want nil", testCase.input, err)
 			}
 		})
 	}
@@ -335,7 +336,7 @@ func TestValidateLogFormat(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     interface{}
+		input     any
 		wantError bool
 	}{
 		{"empty defaults to text", "", false},
@@ -347,14 +348,14 @@ func TestValidateLogFormat(t *testing.T) {
 		{"non-string input (nil)", nil, true},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := validateLogFormat(tc.input)
-			if tc.wantError && err == nil {
-				t.Errorf("validateLogFormat(%v) = nil, want error", tc.input)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := validateLogFormat(testCase.input)
+			if testCase.wantError && err == nil {
+				t.Errorf("validateLogFormat(%v) = nil, want error", testCase.input)
 			}
-			if !tc.wantError && err != nil {
-				t.Errorf("validateLogFormat(%v) = %v, want nil", tc.input, err)
+			if !testCase.wantError && err != nil {
+				t.Errorf("validateLogFormat(%v) = %v, want nil", testCase.input, err)
 			}
 		})
 	}

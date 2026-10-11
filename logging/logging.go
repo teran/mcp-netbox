@@ -34,12 +34,15 @@ import (
 // DefaultLogFilename is used for the STDIO log file when LOG_FILENAME is unset.
 const DefaultLogFilename = "/tmp/mcp-netbox.log"
 
+// logFileMode is the permission mode applied to created log files.
+const logFileMode = 0o600
+
 // Setup builds a *logrus.Logger according to cfg.
 //
 // The returned logger owns an open file handle in STDIO mode that lives for
 // the process lifetime. Callers should not call Close on it.
 func Setup(cfg config.Config) (*logrus.Logger, error) {
-	l := logrus.New()
+	logger := logrus.New()
 
 	// L2: enablement is launch-mode dependent.
 	//   - HTTP: logging is ALWAYS enabled; an empty LOG_LEVEL defaults to info.
@@ -49,38 +52,39 @@ func Setup(cfg config.Config) (*logrus.Logger, error) {
 		levelStr = logrus.InfoLevel.String()
 	}
 	if levelStr == "" {
-		l.SetOutput(io.Discard)
-		return l, nil
+		logger.SetOutput(io.Discard)
+
+		return logger, nil
 	}
 
 	level, err := logrus.ParseLevel(levelStr)
 	if err != nil {
 		return nil, fmt.Errorf("invalid LOG_LEVEL %q: %w", cfg.LogLevel, err)
 	}
-	l.SetLevel(level)
+	logger.SetLevel(level)
 
 	// L4: log format, text by default.
 	switch strings.ToLower(strings.TrimSpace(cfg.LogFormat)) {
 	case "", "text":
-		l.SetFormatter(&requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}})
+		logger.SetFormatter(&requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}})
 	case "json":
-		l.SetFormatter(&logrus.JSONFormatter{})
+		logger.SetFormatter(&logrus.JSONFormatter{})
 	default:
 		return nil, fmt.Errorf("invalid LOG_FORMAT %q (want text or json)", cfg.LogFormat)
 	}
 
 	// S02: redact any struct-typed (secret:"true") field before it is written,
 	// so annotated secrets never leak into log lines.
-	l.AddHook(redact.NewLogrusHook())
+	logger.AddHook(redact.NewLogrusHook())
 
 	// L1: output channel by transport.
 	out, err := outputForTransport(cfg)
 	if err != nil {
 		return nil, err
 	}
-	l.SetOutput(out)
+	logger.SetOutput(out)
 
-	return l, nil
+	return logger, nil
 }
 
 // outputForTransport selects the log output: stdout for HTTP transport, a
@@ -92,6 +96,7 @@ func outputForTransport(cfg config.Config) (io.Writer, error) {
 		if filename == "" {
 			filename = DefaultLogFilename
 		}
+
 		return openLogFile(filename)
 	default: // "" and http
 		return os.Stdout, nil
@@ -120,24 +125,27 @@ func openLogFile(filename string) (*os.File, error) {
 	defer func() { _ = root.Close() }()
 
 	name := filepath.Base(path)
-	f, err := root.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	file, err := root.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_APPEND, logFileMode)
 	if err != nil {
 		return nil, fmt.Errorf("open log file %q: %w", path, err)
 	}
-	if err := root.Chmod(name, 0o600); err != nil {
-		_ = f.Close()
+	if err := root.Chmod(name, logFileMode); err != nil {
+		_ = file.Close()
+
 		return nil, fmt.Errorf("chmod log file %q: %w", path, err)
 	}
 
-	fi, err := f.Stat()
+	fileInfo, err := file.Stat()
 	if err != nil {
-		_ = f.Close()
+		_ = file.Close()
+
 		return nil, fmt.Errorf("stat log file %q: %w", path, err)
 	}
-	if !fi.Mode().IsRegular() {
-		_ = f.Close()
+	if !fileInfo.Mode().IsRegular() {
+		_ = file.Close()
+
 		return nil, fmt.Errorf("log path %q is not a regular file", path)
 	}
 
-	return f, nil
+	return file, nil
 }

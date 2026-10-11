@@ -26,13 +26,15 @@ func (h *slogHandler) Enabled(_ context.Context, level slog.Level) bool {
 }
 
 // Handle forwards a single slog record to logrus.
-func (h *slogHandler) Handle(_ context.Context, r slog.Record) error {
+func (h *slogHandler) Handle(_ context.Context, record slog.Record) error {
 	entry := h.logger.WithFields(attrsToFields(h.attrs))
-	r.Attrs(func(a slog.Attr) bool {
+	record.Attrs(func(a slog.Attr) bool {
 		entry = entry.WithField(attrKey(a.Key), a.Value.Any())
+
 		return true
 	})
-	entry.Log(toLogrusLevel(r.Level), r.Message)
+	entry.Log(toLogrusLevel(record.Level), record.Message)
+
 	return nil
 }
 
@@ -42,6 +44,7 @@ func (h *slogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	combined := make([]slog.Attr, 0, len(h.attrs)+len(attrs))
 	combined = append(combined, h.attrs...)
 	combined = append(combined, attrs...)
+
 	return &slogHandler{logger: h.logger, attrs: combined}
 }
 
@@ -74,6 +77,7 @@ func attrsToFields(attrs []slog.Attr) logrus.Fields {
 	for _, a := range attrs {
 		fields[attrKey(a.Key)] = a.Value.Any()
 	}
+
 	return fields
 }
 
@@ -81,5 +85,6 @@ func attrKey(key string) string {
 	if key == "" {
 		return "message"
 	}
+
 	return key
 }

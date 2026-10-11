@@ -11,12 +11,15 @@ import (
 	"github.com/teran/mcp-netbox/mockrepo"
 )
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestCreateManufacturerHandler(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			CreateManufacturerFunc: func(_ context.Context, _ string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+			CreateManufacturerFunc: func(
+				_ context.Context, _ string, in domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
 				return &domain.Manufacturer{ID: 1, Name: in.Name}, nil
 			},
 		}, "token")
@@ -62,13 +65,13 @@ func TestCreateManufacturerHandler(t *testing.T) {
 		if result.StructuredContent == nil {
 			t.Fatal("StructuredContent is nil, want validation_errors")
 		}
-		sc, ok := result.StructuredContent.(map[string]any)
+		structuredContent, ok := result.StructuredContent.(map[string]any)
 		if !ok {
 			t.Fatalf("StructuredContent type = %T, want map", result.StructuredContent)
 		}
-		raw, ok := sc["validation_errors"].(json.RawMessage)
+		raw, ok := structuredContent["validation_errors"].(json.RawMessage)
 		if !ok {
-			t.Fatalf("validation_errors type = %T, want json.RawMessage", sc["validation_errors"])
+			t.Fatalf("validation_errors type = %T, want json.RawMessage", structuredContent["validation_errors"])
 		}
 		if string(raw) != string(body) {
 			t.Errorf("validation_errors = %s, want %s", raw, body)
@@ -94,7 +97,9 @@ func TestUpdateManufacturerHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			UpdateManufacturerFunc: func(_ context.Context, _ string, id int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+			UpdateManufacturerFunc: func(
+				_ context.Context, _ string, id int, _ domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
 				return &domain.Manufacturer{ID: id, Name: "Cisco2"}, nil
 			},
 		}, "token")
@@ -121,7 +126,9 @@ func TestUpdateManufacturerHandler(t *testing.T) {
 	t.Run("validation error in structured content", func(t *testing.T) {
 		body := []byte(`{"slug":["This field is required."]}`)
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			UpdateManufacturerFunc: func(_ context.Context, _ string, _ int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+			UpdateManufacturerFunc: func(
+				_ context.Context, _ string, _ int, _ domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
 				return nil, &domain.ValidationError{StatusCode: 400, Body: body}
 			},
 		}, "token")
@@ -145,6 +152,7 @@ func TestDeleteManufacturerHandler(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		}, "token")

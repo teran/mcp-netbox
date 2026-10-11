@@ -14,795 +14,1126 @@ var (
 	_ domain.NetworkRepository = (*NilRepo)(nil)
 )
 
-//nolint:gocognit,gocyclo,maintidx // exhaustive per-method table test over every repository method
-func TestMockRepo_AllMethods(t *testing.T) {
+// TestMockRepo_AllMethods exercises every MockRepo method through its function field.
+func TestMockRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,maintidx
 	t.Parallel()
 
 	t.Run("ListSites", func(t *testing.T) {
-		got, err := (&MockRepo{ListSitesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
-			return &domain.PaginatedResponse[domain.Site]{Count: 1}, nil
-		}}).ListSites(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListSitesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Site], error) {
+				return &domain.PaginatedResponse[domain.Site]{Count: 1}, nil
+			},
+		}).ListSites(context.Background(), "t", nil)
 		if err != nil || got.Count != 1 {
 			t.Errorf("ListSites = (%v, %v), want count 1, nil", got, err)
 		}
 	})
 	t.Run("ListDevices", func(t *testing.T) {
-		got, err := (&MockRepo{ListDevicesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
-			return &domain.PaginatedResponse[domain.Device]{Count: 2}, nil
-		}}).ListDevices(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListDevicesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Device], error) {
+				return &domain.PaginatedResponse[domain.Device]{Count: 2}, nil
+			},
+		}).ListDevices(context.Background(), "t", nil)
 		if err != nil || got.Count != 2 {
 			t.Errorf("ListDevices = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListIPAddresses", func(t *testing.T) {
-		got, err := (&MockRepo{ListIPAddressesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
-			return &domain.PaginatedResponse[domain.IPAddress]{Count: 3}, nil
-		}}).ListIPAddresses(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListIPAddressesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.IPAddress], error) {
+				return &domain.PaginatedResponse[domain.IPAddress]{Count: 3}, nil
+			},
+		}).ListIPAddresses(context.Background(), "t", nil)
 		if err != nil || got.Count != 3 {
 			t.Errorf("ListIPAddresses = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListPrefixes", func(t *testing.T) {
-		got, err := (&MockRepo{ListPrefixesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
-			return &domain.PaginatedResponse[domain.Prefix]{Count: 4}, nil
-		}}).ListPrefixes(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListPrefixesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Prefix], error) {
+				return &domain.PaginatedResponse[domain.Prefix]{Count: 4}, nil
+			},
+		}).ListPrefixes(context.Background(), "t", nil)
 		if err != nil || got.Count != 4 {
 			t.Errorf("ListPrefixes = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListVLANs", func(t *testing.T) {
-		got, err := (&MockRepo{ListVLANsFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
-			return &domain.PaginatedResponse[domain.VLAN]{Count: 5}, nil
-		}}).ListVLANs(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListVLANsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.VLAN], error) {
+				return &domain.PaginatedResponse[domain.VLAN]{Count: 5}, nil
+			},
+		}).ListVLANs(context.Background(), "t", nil)
 		if err != nil || got.Count != 5 {
 			t.Errorf("ListVLANs = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListVirtualMachines", func(t *testing.T) {
-		got, err := (&MockRepo{ListVirtualMachinesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
-			return &domain.PaginatedResponse[domain.VirtualMachine]{Count: 6}, nil
-		}}).ListVirtualMachines(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListVirtualMachinesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+				return &domain.PaginatedResponse[domain.VirtualMachine]{Count: 6}, nil
+			},
+		}).ListVirtualMachines(context.Background(), "t", nil)
 		if err != nil || got.Count != 6 {
 			t.Errorf("ListVirtualMachines = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListClusters", func(t *testing.T) {
-		got, err := (&MockRepo{ListClustersFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
-			return &domain.PaginatedResponse[domain.Cluster]{Count: 7}, nil
-		}}).ListClusters(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListClustersFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Cluster], error) {
+				return &domain.PaginatedResponse[domain.Cluster]{Count: 7}, nil
+			},
+		}).ListClusters(context.Background(), "t", nil)
 		if err != nil || got.Count != 7 {
 			t.Errorf("ListClusters = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListCircuits", func(t *testing.T) {
-		got, err := (&MockRepo{ListCircuitsFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
-			return &domain.PaginatedResponse[domain.Circuit]{Count: 8}, nil
-		}}).ListCircuits(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListCircuitsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Circuit], error) {
+				return &domain.PaginatedResponse[domain.Circuit]{Count: 8}, nil
+			},
+		}).ListCircuits(context.Background(), "t", nil)
 		if err != nil || got.Count != 8 {
 			t.Errorf("ListCircuits = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListCircuitTerminations", func(t *testing.T) {
-		got, err := (&MockRepo{ListCircuitTerminationsFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
-			return &domain.PaginatedResponse[domain.CircuitTermination]{Count: 9}, nil
-		}}).ListCircuitTerminations(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListCircuitTerminationsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+				return &domain.PaginatedResponse[domain.CircuitTermination]{Count: 9}, nil
+			},
+		}).ListCircuitTerminations(context.Background(), "t", nil)
 		if err != nil || got.Count != 9 {
 			t.Errorf("ListCircuitTerminations = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListCables", func(t *testing.T) {
-		got, err := (&MockRepo{ListCablesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
-			return &domain.PaginatedResponse[domain.Cable]{Count: 10}, nil
-		}}).ListCables(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListCablesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Cable], error) {
+				return &domain.PaginatedResponse[domain.Cable]{Count: 10}, nil
+			},
+		}).ListCables(context.Background(), "t", nil)
 		if err != nil || got.Count != 10 {
 			t.Errorf("ListCables = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListRacks", func(t *testing.T) {
-		got, err := (&MockRepo{ListRacksFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
-			return &domain.PaginatedResponse[domain.Rack]{Count: 11}, nil
-		}}).ListRacks(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListRacksFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Rack], error) {
+				return &domain.PaginatedResponse[domain.Rack]{Count: 11}, nil
+			},
+		}).ListRacks(context.Background(), "t", nil)
 		if err != nil || got.Count != 11 {
 			t.Errorf("ListRacks = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListInterfaces", func(t *testing.T) {
-		got, err := (&MockRepo{ListInterfacesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
-			return &domain.PaginatedResponse[domain.Interface]{Count: 12}, nil
-		}}).ListInterfaces(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListInterfacesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Interface], error) {
+				return &domain.PaginatedResponse[domain.Interface]{Count: 12}, nil
+			},
+		}).ListInterfaces(context.Background(), "t", nil)
 		if err != nil || got.Count != 12 {
 			t.Errorf("ListInterfaces = (%v, %v)", got, err)
 		}
 	})
 	t.Run("ListVMInterfaces", func(t *testing.T) {
-		got, err := (&MockRepo{ListVMInterfacesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
-			return &domain.PaginatedResponse[domain.VMInterface]{Count: 13}, nil
-		}}).ListVMInterfaces(context.Background(), "t", nil)
+		got, err := (&MockRepo{
+			ListVMInterfacesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.VMInterface], error) {
+				return &domain.PaginatedResponse[domain.VMInterface]{Count: 13}, nil
+			},
+		}).ListVMInterfaces(context.Background(), "t", nil)
 		if err != nil || got.Count != 13 {
 			t.Errorf("ListVMInterfaces = (%v, %v)", got, err)
 		}
 	})
 	t.Run("GetObject", func(t *testing.T) {
-		got, err := (&MockRepo{GetObjectFunc: func(context.Context, string, string, int, map[string]string) (domain.RawObject, error) {
-			return domain.RawObject(`{"id":1}`), nil
-		}}).GetObject(context.Background(), "t", "site", 1, nil)
+		got, err := (&MockRepo{
+			GetObjectFunc: func(
+				context.Context, string, string, int, map[string]string,
+			) (domain.RawObject, error) {
+				return domain.RawObject(`{"id":1}`), nil
+			},
+		}).GetObject(context.Background(), "t", "site", 1, nil)
 		if err != nil || string(got) != `{"id":1}` {
 			t.Errorf("GetObject = (%v, %v)", got, err)
 		}
 	})
 	t.Run("CreateSite", func(t *testing.T) {
-		got, err := (&MockRepo{CreateSiteFunc: func(_ context.Context, _ string, in domain.SiteWrite) (*domain.Site, error) {
-			return &domain.Site{ID: 1, Name: in.Name}, nil
-		}}).CreateSite(context.Background(), "t", domain.SiteWrite{Name: "A"})
+		got, err := (&MockRepo{
+			CreateSiteFunc: func(
+				_ context.Context, _ string, in domain.SiteWrite,
+			) (*domain.Site, error) {
+				return &domain.Site{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateSite(context.Background(), "t", domain.SiteWrite{Name: "A"})
 		if err != nil || got == nil || got.Name != "A" {
 			t.Errorf("CreateSite = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateSite", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateSiteFunc: func(_ context.Context, _ string, id int, in domain.SiteWrite) (*domain.Site, error) {
-			return &domain.Site{ID: id, Name: in.Name}, nil
-		}}).UpdateSite(context.Background(), "t", 7, domain.SiteWrite{Name: "A"})
+		got, err := (&MockRepo{
+			UpdateSiteFunc: func(
+				_ context.Context, _ string, id int, in domain.SiteWrite,
+			) (*domain.Site, error) {
+				return &domain.Site{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateSite(context.Background(), "t", 7, domain.SiteWrite{Name: "A"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateSite = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteSite", func(t *testing.T) {
-		err := (&MockRepo{DeleteSiteFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteSite(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteSiteFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteSite(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteSite = %v", err)
 		}
 	})
 	t.Run("CreateDevice", func(t *testing.T) {
-		got, err := (&MockRepo{CreateDeviceFunc: func(_ context.Context, _ string, in domain.DeviceWrite) (*domain.Device, error) {
-			return &domain.Device{ID: 1, Name: in.Name}, nil
-		}}).CreateDevice(context.Background(), "t", domain.DeviceWrite{Name: "A"})
+		got, err := (&MockRepo{
+			CreateDeviceFunc: func(
+				_ context.Context, _ string, in domain.DeviceWrite,
+			) (*domain.Device, error) {
+				return &domain.Device{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateDevice(context.Background(), "t", domain.DeviceWrite{Name: "A"})
 		if err != nil || got == nil || got.Name != "A" {
 			t.Errorf("CreateDevice = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateDevice", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateDeviceFunc: func(_ context.Context, _ string, id int, in domain.DeviceWrite) (*domain.Device, error) {
-			return &domain.Device{ID: id, Name: in.Name}, nil
-		}}).UpdateDevice(context.Background(), "t", 7, domain.DeviceWrite{Name: "A"})
+		got, err := (&MockRepo{
+			UpdateDeviceFunc: func(
+				_ context.Context, _ string, id int, in domain.DeviceWrite,
+			) (*domain.Device, error) {
+				return &domain.Device{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateDevice(context.Background(), "t", 7, domain.DeviceWrite{Name: "A"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateDevice = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteDevice", func(t *testing.T) {
-		err := (&MockRepo{DeleteDeviceFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteDevice(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteDeviceFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteDevice(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteDevice = %v", err)
 		}
 	})
 	t.Run("CreateIPAddress", func(t *testing.T) {
-		got, err := (&MockRepo{CreateIPAddressFunc: func(_ context.Context, _ string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
-			return &domain.IPAddress{ID: 1, Address: in.Address}, nil
-		}}).CreateIPAddress(context.Background(), "t", domain.IPAddressWrite{Address: "10.0.0.1/32"})
+		got, err := (&MockRepo{
+			CreateIPAddressFunc: func(
+				_ context.Context, _ string, in domain.IPAddressWrite,
+			) (*domain.IPAddress, error) {
+				return &domain.IPAddress{ID: 1, Address: in.Address}, nil
+			},
+		}).CreateIPAddress(context.Background(), "t", domain.IPAddressWrite{Address: "10.0.0.1/32"})
 		if err != nil || got == nil || got.Address != "10.0.0.1/32" {
 			t.Errorf("CreateIPAddress = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateIPAddress", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateIPAddressFunc: func(_ context.Context, _ string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
-			return &domain.IPAddress{ID: id, Address: in.Address}, nil
-		}}).UpdateIPAddress(context.Background(), "t", 7, domain.IPAddressWrite{Address: "10.0.0.1/32"})
+		got, err := (&MockRepo{
+			UpdateIPAddressFunc: func(
+				_ context.Context, _ string, id int, in domain.IPAddressWrite,
+			) (*domain.IPAddress, error) {
+				return &domain.IPAddress{ID: id, Address: in.Address}, nil
+			},
+		}).UpdateIPAddress(context.Background(), "t", 7, domain.IPAddressWrite{Address: "10.0.0.1/32"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateIPAddress = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteIPAddress", func(t *testing.T) {
-		err := (&MockRepo{DeleteIPAddressFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteIPAddress(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteIPAddressFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteIPAddress(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteIPAddress = %v", err)
 		}
 	})
 	t.Run("CreatePrefix", func(t *testing.T) {
-		got, err := (&MockRepo{CreatePrefixFunc: func(_ context.Context, _ string, in domain.PrefixWrite) (*domain.Prefix, error) {
-			return &domain.Prefix{ID: 1, Prefix: in.Prefix}, nil
-		}}).CreatePrefix(context.Background(), "t", domain.PrefixWrite{Prefix: "10.0.0.0/24"})
+		got, err := (&MockRepo{
+			CreatePrefixFunc: func(
+				_ context.Context, _ string, in domain.PrefixWrite,
+			) (*domain.Prefix, error) {
+				return &domain.Prefix{ID: 1, Prefix: in.Prefix}, nil
+			},
+		}).CreatePrefix(context.Background(), "t", domain.PrefixWrite{Prefix: "10.0.0.0/24"})
 		if err != nil || got == nil || got.Prefix != "10.0.0.0/24" {
 			t.Errorf("CreatePrefix = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdatePrefix", func(t *testing.T) {
-		got, err := (&MockRepo{UpdatePrefixFunc: func(_ context.Context, _ string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
-			return &domain.Prefix{ID: id, Prefix: in.Prefix}, nil
-		}}).UpdatePrefix(context.Background(), "t", 7, domain.PrefixWrite{Prefix: "10.0.0.0/24"})
+		got, err := (&MockRepo{
+			UpdatePrefixFunc: func(
+				_ context.Context, _ string, id int, in domain.PrefixWrite,
+			) (*domain.Prefix, error) {
+				return &domain.Prefix{ID: id, Prefix: in.Prefix}, nil
+			},
+		}).UpdatePrefix(context.Background(), "t", 7, domain.PrefixWrite{Prefix: "10.0.0.0/24"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdatePrefix = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeletePrefix", func(t *testing.T) {
-		err := (&MockRepo{DeletePrefixFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeletePrefix(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeletePrefixFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeletePrefix(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeletePrefix = %v", err)
 		}
 	})
 	t.Run("CreateVLAN", func(t *testing.T) {
-		got, err := (&MockRepo{CreateVLANFunc: func(_ context.Context, _ string, in domain.VLANWrite) (*domain.VLAN, error) {
-			return &domain.VLAN{ID: 1, VID: in.VID, Name: in.Name}, nil
-		}}).CreateVLAN(context.Background(), "t", domain.VLANWrite{VID: 100, Name: "mgmt"})
+		got, err := (&MockRepo{
+			CreateVLANFunc: func(
+				_ context.Context, _ string, in domain.VLANWrite,
+			) (*domain.VLAN, error) {
+				return &domain.VLAN{ID: 1, VID: in.VID, Name: in.Name}, nil
+			},
+		}).CreateVLAN(context.Background(), "t", domain.VLANWrite{VID: 100, Name: "mgmt"})
 		if err != nil || got == nil || got.Name != "mgmt" {
 			t.Errorf("CreateVLAN = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateVLAN", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateVLANFunc: func(_ context.Context, _ string, id int, in domain.VLANWrite) (*domain.VLAN, error) {
-			return &domain.VLAN{ID: id, VID: in.VID, Name: in.Name}, nil
-		}}).UpdateVLAN(context.Background(), "t", 7, domain.VLANWrite{VID: 100, Name: "mgmt"})
+		got, err := (&MockRepo{
+			UpdateVLANFunc: func(
+				_ context.Context, _ string, id int, in domain.VLANWrite,
+			) (*domain.VLAN, error) {
+				return &domain.VLAN{ID: id, VID: in.VID, Name: in.Name}, nil
+			},
+		}).UpdateVLAN(context.Background(), "t", 7, domain.VLANWrite{VID: 100, Name: "mgmt"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateVLAN = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteVLAN", func(t *testing.T) {
-		err := (&MockRepo{DeleteVLANFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteVLAN(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteVLANFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteVLAN(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteVLAN = %v", err)
 		}
 	})
 	t.Run("CreateVirtualMachine", func(t *testing.T) {
-		got, err := (&MockRepo{CreateVirtualMachineFunc: func(_ context.Context, _ string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
-			return &domain.VirtualMachine{ID: 1, Name: in.Name}, nil
-		}}).CreateVirtualMachine(context.Background(), "t", domain.VirtualMachineWrite{Name: "web-01"})
+		got, err := (&MockRepo{
+			CreateVirtualMachineFunc: func(
+				_ context.Context, _ string, in domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
+				return &domain.VirtualMachine{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateVirtualMachine(context.Background(), "t", domain.VirtualMachineWrite{Name: "web-01"})
 		if err != nil || got == nil || got.Name != "web-01" {
 			t.Errorf("CreateVirtualMachine = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateVirtualMachine", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateVirtualMachineFunc: func(_ context.Context, _ string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
-			return &domain.VirtualMachine{ID: id, Name: in.Name}, nil
-		}}).UpdateVirtualMachine(context.Background(), "t", 7, domain.VirtualMachineWrite{Name: "web-01"})
+		got, err := (&MockRepo{
+			UpdateVirtualMachineFunc: func(
+				_ context.Context, _ string, id int, in domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
+				return &domain.VirtualMachine{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateVirtualMachine(context.Background(), "t", 7, domain.VirtualMachineWrite{Name: "web-01"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateVirtualMachine = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteVirtualMachine", func(t *testing.T) {
-		err := (&MockRepo{DeleteVirtualMachineFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteVirtualMachine(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteVirtualMachineFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteVirtualMachine(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteVirtualMachine = %v", err)
 		}
 	})
 	t.Run("CreateCluster", func(t *testing.T) {
-		got, err := (&MockRepo{CreateClusterFunc: func(_ context.Context, _ string, in domain.ClusterWrite) (*domain.Cluster, error) {
-			return &domain.Cluster{ID: 1, Name: in.Name}, nil
-		}}).CreateCluster(context.Background(), "t", domain.ClusterWrite{Name: "prod"})
+		got, err := (&MockRepo{
+			CreateClusterFunc: func(
+				_ context.Context, _ string, in domain.ClusterWrite,
+			) (*domain.Cluster, error) {
+				return &domain.Cluster{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateCluster(context.Background(), "t", domain.ClusterWrite{Name: "prod"})
 		if err != nil || got == nil || got.Name != "prod" {
 			t.Errorf("CreateCluster = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateCluster", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateClusterFunc: func(_ context.Context, _ string, id int, in domain.ClusterWrite) (*domain.Cluster, error) {
-			return &domain.Cluster{ID: id, Name: in.Name}, nil
-		}}).UpdateCluster(context.Background(), "t", 7, domain.ClusterWrite{Name: "prod"})
+		got, err := (&MockRepo{
+			UpdateClusterFunc: func(
+				_ context.Context, _ string, id int, in domain.ClusterWrite,
+			) (*domain.Cluster, error) {
+				return &domain.Cluster{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateCluster(context.Background(), "t", 7, domain.ClusterWrite{Name: "prod"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateCluster = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteCluster", func(t *testing.T) {
-		err := (&MockRepo{DeleteClusterFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteCluster(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteClusterFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteCluster(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteCluster = %v", err)
 		}
 	})
 	t.Run("CreateRack", func(t *testing.T) {
-		got, err := (&MockRepo{CreateRackFunc: func(_ context.Context, _ string, in domain.RackWrite) (*domain.Rack, error) {
-			return &domain.Rack{ID: 1, Name: in.Name}, nil
-		}}).CreateRack(context.Background(), "t", domain.RackWrite{Name: "R1"})
+		got, err := (&MockRepo{
+			CreateRackFunc: func(
+				_ context.Context, _ string, in domain.RackWrite,
+			) (*domain.Rack, error) {
+				return &domain.Rack{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateRack(context.Background(), "t", domain.RackWrite{Name: "R1"})
 		if err != nil || got == nil || got.Name != "R1" {
 			t.Errorf("CreateRack = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateRack", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateRackFunc: func(_ context.Context, _ string, id int, in domain.RackWrite) (*domain.Rack, error) {
-			return &domain.Rack{ID: id, Name: in.Name}, nil
-		}}).UpdateRack(context.Background(), "t", 7, domain.RackWrite{Name: "R1"})
+		got, err := (&MockRepo{
+			UpdateRackFunc: func(
+				_ context.Context, _ string, id int, in domain.RackWrite,
+			) (*domain.Rack, error) {
+				return &domain.Rack{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateRack(context.Background(), "t", 7, domain.RackWrite{Name: "R1"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateRack = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteRack", func(t *testing.T) {
-		err := (&MockRepo{DeleteRackFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteRack(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteRackFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRack(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteRack = %v", err)
 		}
 	})
 	t.Run("CreateInterface", func(t *testing.T) {
-		got, err := (&MockRepo{CreateInterfaceFunc: func(_ context.Context, _ string, in domain.InterfaceWrite) (*domain.Interface, error) {
-			return &domain.Interface{ID: 1, Name: in.Name}, nil
-		}}).CreateInterface(context.Background(), "t", domain.InterfaceWrite{Name: "eth0"})
+		got, err := (&MockRepo{
+			CreateInterfaceFunc: func(
+				_ context.Context, _ string, in domain.InterfaceWrite,
+			) (*domain.Interface, error) {
+				return &domain.Interface{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateInterface(context.Background(), "t", domain.InterfaceWrite{Name: "eth0"})
 		if err != nil || got == nil || got.Name != "eth0" {
 			t.Errorf("CreateInterface = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateInterface", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateInterfaceFunc: func(_ context.Context, _ string, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
-			return &domain.Interface{ID: id, Name: in.Name}, nil
-		}}).UpdateInterface(context.Background(), "t", 7, domain.InterfaceWrite{Name: "eth0"})
+		got, err := (&MockRepo{
+			UpdateInterfaceFunc: func(
+				_ context.Context, _ string, id int, in domain.InterfaceWrite,
+			) (*domain.Interface, error) {
+				return &domain.Interface{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateInterface(context.Background(), "t", 7, domain.InterfaceWrite{Name: "eth0"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateInterface = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteInterface", func(t *testing.T) {
-		err := (&MockRepo{DeleteInterfaceFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteInterface(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteInterfaceFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteInterface(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteInterface = %v", err)
 		}
 	})
 	t.Run("CreateCircuitTermination", func(t *testing.T) {
-		got, err := (&MockRepo{CreateCircuitTerminationFunc: func(_ context.Context, _ string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
-			return &domain.CircuitTermination{ID: 1, TermSide: in.TermSide}, nil
-		}}).CreateCircuitTermination(context.Background(), "t", domain.CircuitTerminationWrite{TermSide: "A"})
+		got, err := (&MockRepo{
+			CreateCircuitTerminationFunc: func(
+				_ context.Context, _ string, in domain.CircuitTerminationWrite,
+			) (*domain.CircuitTermination, error) {
+				return &domain.CircuitTermination{ID: 1, TermSide: in.TermSide}, nil
+			},
+		}).CreateCircuitTermination(context.Background(), "t", domain.CircuitTerminationWrite{TermSide: "A"})
 		if err != nil || got == nil || got.TermSide != "A" {
 			t.Errorf("CreateCircuitTermination = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateCircuitTermination", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateCircuitTerminationFunc: func(_ context.Context, _ string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
-			return &domain.CircuitTermination{ID: id, TermSide: in.TermSide}, nil
-		}}).UpdateCircuitTermination(context.Background(), "t", 7, domain.CircuitTerminationWrite{TermSide: "A"})
+		got, err := (&MockRepo{
+			UpdateCircuitTerminationFunc: func(
+				_ context.Context, _ string, id int, in domain.CircuitTerminationWrite,
+			) (*domain.CircuitTermination, error) {
+				return &domain.CircuitTermination{ID: id, TermSide: in.TermSide}, nil
+			},
+		}).UpdateCircuitTermination(context.Background(), "t", 7, domain.CircuitTerminationWrite{TermSide: "A"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateCircuitTermination = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteCircuitTermination", func(t *testing.T) {
-		err := (&MockRepo{DeleteCircuitTerminationFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteCircuitTermination(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteCircuitTerminationFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteCircuitTermination(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteCircuitTermination = %v", err)
 		}
 	})
 	t.Run("CreateCable", func(t *testing.T) {
 		label := "link-01"
-		got, err := (&MockRepo{CreateCableFunc: func(_ context.Context, _ string, in domain.CableWrite) (*domain.Cable, error) {
-			return &domain.Cable{ID: 1, Label: *in.Label}, nil
-		}}).CreateCable(context.Background(), "t", domain.CableWrite{Label: &label})
+		got, err := (&MockRepo{
+			CreateCableFunc: func(
+				_ context.Context, _ string, in domain.CableWrite,
+			) (*domain.Cable, error) {
+				return &domain.Cable{ID: 1, Label: *in.Label}, nil
+			},
+		}).CreateCable(context.Background(), "t", domain.CableWrite{Label: &label})
 		if err != nil || got == nil || got.Label != "link-01" {
 			t.Errorf("CreateCable = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateCable", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateCableFunc: func(_ context.Context, _ string, id int, _ domain.CableWrite) (*domain.Cable, error) {
-			return &domain.Cable{ID: id}, nil
-		}}).UpdateCable(context.Background(), "t", 7, domain.CableWrite{})
+		got, err := (&MockRepo{
+			UpdateCableFunc: func(
+				_ context.Context, _ string, id int, _ domain.CableWrite,
+			) (*domain.Cable, error) {
+				return &domain.Cable{ID: id}, nil
+			},
+		}).UpdateCable(context.Background(), "t", 7, domain.CableWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateCable = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteCable", func(t *testing.T) {
-		err := (&MockRepo{DeleteCableFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteCable(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteCableFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteCable(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteCable = %v", err)
 		}
 	})
 	t.Run("CreateVMInterface", func(t *testing.T) {
-		got, err := (&MockRepo{CreateVMInterfaceFunc: func(_ context.Context, _ string, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
-			return &domain.VMInterface{ID: 1, Name: in.Name}, nil
-		}}).CreateVMInterface(context.Background(), "t", domain.VMInterfaceWrite{Name: "eth0"})
+		got, err := (&MockRepo{
+			CreateVMInterfaceFunc: func(
+				_ context.Context, _ string, in domain.VMInterfaceWrite,
+			) (*domain.VMInterface, error) {
+				return &domain.VMInterface{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateVMInterface(context.Background(), "t", domain.VMInterfaceWrite{Name: "eth0"})
 		if err != nil || got == nil || got.Name != "eth0" {
 			t.Errorf("CreateVMInterface = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateVMInterface", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateVMInterfaceFunc: func(_ context.Context, _ string, id int, _ domain.VMInterfaceWrite) (*domain.VMInterface, error) {
-			return &domain.VMInterface{ID: id}, nil
-		}}).UpdateVMInterface(context.Background(), "t", 7, domain.VMInterfaceWrite{})
+		got, err := (&MockRepo{
+			UpdateVMInterfaceFunc: func(
+				_ context.Context, _ string, id int, _ domain.VMInterfaceWrite,
+			) (*domain.VMInterface, error) {
+				return &domain.VMInterface{ID: id}, nil
+			},
+		}).UpdateVMInterface(context.Background(), "t", 7, domain.VMInterfaceWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateVMInterface = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteVMInterface", func(t *testing.T) {
-		err := (&MockRepo{DeleteVMInterfaceFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteVMInterface(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteVMInterfaceFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteVMInterface(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteVMInterface = %v", err)
 		}
 	})
 	t.Run("CreateProvider", func(t *testing.T) {
-		got, err := (&MockRepo{CreateProviderFunc: func(_ context.Context, _ string, in domain.ProviderWrite) (*domain.Provider, error) {
-			return &domain.Provider{ID: 1, Name: in.Name}, nil
-		}}).CreateProvider(context.Background(), "t", domain.ProviderWrite{Name: "ACME"})
+		got, err := (&MockRepo{
+			CreateProviderFunc: func(
+				_ context.Context, _ string, in domain.ProviderWrite,
+			) (*domain.Provider, error) {
+				return &domain.Provider{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateProvider(context.Background(), "t", domain.ProviderWrite{Name: "ACME"})
 		if err != nil || got == nil || got.Name != "ACME" {
 			t.Errorf("CreateProvider = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateProvider", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateProviderFunc: func(_ context.Context, _ string, id int, _ domain.ProviderWrite) (*domain.Provider, error) {
-			return &domain.Provider{ID: id}, nil
-		}}).UpdateProvider(context.Background(), "t", 7, domain.ProviderWrite{})
+		got, err := (&MockRepo{
+			UpdateProviderFunc: func(
+				_ context.Context, _ string, id int, _ domain.ProviderWrite,
+			) (*domain.Provider, error) {
+				return &domain.Provider{ID: id}, nil
+			},
+		}).UpdateProvider(context.Background(), "t", 7, domain.ProviderWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateProvider = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteProvider", func(t *testing.T) {
-		err := (&MockRepo{DeleteProviderFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteProvider(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteProviderFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteProvider(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteProvider = %v", err)
 		}
 	})
 	t.Run("CreateTenant", func(t *testing.T) {
-		got, err := (&MockRepo{CreateTenantFunc: func(_ context.Context, _ string, in domain.TenantWrite) (*domain.Tenant, error) {
-			return &domain.Tenant{ID: 1, Name: in.Name}, nil
-		}}).CreateTenant(context.Background(), "t", domain.TenantWrite{Name: "ACME"})
+		got, err := (&MockRepo{
+			CreateTenantFunc: func(
+				_ context.Context, _ string, in domain.TenantWrite,
+			) (*domain.Tenant, error) {
+				return &domain.Tenant{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateTenant(context.Background(), "t", domain.TenantWrite{Name: "ACME"})
 		if err != nil || got == nil || got.Name != "ACME" {
 			t.Errorf("CreateTenant = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateTenant", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateTenantFunc: func(_ context.Context, _ string, id int, _ domain.TenantWrite) (*domain.Tenant, error) {
-			return &domain.Tenant{ID: id}, nil
-		}}).UpdateTenant(context.Background(), "t", 7, domain.TenantWrite{})
+		got, err := (&MockRepo{
+			UpdateTenantFunc: func(
+				_ context.Context, _ string, id int, _ domain.TenantWrite,
+			) (*domain.Tenant, error) {
+				return &domain.Tenant{ID: id}, nil
+			},
+		}).UpdateTenant(context.Background(), "t", 7, domain.TenantWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateTenant = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteTenant", func(t *testing.T) {
-		err := (&MockRepo{DeleteTenantFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteTenant(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteTenantFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteTenant(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteTenant = %v", err)
 		}
 	})
 	t.Run("CreateManufacturer", func(t *testing.T) {
-		got, err := (&MockRepo{CreateManufacturerFunc: func(_ context.Context, _ string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
-			return &domain.Manufacturer{ID: 1, Name: in.Name}, nil
-		}}).CreateManufacturer(context.Background(), "t", domain.ManufacturerWrite{Name: "Cisco"})
+		got, err := (&MockRepo{
+			CreateManufacturerFunc: func(
+				_ context.Context, _ string, in domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
+				return &domain.Manufacturer{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateManufacturer(context.Background(), "t", domain.ManufacturerWrite{Name: "Cisco"})
 		if err != nil || got == nil || got.Name != "Cisco" {
 			t.Errorf("CreateManufacturer = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateManufacturer", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateManufacturerFunc: func(_ context.Context, _ string, id int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
-			return &domain.Manufacturer{ID: id}, nil
-		}}).UpdateManufacturer(context.Background(), "t", 7, domain.ManufacturerWrite{})
+		got, err := (&MockRepo{
+			UpdateManufacturerFunc: func(
+				_ context.Context, _ string, id int, _ domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
+				return &domain.Manufacturer{ID: id}, nil
+			},
+		}).UpdateManufacturer(context.Background(), "t", 7, domain.ManufacturerWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateManufacturer = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteManufacturer", func(t *testing.T) {
-		err := (&MockRepo{DeleteManufacturerFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteManufacturer(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteManufacturerFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteManufacturer(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteManufacturer = %v", err)
 		}
 	})
 	t.Run("CreateDeviceType", func(t *testing.T) {
-		got, err := (&MockRepo{CreateDeviceTypeFunc: func(_ context.Context, _ string, in domain.DeviceTypeWrite) (*domain.DeviceType, error) {
-			return &domain.DeviceType{ID: 1, Model: in.Model}, nil
-		}}).CreateDeviceType(context.Background(), "t", domain.DeviceTypeWrite{Model: "C9300"})
+		got, err := (&MockRepo{
+			CreateDeviceTypeFunc: func(
+				_ context.Context, _ string, in domain.DeviceTypeWrite,
+			) (*domain.DeviceType, error) {
+				return &domain.DeviceType{ID: 1, Model: in.Model}, nil
+			},
+		}).CreateDeviceType(context.Background(), "t", domain.DeviceTypeWrite{Model: "C9300"})
 		if err != nil || got == nil || got.Model != "C9300" {
 			t.Errorf("CreateDeviceType = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateDeviceType", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateDeviceTypeFunc: func(_ context.Context, _ string, id int, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
-			return &domain.DeviceType{ID: id}, nil
-		}}).UpdateDeviceType(context.Background(), "t", 7, domain.DeviceTypeWrite{})
+		got, err := (&MockRepo{
+			UpdateDeviceTypeFunc: func(
+				_ context.Context, _ string, id int, _ domain.DeviceTypeWrite,
+			) (*domain.DeviceType, error) {
+				return &domain.DeviceType{ID: id}, nil
+			},
+		}).UpdateDeviceType(context.Background(), "t", 7, domain.DeviceTypeWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateDeviceType = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteDeviceType", func(t *testing.T) {
-		err := (&MockRepo{DeleteDeviceTypeFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteDeviceType(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteDeviceTypeFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteDeviceType(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteDeviceType = %v", err)
 		}
 	})
 	t.Run("CreateLocation", func(t *testing.T) {
 		site := 5
-		got, err := (&MockRepo{CreateLocationFunc: func(_ context.Context, _ string, in domain.LocationWrite) (*domain.Location, error) {
-			return &domain.Location{ID: 1, Name: in.Name}, nil
-		}}).CreateLocation(context.Background(), "t", domain.LocationWrite{Name: "Row A", Site: &site})
+		got, err := (&MockRepo{
+			CreateLocationFunc: func(
+				_ context.Context, _ string, in domain.LocationWrite,
+			) (*domain.Location, error) {
+				return &domain.Location{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateLocation(context.Background(), "t", domain.LocationWrite{Name: "Row A", Site: &site})
 		if err != nil || got == nil || got.Name != "Row A" {
 			t.Errorf("CreateLocation = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateLocation", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateLocationFunc: func(_ context.Context, _ string, id int, _ domain.LocationWrite) (*domain.Location, error) {
-			return &domain.Location{ID: id}, nil
-		}}).UpdateLocation(context.Background(), "t", 7, domain.LocationWrite{})
+		got, err := (&MockRepo{
+			UpdateLocationFunc: func(
+				_ context.Context, _ string, id int, _ domain.LocationWrite,
+			) (*domain.Location, error) {
+				return &domain.Location{ID: id}, nil
+			},
+		}).UpdateLocation(context.Background(), "t", 7, domain.LocationWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateLocation = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteLocation", func(t *testing.T) {
-		err := (&MockRepo{DeleteLocationFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteLocation(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteLocationFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteLocation(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteLocation = %v", err)
 		}
 	})
 	t.Run("CreateClusterType", func(t *testing.T) {
-		got, err := (&MockRepo{CreateClusterTypeFunc: func(_ context.Context, _ string, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
-			return &domain.ClusterType{ID: 1, Name: in.Name}, nil
-		}}).CreateClusterType(context.Background(), "t", domain.ClusterTypeWrite{Name: "KVM"})
+		got, err := (&MockRepo{
+			CreateClusterTypeFunc: func(
+				_ context.Context, _ string, in domain.ClusterTypeWrite,
+			) (*domain.ClusterType, error) {
+				return &domain.ClusterType{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateClusterType(context.Background(), "t", domain.ClusterTypeWrite{Name: "KVM"})
 		if err != nil || got == nil || got.Name != "KVM" {
 			t.Errorf("CreateClusterType = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateClusterType", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateClusterTypeFunc: func(_ context.Context, _ string, id int, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
-			return &domain.ClusterType{ID: id}, nil
-		}}).UpdateClusterType(context.Background(), "t", 7, domain.ClusterTypeWrite{})
+		got, err := (&MockRepo{
+			UpdateClusterTypeFunc: func(
+				_ context.Context, _ string, id int, _ domain.ClusterTypeWrite,
+			) (*domain.ClusterType, error) {
+				return &domain.ClusterType{ID: id}, nil
+			},
+		}).UpdateClusterType(context.Background(), "t", 7, domain.ClusterTypeWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateClusterType = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteClusterType", func(t *testing.T) {
-		err := (&MockRepo{DeleteClusterTypeFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteClusterType(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteClusterTypeFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteClusterType(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteClusterType = %v", err)
 		}
 	})
 	t.Run("CreateClusterGroup", func(t *testing.T) {
-		got, err := (&MockRepo{CreateClusterGroupFunc: func(_ context.Context, _ string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
-			return &domain.ClusterGroup{ID: 1, Name: in.Name}, nil
-		}}).CreateClusterGroup(context.Background(), "t", domain.ClusterGroupWrite{Name: "DC Clusters"})
+		got, err := (&MockRepo{
+			CreateClusterGroupFunc: func(
+				_ context.Context, _ string, in domain.ClusterGroupWrite,
+			) (*domain.ClusterGroup, error) {
+				return &domain.ClusterGroup{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateClusterGroup(context.Background(), "t", domain.ClusterGroupWrite{Name: "DC Clusters"})
 		if err != nil || got == nil || got.Name != "DC Clusters" {
 			t.Errorf("CreateClusterGroup = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateClusterGroup", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateClusterGroupFunc: func(_ context.Context, _ string, id int, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
-			return &domain.ClusterGroup{ID: id}, nil
-		}}).UpdateClusterGroup(context.Background(), "t", 7, domain.ClusterGroupWrite{})
+		got, err := (&MockRepo{
+			UpdateClusterGroupFunc: func(
+				_ context.Context, _ string, id int, _ domain.ClusterGroupWrite,
+			) (*domain.ClusterGroup, error) {
+				return &domain.ClusterGroup{ID: id}, nil
+			},
+		}).UpdateClusterGroup(context.Background(), "t", 7, domain.ClusterGroupWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateClusterGroup = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteClusterGroup", func(t *testing.T) {
-		err := (&MockRepo{DeleteClusterGroupFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteClusterGroup(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteClusterGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteClusterGroup(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteClusterGroup = %v", err)
 		}
 	})
 	t.Run("CreateCircuitType", func(t *testing.T) {
-		got, err := (&MockRepo{CreateCircuitTypeFunc: func(_ context.Context, _ string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
-			return &domain.CircuitType{ID: 1, Name: in.Name}, nil
-		}}).CreateCircuitType(context.Background(), "t", domain.CircuitTypeWrite{Name: "Fiber"})
+		got, err := (&MockRepo{
+			CreateCircuitTypeFunc: func(
+				_ context.Context, _ string, in domain.CircuitTypeWrite,
+			) (*domain.CircuitType, error) {
+				return &domain.CircuitType{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateCircuitType(context.Background(), "t", domain.CircuitTypeWrite{Name: "Fiber"})
 		if err != nil || got == nil || got.Name != "Fiber" {
 			t.Errorf("CreateCircuitType = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateCircuitType", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateCircuitTypeFunc: func(_ context.Context, _ string, id int, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
-			return &domain.CircuitType{ID: id}, nil
-		}}).UpdateCircuitType(context.Background(), "t", 7, domain.CircuitTypeWrite{})
+		got, err := (&MockRepo{
+			UpdateCircuitTypeFunc: func(
+				_ context.Context, _ string, id int, _ domain.CircuitTypeWrite,
+			) (*domain.CircuitType, error) {
+				return &domain.CircuitType{ID: id}, nil
+			},
+		}).UpdateCircuitType(context.Background(), "t", 7, domain.CircuitTypeWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateCircuitType = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteCircuitType", func(t *testing.T) {
-		err := (&MockRepo{DeleteCircuitTypeFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteCircuitType(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteCircuitTypeFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteCircuitType(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteCircuitType = %v", err)
 		}
 	})
 	t.Run("CreateVrf", func(t *testing.T) {
-		got, err := (&MockRepo{CreateVrfFunc: func(_ context.Context, _ string, in domain.VrfWrite) (*domain.Vrf, error) {
-			return &domain.Vrf{ID: 1, Name: in.Name, Rd: in.Rd}, nil
-		}}).CreateVrf(context.Background(), "t", domain.VrfWrite{Name: "prod", Rd: "65000:1"})
+		got, err := (&MockRepo{
+			CreateVrfFunc: func(
+				_ context.Context, _ string, in domain.VrfWrite,
+			) (*domain.Vrf, error) {
+				return &domain.Vrf{ID: 1, Name: in.Name, Rd: in.Rd}, nil
+			},
+		}).CreateVrf(context.Background(), "t", domain.VrfWrite{Name: "prod", Rd: "65000:1"})
 		if err != nil || got == nil || got.Name != "prod" || got.Rd != "65000:1" {
 			t.Errorf("CreateVrf = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateVrf", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateVrfFunc: func(_ context.Context, _ string, id int, _ domain.VrfWrite) (*domain.Vrf, error) {
-			return &domain.Vrf{ID: id}, nil
-		}}).UpdateVrf(context.Background(), "t", 7, domain.VrfWrite{})
+		got, err := (&MockRepo{
+			UpdateVrfFunc: func(
+				_ context.Context, _ string, id int, _ domain.VrfWrite,
+			) (*domain.Vrf, error) {
+				return &domain.Vrf{ID: id}, nil
+			},
+		}).UpdateVrf(context.Background(), "t", 7, domain.VrfWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateVrf = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteVrf", func(t *testing.T) {
-		err := (&MockRepo{DeleteVrfFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteVrf(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteVrfFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteVrf(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteVrf = %v", err)
 		}
 	})
 	t.Run("CreateVlanGroup", func(t *testing.T) {
-		got, err := (&MockRepo{CreateVlanGroupFunc: func(_ context.Context, _ string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
-			return &domain.VlanGroup{ID: 1, Name: in.Name}, nil
-		}}).CreateVlanGroup(context.Background(), "t", domain.VlanGroupWrite{Name: "DC VLANs"})
+		got, err := (&MockRepo{
+			CreateVlanGroupFunc: func(
+				_ context.Context, _ string, in domain.VlanGroupWrite,
+			) (*domain.VlanGroup, error) {
+				return &domain.VlanGroup{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateVlanGroup(context.Background(), "t", domain.VlanGroupWrite{Name: "DC VLANs"})
 		if err != nil || got == nil || got.Name != "DC VLANs" {
 			t.Errorf("CreateVlanGroup = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateVlanGroup", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateVlanGroupFunc: func(_ context.Context, _ string, id int, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
-			return &domain.VlanGroup{ID: id}, nil
-		}}).UpdateVlanGroup(context.Background(), "t", 7, domain.VlanGroupWrite{})
+		got, err := (&MockRepo{
+			UpdateVlanGroupFunc: func(
+				_ context.Context, _ string, id int, _ domain.VlanGroupWrite,
+			) (*domain.VlanGroup, error) {
+				return &domain.VlanGroup{ID: id}, nil
+			},
+		}).UpdateVlanGroup(context.Background(), "t", 7, domain.VlanGroupWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateVlanGroup = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteVlanGroup", func(t *testing.T) {
-		err := (&MockRepo{DeleteVlanGroupFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteVlanGroup(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteVlanGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteVlanGroup(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteVlanGroup = %v", err)
 		}
 	})
 	t.Run("CreateRole", func(t *testing.T) {
-		got, err := (&MockRepo{CreateRoleFunc: func(_ context.Context, _ string, in domain.RoleWrite) (*domain.Role, error) {
-			return &domain.Role{ID: 1, Name: in.Name}, nil
-		}}).CreateRole(context.Background(), "t", domain.RoleWrite{Name: "prod"})
+		got, err := (&MockRepo{
+			CreateRoleFunc: func(
+				_ context.Context, _ string, in domain.RoleWrite,
+			) (*domain.Role, error) {
+				return &domain.Role{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateRole(context.Background(), "t", domain.RoleWrite{Name: "prod"})
 		if err != nil || got == nil || got.Name != "prod" {
 			t.Errorf("CreateRole = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateRole", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateRoleFunc: func(_ context.Context, _ string, id int, _ domain.RoleWrite) (*domain.Role, error) {
-			return &domain.Role{ID: id}, nil
-		}}).UpdateRole(context.Background(), "t", 7, domain.RoleWrite{})
+		got, err := (&MockRepo{
+			UpdateRoleFunc: func(
+				_ context.Context, _ string, id int, _ domain.RoleWrite,
+			) (*domain.Role, error) {
+				return &domain.Role{ID: id}, nil
+			},
+		}).UpdateRole(context.Background(), "t", 7, domain.RoleWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateRole = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteRole", func(t *testing.T) {
-		err := (&MockRepo{DeleteRoleFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteRole(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteRoleFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRole(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteRole = %v", err)
 		}
 	})
 	t.Run("CreateContact", func(t *testing.T) {
-		got, err := (&MockRepo{CreateContactFunc: func(_ context.Context, _ string, in domain.ContactWrite) (*domain.Contact, error) {
-			return &domain.Contact{ID: 1, Name: in.Name}, nil
-		}}).CreateContact(context.Background(), "t", domain.ContactWrite{Name: "ops"})
+		got, err := (&MockRepo{
+			CreateContactFunc: func(
+				_ context.Context, _ string, in domain.ContactWrite,
+			) (*domain.Contact, error) {
+				return &domain.Contact{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateContact(context.Background(), "t", domain.ContactWrite{Name: "ops"})
 		if err != nil || got == nil || got.Name != "ops" {
 			t.Errorf("CreateContact = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateContact", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateContactFunc: func(_ context.Context, _ string, id int, _ domain.ContactWrite) (*domain.Contact, error) {
-			return &domain.Contact{ID: id}, nil
-		}}).UpdateContact(context.Background(), "t", 7, domain.ContactWrite{})
+		got, err := (&MockRepo{
+			UpdateContactFunc: func(
+				_ context.Context, _ string, id int, _ domain.ContactWrite,
+			) (*domain.Contact, error) {
+				return &domain.Contact{ID: id}, nil
+			},
+		}).UpdateContact(context.Background(), "t", 7, domain.ContactWrite{})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateContact = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteContact", func(t *testing.T) {
-		err := (&MockRepo{DeleteContactFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteContact(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteContactFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteContact(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteContact = %v", err)
 		}
 	})
 	t.Run("CreateCircuit", func(t *testing.T) {
-		got, err := (&MockRepo{CreateCircuitFunc: func(_ context.Context, _ string, in domain.CircuitWrite) (*domain.Circuit, error) {
-			return &domain.Circuit{ID: 1, CID: in.CID}, nil
-		}}).CreateCircuit(context.Background(), "t", domain.CircuitWrite{CID: "CIR-001"})
+		got, err := (&MockRepo{
+			CreateCircuitFunc: func(
+				_ context.Context, _ string, in domain.CircuitWrite,
+			) (*domain.Circuit, error) {
+				return &domain.Circuit{ID: 1, CID: in.CID}, nil
+			},
+		}).CreateCircuit(context.Background(), "t", domain.CircuitWrite{CID: "CIR-001"})
 		if err != nil || got == nil || got.CID != "CIR-001" {
 			t.Errorf("CreateCircuit = (%v, %v)", got, err)
 		}
 	})
 	t.Run("UpdateCircuit", func(t *testing.T) {
-		got, err := (&MockRepo{UpdateCircuitFunc: func(_ context.Context, _ string, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
-			return &domain.Circuit{ID: id, CID: in.CID}, nil
-		}}).UpdateCircuit(context.Background(), "t", 7, domain.CircuitWrite{CID: "CIR-001"})
+		got, err := (&MockRepo{
+			UpdateCircuitFunc: func(
+				_ context.Context, _ string, id int, in domain.CircuitWrite,
+			) (*domain.Circuit, error) {
+				return &domain.Circuit{ID: id, CID: in.CID}, nil
+			},
+		}).UpdateCircuit(context.Background(), "t", 7, domain.CircuitWrite{CID: "CIR-001"})
 		if err != nil || got == nil || got.ID != 7 {
 			t.Errorf("UpdateCircuit = (%v, %v)", got, err)
 		}
 	})
 	t.Run("DeleteCircuit", func(t *testing.T) {
-		err := (&MockRepo{DeleteCircuitFunc: func(_ context.Context, _ string, id int) error {
-			if id != 3 {
-				t.Errorf("id = %d, want 3", id)
-			}
-			return nil
-		}}).DeleteCircuit(context.Background(), "t", 3)
+		err := (&MockRepo{
+			DeleteCircuitFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteCircuit(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteCircuit = %v", err)
 		}
@@ -813,16 +1144,20 @@ func TestMockRepo_PropagatesError(t *testing.T) {
 	t.Parallel()
 
 	wantErr := errors.New("boom")
-	_, err := (&MockRepo{ListSitesFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
-		return nil, wantErr
-	}}).ListSites(context.Background(), "t", nil)
-	if err != wantErr {
+	_, err := (&MockRepo{
+		ListSitesFunc: func(
+			context.Context, string, map[string]string,
+		) (*domain.PaginatedResponse[domain.Site], error) {
+			return nil, wantErr
+		},
+	}).ListSites(context.Background(), "t", nil)
+	if !errors.Is(err, wantErr) {
 		t.Errorf("ListSites err = %v, want %v", err, wantErr)
 	}
 }
 
-//nolint:gocognit,gocyclo,maintidx // exhaustive per-method table test over every repository method
-func TestNilRepo_AllMethods(t *testing.T) {
+// TestNilRepo_AllMethods exercises every NilRepo method.
+func TestNilRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,maintidx
 	t.Parallel()
 
 	ctx := context.Background()
@@ -902,20 +1237,24 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	if err := repo.DeleteDevice(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteDevice = %v", err)
 	}
-	if ip, err := repo.CreateIPAddress(ctx, "t", domain.IPAddressWrite{Address: "10.0.0.1/32"}); err != nil || ip.Address != "10.0.0.1/32" {
-		t.Errorf("CreateIPAddress = (%v, %v)", ip, err)
+	ipAddr, err := repo.CreateIPAddress(ctx, "t", domain.IPAddressWrite{Address: "10.0.0.1/32"})
+	if err != nil || ipAddr.Address != "10.0.0.1/32" {
+		t.Errorf("CreateIPAddress = (%v, %v)", ipAddr, err)
 	}
-	if ip, err := repo.UpdateIPAddress(ctx, "t", 7, domain.IPAddressWrite{Address: "10.0.0.1/32"}); err != nil || ip.ID != 7 {
-		t.Errorf("UpdateIPAddress = (%v, %v)", ip, err)
+	ipAddr, err = repo.UpdateIPAddress(ctx, "t", 7, domain.IPAddressWrite{Address: "10.0.0.1/32"})
+	if err != nil || ipAddr.ID != 7 {
+		t.Errorf("UpdateIPAddress = (%v, %v)", ipAddr, err)
 	}
 	if err := repo.DeleteIPAddress(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteIPAddress = %v", err)
 	}
-	if p, err := repo.CreatePrefix(ctx, "t", domain.PrefixWrite{Prefix: "10.0.0.0/24"}); err != nil || p.Prefix != "10.0.0.0/24" {
-		t.Errorf("CreatePrefix = (%v, %v)", p, err)
+	prefix, err := repo.CreatePrefix(ctx, "t", domain.PrefixWrite{Prefix: "10.0.0.0/24"})
+	if err != nil || prefix.Prefix != "10.0.0.0/24" {
+		t.Errorf("CreatePrefix = (%v, %v)", prefix, err)
 	}
-	if p, err := repo.UpdatePrefix(ctx, "t", 7, domain.PrefixWrite{Prefix: "10.0.0.0/24"}); err != nil || p.ID != 7 {
-		t.Errorf("UpdatePrefix = (%v, %v)", p, err)
+	prefix, err = repo.UpdatePrefix(ctx, "t", 7, domain.PrefixWrite{Prefix: "10.0.0.0/24"})
+	if err != nil || prefix.ID != 7 {
+		t.Errorf("UpdatePrefix = (%v, %v)", prefix, err)
 	}
 	if err := repo.DeletePrefix(ctx, "t", 3); err != nil {
 		t.Errorf("DeletePrefix = %v", err)
@@ -929,11 +1268,13 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	if err := repo.DeleteVLAN(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVLAN = %v", err)
 	}
-	if v, err := repo.CreateVirtualMachine(ctx, "t", domain.VirtualMachineWrite{Name: "web-01"}); err != nil || v.Name != "web-01" {
-		t.Errorf("CreateVirtualMachine = (%v, %v)", v, err)
+	virt, err := repo.CreateVirtualMachine(ctx, "t", domain.VirtualMachineWrite{Name: "web-01"})
+	if err != nil || virt.Name != "web-01" {
+		t.Errorf("CreateVirtualMachine = (%v, %v)", virt, err)
 	}
-	if v, err := repo.UpdateVirtualMachine(ctx, "t", 7, domain.VirtualMachineWrite{Name: "web-01"}); err != nil || v.ID != 7 {
-		t.Errorf("UpdateVirtualMachine = (%v, %v)", v, err)
+	virt, err = repo.UpdateVirtualMachine(ctx, "t", 7, domain.VirtualMachineWrite{Name: "web-01"})
+	if err != nil || virt.ID != 7 {
+		t.Errorf("UpdateVirtualMachine = (%v, %v)", virt, err)
 	}
 	if err := repo.DeleteVirtualMachine(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVirtualMachine = %v", err)
@@ -974,11 +1315,13 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	if err := repo.DeleteInterface(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteInterface = %v", err)
 	}
-	if ct, err := repo.CreateCircuitTermination(ctx, "t", domain.CircuitTerminationWrite{TermSide: "A"}); err != nil || ct.TermSide != "A" {
-		t.Errorf("CreateCircuitTermination = (%v, %v)", ct, err)
+	ctTerm, err := repo.CreateCircuitTermination(ctx, "t", domain.CircuitTerminationWrite{TermSide: "A"})
+	if err != nil || ctTerm.TermSide != "A" {
+		t.Errorf("CreateCircuitTermination = (%v, %v)", ctTerm, err)
 	}
-	if ct, err := repo.UpdateCircuitTermination(ctx, "t", 7, domain.CircuitTerminationWrite{TermSide: "A"}); err != nil || ct.ID != 7 {
-		t.Errorf("UpdateCircuitTermination = (%v, %v)", ct, err)
+	ctTerm, err = repo.UpdateCircuitTermination(ctx, "t", 7, domain.CircuitTerminationWrite{TermSide: "A"})
+	if err != nil || ctTerm.ID != 7 {
+		t.Errorf("UpdateCircuitTermination = (%v, %v)", ctTerm, err)
 	}
 	if err := repo.DeleteCircuitTermination(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteCircuitTermination = %v", err)
@@ -987,17 +1330,20 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	if c, err := repo.CreateCable(ctx, "t", domain.CableWrite{Label: &label}); err != nil || c.Label != "link-01" {
 		t.Errorf("CreateCable = (%v, %v)", c, err)
 	}
-	if c, err := repo.UpdateCable(ctx, "t", 7, domain.CableWrite{Label: &label}); err != nil || c.ID != 7 || c.Label != "link-01" {
+	c, err := repo.UpdateCable(ctx, "t", 7, domain.CableWrite{Label: &label})
+	if err != nil || c.ID != 7 || c.Label != "link-01" {
 		t.Errorf("UpdateCable = (%v, %v)", c, err)
 	}
 	if err := repo.DeleteCable(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteCable = %v", err)
 	}
-	if vi, err := repo.CreateVMInterface(ctx, "t", domain.VMInterfaceWrite{Name: "eth0"}); err != nil || vi.Name != "eth0" {
-		t.Errorf("CreateVMInterface = (%v, %v)", vi, err)
+	vmIface, err := repo.CreateVMInterface(ctx, "t", domain.VMInterfaceWrite{Name: "eth0"})
+	if err != nil || vmIface.Name != "eth0" {
+		t.Errorf("CreateVMInterface = (%v, %v)", vmIface, err)
 	}
-	if vi, err := repo.UpdateVMInterface(ctx, "t", 7, domain.VMInterfaceWrite{Name: "eth0"}); err != nil || vi.ID != 7 {
-		t.Errorf("UpdateVMInterface = (%v, %v)", vi, err)
+	vmIface, err = repo.UpdateVMInterface(ctx, "t", 7, domain.VMInterfaceWrite{Name: "eth0"})
+	if err != nil || vmIface.ID != 7 {
+		t.Errorf("UpdateVMInterface = (%v, %v)", vmIface, err)
 	}
 	if err := repo.DeleteVMInterface(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVMInterface = %v", err)
@@ -1020,20 +1366,24 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	if err := repo.DeleteTenant(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteTenant = %v", err)
 	}
-	if m, err := repo.CreateManufacturer(ctx, "t", domain.ManufacturerWrite{Name: "Cisco"}); err != nil || m.Name != "Cisco" {
-		t.Errorf("CreateManufacturer = (%v, %v)", m, err)
+	manuf, err := repo.CreateManufacturer(ctx, "t", domain.ManufacturerWrite{Name: "Cisco"})
+	if err != nil || manuf.Name != "Cisco" {
+		t.Errorf("CreateManufacturer = (%v, %v)", manuf, err)
 	}
-	if m, err := repo.UpdateManufacturer(ctx, "t", 7, domain.ManufacturerWrite{Name: "Cisco"}); err != nil || m.ID != 7 {
-		t.Errorf("UpdateManufacturer = (%v, %v)", m, err)
+	manuf, err = repo.UpdateManufacturer(ctx, "t", 7, domain.ManufacturerWrite{Name: "Cisco"})
+	if err != nil || manuf.ID != 7 {
+		t.Errorf("UpdateManufacturer = (%v, %v)", manuf, err)
 	}
 	if err := repo.DeleteManufacturer(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteManufacturer = %v", err)
 	}
-	if dt, err := repo.CreateDeviceType(ctx, "t", domain.DeviceTypeWrite{Model: "C9300"}); err != nil || dt.Model != "C9300" {
-		t.Errorf("CreateDeviceType = (%v, %v)", dt, err)
+	devType, err := repo.CreateDeviceType(ctx, "t", domain.DeviceTypeWrite{Model: "C9300"})
+	if err != nil || devType.Model != "C9300" {
+		t.Errorf("CreateDeviceType = (%v, %v)", devType, err)
 	}
-	if dt, err := repo.UpdateDeviceType(ctx, "t", 7, domain.DeviceTypeWrite{Model: "C9300"}); err != nil || dt.ID != 7 {
-		t.Errorf("UpdateDeviceType = (%v, %v)", dt, err)
+	devType, err = repo.UpdateDeviceType(ctx, "t", 7, domain.DeviceTypeWrite{Model: "C9300"})
+	if err != nil || devType.ID != 7 {
+		t.Errorf("UpdateDeviceType = (%v, %v)", devType, err)
 	}
 	if err := repo.DeleteDeviceType(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteDeviceType = %v", err)
@@ -1056,26 +1406,31 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	if err := repo.DeleteClusterType(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteClusterType = %v", err)
 	}
-	if cg, err := repo.CreateClusterGroup(ctx, "t", domain.ClusterGroupWrite{Name: "DC Clusters"}); err != nil || cg.Name != "DC Clusters" {
-		t.Errorf("CreateClusterGroup = (%v, %v)", cg, err)
+	clusterGroup, err := repo.CreateClusterGroup(ctx, "t", domain.ClusterGroupWrite{Name: "DC Clusters"})
+	if err != nil || clusterGroup.Name != "DC Clusters" {
+		t.Errorf("CreateClusterGroup = (%v, %v)", clusterGroup, err)
 	}
-	if cg, err := repo.UpdateClusterGroup(ctx, "t", 7, domain.ClusterGroupWrite{Name: "DC Clusters"}); err != nil || cg.ID != 7 {
-		t.Errorf("UpdateClusterGroup = (%v, %v)", cg, err)
+	clusterGroup, err = repo.UpdateClusterGroup(ctx, "t", 7, domain.ClusterGroupWrite{Name: "DC Clusters"})
+	if err != nil || clusterGroup.ID != 7 {
+		t.Errorf("UpdateClusterGroup = (%v, %v)", clusterGroup, err)
 	}
 	if err := repo.DeleteClusterGroup(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteClusterGroup = %v", err)
 	}
-	if ct, err := repo.CreateCircuitType(ctx, "t", domain.CircuitTypeWrite{Name: "Fiber"}); err != nil || ct.Name != "Fiber" {
-		t.Errorf("CreateCircuitType = (%v, %v)", ct, err)
+	crt, err := repo.CreateCircuitType(ctx, "t", domain.CircuitTypeWrite{Name: "Fiber"})
+	if err != nil || crt.Name != "Fiber" {
+		t.Errorf("CreateCircuitType = (%v, %v)", crt, err)
 	}
-	if ct, err := repo.UpdateCircuitType(ctx, "t", 7, domain.CircuitTypeWrite{Name: "Fiber"}); err != nil || ct.ID != 7 {
-		t.Errorf("UpdateCircuitType = (%v, %v)", ct, err)
+	crt, err = repo.UpdateCircuitType(ctx, "t", 7, domain.CircuitTypeWrite{Name: "Fiber"})
+	if err != nil || crt.ID != 7 {
+		t.Errorf("UpdateCircuitType = (%v, %v)", crt, err)
 	}
 	if err := repo.DeleteCircuitType(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteCircuitType = %v", err)
 	}
-	if v, err := repo.CreateVrf(ctx, "t", domain.VrfWrite{Name: "prod", Rd: "65000:1"}); err != nil || v.Name != "prod" || v.Rd != "65000:1" {
-		t.Errorf("CreateVrf = (%v, %v)", v, err)
+	rv, err := repo.CreateVrf(ctx, "t", domain.VrfWrite{Name: "prod", Rd: "65000:1"})
+	if err != nil || rv.Name != "prod" || rv.Rd != "65000:1" {
+		t.Errorf("CreateVrf = (%v, %v)", rv, err)
 	}
 	if v, err := repo.UpdateVrf(ctx, "t", 7, domain.VrfWrite{Name: "prod"}); err != nil || v.ID != 7 {
 		t.Errorf("UpdateVrf = (%v, %v)", v, err)
@@ -1083,7 +1438,8 @@ func TestNilRepo_AllMethods(t *testing.T) {
 	if err := repo.DeleteVrf(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteVrf = %v", err)
 	}
-	if vg, err := repo.CreateVlanGroup(ctx, "t", domain.VlanGroupWrite{Name: "DC VLANs"}); err != nil || vg.Name != "DC VLANs" {
+	vg, err := repo.CreateVlanGroup(ctx, "t", domain.VlanGroupWrite{Name: "DC VLANs"})
+	if err != nil || vg.Name != "DC VLANs" {
 		t.Errorf("CreateVlanGroup = (%v, %v)", vg, err)
 	}
 	if vg, err := repo.UpdateVlanGroup(ctx, "t", 7, domain.VlanGroupWrite{Name: "DC VLANs"}); err != nil || vg.ID != 7 {

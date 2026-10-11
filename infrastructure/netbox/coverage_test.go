@@ -27,6 +27,9 @@ func TestStatusCodeOf_NilResponse(t *testing.T) {
 
 // TestUnmarshalFunctions_InvalidJSON exercises the json.Unmarshal error branch
 // of each unmarshal<Type> helper with malformed input.
+//
+//nolint:funlen // table-driven test over all unmarshal helpers; splitting is not sensible.
+//nolint:funlen // table-driven test over all unmarshal helpers; splitting is not sensible.
 func TestUnmarshalFunctions_InvalidJSON(t *testing.T) {
 	t.Parallel()
 
@@ -36,28 +39,92 @@ func TestUnmarshalFunctions_InvalidJSON(t *testing.T) {
 		name string
 		call func() error
 	}{
-		{"site", func() error { _, err := unmarshalSite(bad); return err }},
-		{"device", func() error { _, err := unmarshalDevice(bad); return err }},
-		{"ip_address", func() error { _, err := unmarshalIPAddress(bad); return err }},
-		{"prefix", func() error { _, err := unmarshalPrefix(bad); return err }},
-		{"vlan", func() error { _, err := unmarshalVLAN(bad); return err }},
-		{"virtual_machine", func() error { _, err := unmarshalVirtualMachine(bad); return err }},
-		{"cluster", func() error { _, err := unmarshalCluster(bad); return err }},
-		{"circuit", func() error { _, err := unmarshalCircuit(bad); return err }},
-		{"rack", func() error { _, err := unmarshalRack(bad); return err }},
-		{"interface", func() error { _, err := unmarshalInterface(bad); return err }},
-		{"circuit_termination", func() error { _, err := unmarshalCircuitTermination(bad); return err }},
-		{"location", func() error { _, err := unmarshalLocation(bad); return err }},
-		{"cluster_type", func() error { _, err := unmarshalClusterType(bad); return err }},
-		{"cluster_group", func() error { _, err := unmarshalClusterGroup(bad); return err }},
-		{"role", func() error { _, err := unmarshalRole(bad); return err }},
-		{"contact", func() error { _, err := unmarshalContact(bad); return err }},
+		{"site", func() error {
+			_, err := unmarshalSite(bad)
+
+			return err
+		}},
+		{"device", func() error {
+			_, err := unmarshalDevice(bad)
+
+			return err
+		}},
+		{"ip_address", func() error {
+			_, err := unmarshalIPAddress(bad)
+
+			return err
+		}},
+		{"prefix", func() error {
+			_, err := unmarshalPrefix(bad)
+
+			return err
+		}},
+		{"vlan", func() error {
+			_, err := unmarshalVLAN(bad)
+
+			return err
+		}},
+		{"virtual_machine", func() error {
+			_, err := unmarshalVirtualMachine(bad)
+
+			return err
+		}},
+		{"cluster", func() error {
+			_, err := unmarshalCluster(bad)
+
+			return err
+		}},
+		{"circuit", func() error {
+			_, err := unmarshalCircuit(bad)
+
+			return err
+		}},
+		{"rack", func() error {
+			_, err := unmarshalRack(bad)
+
+			return err
+		}},
+		{"interface", func() error {
+			_, err := unmarshalInterface(bad)
+
+			return err
+		}},
+		{"circuit_termination", func() error {
+			_, err := unmarshalCircuitTermination(bad)
+
+			return err
+		}},
+		{"location", func() error {
+			_, err := unmarshalLocation(bad)
+
+			return err
+		}},
+		{"cluster_type", func() error {
+			_, err := unmarshalClusterType(bad)
+
+			return err
+		}},
+		{"cluster_group", func() error {
+			_, err := unmarshalClusterGroup(bad)
+
+			return err
+		}},
+		{"role", func() error {
+			_, err := unmarshalRole(bad)
+
+			return err
+		}},
+		{"contact", func() error {
+			_, err := unmarshalContact(bad)
+
+			return err
+		}},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			if err := tc.call(); err == nil {
-				t.Errorf("%s: unmarshal = nil, want error for invalid json", tc.name)
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if err := testCase.call(); err == nil {
+				t.Errorf("%s: unmarshal = nil, want error for invalid json", testCase.name)
 			}
 		})
 	}

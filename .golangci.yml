@@ -1,27 +1,35 @@
 ---
 version: "2"
 linters:
-  default: none
+  default: standard
   enable:
     - asciicheck
     - bidichk
     - bodyclose
     - canonicalheader
+    - containedctx
     - contextcheck
     - copyloopvar
     - decorder
+    - dupword
     - durationcheck
     - embeddedstructfieldcheck
     - errcheck
     - errchkjson
     - errname
+    - errorlint
+    - exhaustive
     - exptostd
     - fatcontext
+    - forcetypeassert
+    - funlen
     - gocheckcompilerdirectives
     - gochecksumtype
     - gocognit
     - gocritic
     - gocyclo
+    - godoclint
+    - godot
     - godox
     - gomoddirectives
     - goprintffuncname
@@ -31,22 +39,31 @@ linters:
     - iface
     - importas
     - ineffassign
+    - interfacebloat
     - intrange
     - iotamixing
+    - ireturn
+    - lll
     - maintidx
     - makezero
     - mirror
     - misspell
+    - mnd
+    - modernize
     - musttag
+    - nakedret
     - nestif
+    - nilerr
     - nilnesserr
     - nilnil
+    - nlreturn
     - noctx
     - nolintlint
     - nosprintfhostport
     - predeclared
     - reassign
     - recvcheck
+    - revive
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
@@ -55,7 +72,9 @@ linters:
     - unused
     - usestdlibvars
     - usetesting
+    - varnamelen
     - wastedassign
+    - whitespace
 formatters:
   enable:
     - gci

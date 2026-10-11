@@ -16,7 +16,9 @@ func TestGetSitesHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListSitesFunc: func(_ context.Context, _ string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+			ListSitesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Site], error) {
 				return &domain.PaginatedResponse[domain.Site]{
 					Count:   1,
 					Results: []domain.Site{{ID: 1, Name: "Test Site"}},
@@ -42,7 +44,9 @@ func TestGetSitesHandler(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListSitesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+			ListSitesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Site], error) {
 				return nil, errors.New("repo error")
 			},
 		}, "token")
@@ -59,7 +63,9 @@ func TestGetDevicesHandler(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListDevicesFunc: func(_ context.Context, _ string, params map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+		ListDevicesFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.Device], error) {
 			return &domain.PaginatedResponse[domain.Device]{
 				Count: 1,
 				Results: []domain.Device{{
@@ -87,7 +93,9 @@ func TestGetDevicesHandler(t *testing.T) {
 func TestGetDevicesHandler_Error(t *testing.T) {
 	t.Parallel()
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+		ListDevicesFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.Device], error) {
 			return nil, errors.New("repo error")
 		},
 	}, "token")
@@ -103,7 +111,9 @@ func TestGetIPAddressesHandler(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+		ListIPAddressesFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.IPAddress], error) {
 			return &domain.PaginatedResponse[domain.IPAddress]{Count: 0}, nil
 		},
 	}, "token")
@@ -125,7 +135,9 @@ func TestGetPrefixesHandler(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+		ListPrefixesFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.Prefix], error) {
 			return &domain.PaginatedResponse[domain.Prefix]{Count: 0}, nil
 		},
 	}, "token")
@@ -147,7 +159,9 @@ func TestGetVLANsHandler(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+		ListVLANsFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.VLAN], error) {
 			return &domain.PaginatedResponse[domain.VLAN]{Count: 0}, nil
 		},
 	}, "token")
@@ -169,7 +183,9 @@ func TestGetVirtualMachinesHandler(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+		ListVirtualMachinesFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
 			return &domain.PaginatedResponse[domain.VirtualMachine]{Count: 0}, nil
 		},
 	}, "token")
@@ -191,7 +207,9 @@ func TestGetClustersHandler(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+		ListClustersFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.Cluster], error) {
 			return &domain.PaginatedResponse[domain.Cluster]{Count: 0}, nil
 		},
 	}, "token")
@@ -213,7 +231,9 @@ func TestGetCircuitsHandler(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+		ListCircuitsFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.Circuit], error) {
 			return &domain.PaginatedResponse[domain.Circuit]{Count: 0}, nil
 		},
 	}, "token")
@@ -235,10 +255,13 @@ func TestGetSitesHandler_WithTagFilter(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListSitesFunc: func(_ context.Context, _ string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+		ListSitesFunc: func(
+			_ context.Context, _ string, params map[string]string,
+		) (*domain.PaginatedResponse[domain.Site], error) {
 			if params["tag"] != "prod" {
 				t.Errorf("tag param = %q, want %q", params["tag"], "prod")
 			}
+
 			return &domain.PaginatedResponse[domain.Site]{
 				Count:   1,
 				Results: []domain.Site{{ID: 1, Name: "Prod Site"}},
@@ -264,7 +287,9 @@ func TestGetInterfacesHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+			ListInterfacesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Interface], error) {
 				return &domain.PaginatedResponse[domain.Interface]{Count: 0}, nil
 			},
 		}, "token")
@@ -284,7 +309,9 @@ func TestGetInterfacesHandler(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+			ListInterfacesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Interface], error) {
 				return nil, errors.New("repo error")
 			},
 		}, "token")
@@ -302,7 +329,9 @@ func TestGetVMInterfacesHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListVMInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+			ListVMInterfacesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VMInterface], error) {
 				return &domain.PaginatedResponse[domain.VMInterface]{Count: 0}, nil
 			},
 		}, "token")
@@ -322,7 +351,9 @@ func TestGetVMInterfacesHandler(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListVMInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+			ListVMInterfacesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VMInterface], error) {
 				return nil, errors.New("repo error")
 			},
 		}, "token")
@@ -340,7 +371,9 @@ func TestGetCircuitTerminationsHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListCircuitTerminationsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+			ListCircuitTerminationsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
 				return &domain.PaginatedResponse[domain.CircuitTermination]{Count: 0}, nil
 			},
 		}, "token")
@@ -360,7 +393,9 @@ func TestGetCircuitTerminationsHandler(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListCircuitTerminationsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+			ListCircuitTerminationsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
 				return nil, errors.New("repo error")
 			},
 		}, "token")
@@ -378,7 +413,9 @@ func TestGetCablesHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListCablesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+			ListCablesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Cable], error) {
 				return &domain.PaginatedResponse[domain.Cable]{Count: 0}, nil
 			},
 		}, "token")
@@ -398,7 +435,9 @@ func TestGetCablesHandler(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			ListCablesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+			ListCablesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Cable], error) {
 				return nil, errors.New("repo error")
 			},
 		}, "token")
@@ -415,7 +454,9 @@ func TestGetRacksHandler(t *testing.T) {
 	t.Parallel()
 
 	svc := application.NewNetworkService(&mockrepo.MockRepo{
-		ListRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+		ListRacksFunc: func(
+			_ context.Context, _ string, _ map[string]string,
+		) (*domain.PaginatedResponse[domain.Rack], error) {
 			return &domain.PaginatedResponse[domain.Rack]{Count: 0}, nil
 		},
 	}, "token")
@@ -438,7 +479,7 @@ func TestGetObjectByIDHandler(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := application.NewNetworkService(&mockrepo.MockRepo{
-			GetObjectFunc: func(_ context.Context, _ string, objectType string, id int, _ map[string]string) (domain.RawObject, error) {
+			GetObjectFunc: func(_ context.Context, _ string, _ string, _ int, _ map[string]string) (domain.RawObject, error) {
 				return domain.RawObject(`{"id":1,"name":"Test"}`), nil
 			},
 		}, "token")

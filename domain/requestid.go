@@ -19,5 +19,6 @@ func RequestIDFromContext(ctx context.Context) string {
 	if id, ok := ctx.Value(requestIDContextKey{}).(string); ok {
 		return id
 	}
+
 	return ""
 }
