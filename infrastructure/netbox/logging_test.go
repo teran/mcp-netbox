@@ -19,14 +19,14 @@ func TestSetLoggerAndGetLogger(t *testing.T) {
 		SetLogger(nil)
 	})
 
-	l := logrus.New()
-	l.SetOutput(io.Discard)
-	l.SetLevel(logrus.DebugLevel)
+	logger := logrus.New()
+	logger.SetOutput(io.Discard)
+	logger.SetLevel(logrus.DebugLevel)
 
-	SetLogger(l)
+	SetLogger(logger)
 
-	if got := getLogger(); got != l {
-		t.Errorf("getLogger() = %p, want %p", got, l)
+	if got := getLogger(); got != logger {
+		t.Errorf("getLogger() = %p, want %p", got, logger)
 	}
 }
 
@@ -37,12 +37,12 @@ func TestGetLoggerDefaultDiscards(t *testing.T) {
 
 	SetLogger(nil)
 
-	l := getLogger()
-	if l == nil {
+	logger := getLogger()
+	if logger == nil {
 		t.Fatal("getLogger() returned nil")
 	}
-	if l.Out != io.Discard {
-		t.Errorf("default logger output = %T, want io.Discard", l.Out)
+	if logger.Out != io.Discard {
+		t.Errorf("default logger output = %T, want io.Discard", logger.Out)
 	}
 }
 
@@ -52,14 +52,14 @@ func TestClient_LogsRequestIDAtDebug(t *testing.T) {
 	})
 
 	var buf bytes.Buffer
-	l := logrus.New()
-	l.SetOutput(&buf)
-	l.SetLevel(logrus.DebugLevel)
-	SetLogger(l)
+	logger := logrus.New()
+	logger.SetOutput(&buf)
+	logger.SetLevel(logrus.DebugLevel)
+	SetLogger(logger)
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"count":0,"results":[]}`))
+	srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"count":0,"results":[]}`))
 	}))
 	defer srv.Close()
 

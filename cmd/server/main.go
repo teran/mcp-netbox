@@ -1,3 +1,5 @@
+// Command server runs the mcp-netbox MCP server over Streamable HTTP or STDIO
+// transport, relaying NetBox API requests transparently for MCP clients.
 package main
 
 import (
@@ -31,6 +33,24 @@ var (
 	appTimestamp  = "unknown"
 )
 
+// HTTP server and dialer timeouts/counts (mnd: magic number constants).
+const (
+	dialTimeout               = 30 * time.Second
+	dialKeepAlive             = 30 * time.Second
+	mainReadHeaderTimeout     = 30 * time.Second
+	mainReadTimeout           = 60 * time.Second
+	mainIdleTimeout           = 120 * time.Second
+	internalReadHeaderTimeout = 10 * time.Second
+	internalWriteTimeout      = 30 * time.Second
+	internalIdleTimeout       = 60 * time.Second
+	shutdownTimeout           = 30 * time.Second
+	clientTimeout             = 30 * time.Second
+	serverErrChSize           = 2
+	maxIdleConns              = 100
+	maxIdleConnsPerHost       = 100
+	transportIdleConnTimeout  = 90 * time.Second
+)
+
 // bannerString returns the B5 startup banner built from the ldflags-embedded
 // build metadata. It is emitted as the very first log line when logging is
 // enabled (L6).
@@ -39,6 +59,7 @@ func bannerString() string {
 	if name == "" {
 		name = "mcp-netbox"
 	}
+
 	return fmt.Sprintf("Starting %s/%s (commit: %s; built at %s) ...", name, appVersion, appCommitHash, appTimestamp)
 }
 
@@ -71,6 +92,7 @@ func resolveTransport(modeFlag string) string {
 	if t, ok := os.LookupEnv("TRANSPORT"); ok && t != "" {
 		return t
 	}
+
 	return config.TransportStdio
 }
 
@@ -82,10 +104,11 @@ func resolveTransport(modeFlag string) string {
 // addresses are rejected (private RFC 1918 ranges are allowed).
 func newPrivateIPCheckingDialer(allowPrivate bool) *net.Dialer {
 	rejectAllPrivate := !allowPrivate
+
 	return &net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-		Control: func(network, address string, c syscall.RawConn) error {
+		Timeout:   dialTimeout,
+		KeepAlive: dialKeepAlive,
+		Control: func(_, address string, _ syscall.RawConn) error {
 			host, _, err := net.SplitHostPort(address)
 			if err != nil {
 				return err
@@ -94,17 +117,21 @@ func newPrivateIPCheckingDialer(allowPrivate bool) *net.Dialer {
 			if err != nil {
 				return fmt.Errorf("DNS lookup for %q failed: %w", host, err)
 			}
-			for _, ip := range ips {
-				if config.IsPrivateAddr(ip) {
+			for _, addr := range ips {
+				if config.IsPrivateAddr(addr) {
 					// Always reject loopback and unspecified, even when private is allowed.
-					if ip.IsLoopback() || ip.IsUnspecified() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
-						return fmt.Errorf("connection to reserved IP %q rejected (DNS rebinding protection)", ip)
+					if addr.IsLoopback() || addr.IsUnspecified() || addr.IsLinkLocalUnicast() || addr.IsLinkLocalMulticast() {
+						return fmt.Errorf("connection to reserved IP %q rejected (DNS rebinding protection)", addr)
 					}
 					if rejectAllPrivate {
-						return fmt.Errorf("connection to private IP %q rejected (DNS rebinding protection; set ALLOW_PRIVATE_NETBOX=true to bypass)", ip)
+						return fmt.Errorf(
+							"connection to private IP %q rejected (DNS rebinding protection; set ALLOW_PRIVATE_NETBOX=true to bypass)",
+							addr,
+						)
 					}
 				}
 			}
+
 			return nil
 		},
 	}
@@ -160,7 +187,10 @@ func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport m
 	svc := application.NewNetworkService(netboxClient, cfg.NetBoxToken)
 
 	// In stdio mode there is no HTTP middleware chain, so no per-request
-	// service injection. Register the shared service directly.
+	// service injection. Register the shared service directly, and enable the
+	// per-tool info-level access log that the HTTP LoggingMiddleware provides
+	// in HTTP mode (L08).
+	handlers.EnableToolAccessLog()
 	handlers.RegisterTools(srv, nil, svc)
 
 	// B5/L6: when logging is enabled, the startup banner is the very first log line.
@@ -182,6 +212,8 @@ func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport m
 // runHTTP runs the MCP server over Streamable HTTP plus a separate internal
 // observability server (metrics, pprof, probes). Tokens are read per request
 // from the Authorization header.
+//
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	srv := newMCPServer(logger)
 
@@ -192,7 +224,7 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	upstreamMetrics := infra.NewUpstreamMetrics(promRegistry)
 
 	mcpHandler := mcp.NewStreamableHTTPHandler(
-		func(r *http.Request) *mcp.Server {
+		func(*http.Request) *mcp.Server {
 			return srv
 		},
 		&mcp.StreamableHTTPOptions{
@@ -213,10 +245,10 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	mainServer := &http.Server{
 		Addr:              cfg.ListenAddr,
 		Handler:           mux,
-		ReadHeaderTimeout: 30 * time.Second,
-		ReadTimeout:       60 * time.Second,
+		ReadHeaderTimeout: mainReadHeaderTimeout,
+		ReadTimeout:       mainReadTimeout,
 		WriteTimeout:      cfg.WriteTimeout,
-		IdleTimeout:       120 * time.Second,
+		IdleTimeout:       mainIdleTimeout,
 	}
 
 	metricsHandler := handlers.RegisterMetricsOnRegistry(promRegistry)
@@ -226,9 +258,9 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	internalServer := &http.Server{
 		Addr:              cfg.InternalAddr,
 		Handler:           internalHandler,
-		ReadHeaderTimeout: 10 * time.Second,
-		WriteTimeout:      30 * time.Second,
-		IdleTimeout:       60 * time.Second,
+		ReadHeaderTimeout: internalReadHeaderTimeout,
+		WriteTimeout:      internalWriteTimeout,
+		IdleTimeout:       internalIdleTimeout,
 	}
 
 	quit := make(chan os.Signal, 1)
@@ -236,7 +268,7 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	defer signal.Stop(quit)
 
 	// Start servers and wait for signal or error
-	errCh := make(chan error, 2)
+	errCh := make(chan error, serverErrChSize)
 	go func() {
 		logger.WithField("addr", handlers.SanitizeLog(cfg.ListenAddr)).Info("mcp server listening")
 		if err := mainServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -257,7 +289,7 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 		logger.WithError(err).Error("server error")
 	}
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	if err := mainServer.Shutdown(shutdownCtx); err != nil {
@@ -268,6 +300,7 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	}
 
 	logger.Info("server stopped gracefully")
+
 	return nil
 }
 
@@ -290,22 +323,42 @@ const serverInstructions = `This server provides CRUD access to the NetBox inven
 - Authentication: in HTTP/SSE mode the NetBox token is passed in the
   Authorization: Bearer header. In STDIO mode it is provided via the
   NETBOX_TOKEN environment variable at server startup. Authorization is
-  enforced entirely by NetBox; this server does not validate tokens.`
+  enforced entirely by NetBox; this server does not validate tokens.
+
+Resources:
+The server advertises the resources capability serving read-only markdown
+guidance per topic, each under netbox://guidance/. The invariant set is:
+  - netbox://guidance/overview
+  - netbox://guidance/read-tools
+  - netbox://guidance/write-tools
+  - netbox://guidance/delete-tools
+  - netbox://guidance/validation
+  - netbox://guidance/pagination
+  - netbox://guidance/authentication
+Grouping is read → write → delete; validation and pagination notes apply to all
+write/list tools; authentication covers both HTTP/SSE and STDIO transports.`
 
 // newMCPServer builds the shared MCP server with the configured capabilities,
 // instructions, and an SDK logger wired into the server's logrus logger so
-// SDK-level events are visible in the logs (L7/G10).
+// SDK-level events are visible in the logs (L7/G10). In addition to the tools
+// capability it advertises the read-only resources capability and registers the
+// usage-guidance resources served under it (M08).
 func newMCPServer(logger *logrus.Logger) *mcp.Server {
-	return mcp.NewServer(&mcp.Implementation{
+	srv := mcp.NewServer(&mcp.Implementation{
 		Name:    "mcp-netbox",
 		Version: appVersion,
 	}, &mcp.ServerOptions{
 		Capabilities: &mcp.ServerCapabilities{
-			Tools: &mcp.ToolCapabilities{ListChanged: false},
+			Tools:     &mcp.ToolCapabilities{ListChanged: false},
+			Resources: &mcp.ResourceCapabilities{ListChanged: false, Subscribe: false},
 		},
 		Instructions: serverInstructions,
 		Logger:       logging.NewSlogLogger(logger),
 	})
+
+	handlers.RegisterResources(srv)
+
+	return srv
 }
 
 // newNetBoxHTTPClient builds the shared HTTP client used to talk to NetBox,
@@ -316,9 +369,9 @@ func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Break
 
 	cbTransport := circuitbreaker.NewRoundTripper(
 		&http.Transport{
-			MaxIdleConns:        100,
-			MaxIdleConnsPerHost: 100,
-			IdleConnTimeout:     90 * time.Second,
+			MaxIdleConns:        maxIdleConns,
+			MaxIdleConnsPerHost: maxIdleConnsPerHost,
+			IdleConnTimeout:     transportIdleConnTimeout,
 			DisableCompression:  false,
 			DisableKeepAlives:   false,
 			DialContext:         dialer.DialContext,
@@ -327,8 +380,8 @@ func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Break
 	)
 
 	return &http.Client{
-		Timeout: 30 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		Timeout: clientTimeout,
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
 		Transport: cbTransport,

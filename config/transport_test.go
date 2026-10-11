@@ -21,22 +21,22 @@ func TestValidateTransport(t *testing.T) {
 		{"non-string value", "1", "", true},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
 			cfg := Config{
 				NetBoxURL:          "http://192.168.1.1:8000",
 				AllowPrivateNetBox: true,
-				NetBoxToken:        tc.netboxToken,
-				Transport:          tc.transport,
+				NetBoxToken:        testCase.netboxToken,
+				Transport:          testCase.transport,
 				RateLimitGlobal:    100,
 				RateLimitPerClient: 10,
 				WriteTimeout:       300e9,
 			}
 			err := cfg.validate()
-			if tc.wantError && err == nil {
+			if testCase.wantError && err == nil {
 				t.Errorf("validate() = nil, want error")
 			}
-			if !tc.wantError && err != nil {
+			if !testCase.wantError && err != nil {
 				t.Errorf("validate() = %v, want nil", err)
 			}
 		})

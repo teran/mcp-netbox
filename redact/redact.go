@@ -36,75 +36,82 @@ func Redact(v any) any {
 	if v == nil {
 		return nil
 	}
+
 	return redact(reflect.ValueOf(v))
 }
 
-// redact recursively returns a redacted deep copy of the value held by rv,
+// redact recursively returns a redacted deep copy of the value held by value,
 // preserving its dynamic type.
-func redact(rv reflect.Value) any {
-	switch rv.Kind() {
+func redact(value reflect.Value) any {
+	//nolint:exhaustive // reflect.Kind has ~27 values; all unlisted scalar/composite kinds hit default.
+	switch value.Kind() {
 	case reflect.Pointer:
-		if rv.IsNil() {
-			return rv.Interface()
+		if value.IsNil() {
+			return value.Interface()
 		}
-		np := reflect.New(rv.Elem().Type())
-		np.Elem().Set(reflect.ValueOf(redact(rv.Elem())))
+		np := reflect.New(value.Elem().Type())
+		np.Elem().Set(reflect.ValueOf(redact(value.Elem())))
+
 		return np.Interface()
 
 	case reflect.Interface:
-		if rv.IsNil() {
-			return rv.Interface()
+		if value.IsNil() {
+			return value.Interface()
 		}
-		return redact(rv.Elem())
+
+		return redact(value.Elem())
 
 	case reflect.Struct:
-		return redactStruct(rv)
+		return redactStruct(value)
 
 	case reflect.Slice:
-		return redactSlice(rv)
+		return redactSlice(value)
 
 	case reflect.Array:
-		return redactArray(rv)
+		return redactArray(value)
 
 	case reflect.Map:
-		return redactMap(rv)
+		return redactMap(value)
 
 	default:
-		return rv.Interface()
+		return value.Interface()
 	}
 }
 
-// redactStruct returns a deep copy of the struct value rv with every exported
+// redactStruct returns a deep copy of the struct value with every exported
 // field tagged secret:"true" replaced by Mask and every composite field
 // deep-redacted recursively. Unexported fields are copied verbatim.
-func redactStruct(rv reflect.Value) any {
-	t := rv.Type()
-	out := reflect.New(t).Elem()
+func redactStruct(value reflect.Value) any {
+	structType := value.Type()
+	out := reflect.New(structType).Elem()
 	// Copy the whole struct (including unexported fields) before rewriting.
-	out.Set(rv)
+	out.Set(value)
 
-	for i := range t.NumField() {
-		field := t.Field(i)
+	for fieldIndex := range structType.NumField() {
+		field := structType.Field(fieldIndex)
 		if field.PkgPath != "" {
 			// Unexported field — never rewritten.
+
 			continue
 		}
 
-		fv := out.Field(i)
+		fieldValue := out.Field(fieldIndex)
 		if field.Tag.Get("secret") == "true" {
-			if fv.Kind() == reflect.String {
-				fv.SetString(Mask)
+			if fieldValue.Kind() == reflect.String {
+				fieldValue.SetString(Mask)
 			} else {
-				fv.Set(reflect.ValueOf(redact(fv)))
+				fieldValue.Set(reflect.ValueOf(redact(fieldValue)))
 			}
+
 			continue
 		}
 
 		// Deep-redact composite fields so nested secrets are caught.
-		switch fv.Kind() {
+		//nolint:exhaustive // Only composite kinds need recursion; scalars are left as-is.
+		switch fieldValue.Kind() {
 		case reflect.Struct, reflect.Pointer, reflect.Slice, reflect.Array, reflect.Map, reflect.Interface:
-			if v, ok := settableRedact(fv); ok {
-				fv.Set(v)
+			if v, ok := settableRedact(fieldValue); ok {
+				fieldValue.Set(v)
 			}
 		}
 	}
@@ -116,55 +123,59 @@ func redactStruct(rv reflect.Value) any {
 // can be Set into fv, or ok=false when the field should be left as-is (e.g. a
 // nil interface).
 func settableRedact(fv reflect.Value) (reflect.Value, bool) {
-	rv := reflect.ValueOf(redact(fv))
-	if !rv.IsValid() {
+	value := reflect.ValueOf(redact(fv))
+	if !value.IsValid() {
 		return reflect.Value{}, false
 	}
-	return rv, true
+
+	return value, true
 }
 
 // redactSlice returns a new slice whose elements are deep-redacted copies.
-func redactSlice(rv reflect.Value) any {
-	if rv.IsNil() {
-		return rv.Interface()
+func redactSlice(value reflect.Value) any {
+	if value.IsNil() {
+		return value.Interface()
 	}
-	out := reflect.MakeSlice(rv.Type(), rv.Len(), rv.Len())
-	for i := range rv.Len() {
-		if v, ok := settableRedact(rv.Index(i)); ok {
+	out := reflect.MakeSlice(value.Type(), value.Len(), value.Len())
+	for i := range value.Len() {
+		if v, ok := settableRedact(value.Index(i)); ok {
 			out.Index(i).Set(v)
 		}
 	}
+
 	return out.Interface()
 }
 
 // redactArray returns a new array whose elements are deep-redacted copies.
-func redactArray(rv reflect.Value) any {
-	out := reflect.New(rv.Type()).Elem()
-	for i := range rv.Len() {
-		if v, ok := settableRedact(rv.Index(i)); ok {
+func redactArray(value reflect.Value) any {
+	out := reflect.New(value.Type()).Elem()
+	for i := range value.Len() {
+		if v, ok := settableRedact(value.Index(i)); ok {
 			out.Index(i).Set(v)
 		}
 	}
+
 	return out.Interface()
 }
 
 // redactMap returns a new map whose values are deep-redacted copies; keys are
 // copied unchanged.
-func redactMap(rv reflect.Value) any {
-	if rv.IsNil() {
-		return rv.Interface()
+func redactMap(value reflect.Value) any {
+	if value.IsNil() {
+		return value.Interface()
 	}
-	out := reflect.MakeMapWithSize(rv.Type(), rv.Len())
-	iter := rv.MapRange()
+	out := reflect.MakeMapWithSize(value.Type(), value.Len())
+	iter := value.MapRange()
 	for iter.Next() {
-		k := iter.Key()
+		key := iter.Key()
 		val := iter.Value()
 		redacted, ok := settableRedact(val)
 		if !ok {
-			redacted = reflect.Zero(rv.Type().Elem())
+			redacted = reflect.Zero(value.Type().Elem())
 		}
-		out.SetMapIndex(k, redacted)
+		out.SetMapIndex(key, redacted)
 	}
+
 	return out.Interface()
 }
 

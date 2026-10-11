@@ -10,14 +10,14 @@ import (
 func TestRequestIDFormatter_WithRequestID(t *testing.T) {
 	t.Parallel()
 
-	f := &requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}}
+	formatter := &requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}}
 	entry := &logrus.Entry{
 		Data:    logrus.Fields{"request_id": "abc-123", "method": "GET"},
 		Level:   logrus.InfoLevel,
 		Message: "mcp_request",
 	}
 
-	out, err := f.Format(entry)
+	out, err := formatter.Format(entry)
 	if err != nil {
 		t.Fatalf("Format = %v, want nil", err)
 	}
@@ -41,14 +41,14 @@ func TestRequestIDFormatter_WithRequestID(t *testing.T) {
 func TestRequestIDFormatter_WithoutRequestID(t *testing.T) {
 	t.Parallel()
 
-	f := &requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}}
+	formatter := &requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}}
 	entry := &logrus.Entry{
 		Data:    logrus.Fields{"method": "GET"},
 		Level:   logrus.InfoLevel,
 		Message: "session connected",
 	}
 
-	out, err := f.Format(entry)
+	out, err := formatter.Format(entry)
 	if err != nil {
 		t.Fatalf("Format = %v, want nil", err)
 	}
@@ -68,14 +68,14 @@ func TestRequestIDFormatter_WithoutRequestID(t *testing.T) {
 func TestRequestIDFormatter_LeavesEntryDataUntouched(t *testing.T) {
 	t.Parallel()
 
-	f := &requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}}
+	formatter := &requestIDFormatter{inner: &logrus.TextFormatter{FullTimestamp: true}}
 	entry := &logrus.Entry{
 		Data:    logrus.Fields{"request_id": "xyz"},
 		Level:   logrus.InfoLevel,
 		Message: "mcp_request",
 	}
 
-	if _, err := f.Format(entry); err != nil {
+	if _, err := formatter.Format(entry); err != nil {
 		t.Fatalf("Format = %v, want nil", err)
 	}
 

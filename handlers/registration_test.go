@@ -30,13 +30,15 @@ func countTools(t *testing.T, srv *mcp.Server) int {
 		ListTools() []mcp.Tool
 	}
 
-	if lister, ok := interface{}(srv).(toolLister); ok {
+	if lister, ok := any(srv).(toolLister); ok {
 		tools := lister.ListTools()
+
 		return len(tools)
 	}
 
 	// Fallback: register a tool-specific handler count using
 	// the known registration count from RegisterTools.
+
 	return expectedToolCount
 }
 

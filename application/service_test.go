@@ -19,10 +19,13 @@ func TestNetworkService_ListSites(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListSitesFunc: func(_ context.Context, token string, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+			ListSitesFunc: func(
+				_ context.Context, token string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Site], error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want %q", token, "test-token")
 				}
+
 				return &domain.PaginatedResponse[domain.Site]{
 					Count:   1,
 					Results: []domain.Site{{ID: 1, Name: "Test"}},
@@ -40,7 +43,9 @@ func TestNetworkService_ListSites(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListSitesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+			ListSitesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Site], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -56,7 +61,9 @@ func TestNetworkService_ListDevices(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+			ListDevicesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Device], error) {
 				return &domain.PaginatedResponse[domain.Device]{Count: 0}, nil
 			},
 		})
@@ -71,7 +78,9 @@ func TestNetworkService_ListDevices(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListDevicesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+			ListDevicesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Device], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -87,7 +96,9 @@ func TestNetworkService_ListIPAddresses(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+			ListIPAddressesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.IPAddress], error) {
 				return &domain.PaginatedResponse[domain.IPAddress]{Count: 0}, nil
 			},
 		})
@@ -102,7 +113,9 @@ func TestNetworkService_ListIPAddresses(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListIPAddressesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+			ListIPAddressesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.IPAddress], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -118,7 +131,9 @@ func TestNetworkService_ListPrefixes(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+			ListPrefixesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Prefix], error) {
 				return &domain.PaginatedResponse[domain.Prefix]{Count: 0}, nil
 			},
 		})
@@ -133,7 +148,9 @@ func TestNetworkService_ListPrefixes(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListPrefixesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+			ListPrefixesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Prefix], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -149,7 +166,9 @@ func TestNetworkService_ListVLANs(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+			ListVLANsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VLAN], error) {
 				return &domain.PaginatedResponse[domain.VLAN]{Count: 0}, nil
 			},
 		})
@@ -164,7 +183,9 @@ func TestNetworkService_ListVLANs(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListVLANsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+			ListVLANsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VLAN], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -180,7 +201,9 @@ func TestNetworkService_ListVirtualMachines(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+			ListVirtualMachinesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
 				return &domain.PaginatedResponse[domain.VirtualMachine]{Count: 0}, nil
 			},
 		})
@@ -195,7 +218,9 @@ func TestNetworkService_ListVirtualMachines(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListVirtualMachinesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+			ListVirtualMachinesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -211,7 +236,9 @@ func TestNetworkService_ListClusters(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+			ListClustersFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Cluster], error) {
 				return &domain.PaginatedResponse[domain.Cluster]{Count: 0}, nil
 			},
 		})
@@ -226,7 +253,9 @@ func TestNetworkService_ListClusters(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListClustersFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+			ListClustersFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Cluster], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -242,7 +271,9 @@ func TestNetworkService_ListCircuits(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+			ListCircuitsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Circuit], error) {
 				return &domain.PaginatedResponse[domain.Circuit]{Count: 0}, nil
 			},
 		})
@@ -257,7 +288,9 @@ func TestNetworkService_ListCircuits(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListCircuitsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+			ListCircuitsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Circuit], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -273,7 +306,9 @@ func TestNetworkService_ListRacks(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+			ListRacksFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Rack], error) {
 				return &domain.PaginatedResponse[domain.Rack]{Count: 0}, nil
 			},
 		})
@@ -288,7 +323,9 @@ func TestNetworkService_ListRacks(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListRacksFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+			ListRacksFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Rack], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -304,7 +341,9 @@ func TestNetworkService_ListInterfaces(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+			ListInterfacesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Interface], error) {
 				return &domain.PaginatedResponse[domain.Interface]{Count: 0}, nil
 			},
 		})
@@ -319,7 +358,9 @@ func TestNetworkService_ListInterfaces(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+			ListInterfacesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Interface], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -335,7 +376,9 @@ func TestNetworkService_ListVMInterfaces(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListVMInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+			ListVMInterfacesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VMInterface], error) {
 				return &domain.PaginatedResponse[domain.VMInterface]{Count: 0}, nil
 			},
 		})
@@ -350,7 +393,9 @@ func TestNetworkService_ListVMInterfaces(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListVMInterfacesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+			ListVMInterfacesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VMInterface], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -366,7 +411,9 @@ func TestNetworkService_ListCircuitTerminations(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListCircuitTerminationsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+			ListCircuitTerminationsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
 				return &domain.PaginatedResponse[domain.CircuitTermination]{Count: 0}, nil
 			},
 		})
@@ -381,7 +428,9 @@ func TestNetworkService_ListCircuitTerminations(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListCircuitTerminationsFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+			ListCircuitTerminationsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -397,7 +446,9 @@ func TestNetworkService_ListCables(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListCablesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+			ListCablesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Cable], error) {
 				return &domain.PaginatedResponse[domain.Cable]{Count: 0}, nil
 			},
 		})
@@ -412,7 +463,9 @@ func TestNetworkService_ListCables(t *testing.T) {
 
 	t.Run("error propagation", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			ListCablesFunc: func(_ context.Context, _ string, _ map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+			ListCablesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Cable], error) {
 				return nil, errors.New("repo error")
 			},
 		})
@@ -428,7 +481,9 @@ func TestNetworkService_GetObject(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			GetObjectFunc: func(_ context.Context, _ string, objectType string, id int, _ map[string]string) (domain.RawObject, error) {
+			GetObjectFunc: func(
+				_ context.Context, _ string, objectType string, id int, _ map[string]string,
+			) (domain.RawObject, error) {
 				return domain.RawObject(fmt.Sprintf(`{"id":%d,"name":"%s"}`, id, objectType)), nil
 			},
 		})
@@ -459,11 +514,12 @@ func TestNetworkService_CreateSite(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateSiteFunc: func(_ context.Context, token string, in domain.SiteWrite) (*domain.Site, error) {
+			CreateSiteFunc: func(_ context.Context, token string, inData domain.SiteWrite) (*domain.Site, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Site{ID: 1, Name: in.Name}, nil
+
+				return &domain.Site{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		site, err := svc.CreateSite(context.Background(), domain.SiteWrite{Name: "A"})
@@ -476,10 +532,10 @@ func TestNetworkService_CreateSite(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateSiteFunc: func(_ context.Context, _ string, _ domain.SiteWrite) (*domain.Site, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateSite(context.Background(), domain.SiteWrite{})
@@ -490,7 +546,7 @@ func TestNetworkService_CreateSite(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 		if string(got.Body) != `{"name":["required"]}` {
@@ -519,8 +575,8 @@ func TestNetworkService_UpdateSite(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateSiteFunc: func(_ context.Context, _ string, id int, in domain.SiteWrite) (*domain.Site, error) {
-				return &domain.Site{ID: id, Name: in.Name}, nil
+			UpdateSiteFunc: func(_ context.Context, _ string, id int, inData domain.SiteWrite) (*domain.Site, error) {
+				return &domain.Site{ID: id, Name: inData.Name}, nil
 			},
 		})
 		site, err := svc.UpdateSite(context.Background(), 7, domain.SiteWrite{Name: "Renamed"})
@@ -533,15 +589,15 @@ func TestNetworkService_UpdateSite(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateSiteFunc: func(_ context.Context, _ string, _ int, _ domain.SiteWrite) (*domain.Site, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateSite(context.Background(), 7, domain.SiteWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -568,6 +624,7 @@ func TestNetworkService_DeleteSite(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -577,15 +634,15 @@ func TestNetworkService_DeleteSite(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteSiteFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteSite(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -608,11 +665,12 @@ func TestNetworkService_CreateDevice(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateDeviceFunc: func(_ context.Context, token string, in domain.DeviceWrite) (*domain.Device, error) {
+			CreateDeviceFunc: func(_ context.Context, token string, inData domain.DeviceWrite) (*domain.Device, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Device{ID: 1, Name: in.Name}, nil
+
+				return &domain.Device{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		device, err := svc.CreateDevice(context.Background(), domain.DeviceWrite{Name: "A"})
@@ -625,10 +683,10 @@ func TestNetworkService_CreateDevice(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateDeviceFunc: func(_ context.Context, _ string, _ domain.DeviceWrite) (*domain.Device, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateDevice(context.Background(), domain.DeviceWrite{})
@@ -639,7 +697,7 @@ func TestNetworkService_CreateDevice(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 		if string(got.Body) != `{"name":["required"]}` {
@@ -668,8 +726,8 @@ func TestNetworkService_UpdateDevice(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateDeviceFunc: func(_ context.Context, _ string, id int, in domain.DeviceWrite) (*domain.Device, error) {
-				return &domain.Device{ID: id, Name: in.Name}, nil
+			UpdateDeviceFunc: func(_ context.Context, _ string, id int, inData domain.DeviceWrite) (*domain.Device, error) {
+				return &domain.Device{ID: id, Name: inData.Name}, nil
 			},
 		})
 		device, err := svc.UpdateDevice(context.Background(), 7, domain.DeviceWrite{Name: "Renamed"})
@@ -682,15 +740,15 @@ func TestNetworkService_UpdateDevice(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"role":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"role":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateDeviceFunc: func(_ context.Context, _ string, _ int, _ domain.DeviceWrite) (*domain.Device, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateDevice(context.Background(), 7, domain.DeviceWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -717,6 +775,7 @@ func TestNetworkService_DeleteDevice(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -726,15 +785,15 @@ func TestNetworkService_DeleteDevice(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteDeviceFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteDevice(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -757,11 +816,12 @@ func TestNetworkService_CreateIPAddress(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateIPAddressFunc: func(_ context.Context, token string, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+			CreateIPAddressFunc: func(_ context.Context, token string, inData domain.IPAddressWrite) (*domain.IPAddress, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.IPAddress{ID: 1, Address: in.Address}, nil
+
+				return &domain.IPAddress{ID: 1, Address: inData.Address}, nil
 			},
 		})
 		ip, err := svc.CreateIPAddress(context.Background(), domain.IPAddressWrite{Address: "A"})
@@ -774,10 +834,10 @@ func TestNetworkService_CreateIPAddress(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"address":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"address":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateIPAddressFunc: func(_ context.Context, _ string, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateIPAddress(context.Background(), domain.IPAddressWrite{})
@@ -788,7 +848,7 @@ func TestNetworkService_CreateIPAddress(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 		if string(got.Body) != `{"address":["required"]}` {
@@ -817,8 +877,10 @@ func TestNetworkService_UpdateIPAddress(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateIPAddressFunc: func(_ context.Context, _ string, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
-				return &domain.IPAddress{ID: id, Address: in.Address}, nil
+			UpdateIPAddressFunc: func(
+				_ context.Context, _ string, id int, inData domain.IPAddressWrite,
+			) (*domain.IPAddress, error) {
+				return &domain.IPAddress{ID: id, Address: inData.Address}, nil
 			},
 		})
 		ip, err := svc.UpdateIPAddress(context.Background(), 7, domain.IPAddressWrite{Address: "Renamed"})
@@ -831,15 +893,15 @@ func TestNetworkService_UpdateIPAddress(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"dns_name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"dns_name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateIPAddressFunc: func(_ context.Context, _ string, _ int, _ domain.IPAddressWrite) (*domain.IPAddress, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateIPAddress(context.Background(), 7, domain.IPAddressWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -866,6 +928,7 @@ func TestNetworkService_DeleteIPAddress(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -875,15 +938,15 @@ func TestNetworkService_DeleteIPAddress(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteIPAddressFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteIPAddress(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -906,11 +969,12 @@ func TestNetworkService_CreatePrefix(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreatePrefixFunc: func(_ context.Context, token string, in domain.PrefixWrite) (*domain.Prefix, error) {
+			CreatePrefixFunc: func(_ context.Context, token string, inData domain.PrefixWrite) (*domain.Prefix, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Prefix{ID: 1, Prefix: in.Prefix}, nil
+
+				return &domain.Prefix{ID: 1, Prefix: inData.Prefix}, nil
 			},
 		})
 		prefix, err := svc.CreatePrefix(context.Background(), domain.PrefixWrite{Prefix: "10.0.0.0/24"})
@@ -923,10 +987,10 @@ func TestNetworkService_CreatePrefix(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"prefix":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"prefix":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreatePrefixFunc: func(_ context.Context, _ string, _ domain.PrefixWrite) (*domain.Prefix, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreatePrefix(context.Background(), domain.PrefixWrite{})
@@ -937,7 +1001,7 @@ func TestNetworkService_CreatePrefix(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -960,8 +1024,8 @@ func TestNetworkService_UpdatePrefix(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdatePrefixFunc: func(_ context.Context, _ string, id int, in domain.PrefixWrite) (*domain.Prefix, error) {
-				return &domain.Prefix{ID: id, Prefix: in.Prefix}, nil
+			UpdatePrefixFunc: func(_ context.Context, _ string, id int, inData domain.PrefixWrite) (*domain.Prefix, error) {
+				return &domain.Prefix{ID: id, Prefix: inData.Prefix}, nil
 			},
 		})
 		prefix, err := svc.UpdatePrefix(context.Background(), 7, domain.PrefixWrite{Prefix: "10.0.0.0/24"})
@@ -974,15 +1038,15 @@ func TestNetworkService_UpdatePrefix(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdatePrefixFunc: func(_ context.Context, _ string, _ int, _ domain.PrefixWrite) (*domain.Prefix, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdatePrefix(context.Background(), 7, domain.PrefixWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1009,6 +1073,7 @@ func TestNetworkService_DeletePrefix(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -1018,15 +1083,15 @@ func TestNetworkService_DeletePrefix(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeletePrefixFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeletePrefix(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1049,11 +1114,12 @@ func TestNetworkService_CreateVLAN(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateVLANFunc: func(_ context.Context, token string, in domain.VLANWrite) (*domain.VLAN, error) {
+			CreateVLANFunc: func(_ context.Context, token string, inData domain.VLANWrite) (*domain.VLAN, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.VLAN{ID: 1, VID: in.VID, Name: in.Name}, nil
+
+				return &domain.VLAN{ID: 1, VID: inData.VID, Name: inData.Name}, nil
 			},
 		})
 		vlan, err := svc.CreateVLAN(context.Background(), domain.VLANWrite{VID: 100, Name: "mgmt"})
@@ -1066,10 +1132,10 @@ func TestNetworkService_CreateVLAN(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateVLANFunc: func(_ context.Context, _ string, _ domain.VLANWrite) (*domain.VLAN, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateVLAN(context.Background(), domain.VLANWrite{})
@@ -1080,7 +1146,7 @@ func TestNetworkService_CreateVLAN(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -1103,8 +1169,8 @@ func TestNetworkService_UpdateVLAN(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateVLANFunc: func(_ context.Context, _ string, id int, in domain.VLANWrite) (*domain.VLAN, error) {
-				return &domain.VLAN{ID: id, VID: in.VID, Name: in.Name}, nil
+			UpdateVLANFunc: func(_ context.Context, _ string, id int, inData domain.VLANWrite) (*domain.VLAN, error) {
+				return &domain.VLAN{ID: id, VID: inData.VID, Name: inData.Name}, nil
 			},
 		})
 		vlan, err := svc.UpdateVLAN(context.Background(), 7, domain.VLANWrite{Name: "Renamed"})
@@ -1117,15 +1183,15 @@ func TestNetworkService_UpdateVLAN(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateVLANFunc: func(_ context.Context, _ string, _ int, _ domain.VLANWrite) (*domain.VLAN, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateVLAN(context.Background(), 7, domain.VLANWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1152,6 +1218,7 @@ func TestNetworkService_DeleteVLAN(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -1161,15 +1228,15 @@ func TestNetworkService_DeleteVLAN(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteVLANFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteVLAN(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1192,11 +1259,14 @@ func TestNetworkService_CreateVirtualMachine(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateVirtualMachineFunc: func(_ context.Context, token string, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			CreateVirtualMachineFunc: func(
+				_ context.Context, token string, inData domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.VirtualMachine{ID: 1, Name: in.Name}, nil
+
+				return &domain.VirtualMachine{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		vm, err := svc.CreateVirtualMachine(context.Background(), domain.VirtualMachineWrite{Name: "web-01"})
@@ -1209,10 +1279,12 @@ func TestNetworkService_CreateVirtualMachine(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateVirtualMachineFunc: func(_ context.Context, _ string, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
-				return nil, ve
+			CreateVirtualMachineFunc: func(
+				_ context.Context, _ string, _ domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateVirtualMachine(context.Background(), domain.VirtualMachineWrite{})
@@ -1223,14 +1295,16 @@ func TestNetworkService_CreateVirtualMachine(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateVirtualMachineFunc: func(_ context.Context, _ string, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			CreateVirtualMachineFunc: func(
+				_ context.Context, _ string, _ domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -1246,8 +1320,10 @@ func TestNetworkService_UpdateVirtualMachine(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateVirtualMachineFunc: func(_ context.Context, _ string, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
-				return &domain.VirtualMachine{ID: id, Name: in.Name}, nil
+			UpdateVirtualMachineFunc: func(
+				_ context.Context, _ string, id int, inData domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
+				return &domain.VirtualMachine{ID: id, Name: inData.Name}, nil
 			},
 		})
 		vm, err := svc.UpdateVirtualMachine(context.Background(), 7, domain.VirtualMachineWrite{Name: "Renamed"})
@@ -1260,22 +1336,26 @@ func TestNetworkService_UpdateVirtualMachine(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateVirtualMachineFunc: func(_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
-				return nil, ve
+			UpdateVirtualMachineFunc: func(
+				_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateVirtualMachine(context.Background(), 7, domain.VirtualMachineWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateVirtualMachineFunc: func(_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+			UpdateVirtualMachineFunc: func(
+				_ context.Context, _ string, _ int, _ domain.VirtualMachineWrite,
+			) (*domain.VirtualMachine, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -1295,6 +1375,7 @@ func TestNetworkService_DeleteVirtualMachine(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -1304,15 +1385,15 @@ func TestNetworkService_DeleteVirtualMachine(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteVirtualMachineFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteVirtualMachine(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1335,11 +1416,12 @@ func TestNetworkService_CreateCluster(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateClusterFunc: func(_ context.Context, token string, in domain.ClusterWrite) (*domain.Cluster, error) {
+			CreateClusterFunc: func(_ context.Context, token string, inData domain.ClusterWrite) (*domain.Cluster, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Cluster{ID: 1, Name: in.Name}, nil
+
+				return &domain.Cluster{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		cluster, err := svc.CreateCluster(context.Background(), domain.ClusterWrite{Name: "prod"})
@@ -1352,10 +1434,10 @@ func TestNetworkService_CreateCluster(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateClusterFunc: func(_ context.Context, _ string, _ domain.ClusterWrite) (*domain.Cluster, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateCluster(context.Background(), domain.ClusterWrite{})
@@ -1366,7 +1448,7 @@ func TestNetworkService_CreateCluster(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -1389,8 +1471,8 @@ func TestNetworkService_UpdateCluster(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateClusterFunc: func(_ context.Context, _ string, id int, in domain.ClusterWrite) (*domain.Cluster, error) {
-				return &domain.Cluster{ID: id, Name: in.Name}, nil
+			UpdateClusterFunc: func(_ context.Context, _ string, id int, inData domain.ClusterWrite) (*domain.Cluster, error) {
+				return &domain.Cluster{ID: id, Name: inData.Name}, nil
 			},
 		})
 		cluster, err := svc.UpdateCluster(context.Background(), 7, domain.ClusterWrite{Name: "Renamed"})
@@ -1403,15 +1485,15 @@ func TestNetworkService_UpdateCluster(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"type":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"type":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateClusterFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterWrite) (*domain.Cluster, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateCluster(context.Background(), 7, domain.ClusterWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1438,6 +1520,7 @@ func TestNetworkService_DeleteCluster(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -1447,15 +1530,15 @@ func TestNetworkService_DeleteCluster(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteClusterFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteCluster(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1478,11 +1561,12 @@ func TestNetworkService_CreateCircuit(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateCircuitFunc: func(_ context.Context, token string, in domain.CircuitWrite) (*domain.Circuit, error) {
+			CreateCircuitFunc: func(_ context.Context, token string, inData domain.CircuitWrite) (*domain.Circuit, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Circuit{ID: 1, CID: in.CID}, nil
+
+				return &domain.Circuit{ID: 1, CID: inData.CID}, nil
 			},
 		})
 		circuit, err := svc.CreateCircuit(context.Background(), domain.CircuitWrite{CID: "CIR-001"})
@@ -1495,10 +1579,10 @@ func TestNetworkService_CreateCircuit(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"cid":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"cid":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateCircuitFunc: func(_ context.Context, _ string, _ domain.CircuitWrite) (*domain.Circuit, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateCircuit(context.Background(), domain.CircuitWrite{})
@@ -1509,7 +1593,7 @@ func TestNetworkService_CreateCircuit(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -1532,8 +1616,8 @@ func TestNetworkService_UpdateCircuit(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateCircuitFunc: func(_ context.Context, _ string, id int, in domain.CircuitWrite) (*domain.Circuit, error) {
-				return &domain.Circuit{ID: id, CID: in.CID}, nil
+			UpdateCircuitFunc: func(_ context.Context, _ string, id int, inData domain.CircuitWrite) (*domain.Circuit, error) {
+				return &domain.Circuit{ID: id, CID: inData.CID}, nil
 			},
 		})
 		circuit, err := svc.UpdateCircuit(context.Background(), 7, domain.CircuitWrite{CID: "Renamed"})
@@ -1546,15 +1630,15 @@ func TestNetworkService_UpdateCircuit(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"provider":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"provider":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateCircuitFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitWrite) (*domain.Circuit, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateCircuit(context.Background(), 7, domain.CircuitWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1581,6 +1665,7 @@ func TestNetworkService_DeleteCircuit(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -1590,15 +1675,15 @@ func TestNetworkService_DeleteCircuit(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteCircuitFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteCircuit(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1621,11 +1706,12 @@ func TestNetworkService_CreateRack(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateRackFunc: func(_ context.Context, token string, in domain.RackWrite) (*domain.Rack, error) {
+			CreateRackFunc: func(_ context.Context, token string, inData domain.RackWrite) (*domain.Rack, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Rack{ID: 1, Name: in.Name}, nil
+
+				return &domain.Rack{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		rack, err := svc.CreateRack(context.Background(), domain.RackWrite{Name: "R1"})
@@ -1638,10 +1724,10 @@ func TestNetworkService_CreateRack(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateRackFunc: func(_ context.Context, _ string, _ domain.RackWrite) (*domain.Rack, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateRack(context.Background(), domain.RackWrite{})
@@ -1652,7 +1738,7 @@ func TestNetworkService_CreateRack(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -1675,8 +1761,8 @@ func TestNetworkService_UpdateRack(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateRackFunc: func(_ context.Context, _ string, id int, in domain.RackWrite) (*domain.Rack, error) {
-				return &domain.Rack{ID: id, Name: in.Name}, nil
+			UpdateRackFunc: func(_ context.Context, _ string, id int, inData domain.RackWrite) (*domain.Rack, error) {
+				return &domain.Rack{ID: id, Name: inData.Name}, nil
 			},
 		})
 		rack, err := svc.UpdateRack(context.Background(), 7, domain.RackWrite{Name: "Renamed"})
@@ -1689,15 +1775,15 @@ func TestNetworkService_UpdateRack(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateRackFunc: func(_ context.Context, _ string, _ int, _ domain.RackWrite) (*domain.Rack, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateRack(context.Background(), 7, domain.RackWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1724,6 +1810,7 @@ func TestNetworkService_DeleteRack(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -1733,15 +1820,15 @@ func TestNetworkService_DeleteRack(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteRackFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteRack(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1764,11 +1851,12 @@ func TestNetworkService_CreateInterface(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateInterfaceFunc: func(_ context.Context, token string, in domain.InterfaceWrite) (*domain.Interface, error) {
+			CreateInterfaceFunc: func(_ context.Context, token string, inData domain.InterfaceWrite) (*domain.Interface, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Interface{ID: 1, Name: in.Name}, nil
+
+				return &domain.Interface{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		iface, err := svc.CreateInterface(context.Background(), domain.InterfaceWrite{Name: "eth0"})
@@ -1781,10 +1869,10 @@ func TestNetworkService_CreateInterface(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateInterfaceFunc: func(_ context.Context, _ string, _ domain.InterfaceWrite) (*domain.Interface, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateInterface(context.Background(), domain.InterfaceWrite{})
@@ -1795,7 +1883,7 @@ func TestNetworkService_CreateInterface(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -1818,8 +1906,10 @@ func TestNetworkService_UpdateInterface(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateInterfaceFunc: func(_ context.Context, _ string, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
-				return &domain.Interface{ID: id, Name: in.Name}, nil
+			UpdateInterfaceFunc: func(
+				_ context.Context, _ string, id int, inData domain.InterfaceWrite,
+			) (*domain.Interface, error) {
+				return &domain.Interface{ID: id, Name: inData.Name}, nil
 			},
 		})
 		iface, err := svc.UpdateInterface(context.Background(), 7, domain.InterfaceWrite{Name: "Renamed"})
@@ -1832,15 +1922,15 @@ func TestNetworkService_UpdateInterface(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"type":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"type":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateInterfaceFunc: func(_ context.Context, _ string, _ int, _ domain.InterfaceWrite) (*domain.Interface, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateInterface(context.Background(), 7, domain.InterfaceWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1867,6 +1957,7 @@ func TestNetworkService_DeleteInterface(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -1876,15 +1967,15 @@ func TestNetworkService_DeleteInterface(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteInterfaceFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteInterface(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -1907,11 +1998,14 @@ func TestNetworkService_CreateCircuitTermination(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateCircuitTerminationFunc: func(_ context.Context, token string, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+			CreateCircuitTerminationFunc: func(
+				_ context.Context, token string, inData domain.CircuitTerminationWrite,
+			) (*domain.CircuitTermination, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.CircuitTermination{ID: 1, TermSide: in.TermSide}, nil
+
+				return &domain.CircuitTermination{ID: 1, TermSide: inData.TermSide}, nil
 			},
 		})
 		ct, err := svc.CreateCircuitTermination(context.Background(), domain.CircuitTerminationWrite{TermSide: "A"})
@@ -1924,10 +2018,12 @@ func TestNetworkService_CreateCircuitTermination(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"term_side":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"term_side":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateCircuitTerminationFunc: func(_ context.Context, _ string, _ domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
-				return nil, ve
+			CreateCircuitTerminationFunc: func(
+				_ context.Context, _ string, _ domain.CircuitTerminationWrite,
+			) (*domain.CircuitTermination, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateCircuitTermination(context.Background(), domain.CircuitTerminationWrite{})
@@ -1938,14 +2034,16 @@ func TestNetworkService_CreateCircuitTermination(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateCircuitTerminationFunc: func(_ context.Context, _ string, _ domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+			CreateCircuitTerminationFunc: func(
+				_ context.Context, _ string, _ domain.CircuitTerminationWrite,
+			) (*domain.CircuitTermination, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -1961,8 +2059,10 @@ func TestNetworkService_UpdateCircuitTermination(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateCircuitTerminationFunc: func(_ context.Context, _ string, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
-				return &domain.CircuitTermination{ID: id, TermSide: in.TermSide}, nil
+			UpdateCircuitTerminationFunc: func(
+				_ context.Context, _ string, id int, inData domain.CircuitTerminationWrite,
+			) (*domain.CircuitTermination, error) {
+				return &domain.CircuitTermination{ID: id, TermSide: inData.TermSide}, nil
 			},
 		})
 		ct, err := svc.UpdateCircuitTermination(context.Background(), 7, domain.CircuitTerminationWrite{TermSide: "Z"})
@@ -1975,22 +2075,26 @@ func TestNetworkService_UpdateCircuitTermination(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"site":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"site":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateCircuitTerminationFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
-				return nil, ve
+			UpdateCircuitTerminationFunc: func(
+				_ context.Context, _ string, _ int, _ domain.CircuitTerminationWrite,
+			) (*domain.CircuitTermination, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateCircuitTermination(context.Background(), 7, domain.CircuitTerminationWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateCircuitTerminationFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+			UpdateCircuitTerminationFunc: func(
+				_ context.Context, _ string, _ int, _ domain.CircuitTerminationWrite,
+			) (*domain.CircuitTermination, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -2010,6 +2114,7 @@ func TestNetworkService_DeleteCircuitTermination(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -2019,15 +2124,15 @@ func TestNetworkService_DeleteCircuitTermination(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteCircuitTerminationFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteCircuitTermination(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2052,11 +2157,12 @@ func TestNetworkService_CreateCable(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateCableFunc: func(_ context.Context, token string, in domain.CableWrite) (*domain.Cable, error) {
+			CreateCableFunc: func(_ context.Context, token string, inData domain.CableWrite) (*domain.Cable, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Cable{ID: 1, Label: *in.Label}, nil
+
+				return &domain.Cable{ID: 1, Label: *inData.Label}, nil
 			},
 		})
 		c, err := svc.CreateCable(context.Background(), domain.CableWrite{Label: &label})
@@ -2069,10 +2175,10 @@ func TestNetworkService_CreateCable(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"termination_a":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"termination_a":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateCableFunc: func(_ context.Context, _ string, _ domain.CableWrite) (*domain.Cable, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateCable(context.Background(), domain.CableWrite{})
@@ -2083,7 +2189,7 @@ func TestNetworkService_CreateCable(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -2122,15 +2228,15 @@ func TestNetworkService_UpdateCable(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"status":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateCableFunc: func(_ context.Context, _ string, _ int, _ domain.CableWrite) (*domain.Cable, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateCable(context.Background(), 7, domain.CableWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2157,6 +2263,7 @@ func TestNetworkService_DeleteCable(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -2166,15 +2273,15 @@ func TestNetworkService_DeleteCable(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteCableFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteCable(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2197,11 +2304,14 @@ func TestNetworkService_CreateVMInterface(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateVMInterfaceFunc: func(_ context.Context, token string, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+			CreateVMInterfaceFunc: func(
+				_ context.Context, token string, inData domain.VMInterfaceWrite,
+			) (*domain.VMInterface, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.VMInterface{ID: 1, Name: in.Name}, nil
+
+				return &domain.VMInterface{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		vi, err := svc.CreateVMInterface(context.Background(), domain.VMInterfaceWrite{Name: "eth0"})
@@ -2214,10 +2324,10 @@ func TestNetworkService_CreateVMInterface(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateVMInterfaceFunc: func(_ context.Context, _ string, _ domain.VMInterfaceWrite) (*domain.VMInterface, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateVMInterface(context.Background(), domain.VMInterfaceWrite{})
@@ -2228,7 +2338,7 @@ func TestNetworkService_CreateVMInterface(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -2251,7 +2361,9 @@ func TestNetworkService_UpdateVMInterface(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateVMInterfaceFunc: func(_ context.Context, _ string, id int, _ domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+			UpdateVMInterfaceFunc: func(
+				_ context.Context, _ string, id int, _ domain.VMInterfaceWrite,
+			) (*domain.VMInterface, error) {
 				return &domain.VMInterface{ID: id, Name: "eth1"}, nil
 			},
 		})
@@ -2265,22 +2377,26 @@ func TestNetworkService_UpdateVMInterface(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"mac_address":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"mac_address":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateVMInterfaceFunc: func(_ context.Context, _ string, _ int, _ domain.VMInterfaceWrite) (*domain.VMInterface, error) {
-				return nil, ve
+			UpdateVMInterfaceFunc: func(
+				_ context.Context, _ string, _ int, _ domain.VMInterfaceWrite,
+			) (*domain.VMInterface, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateVMInterface(context.Background(), 7, domain.VMInterfaceWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateVMInterfaceFunc: func(_ context.Context, _ string, _ int, _ domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+			UpdateVMInterfaceFunc: func(
+				_ context.Context, _ string, _ int, _ domain.VMInterfaceWrite,
+			) (*domain.VMInterface, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -2300,6 +2416,7 @@ func TestNetworkService_DeleteVMInterface(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -2309,15 +2426,15 @@ func TestNetworkService_DeleteVMInterface(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteVMInterfaceFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteVMInterface(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2340,11 +2457,12 @@ func TestNetworkService_CreateProvider(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateProviderFunc: func(_ context.Context, token string, in domain.ProviderWrite) (*domain.Provider, error) {
+			CreateProviderFunc: func(_ context.Context, token string, inData domain.ProviderWrite) (*domain.Provider, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Provider{ID: 1, Name: in.Name}, nil
+
+				return &domain.Provider{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateProvider(context.Background(), domain.ProviderWrite{Name: "ACME"})
@@ -2357,10 +2475,10 @@ func TestNetworkService_CreateProvider(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateProviderFunc: func(_ context.Context, _ string, _ domain.ProviderWrite) (*domain.Provider, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateProvider(context.Background(), domain.ProviderWrite{})
@@ -2371,7 +2489,7 @@ func TestNetworkService_CreateProvider(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -2408,15 +2526,15 @@ func TestNetworkService_UpdateProvider(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateProviderFunc: func(_ context.Context, _ string, _ int, _ domain.ProviderWrite) (*domain.Provider, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateProvider(context.Background(), 7, domain.ProviderWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2443,6 +2561,7 @@ func TestNetworkService_DeleteProvider(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -2452,15 +2571,15 @@ func TestNetworkService_DeleteProvider(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteProviderFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteProvider(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2483,11 +2602,12 @@ func TestNetworkService_CreateTenant(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateTenantFunc: func(_ context.Context, token string, in domain.TenantWrite) (*domain.Tenant, error) {
+			CreateTenantFunc: func(_ context.Context, token string, inData domain.TenantWrite) (*domain.Tenant, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Tenant{ID: 1, Name: in.Name}, nil
+
+				return &domain.Tenant{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateTenant(context.Background(), domain.TenantWrite{Name: "ACME"})
@@ -2500,10 +2620,10 @@ func TestNetworkService_CreateTenant(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateTenantFunc: func(_ context.Context, _ string, _ domain.TenantWrite) (*domain.Tenant, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateTenant(context.Background(), domain.TenantWrite{})
@@ -2514,7 +2634,7 @@ func TestNetworkService_CreateTenant(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -2551,15 +2671,15 @@ func TestNetworkService_UpdateTenant(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateTenantFunc: func(_ context.Context, _ string, _ int, _ domain.TenantWrite) (*domain.Tenant, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateTenant(context.Background(), 7, domain.TenantWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2586,6 +2706,7 @@ func TestNetworkService_DeleteTenant(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -2595,15 +2716,15 @@ func TestNetworkService_DeleteTenant(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteTenantFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteTenant(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2626,11 +2747,14 @@ func TestNetworkService_CreateManufacturer(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateManufacturerFunc: func(_ context.Context, token string, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+			CreateManufacturerFunc: func(
+				_ context.Context, token string, inData domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Manufacturer{ID: 1, Name: in.Name}, nil
+
+				return &domain.Manufacturer{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateManufacturer(context.Background(), domain.ManufacturerWrite{Name: "Cisco"})
@@ -2643,10 +2767,10 @@ func TestNetworkService_CreateManufacturer(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateManufacturerFunc: func(_ context.Context, _ string, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateManufacturer(context.Background(), domain.ManufacturerWrite{})
@@ -2657,7 +2781,7 @@ func TestNetworkService_CreateManufacturer(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -2680,7 +2804,9 @@ func TestNetworkService_UpdateManufacturer(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateManufacturerFunc: func(_ context.Context, _ string, id int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+			UpdateManufacturerFunc: func(
+				_ context.Context, _ string, id int, _ domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
 				return &domain.Manufacturer{ID: id, Name: "Cisco2"}, nil
 			},
 		})
@@ -2694,22 +2820,26 @@ func TestNetworkService_UpdateManufacturer(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateManufacturerFunc: func(_ context.Context, _ string, _ int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
-				return nil, ve
+			UpdateManufacturerFunc: func(
+				_ context.Context, _ string, _ int, _ domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateManufacturer(context.Background(), 7, domain.ManufacturerWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateManufacturerFunc: func(_ context.Context, _ string, _ int, _ domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+			UpdateManufacturerFunc: func(
+				_ context.Context, _ string, _ int, _ domain.ManufacturerWrite,
+			) (*domain.Manufacturer, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -2729,6 +2859,7 @@ func TestNetworkService_DeleteManufacturer(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -2738,15 +2869,15 @@ func TestNetworkService_DeleteManufacturer(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteManufacturerFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteManufacturer(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2769,11 +2900,14 @@ func TestNetworkService_CreateDeviceType(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateDeviceTypeFunc: func(_ context.Context, token string, in domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+			CreateDeviceTypeFunc: func(
+				_ context.Context, token string, inData domain.DeviceTypeWrite,
+			) (*domain.DeviceType, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.DeviceType{ID: 1, Model: in.Model}, nil
+
+				return &domain.DeviceType{ID: 1, Model: inData.Model}, nil
 			},
 		})
 		p, err := svc.CreateDeviceType(context.Background(), domain.DeviceTypeWrite{Model: "C9300"})
@@ -2786,10 +2920,10 @@ func TestNetworkService_CreateDeviceType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"model":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"model":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateDeviceTypeFunc: func(_ context.Context, _ string, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateDeviceType(context.Background(), domain.DeviceTypeWrite{})
@@ -2800,7 +2934,7 @@ func TestNetworkService_CreateDeviceType(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -2823,7 +2957,9 @@ func TestNetworkService_UpdateDeviceType(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateDeviceTypeFunc: func(_ context.Context, _ string, id int, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+			UpdateDeviceTypeFunc: func(
+				_ context.Context, _ string, id int, _ domain.DeviceTypeWrite,
+			) (*domain.DeviceType, error) {
 				return &domain.DeviceType{ID: id, Model: "C9300-2"}, nil
 			},
 		})
@@ -2837,22 +2973,26 @@ func TestNetworkService_UpdateDeviceType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateDeviceTypeFunc: func(_ context.Context, _ string, _ int, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
-				return nil, ve
+			UpdateDeviceTypeFunc: func(
+				_ context.Context, _ string, _ int, _ domain.DeviceTypeWrite,
+			) (*domain.DeviceType, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateDeviceType(context.Background(), 7, domain.DeviceTypeWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateDeviceTypeFunc: func(_ context.Context, _ string, _ int, _ domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+			UpdateDeviceTypeFunc: func(
+				_ context.Context, _ string, _ int, _ domain.DeviceTypeWrite,
+			) (*domain.DeviceType, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -2872,6 +3012,7 @@ func TestNetworkService_DeleteDeviceType(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -2881,15 +3022,15 @@ func TestNetworkService_DeleteDeviceType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteDeviceTypeFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteDeviceType(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -2918,6 +3059,7 @@ func indexOfService(s, sub string) int {
 			return i
 		}
 	}
+
 	return -1
 }
 
@@ -2926,11 +3068,12 @@ func TestNetworkService_CreateLocation(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateLocationFunc: func(_ context.Context, token string, in domain.LocationWrite) (*domain.Location, error) {
+			CreateLocationFunc: func(_ context.Context, token string, inData domain.LocationWrite) (*domain.Location, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Location{ID: 1, Name: in.Name}, nil
+
+				return &domain.Location{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		site := 5
@@ -2944,10 +3087,10 @@ func TestNetworkService_CreateLocation(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"site":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"site":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateLocationFunc: func(_ context.Context, _ string, _ domain.LocationWrite) (*domain.Location, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateLocation(context.Background(), domain.LocationWrite{})
@@ -2958,7 +3101,7 @@ func TestNetworkService_CreateLocation(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -2995,15 +3138,15 @@ func TestNetworkService_UpdateLocation(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateLocationFunc: func(_ context.Context, _ string, _ int, _ domain.LocationWrite) (*domain.Location, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateLocation(context.Background(), 7, domain.LocationWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3030,6 +3173,7 @@ func TestNetworkService_DeleteLocation(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -3039,15 +3183,15 @@ func TestNetworkService_DeleteLocation(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteLocationFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteLocation(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3070,11 +3214,14 @@ func TestNetworkService_CreateClusterType(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateClusterTypeFunc: func(_ context.Context, token string, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+			CreateClusterTypeFunc: func(
+				_ context.Context, token string, inData domain.ClusterTypeWrite,
+			) (*domain.ClusterType, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.ClusterType{ID: 1, Name: in.Name}, nil
+
+				return &domain.ClusterType{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateClusterType(context.Background(), domain.ClusterTypeWrite{Name: "KVM"})
@@ -3087,10 +3234,10 @@ func TestNetworkService_CreateClusterType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateClusterTypeFunc: func(_ context.Context, _ string, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateClusterType(context.Background(), domain.ClusterTypeWrite{})
@@ -3101,7 +3248,7 @@ func TestNetworkService_CreateClusterType(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -3124,7 +3271,9 @@ func TestNetworkService_UpdateClusterType(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateClusterTypeFunc: func(_ context.Context, _ string, id int, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+			UpdateClusterTypeFunc: func(
+				_ context.Context, _ string, id int, _ domain.ClusterTypeWrite,
+			) (*domain.ClusterType, error) {
 				return &domain.ClusterType{ID: id, Name: "KVM"}, nil
 			},
 		})
@@ -3138,22 +3287,26 @@ func TestNetworkService_UpdateClusterType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateClusterTypeFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
-				return nil, ve
+			UpdateClusterTypeFunc: func(
+				_ context.Context, _ string, _ int, _ domain.ClusterTypeWrite,
+			) (*domain.ClusterType, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateClusterType(context.Background(), 7, domain.ClusterTypeWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateClusterTypeFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+			UpdateClusterTypeFunc: func(
+				_ context.Context, _ string, _ int, _ domain.ClusterTypeWrite,
+			) (*domain.ClusterType, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -3173,6 +3326,7 @@ func TestNetworkService_DeleteClusterType(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -3182,15 +3336,15 @@ func TestNetworkService_DeleteClusterType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteClusterTypeFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteClusterType(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3213,11 +3367,14 @@ func TestNetworkService_CreateClusterGroup(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateClusterGroupFunc: func(_ context.Context, token string, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+			CreateClusterGroupFunc: func(
+				_ context.Context, token string, inData domain.ClusterGroupWrite,
+			) (*domain.ClusterGroup, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.ClusterGroup{ID: 1, Name: in.Name}, nil
+
+				return &domain.ClusterGroup{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateClusterGroup(context.Background(), domain.ClusterGroupWrite{Name: "DC Clusters"})
@@ -3230,10 +3387,10 @@ func TestNetworkService_CreateClusterGroup(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateClusterGroupFunc: func(_ context.Context, _ string, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateClusterGroup(context.Background(), domain.ClusterGroupWrite{})
@@ -3244,7 +3401,7 @@ func TestNetworkService_CreateClusterGroup(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -3267,7 +3424,9 @@ func TestNetworkService_UpdateClusterGroup(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateClusterGroupFunc: func(_ context.Context, _ string, id int, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+			UpdateClusterGroupFunc: func(
+				_ context.Context, _ string, id int, _ domain.ClusterGroupWrite,
+			) (*domain.ClusterGroup, error) {
 				return &domain.ClusterGroup{ID: id, Name: "DC Clusters"}, nil
 			},
 		})
@@ -3281,22 +3440,26 @@ func TestNetworkService_UpdateClusterGroup(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateClusterGroupFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
-				return nil, ve
+			UpdateClusterGroupFunc: func(
+				_ context.Context, _ string, _ int, _ domain.ClusterGroupWrite,
+			) (*domain.ClusterGroup, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateClusterGroup(context.Background(), 7, domain.ClusterGroupWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateClusterGroupFunc: func(_ context.Context, _ string, _ int, _ domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+			UpdateClusterGroupFunc: func(
+				_ context.Context, _ string, _ int, _ domain.ClusterGroupWrite,
+			) (*domain.ClusterGroup, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -3316,6 +3479,7 @@ func TestNetworkService_DeleteClusterGroup(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -3325,15 +3489,15 @@ func TestNetworkService_DeleteClusterGroup(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteClusterGroupFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteClusterGroup(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3356,11 +3520,14 @@ func TestNetworkService_CreateCircuitType(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateCircuitTypeFunc: func(_ context.Context, token string, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+			CreateCircuitTypeFunc: func(
+				_ context.Context, token string, inData domain.CircuitTypeWrite,
+			) (*domain.CircuitType, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.CircuitType{ID: 1, Name: in.Name}, nil
+
+				return &domain.CircuitType{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateCircuitType(context.Background(), domain.CircuitTypeWrite{Name: "Fiber"})
@@ -3373,10 +3540,10 @@ func TestNetworkService_CreateCircuitType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateCircuitTypeFunc: func(_ context.Context, _ string, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateCircuitType(context.Background(), domain.CircuitTypeWrite{})
@@ -3387,7 +3554,7 @@ func TestNetworkService_CreateCircuitType(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -3410,7 +3577,9 @@ func TestNetworkService_UpdateCircuitType(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateCircuitTypeFunc: func(_ context.Context, _ string, id int, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+			UpdateCircuitTypeFunc: func(
+				_ context.Context, _ string, id int, _ domain.CircuitTypeWrite,
+			) (*domain.CircuitType, error) {
 				return &domain.CircuitType{ID: id, Name: "Fiber"}, nil
 			},
 		})
@@ -3424,22 +3593,26 @@ func TestNetworkService_UpdateCircuitType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateCircuitTypeFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
-				return nil, ve
+			UpdateCircuitTypeFunc: func(
+				_ context.Context, _ string, _ int, _ domain.CircuitTypeWrite,
+			) (*domain.CircuitType, error) {
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateCircuitType(context.Background(), 7, domain.CircuitTypeWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
 
 	t.Run("wraps generic error with label", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			UpdateCircuitTypeFunc: func(_ context.Context, _ string, _ int, _ domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+			UpdateCircuitTypeFunc: func(
+				_ context.Context, _ string, _ int, _ domain.CircuitTypeWrite,
+			) (*domain.CircuitType, error) {
 				return nil, errors.New("boom")
 			},
 		})
@@ -3459,6 +3632,7 @@ func TestNetworkService_DeleteCircuitType(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -3468,15 +3642,15 @@ func TestNetworkService_DeleteCircuitType(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteCircuitTypeFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteCircuitType(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3499,11 +3673,12 @@ func TestNetworkService_CreateVrf(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateVrfFunc: func(_ context.Context, token string, in domain.VrfWrite) (*domain.Vrf, error) {
+			CreateVrfFunc: func(_ context.Context, token string, inData domain.VrfWrite) (*domain.Vrf, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Vrf{ID: 1, Name: in.Name, Rd: in.Rd}, nil
+
+				return &domain.Vrf{ID: 1, Name: inData.Name, Rd: inData.Rd}, nil
 			},
 		})
 		p, err := svc.CreateVrf(context.Background(), domain.VrfWrite{Name: "prod", Rd: "65000:1"})
@@ -3516,10 +3691,10 @@ func TestNetworkService_CreateVrf(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateVrfFunc: func(_ context.Context, _ string, _ domain.VrfWrite) (*domain.Vrf, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateVrf(context.Background(), domain.VrfWrite{})
@@ -3530,7 +3705,7 @@ func TestNetworkService_CreateVrf(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -3567,15 +3742,15 @@ func TestNetworkService_UpdateVrf(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"rd":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"rd":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateVrfFunc: func(_ context.Context, _ string, _ int, _ domain.VrfWrite) (*domain.Vrf, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateVrf(context.Background(), 7, domain.VrfWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3602,6 +3777,7 @@ func TestNetworkService_DeleteVrf(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -3611,15 +3787,15 @@ func TestNetworkService_DeleteVrf(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteVrfFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteVrf(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3642,11 +3818,12 @@ func TestNetworkService_CreateVlanGroup(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateVlanGroupFunc: func(_ context.Context, token string, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+			CreateVlanGroupFunc: func(_ context.Context, token string, inData domain.VlanGroupWrite) (*domain.VlanGroup, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.VlanGroup{ID: 1, Name: in.Name}, nil
+
+				return &domain.VlanGroup{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateVlanGroup(context.Background(), domain.VlanGroupWrite{Name: "DC VLANs"})
@@ -3659,10 +3836,10 @@ func TestNetworkService_CreateVlanGroup(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateVlanGroupFunc: func(_ context.Context, _ string, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateVlanGroup(context.Background(), domain.VlanGroupWrite{})
@@ -3673,7 +3850,7 @@ func TestNetworkService_CreateVlanGroup(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -3710,15 +3887,15 @@ func TestNetworkService_UpdateVlanGroup(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateVlanGroupFunc: func(_ context.Context, _ string, _ int, _ domain.VlanGroupWrite) (*domain.VlanGroup, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateVlanGroup(context.Background(), 7, domain.VlanGroupWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3745,6 +3922,7 @@ func TestNetworkService_DeleteVlanGroup(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -3754,15 +3932,15 @@ func TestNetworkService_DeleteVlanGroup(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteVlanGroupFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteVlanGroup(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3785,11 +3963,12 @@ func TestNetworkService_CreateRole(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateRoleFunc: func(_ context.Context, token string, in domain.RoleWrite) (*domain.Role, error) {
+			CreateRoleFunc: func(_ context.Context, token string, inData domain.RoleWrite) (*domain.Role, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Role{ID: 1, Name: in.Name}, nil
+
+				return &domain.Role{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateRole(context.Background(), domain.RoleWrite{Name: "prod"})
@@ -3802,10 +3981,10 @@ func TestNetworkService_CreateRole(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateRoleFunc: func(_ context.Context, _ string, _ domain.RoleWrite) (*domain.Role, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateRole(context.Background(), domain.RoleWrite{})
@@ -3816,7 +3995,7 @@ func TestNetworkService_CreateRole(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -3853,15 +4032,15 @@ func TestNetworkService_UpdateRole(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateRoleFunc: func(_ context.Context, _ string, _ int, _ domain.RoleWrite) (*domain.Role, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateRole(context.Background(), 7, domain.RoleWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3888,6 +4067,7 @@ func TestNetworkService_DeleteRole(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -3897,15 +4077,15 @@ func TestNetworkService_DeleteRole(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteRoleFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteRole(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -3928,11 +4108,12 @@ func TestNetworkService_CreateContact(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		svc := newTestService(&mockrepo.MockRepo{
-			CreateContactFunc: func(_ context.Context, token string, in domain.ContactWrite) (*domain.Contact, error) {
+			CreateContactFunc: func(_ context.Context, token string, inData domain.ContactWrite) (*domain.Contact, error) {
 				if token != "test-token" {
 					t.Errorf("token = %q, want test-token", token)
 				}
-				return &domain.Contact{ID: 1, Name: in.Name}, nil
+
+				return &domain.Contact{ID: 1, Name: inData.Name}, nil
 			},
 		})
 		p, err := svc.CreateContact(context.Background(), domain.ContactWrite{Name: "ops"})
@@ -3945,10 +4126,10 @@ func TestNetworkService_CreateContact(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			CreateContactFunc: func(_ context.Context, _ string, _ domain.ContactWrite) (*domain.Contact, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.CreateContact(context.Background(), domain.ContactWrite{})
@@ -3959,7 +4140,7 @@ func TestNetworkService_CreateContact(t *testing.T) {
 		if !errors.As(err, &got) {
 			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
 		}
-		if got != ve {
+		if got != valErr {
 			t.Error("ValidationError was not passed through unchanged")
 		}
 	})
@@ -3996,15 +4177,15 @@ func TestNetworkService_UpdateContact(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["invalid"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["invalid"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			UpdateContactFunc: func(_ context.Context, _ string, _ int, _ domain.ContactWrite) (*domain.Contact, error) {
-				return nil, ve
+				return nil, valErr
 			},
 		})
 		_, err := svc.UpdateContact(context.Background(), 7, domain.ContactWrite{})
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})
@@ -4031,6 +4212,7 @@ func TestNetworkService_DeleteContact(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		})
@@ -4040,15 +4222,15 @@ func TestNetworkService_DeleteContact(t *testing.T) {
 	})
 
 	t.Run("propagates validation error via errors.As", func(t *testing.T) {
-		ve := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
 		svc := newTestService(&mockrepo.MockRepo{
 			DeleteContactFunc: func(_ context.Context, _ string, _ int) error {
-				return ve
+				return valErr
 			},
 		})
 		err := svc.DeleteContact(context.Background(), 3)
 		var got *domain.ValidationError
-		if !errors.As(err, &got) || got != ve {
+		if !errors.As(err, &got) || got != valErr {
 			t.Errorf("err = %v, want the ValidationError passed through", err)
 		}
 	})

@@ -11,6 +11,7 @@ import (
 	"github.com/teran/mcp-netbox/mockrepo"
 )
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestCreateVLANHandler(t *testing.T) {
 	t.Parallel()
 
@@ -71,13 +72,13 @@ func TestCreateVLANHandler(t *testing.T) {
 		if result.StructuredContent == nil {
 			t.Fatal("StructuredContent is nil, want validation_errors")
 		}
-		sc, ok := result.StructuredContent.(map[string]any)
+		structuredContent, ok := result.StructuredContent.(map[string]any)
 		if !ok {
 			t.Fatalf("StructuredContent type = %T, want map", result.StructuredContent)
 		}
-		raw, ok := sc["validation_errors"].(json.RawMessage)
+		raw, ok := structuredContent["validation_errors"].(json.RawMessage)
 		if !ok {
-			t.Fatalf("validation_errors type = %T, want json.RawMessage", sc["validation_errors"])
+			t.Fatalf("validation_errors type = %T, want json.RawMessage", structuredContent["validation_errors"])
 		}
 		if string(raw) != string(body) {
 			t.Errorf("validation_errors = %s, want %s", raw, body)
@@ -154,6 +155,7 @@ func TestDeleteVLANHandler(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		}, "token")

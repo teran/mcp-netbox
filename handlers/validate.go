@@ -11,19 +11,28 @@ func validatePositiveID(id int) error {
 	if id <= 0 {
 		return fmt.Errorf("id must be a positive integer")
 	}
+
 	return nil
 }
 
 // sanitizeControl strips CR and LF control characters, preventing header/query
 // injection via crafted payload values.
-func sanitizeControl(s string) string {
+func sanitizeControl(value string) string {
 	return strings.Map(func(r rune) rune {
 		if r == '\r' || r == '\n' {
 			return -1
 		}
+
 		return r
-	}, s)
+	}, value)
 }
+
+const (
+	// escByte is the ASCII ESC byte that begins an ANSI escape sequence.
+	escByte = 0x1b
+	// csiOffset is the length of the "ESC [" CSI prefix (escByte + '[').
+	csiOffset = 2
+)
 
 // sanitizeOutput strips ANSI escape sequences and C0 control characters from
 // tool-result text (S09/N23). It is applied to the text form of a tool result
@@ -32,35 +41,40 @@ func sanitizeControl(s string) string {
 // operates on bytes: only ASCII control bytes (< 0x20, 0x7f) and whole ANSI
 // escape sequences are removed, so valid multi-byte UTF-8 and printable ASCII
 // pass through untouched.
-func sanitizeOutput(s string) string {
-	var b strings.Builder
-	b.Grow(len(s))
-	for i := 0; i < len(s); {
-		c := s[i]
-		if c == 0x1b { // ESC — ANSI escape sequence
+func sanitizeOutput(value string) string {
+	var builder strings.Builder
+	builder.Grow(len(value))
+	for idx := 0; idx < len(value); {
+		currentByte := value[idx]
+		if currentByte == escByte { // ESC — ANSI escape sequence
 			// CSI: ESC '[' ... final byte in 0x40-0x7e. When no final byte is
 			// present before the end of the string, the whole remainder is part
 			// of the incomplete escape and is dropped.
-			if i+1 < len(s) && s[i+1] == '[' {
-				j := i + 2
-				for j < len(s) && (s[j] < 0x40 || s[j] > 0x7e) {
+			if idx+1 < len(value) && value[idx+1] == '[' {
+				j := idx + csiOffset
+				for j < len(value) && (value[j] < 0x40 || value[j] > 0x7e) {
 					j++
 				}
-				i = j + 1
+
+				idx = j + 1
+
 				continue
 			}
 			// Two-character escape: ESC + a printable byte.
-			i += 2
+			idx += 2
+
 			continue
 		}
-		if c < 0x20 || c == 0x7f { // C0 control char or DEL
-			i++
+		if currentByte < 0x20 || currentByte == 0x7f { // C0 control char or DEL
+			idx++
+
 			continue
 		}
-		b.WriteByte(c)
-		i++
+		builder.WriteByte(currentByte)
+		idx++
 	}
-	return b.String()
+
+	return builder.String()
 }
 
 // sanitizeMapKeysValues applies sanitizeControl to every key and value of a
@@ -73,28 +87,30 @@ func sanitizeMapKeysValues(m map[string]string) map[string]string {
 	for k, v := range m {
 		out[sanitizeControl(k)] = sanitizeControl(v)
 	}
+
 	return out
 }
 
 // sanitizeAllStrings recursively sanitizes every settable string field of a
 // struct value (including through pointers). It is applied to write payloads
 // before json.Marshal so CRLF never reaches the NetBox request body.
-func sanitizeAllStrings(v reflect.Value) {
-	if !v.IsValid() {
+func sanitizeAllStrings(value reflect.Value) {
+	if !value.IsValid() {
 		return
 	}
-	switch v.Kind() {
+	//nolint:exhaustive // reflect.Kind has ~27 values; only pointer/struct/string are handled here.
+	switch value.Kind() {
 	case reflect.Pointer:
-		if !v.IsNil() {
-			sanitizeAllStrings(v.Elem())
+		if !value.IsNil() {
+			sanitizeAllStrings(value.Elem())
 		}
 	case reflect.Struct:
-		for i := range v.NumField() {
-			sanitizeAllStrings(v.Field(i))
+		for _, field := range value.Fields() {
+			sanitizeAllStrings(field)
 		}
 	case reflect.String:
-		if v.CanSet() {
-			v.SetString(sanitizeControl(v.String()))
+		if value.CanSet() {
+			value.SetString(sanitizeControl(value.String()))
 		}
 	}
 }

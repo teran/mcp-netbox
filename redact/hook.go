@@ -11,6 +11,8 @@ import (
 //
 // Scalar strings are passed through unchanged: a bare string has no struct tag
 // for Redact to act on, and rewriting it would corrupt ordinary log fields.
+//
+//nolint:ireturn // logrus.AddHook requires the logrus.Hook interface; a concrete type is not accepted.
 func NewLogrusHook() logrus.Hook {
 	return &secretHook{}
 }
@@ -30,5 +32,6 @@ func (h *secretHook) Fire(e *logrus.Entry) error {
 		}
 		e.Data[k] = Redact(v)
 	}
+
 	return nil
 }

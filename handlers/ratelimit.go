@@ -16,6 +16,7 @@ type clientLimiter struct {
 	lastSeen time.Time
 }
 
+// RateLimiterConfig configures the global and per-client rate limits.
 type RateLimiterConfig struct {
 	GlobalLimit    rate.Limit
 	GlobalBurst    int
@@ -40,15 +41,18 @@ type rateLimiter struct {
 	now func() time.Time
 }
 
-func NewRateLimiter(config RateLimiterConfig) *rateLimiter {
-	rl := &rateLimiter{
+// newRateLimiter creates a rate limiter with the given config and starts its
+// background client-eviction loop.
+func newRateLimiter(config RateLimiterConfig) *rateLimiter {
+	limiter := &rateLimiter{
 		config:  config,
 		global:  rate.NewLimiter(config.GlobalLimit, config.GlobalBurst),
 		clients: make(map[string]*clientLimiter),
 		stopCh:  make(chan struct{}),
 	}
-	go rl.evictExpired()
-	return rl
+	go limiter.evictExpired()
+
+	return limiter
 }
 
 func (rl *rateLimiter) Stop() {
@@ -66,17 +70,17 @@ func (rl *rateLimiter) Allow(clientIP string) bool {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 
-	cl, ok := rl.clients[clientIP]
+	clientLim, ok := rl.clients[clientIP]
 	if !ok {
-		cl = &clientLimiter{
+		clientLim = &clientLimiter{
 			limiter:  rate.NewLimiter(rl.config.PerClientLimit, rl.config.PerClientBurst),
 			lastSeen: time.Now(),
 		}
-		rl.clients[clientIP] = cl
+		rl.clients[clientIP] = clientLim
 	}
-	cl.lastSeen = time.Now()
+	clientLim.lastSeen = time.Now()
 
-	return cl.limiter.Allow()
+	return clientLim.limiter.Allow()
 }
 
 func (rl *rateLimiter) evictExpired() {
@@ -111,36 +115,39 @@ func (rl *rateLimiter) evictStaleClients() {
 
 // RateLimitMiddleware returns a middleware and a stop function for the rate limiter.
 func RateLimitMiddleware(cfg RateLimiterConfig, trustedProxy string) (func(http.Handler) http.Handler, func()) {
-	rl := NewRateLimiter(cfg)
+	limiter := newRateLimiter(cfg)
+
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			clientIP := extractClientIP(r, trustedProxy)
-			if !rl.Allow(clientIP) {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			clientIP := extractClientIP(request, trustedProxy)
+			if !limiter.Allow(clientIP) {
 				getLogger().WithField("client_ip", SanitizeLog(clientIP)).Warn("rate limit exceeded")
-				w.Header().Set("Retry-After", "1")
-				http.Error(w, `{"error":"rate limit exceeded"}`, http.StatusTooManyRequests)
+				writer.Header().Set("Retry-After", "1")
+				http.Error(writer, `{"error":"rate limit exceeded"}`, http.StatusTooManyRequests)
+
 				return
 			}
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(writer, request)
 		})
-	}, rl.Stop
+	}, limiter.Stop
 }
 
-func extractClientIP(r *http.Request, trustedProxy string) string {
+func extractClientIP(request *http.Request, trustedProxy string) string {
 	proxyPrefix := parseTrustedProxy(trustedProxy)
 	if proxyPrefix == nil {
 		// No trusted proxy configured — use RemoteAddr only (secure default).
-		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		host, _, err := net.SplitHostPort(request.RemoteAddr)
 		if err != nil {
-			return r.RemoteAddr
+			return request.RemoteAddr
 		}
+
 		return host
 	}
 
 	// Check if the connecting IP is from a trusted proxy
-	remoteIPStr, _, err := net.SplitHostPort(r.RemoteAddr)
+	remoteIPStr, _, err := net.SplitHostPort(request.RemoteAddr)
 	if err != nil {
-		return r.RemoteAddr
+		return request.RemoteAddr
 	}
 	remoteIP, err := netip.ParseAddr(remoteIPStr)
 	if err != nil {
@@ -149,7 +156,7 @@ func extractClientIP(r *http.Request, trustedProxy string) string {
 
 	if proxyPrefix.Contains(remoteIP) {
 		// Trusted proxy — extract first IP from X-Forwarded-For
-		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		if xff := request.Header.Get("X-Forwarded-For"); xff != "" {
 			if firstIP := extractFirstIP(xff); firstIP != "" {
 				return firstIP
 			}
@@ -168,6 +175,7 @@ func extractFirstIP(xff string) string {
 	if _, err := netip.ParseAddr(ip); err != nil {
 		return ""
 	}
+
 	return ip
 }
 
@@ -179,5 +187,6 @@ func parseTrustedProxy(cidr string) *netip.Prefix {
 	if err != nil {
 		return nil
 	}
+
 	return &prefix
 }

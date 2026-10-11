@@ -20,6 +20,7 @@ func ServiceFromContext(ctx context.Context) *application.NetworkService {
 	if svc, ok := ctx.Value(svcContextKey).(*application.NetworkService); ok {
 		return svc
 	}
+
 	return nil
 }
 
@@ -27,15 +28,25 @@ func ServiceFromContext(ctx context.Context) *application.NetworkService {
 // The burst is double the limit so that short request spikes are absorbed
 // without tripping the rate limiter while the steady-state rate stays capped.
 func burstForLimit(limit int) int {
-	return limit * 2
+	return limit * burstMultiplier
 }
+
+// burstMultiplier scales a per-second rate limit into a token-bucket burst.
+const burstMultiplier = 2
 
 // NewMux builds the MCP HTTP mux (served on LISTEN_ADDR, :8080) with all
 // middleware and routes configured. Only the MCP endpoint (/mcp) is served
 // here; observability (metrics, pprof, probes) lives on the separate internal
 // mux (see NewInternalMux) on INTERNAL_ADDR (:8081) (O01/O04).
 // Returns the mux and a stop function for background goroutines (e.g. rate limiter eviction).
-func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, cb *circuitbreaker.Breaker, mcpHandler http.Handler, upstreamMetrics *infra.UpstreamMetrics) (*http.ServeMux, func()) {
+func NewMux(
+	cfg config.Config,
+	metrics *Metrics,
+	sharedHTTPClient *http.Client,
+	_ *circuitbreaker.Breaker,
+	mcpHandler http.Handler,
+	upstreamMetrics *infra.UpstreamMetrics,
+) (*http.ServeMux, func()) {
 	injectClientMW := injectClientMiddleware(cfg.NetBoxURL, sharedHTTPClient, upstreamMetrics)
 	rateLimitMW, stopRateLimit := RateLimitMiddleware(RateLimiterConfig{
 		GlobalLimit:    rate.Limit(cfg.RateLimitGlobal),
@@ -72,20 +83,25 @@ func NewMux(cfg config.Config, metrics *Metrics, sharedHTTPClient *http.Client, 
 
 // injectClientMiddleware creates a middleware that injects a per-request
 // NetBox API client and NetworkService into the request context.
-func injectClientMiddleware(netboxURL string, httpClient *http.Client, upstreamMetrics *infra.UpstreamMetrics) func(http.Handler) http.Handler {
+func injectClientMiddleware(
+	netboxURL string,
+	httpClient *http.Client,
+	upstreamMetrics *infra.UpstreamMetrics,
+) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			t, ok := r.Context().Value(tokenContextKey).(*application.Token)
-			if !ok || t == nil || t.Value() == "" {
-				http.Error(w, `{"error":"authorization token missing from context"}`, http.StatusUnauthorized)
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			token, ok := request.Context().Value(tokenContextKey).(*application.Token)
+			if !ok || token == nil || token.Value() == "" {
+				http.Error(writer, `{"error":"authorization token missing from context"}`, http.StatusUnauthorized)
+
 				return
 			}
 
 			netboxClient := infra.NewClientWithMetrics(netboxURL, httpClient, upstreamMetrics)
-			svc := application.NewNetworkService(netboxClient, t.Value())
+			svc := application.NewNetworkService(netboxClient, token.Value())
 
-			ctx := context.WithValue(r.Context(), svcContextKey, svc)
-			next.ServeHTTP(w, r.WithContext(ctx))
+			ctx := context.WithValue(request.Context(), svcContextKey, svc)
+			next.ServeHTTP(writer, request.WithContext(ctx))
 		})
 	}
 }

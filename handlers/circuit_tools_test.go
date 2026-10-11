@@ -11,6 +11,7 @@ import (
 	"github.com/teran/mcp-netbox/mockrepo"
 )
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestCreateCircuitHandler(t *testing.T) {
 	t.Parallel()
 
@@ -24,7 +25,9 @@ func TestCreateCircuitHandler(t *testing.T) {
 		handler := handlers.NewCreateCircuitHandler(svc)
 		prov := 2
 		ct := 3
-		result, out, err := handler(context.Background(), nil, handlers.CircuitCreateInput{CID: "CIR-001", Provider: &prov, CircuitType: &ct})
+		result, out, err := handler(context.Background(), nil, handlers.CircuitCreateInput{
+			CID: "CIR-001", Provider: &prov, CircuitType: &ct,
+		})
 		if err != nil {
 			t.Fatalf("handler returned error: %v", err)
 		}
@@ -41,7 +44,9 @@ func TestCreateCircuitHandler(t *testing.T) {
 		handler := handlers.NewCreateCircuitHandler(svc)
 		prov := 2
 		ct := 3
-		result, _, _ := handler(context.Background(), nil, handlers.CircuitCreateInput{CID: "", Provider: &prov, CircuitType: &ct})
+		result, _, _ := handler(context.Background(), nil, handlers.CircuitCreateInput{
+			CID: "", Provider: &prov, CircuitType: &ct,
+		})
 		if !result.IsError {
 			t.Error("result.IsError = false, want true for missing cid")
 		}
@@ -78,7 +83,9 @@ func TestCreateCircuitHandler(t *testing.T) {
 		handler := handlers.NewCreateCircuitHandler(svc)
 		prov := 2
 		ct := 3
-		result, _, err := handler(context.Background(), nil, handlers.CircuitCreateInput{CID: "CIR-001", Provider: &prov, CircuitType: &ct})
+		result, _, err := handler(context.Background(), nil, handlers.CircuitCreateInput{
+			CID: "CIR-001", Provider: &prov, CircuitType: &ct,
+		})
 		if err != nil {
 			t.Fatalf("handler returned non-nil error, want structured result: %v", err)
 		}
@@ -88,13 +95,13 @@ func TestCreateCircuitHandler(t *testing.T) {
 		if result.StructuredContent == nil {
 			t.Fatal("StructuredContent is nil, want validation_errors")
 		}
-		sc, ok := result.StructuredContent.(map[string]any)
+		structuredContent, ok := result.StructuredContent.(map[string]any)
 		if !ok {
 			t.Fatalf("StructuredContent type = %T, want map", result.StructuredContent)
 		}
-		raw, ok := sc["validation_errors"].(json.RawMessage)
+		raw, ok := structuredContent["validation_errors"].(json.RawMessage)
 		if !ok {
-			t.Fatalf("validation_errors type = %T, want json.RawMessage", sc["validation_errors"])
+			t.Fatalf("validation_errors type = %T, want json.RawMessage", structuredContent["validation_errors"])
 		}
 		if string(raw) != string(body) {
 			t.Errorf("validation_errors = %s, want %s", raw, body)
@@ -110,7 +117,9 @@ func TestCreateCircuitHandler(t *testing.T) {
 		handler := handlers.NewCreateCircuitHandler(svc)
 		prov := 2
 		ct := 3
-		result, _, _ := handler(context.Background(), nil, handlers.CircuitCreateInput{CID: "CIR-001", Provider: &prov, CircuitType: &ct})
+		result, _, _ := handler(context.Background(), nil, handlers.CircuitCreateInput{
+			CID: "CIR-001", Provider: &prov, CircuitType: &ct,
+		})
 		if !result.IsError {
 			t.Error("result.IsError = false, want true")
 		}
@@ -173,6 +182,7 @@ func TestDeleteCircuitHandler(t *testing.T) {
 				if id != 3 {
 					t.Errorf("id = %d, want 3", id)
 				}
+
 				return nil
 			},
 		}, "token")

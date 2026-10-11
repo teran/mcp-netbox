@@ -18,12 +18,13 @@ import (
 )
 
 func freePort() string {
-	l, err := net.Listen("tcp", ":0") //nolint:noctx,gosec
+	listener, err := net.Listen("tcp", ":0") //nolint:noctx,gosec
 	if err != nil {
 		return ":0"
 	}
-	defer func() { _ = l.Close() }()
-	return l.Addr().String()
+	defer func() { _ = listener.Close() }()
+
+	return listener.Addr().String()
 }
 
 func waitForServer(url string, timeout time.Duration) bool {
@@ -32,17 +33,19 @@ func waitForServer(url string, timeout time.Duration) bool {
 		resp, err := http.Get(url) //nolint:gosec,noctx
 		if err == nil {
 			func() { _ = resp.Body.Close() }()
+
 			return true
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
+
 	return false
 }
 
 func TestHealthEndpoint(t *testing.T) {
 	t.Parallel()
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"status":"ok"}`))
@@ -131,14 +134,19 @@ func TestRun_MCPHandlerPing(t *testing.T) {
 		t.Fatal("Server did not start")
 	}
 
-	reqBody := map[string]interface{}{
+	reqBody := map[string]any{
 		"jsonrpc": "2.0",
 		"id":      1,
 		"method":  "ping",
 	}
 	body, _ := json.Marshal(reqBody) //nolint:errchkjson
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, "http://"+addr+"/mcp", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(
+		context.Background(),
+		http.MethodPost,
+		"http://"+addr+"/mcp",
+		bytes.NewReader(body),
+	)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -239,22 +247,27 @@ func TestNewPrivateIPCheckingDialer_AllowsPrivateWhenEnabled(t *testing.T) {
 func dialerRawConn(t *testing.T) syscall.RawConn {
 	t.Helper()
 
-	ln, err := net.Listen("tcp", "127.0.0.1:0") //nolint:noctx
+	listener, err := net.Listen("tcp", "127.0.0.1:0") //nolint:noctx
 	if err != nil {
 		t.Fatalf("Listen error: %v", err)
 	}
-	defer func() { _ = ln.Close() }()
+	defer func() { _ = listener.Close() }()
 
-	conn, err := net.Dial("tcp", ln.Addr().String()) //nolint:noctx
+	conn, err := net.Dial("tcp", listener.Addr().String()) //nolint:noctx
 	if err != nil {
 		t.Fatalf("Dial error: %v", err)
 	}
 	defer func() { _ = conn.Close() }()
 
-	raw, err := conn.(*net.TCPConn).SyscallConn()
+	tcpConn, ok := conn.(*net.TCPConn)
+	if !ok {
+		t.Fatalf("conn type = %T, want *net.TCPConn", conn)
+	}
+	raw, err := tcpConn.SyscallConn()
 	if err != nil {
 		t.Fatalf("SyscallConn error: %v", err)
 	}
+
 	return raw
 }
 

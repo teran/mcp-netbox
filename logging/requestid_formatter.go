@@ -49,5 +49,6 @@ func (f *requestIDFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	out := make([]byte, 0, len(prefix)+len(body))
 	out = append(out, prefix...)
 	out = append(out, body...)
+
 	return out, nil
 }

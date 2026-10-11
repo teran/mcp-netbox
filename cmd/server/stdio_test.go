@@ -25,6 +25,7 @@ type stdioSession struct {
 func newStdioSession() *stdioSession {
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
+
 	return &stdioSession{
 		inR: inR, inW: inW,
 		outR: outR, outW: outW,
@@ -32,11 +33,12 @@ func newStdioSession() *stdioSession {
 	}
 }
 
+//nolint:ireturn // runStdioWithTransport requires the mcp.Transport interface.
 func (s *stdioSession) transport() mcp.Transport {
 	return &mcp.IOTransport{Reader: s.inR, Writer: s.outW}
 }
 
-func (s *stdioSession) send(obj map[string]interface{}) error {
+func (s *stdioSession) send(obj map[string]any) error {
 	b, err := json.Marshal(obj)
 	if err != nil {
 		return err
@@ -44,6 +46,7 @@ func (s *stdioSession) send(obj map[string]interface{}) error {
 	if _, err := s.inW.Write(append(b, '\n')); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -60,23 +63,25 @@ func (s *stdioSession) readResp(t *testing.T) *rpcResp {
 		line []byte
 		err  error
 	}
-	ch := make(chan res, 1)
+	resultCh := make(chan res, 1)
 	go func() {
 		line, err := s.reader.ReadBytes('\n')
-		ch <- res{line, err}
+		resultCh <- res{line, err}
 	}()
 	select {
-	case r := <-ch:
-		if r.err != nil {
-			t.Fatalf("reading response: %v", r.err)
+	case result := <-resultCh:
+		if result.err != nil {
+			t.Fatalf("reading response: %v", result.err)
 		}
 		var resp rpcResp
-		if err := json.Unmarshal(r.line, &resp); err != nil {
-			t.Fatalf("unmarshal response %q: %v", string(r.line), err)
+		if err := json.Unmarshal(result.line, &resp); err != nil {
+			t.Fatalf("unmarshal response %q: %v", string(result.line), err)
 		}
+
 		return &resp
 	case <-time.After(5 * time.Second):
 		t.Fatal("timeout waiting for response")
+
 		return nil
 	}
 }
@@ -100,6 +105,7 @@ func testStdioConfig() config.Config {
 	}
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 func TestRunStdio_EndToEnd(t *testing.T) {
 	sess := newStdioSession()
 	defer sess.close()
@@ -116,12 +122,12 @@ func TestRunStdio_EndToEnd(t *testing.T) {
 	}()
 
 	// 1. initialize
-	if err := sess.send(map[string]interface{}{
+	if err := sess.send(map[string]any{
 		"jsonrpc": "2.0", "id": 1, "method": "initialize",
-		"params": map[string]interface{}{
+		"params": map[string]any{
 			"protocolVersion": "2025-06-18",
-			"capabilities":    map[string]interface{}{},
-			"clientInfo":      map[string]interface{}{"name": "test", "version": "1"},
+			"capabilities":    map[string]any{},
+			"clientInfo":      map[string]any{"name": "test", "version": "1"},
 		},
 	}); err != nil {
 		t.Fatalf("send initialize: %v", err)
@@ -131,14 +137,14 @@ func TestRunStdio_EndToEnd(t *testing.T) {
 	}
 
 	// 2. initialized notification
-	if err := sess.send(map[string]interface{}{
+	if err := sess.send(map[string]any{
 		"jsonrpc": "2.0", "method": "notifications/initialized",
 	}); err != nil {
 		t.Fatalf("send initialized: %v", err)
 	}
 
 	// 3. tools/list — must list all registered read-only tools
-	if err := sess.send(map[string]interface{}{
+	if err := sess.send(map[string]any{
 		"jsonrpc": "2.0", "id": 2, "method": "tools/list",
 	}); err != nil {
 		t.Fatalf("send tools/list: %v", err)
@@ -170,11 +176,11 @@ func TestRunStdio_EndToEnd(t *testing.T) {
 
 	// 4. tools/call — attempts a real NetBox request that fails fast (the
 	//    dialer rejects loopback), but must still return a JSON-RPC response.
-	if err := sess.send(map[string]interface{}{
+	if err := sess.send(map[string]any{
 		"jsonrpc": "2.0", "id": 3, "method": "tools/call",
-		"params": map[string]interface{}{
+		"params": map[string]any{
 			"name":      "get_sites",
-			"arguments": map[string]interface{}{"page": 1, "page_size": 5},
+			"arguments": map[string]any{"page": 1, "page_size": 5},
 		},
 	}); err != nil {
 		t.Fatalf("send tools/call: %v", err)

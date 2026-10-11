@@ -35,18 +35,18 @@ func TestSetup_HTTPEmptyLevelDefaultsToInfo(t *testing.T) {
 	cfg := baseConfig()
 	cfg.LogLevel = ""
 
-	l, err := Setup(cfg)
+	logger, err := Setup(cfg)
 	if err != nil {
 		t.Fatalf("Setup = %v, want nil", err)
 	}
-	if l == nil {
+	if logger == nil {
 		t.Fatal("Setup returned nil logger")
 	}
-	if l.Out == io.Discard {
+	if logger.Out == io.Discard {
 		t.Errorf("HTTP logger output = io.Discard, want enabled")
 	}
-	if l.GetLevel() != logrus.InfoLevel {
-		t.Errorf("level = %v, want info", l.GetLevel())
+	if logger.GetLevel() != logrus.InfoLevel {
+		t.Errorf("level = %v, want info", logger.GetLevel())
 	}
 }
 
@@ -57,31 +57,31 @@ func TestSetup_StdioEmptyLevelDisablesLogging(t *testing.T) {
 	cfg.Transport = config.TransportStdio
 	cfg.LogLevel = ""
 
-	l, err := Setup(cfg)
+	logger, err := Setup(cfg)
 	if err != nil {
 		t.Fatalf("Setup = %v, want nil", err)
 	}
-	if l == nil {
+	if logger == nil {
 		t.Fatal("Setup returned nil logger")
 	}
-	if l.Out != io.Discard {
-		t.Errorf("logger output = %T, want io.Discard", l.Out)
+	if logger.Out != io.Discard {
+		t.Errorf("logger output = %T, want io.Discard", logger.Out)
 	}
 }
 
 func TestSetup_LevelAndTextFormat(t *testing.T) {
 	t.Parallel()
 
-	l, err := Setup(baseConfig())
+	logger, err := Setup(baseConfig())
 	if err != nil {
 		t.Fatalf("Setup = %v, want nil", err)
 	}
-	if l.GetLevel() != logrus.InfoLevel {
-		t.Errorf("level = %v, want info", l.GetLevel())
+	if logger.GetLevel() != logrus.InfoLevel {
+		t.Errorf("level = %v, want info", logger.GetLevel())
 	}
-	f, ok := l.Formatter.(*requestIDFormatter)
+	f, ok := logger.Formatter.(*requestIDFormatter)
 	if !ok {
-		t.Fatalf("formatter = %T, want *requestIDFormatter", l.Formatter)
+		t.Fatalf("formatter = %T, want *requestIDFormatter", logger.Formatter)
 	}
 	if f.inner == nil {
 		t.Error("wrapped TextFormatter is nil")
@@ -94,12 +94,12 @@ func TestSetup_JSONFormat(t *testing.T) {
 	cfg := baseConfig()
 	cfg.LogFormat = "json"
 
-	l, err := Setup(cfg)
+	logger, err := Setup(cfg)
 	if err != nil {
 		t.Fatalf("Setup = %v, want nil", err)
 	}
-	if _, ok := l.Formatter.(*logrus.JSONFormatter); !ok {
-		t.Errorf("formatter = %T, want JSONFormatter", l.Formatter)
+	if _, ok := logger.Formatter.(*logrus.JSONFormatter); !ok {
+		t.Errorf("formatter = %T, want JSONFormatter", logger.Formatter)
 	}
 }
 
@@ -133,25 +133,25 @@ func TestSetup_StdioWritesToFile(t *testing.T) {
 	cfg.Transport = config.TransportStdio
 	cfg.LogFilename = filename
 
-	l, err := Setup(cfg)
+	logger, err := Setup(cfg)
 	if err != nil {
 		t.Fatalf("Setup = %v, want nil", err)
 	}
-	if l == nil {
+	if logger == nil {
 		t.Fatal("Setup returned nil logger")
 	}
 
 	// Logging a line must land in the file.
-	l.Info("hello from test")
+	logger.Info("hello from test")
 
-	fi, err := os.Stat(filename)
+	fileInfo, err := os.Stat(filename)
 	if err != nil {
 		t.Fatalf("stat log file: %v", err)
 	}
-	if fi.Size() == 0 {
+	if fileInfo.Size() == 0 {
 		t.Error("log file is empty after logging")
 	}
-	if perm := fi.Mode().Perm(); perm != 0o600 {
+	if perm := fileInfo.Mode().Perm(); perm != 0o600 {
 		t.Errorf("log file perm = %o, want 600", perm)
 	}
 }
@@ -162,11 +162,11 @@ func TestSetup_StdioDefaultFilename(t *testing.T) {
 	cfg.Transport = config.TransportStdio
 	cfg.LogFilename = ""
 
-	l, err := Setup(cfg)
+	logger, err := Setup(cfg)
 	if err != nil {
 		t.Fatalf("Setup = %v, want nil", err)
 	}
-	if l == nil {
+	if logger == nil {
 		t.Fatal("Setup returned nil logger")
 	}
 }
@@ -174,12 +174,12 @@ func TestSetup_StdioDefaultFilename(t *testing.T) {
 func TestSetup_HTTPOutputsToStdout(t *testing.T) {
 	t.Parallel()
 
-	l, err := Setup(baseConfig())
+	logger, err := Setup(baseConfig())
 	if err != nil {
 		t.Fatalf("Setup = %v, want nil", err)
 	}
-	if l.Out != os.Stdout {
-		t.Errorf("logger output = %T, want os.Stdout", l.Out)
+	if logger.Out != os.Stdout {
+		t.Errorf("logger output = %T, want os.Stdout", logger.Out)
 	}
 }
 
@@ -203,21 +203,22 @@ func captureLogger(t *testing.T, format string) (*logrus.Logger, *bytes.Buffer) 
 	t.Helper()
 	cfg := baseConfig()
 	cfg.LogFormat = format
-	l, err := Setup(cfg)
+	logger, err := Setup(cfg)
 	if err != nil {
 		t.Fatalf("Setup = %v, want nil", err)
 	}
 	var buf bytes.Buffer
-	l.SetOutput(&buf)
-	return l, &buf
+	logger.SetOutput(&buf)
+
+	return logger, &buf
 }
 
 func TestHook_RedactsStructSecret(t *testing.T) {
 	t.Parallel()
 
 	t.Run("text format", func(t *testing.T) {
-		l, buf := captureLogger(t, "text")
-		l.WithField("obj", secretLog{Name: "srv", Token: "super-secret"}).Info("msg")
+		logger, buf := captureLogger(t, "text")
+		logger.WithField("obj", secretLog{Name: "srv", Token: "super-secret"}).Info("msg")
 
 		out := buf.String()
 		if strings.Contains(out, "super-secret") {
@@ -232,8 +233,8 @@ func TestHook_RedactsStructSecret(t *testing.T) {
 	})
 
 	t.Run("json format", func(t *testing.T) {
-		l, buf := captureLogger(t, "json")
-		l.WithField("obj", secretLog{Name: "srv", Token: "super-secret"}).Info("msg")
+		logger, buf := captureLogger(t, "json")
+		logger.WithField("obj", secretLog{Name: "srv", Token: "super-secret"}).Info("msg")
 
 		out := buf.String()
 		if strings.Contains(out, "super-secret") {
@@ -254,8 +255,8 @@ func TestHook_RedactsApplicationToken(t *testing.T) {
 	}
 
 	t.Run("text format", func(t *testing.T) {
-		l, buf := captureLogger(t, "text")
-		l.WithField("token", tok).Info("msg")
+		logger, buf := captureLogger(t, "text")
+		logger.WithField("token", tok).Info("msg")
 
 		out := buf.String()
 		if strings.Contains(out, "tok-abc-123") {
@@ -267,8 +268,8 @@ func TestHook_RedactsApplicationToken(t *testing.T) {
 	})
 
 	t.Run("json format", func(t *testing.T) {
-		l, buf := captureLogger(t, "json")
-		l.WithField("token", tok).Info("msg")
+		logger, buf := captureLogger(t, "json")
+		logger.WithField("token", tok).Info("msg")
 
 		out := buf.String()
 		if strings.Contains(out, "tok-abc-123") {
@@ -283,8 +284,8 @@ func TestHook_RedactsApplicationToken(t *testing.T) {
 func TestHook_LeavesFlatStringsUnchanged(t *testing.T) {
 	t.Parallel()
 
-	l, buf := captureLogger(t, "json")
-	l.WithField("plain", "just-a-string").Info("msg")
+	logger, buf := captureLogger(t, "json")
+	logger.WithField("plain", "just-a-string").Info("msg")
 
 	out := buf.String()
 	if !strings.Contains(out, "just-a-string") {

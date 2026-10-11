@@ -28,6 +28,7 @@ func histogramSampleCount(c prometheus.Collector) uint64 {
 			}
 		}
 	}
+
 	return 0
 }
 
@@ -47,6 +48,7 @@ func histogramSum(c prometheus.Collector) float64 {
 			}
 		}
 	}
+
 	return 0
 }
 
@@ -54,26 +56,26 @@ func TestUpstreamMetrics_Observe(t *testing.T) {
 	t.Parallel()
 
 	reg := prometheus.NewRegistry()
-	um := NewUpstreamMetrics(reg)
+	upstreamMetrics := NewUpstreamMetrics(reg)
 
 	// A nil handle must be safe to call (no panic, no-op).
 	var nilMetrics *UpstreamMetrics
 	nilMetrics.observe(200, time.Millisecond, 512)
 
-	um.observe(200, 100*time.Millisecond, 512)
-	um.observe(404, 200*time.Millisecond, 64)
-	um.observe(200, 300*time.Millisecond, 256)
+	upstreamMetrics.observe(200, 100*time.Millisecond, 512)
+	upstreamMetrics.observe(404, 200*time.Millisecond, 64)
+	upstreamMetrics.observe(200, 300*time.Millisecond, 256)
 
-	if got := testutil.ToFloat64(um.requestsTotal.WithLabelValues("200")); got != 2 {
+	if got := testutil.ToFloat64(upstreamMetrics.requestsTotal.WithLabelValues("200")); got != 2 {
 		t.Errorf("requests_total{status=200} = %v, want 2", got)
 	}
-	if got := testutil.ToFloat64(um.requestsTotal.WithLabelValues("404")); got != 1 {
+	if got := testutil.ToFloat64(upstreamMetrics.requestsTotal.WithLabelValues("404")); got != 1 {
 		t.Errorf("requests_total{status=404} = %v, want 1", got)
 	}
-	if got := histogramSampleCount(um.duration); got != 3 {
+	if got := histogramSampleCount(upstreamMetrics.duration); got != 3 {
 		t.Errorf("duration histogram sample count = %d, want 3", got)
 	}
-	if got := histogramSampleCount(um.responseSize); got != 3 {
+	if got := histogramSampleCount(upstreamMetrics.responseSize); got != 3 {
 		t.Errorf("response_size histogram sample count = %d, want 3", got)
 	}
 }
@@ -82,20 +84,21 @@ func TestClient_UpstreamMetrics(t *testing.T) {
 	t.Parallel()
 
 	reg := prometheus.NewRegistry()
-	um := NewUpstreamMetrics(reg)
+	upstreamMetrics := NewUpstreamMetrics(reg)
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/dcim/sites/" {
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write([]byte(`{"count":0,"next":null,"previous":null,"results":[]}`))
+	srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == "/api/dcim/sites/" {
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = writer.Write([]byte(`{"count":0,"next":null,"previous":null,"results":[]}`))
+
 			return
 		}
 		// Any other path returns 404 to exercise the error branch.
-		http.NotFound(w, r)
+		http.NotFound(writer, req)
 	}))
 	defer srv.Close()
 
-	client := NewClientWithMetrics(srv.URL, http.DefaultClient, um)
+	client := NewClientWithMetrics(srv.URL, http.DefaultClient, upstreamMetrics)
 
 	// Success path -> 200.
 	if _, err := client.ListSites(context.Background(), "token", nil); err != nil {
@@ -106,16 +109,16 @@ func TestClient_UpstreamMetrics(t *testing.T) {
 		t.Fatal("GetObject() expected error for missing object, got nil")
 	}
 
-	if got := testutil.ToFloat64(um.requestsTotal.WithLabelValues("200")); got != 1 {
+	if got := testutil.ToFloat64(upstreamMetrics.requestsTotal.WithLabelValues("200")); got != 1 {
 		t.Errorf("requests_total{status=200} = %v, want 1", got)
 	}
-	if got := testutil.ToFloat64(um.requestsTotal.WithLabelValues("404")); got != 1 {
+	if got := testutil.ToFloat64(upstreamMetrics.requestsTotal.WithLabelValues("404")); got != 1 {
 		t.Errorf("requests_total{status=404} = %v, want 1", got)
 	}
-	if got := histogramSampleCount(um.duration); got != 2 {
+	if got := histogramSampleCount(upstreamMetrics.duration); got != 2 {
 		t.Errorf("duration histogram sample count = %d, want 2", got)
 	}
-	if got := histogramSampleCount(um.responseSize); got != 2 {
+	if got := histogramSampleCount(upstreamMetrics.responseSize); got != 2 {
 		t.Errorf("response_size histogram sample count = %d, want 2", got)
 	}
 }
@@ -127,20 +130,22 @@ func TestClient_UpstreamRecordsResponseSize(t *testing.T) {
 	// histogram with its real byte count. Kills the CONDITIONALS_NEGATION on
 	// `resp != nil` (whose mutant would always record size 0).
 	reg := prometheus.NewRegistry()
-	um := NewUpstreamMetrics(reg)
+	upstreamMetrics := NewUpstreamMetrics(reg)
 	body := []byte(`{"data":"` + strings.Repeat("x", 5000) + `"}`)
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write(body)
+	srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write(body)
 	}))
 	defer srv.Close()
 
-	client := NewClientWithMetrics(srv.URL, http.DefaultClient, um)
-	if _, err := client.doRequest(context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil); err != nil {
+	client := NewClientWithMetrics(srv.URL, http.DefaultClient, upstreamMetrics)
+	if _, err := client.doRequest(
+		context.Background(), "token", http.MethodGet, "/api/dcim/sites/", nil, nil,
+	); err != nil {
 		t.Fatalf("doRequest() returned error: %v", err)
 	}
-	if got := histogramSum(um.responseSize); got < 1024 {
+	if got := histogramSum(upstreamMetrics.responseSize); got < 1024 {
 		t.Errorf("response_size histogram sum = %v, want >= 1024 (records the real body size)", got)
 	}
 }
@@ -149,11 +154,11 @@ func TestNewUpstreamMetrics_Registers(t *testing.T) {
 	t.Parallel()
 
 	reg := prometheus.NewRegistry()
-	um := NewUpstreamMetrics(reg)
+	upstreamMetrics := NewUpstreamMetrics(reg)
 
 	// Observe once so the counter vector has a value and the metric families
 	// are emitted on gather.
-	um.observe(200, time.Millisecond, 1)
+	upstreamMetrics.observe(200, time.Millisecond, 1)
 
 	mfs, err := reg.Gather()
 	if err != nil {

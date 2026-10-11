@@ -18,6 +18,7 @@ import (
 // State represents the circuit breaker state.
 type State int
 
+// Circuit breaker states.
 const (
 	StateClosed   State = iota // normal operation
 	StateOpen                  // failing fast
@@ -39,10 +40,15 @@ type Config struct {
 // DefaultConfig returns a sensible default configuration.
 func DefaultConfig() Config {
 	return Config{
-		FailureThreshold: 5,
-		Timeout:          30 * time.Second,
+		FailureThreshold: defaultFailureThreshold,
+		Timeout:          defaultOpenTimeout,
 	}
 }
+
+const (
+	defaultFailureThreshold = 5
+	defaultOpenTimeout      = 30 * time.Second
+)
 
 // Breaker implements the circuit breaker pattern for HTTP round trips.
 type Breaker struct {
@@ -61,6 +67,7 @@ type Breaker struct {
 func (b *Breaker) State() State {
 	b.mu.Lock()
 	defer b.mu.Unlock()
+
 	return b.state
 }
 
@@ -71,6 +78,8 @@ func (b *Breaker) Allow() error {
 	defer b.mu.Unlock()
 
 	switch b.state {
+	case StateClosed, StateHalfOpen:
+		return nil
 	case StateOpen:
 		now := b.now
 		if now == nil {
@@ -78,8 +87,10 @@ func (b *Breaker) Allow() error {
 		}
 		if now().Sub(b.lastFailureTime) > b.config.Timeout {
 			b.state = StateHalfOpen
+
 			return nil
 		}
+
 		return ErrCircuitOpen
 	default:
 		return nil
@@ -98,6 +109,7 @@ func (b *Breaker) RecordResult(err error) {
 		if b.state == StateHalfOpen {
 			b.state = StateClosed
 		}
+
 		return
 	}
 
@@ -166,5 +178,6 @@ func (rt *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	rt.breaker.RecordResult(err)
 
 	//nolint:wrapcheck
+
 	return resp, err
 }

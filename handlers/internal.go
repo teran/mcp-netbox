@@ -10,7 +10,7 @@ import (
 // healthzHandler is the liveness probe. It returns {"status":"ok"} with HTTP
 // 200 to indicate the process is alive.
 func healthzHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"status":"ok"}`))
@@ -19,26 +19,26 @@ func healthzHandler() http.Handler {
 
 // readyzHandler is the readiness probe. It reports degraded (HTTP 503) when
 // the NetBox circuit breaker is open.
-func readyzHandler(cb *circuitbreaker.Breaker) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+func readyzHandler(breaker *circuitbreaker.Breaker) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
 
 		status := http.StatusOK
 		body := `{"status":"ok"}`
-		if cb != nil && cb.State() == circuitbreaker.StateOpen {
+		if breaker != nil && breaker.State() == circuitbreaker.StateOpen {
 			status = http.StatusServiceUnavailable
 			body = `{"status":"degraded","circuit_breaker":"open"}`
 		}
 
-		w.WriteHeader(status)
-		_, _ = w.Write([]byte(body))
+		writer.WriteHeader(status)
+		_, _ = writer.Write([]byte(body))
 	})
 }
 
 // startupHandler is the startup probe. It returns {"status":"ok"} with HTTP
 // 200 once the server is up.
 func startupHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"status":"ok"}`))
@@ -51,7 +51,7 @@ func startupHandler() http.Handler {
 // healthz/readyz/startup probes, and the net/http/pprof endpoints
 // (/debug/pprof/*) (O01/O04). metricsHandler may be nil (e.g. in tests) in
 // which case /metrics is not registered.
-func NewInternalMux(metricsHandler http.Handler, cb *circuitbreaker.Breaker) *http.ServeMux {
+func NewInternalMux(metricsHandler http.Handler, breaker *circuitbreaker.Breaker) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	if metricsHandler != nil {
@@ -59,7 +59,7 @@ func NewInternalMux(metricsHandler http.Handler, cb *circuitbreaker.Breaker) *ht
 	}
 
 	mux.Handle("GET /healthz", healthzHandler())
-	mux.Handle("GET /readyz", readyzHandler(cb))
+	mux.Handle("GET /readyz", readyzHandler(breaker))
 	mux.Handle("GET /startup", startupHandler())
 
 	// pprof — registered explicitly on this internal mux only, so it is never

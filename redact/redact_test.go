@@ -30,10 +30,10 @@ type withTags struct {
 func TestRedactFlatStruct(t *testing.T) {
 	t.Parallel()
 
-	in := flat{Name: "srv", Token: "tok-123", Secret: "s3cr3t", Public: "visible"}
-	out, ok := Redact(in).(flat)
+	input := flat{Name: "srv", Token: "tok-123", Secret: "s3cr3t", Public: "visible"}
+	out, ok := Redact(input).(flat)
 	if !ok {
-		t.Fatalf("Redact() type = %T, want flat", Redact(in))
+		t.Fatalf("Redact() type = %T, want flat", Redact(input))
 	}
 	if out.Token != Mask {
 		t.Errorf("Token = %q, want %q", out.Token, Mask)
@@ -52,12 +52,16 @@ func TestRedactFlatStruct(t *testing.T) {
 func TestRedactNestedStruct(t *testing.T) {
 	t.Parallel()
 
-	in := nested{
+	input := nested{
 		Top:    "top",
 		Inner:  flat{Token: "inner-tok", Public: "inner-pub"},
 		InnerP: &flat{Token: "ptr-tok", Public: "ptr-pub"},
 	}
-	out := Redact(in).(nested)
+	redacted, ok := Redact(input).(nested)
+	if !ok {
+		t.Fatalf("Redact type = %T, want nested", Redact(input))
+	}
+	out := redacted
 
 	if out.Inner.Token != Mask {
 		t.Errorf("nested Inner.Token = %q, want %q", out.Inner.Token, Mask)
@@ -80,27 +84,27 @@ func TestRedactPointer(t *testing.T) {
 	t.Parallel()
 
 	t.Run("non-nil pointer", func(t *testing.T) {
-		p := &flat{Token: "ptr-secret", Public: "ok"}
-		out, ok := Redact(p).(*flat)
+		pointer := &flat{Token: "ptr-secret", Public: "ok"}
+		out, ok := Redact(pointer).(*flat)
 		if !ok {
-			t.Fatalf("Redact() type = %T, want *flat", Redact(p))
+			t.Fatalf("Redact() type = %T, want *flat", Redact(pointer))
 		}
-		if out == p {
+		if out == pointer {
 			t.Error("Redact returned the same pointer, want a copy")
 		}
 		if out.Token != Mask {
 			t.Errorf("Token = %q, want %q", out.Token, Mask)
 		}
-		if p.Token != "ptr-secret" {
-			t.Errorf("original mutated: Token = %q, want %q", p.Token, "ptr-secret")
+		if pointer.Token != "ptr-secret" {
+			t.Errorf("original mutated: Token = %q, want %q", pointer.Token, "ptr-secret")
 		}
 	})
 
 	t.Run("nil pointer", func(t *testing.T) {
-		var p *flat
-		out, ok := Redact(p).(*flat)
+		var pointer *flat
+		out, ok := Redact(pointer).(*flat)
 		if !ok {
-			t.Fatalf("Redact(nil ptr) type = %T, want *flat", Redact(p))
+			t.Fatalf("Redact(nil ptr) type = %T, want *flat", Redact(pointer))
 		}
 		if out != nil {
 			t.Errorf("Redact(nil ptr) = %v, want nil", out)
@@ -112,10 +116,10 @@ func TestRedactSlice(t *testing.T) {
 	t.Parallel()
 
 	t.Run("slice of structs", func(t *testing.T) {
-		in := []flat{{Token: "a", Public: "1"}, {Token: "b", Public: "2"}}
-		out, ok := Redact(in).([]flat)
+		input := []flat{{Token: "a", Public: "1"}, {Token: "encoded", Public: "2"}}
+		out, ok := Redact(input).([]flat)
 		if !ok {
-			t.Fatalf("Redact() type = %T, want []flat", Redact(in))
+			t.Fatalf("Redact() type = %T, want []flat", Redact(input))
 		}
 		if len(out) != 2 {
 			t.Fatalf("len(out) = %d, want 2", len(out))
@@ -125,16 +129,16 @@ func TestRedactSlice(t *testing.T) {
 				t.Errorf("out[%d].Token = %q, want %q", i, out[i].Token, Mask)
 			}
 		}
-		if in[0].Token != "a" {
-			t.Errorf("original mutated: in[0].Token = %q", in[0].Token)
+		if input[0].Token != "a" {
+			t.Errorf("original mutated: input[0].Token = %q", input[0].Token)
 		}
 	})
 
 	t.Run("nil slice", func(t *testing.T) {
-		var in []flat
-		out, ok := Redact(in).([]flat)
+		var input []flat
+		out, ok := Redact(input).([]flat)
 		if !ok {
-			t.Fatalf("Redact(nil slice) type = %T, want []flat", Redact(in))
+			t.Fatalf("Redact(nil slice) type = %T, want []flat", Redact(input))
 		}
 		if out != nil {
 			t.Errorf("Redact(nil slice) = %v, want nil", out)
@@ -145,18 +149,18 @@ func TestRedactSlice(t *testing.T) {
 func TestRedactArray(t *testing.T) {
 	t.Parallel()
 
-	in := [2]flat{{Token: "a", Public: "1"}, {Token: "b", Public: "2"}}
-	out, ok := Redact(in).([2]flat)
+	input := [2]flat{{Token: "a", Public: "1"}, {Token: "encoded", Public: "2"}}
+	out, ok := Redact(input).([2]flat)
 	if !ok {
-		t.Fatalf("Redact() type = %T, want [2]flat", Redact(in))
+		t.Fatalf("Redact() type = %T, want [2]flat", Redact(input))
 	}
 	for i := range out {
 		if out[i].Token != Mask {
 			t.Errorf("out[%d].Token = %q, want %q", i, out[i].Token, Mask)
 		}
 	}
-	if in[0].Token != "a" {
-		t.Errorf("original mutated: in[0].Token = %q", in[0].Token)
+	if input[0].Token != "a" {
+		t.Errorf("original mutated: input[0].Token = %q", input[0].Token)
 	}
 }
 
@@ -164,35 +168,35 @@ func TestRedactMap(t *testing.T) {
 	t.Parallel()
 
 	t.Run("values redacted, keys untouched", func(t *testing.T) {
-		in := map[string]flat{
-			"key-a": {Token: "tok-a", Public: "pub-a"},
-			"key-b": {Token: "tok-b", Public: "pub-b"},
+		input := map[string]flat{
+			"key-a":       {Token: "tok-a", Public: "pub-a"},
+			"key-encoded": {Token: "tok-encoded", Public: "pub-encoded"},
 		}
-		out, ok := Redact(in).(map[string]flat)
+		out, ok := Redact(input).(map[string]flat)
 		if !ok {
-			t.Fatalf("Redact() type = %T, want map[string]flat", Redact(in))
+			t.Fatalf("Redact() type = %T, want map[string]flat", Redact(input))
 		}
 		if len(out) != 2 {
 			t.Fatalf("len(out) = %d, want 2", len(out))
 		}
 		for k, v := range out {
-			if k != "key-a" && k != "key-b" {
+			if k != "key-a" && k != "key-encoded" {
 				t.Errorf("unexpected key %q", k)
 			}
 			if v.Token != Mask {
 				t.Errorf("out[%q].Token = %q, want %q", k, v.Token, Mask)
 			}
 		}
-		if in["key-a"].Token != "tok-a" {
-			t.Errorf("original mutated: in[key-a].Token = %q", in["key-a"].Token)
+		if input["key-a"].Token != "tok-a" {
+			t.Errorf("original mutated: input[key-a].Token = %q", input["key-a"].Token)
 		}
 	})
 
 	t.Run("nil map", func(t *testing.T) {
-		var in map[string]flat
-		out, ok := Redact(in).(map[string]flat)
+		var input map[string]flat
+		out, ok := Redact(input).(map[string]flat)
 		if !ok {
-			t.Fatalf("Redact(nil map) type = %T, want map[string]flat", Redact(in))
+			t.Fatalf("Redact(nil map) type = %T, want map[string]flat", Redact(input))
 		}
 		if out != nil {
 			t.Errorf("Redact(nil map) = %v, want nil", out)
@@ -203,10 +207,10 @@ func TestRedactMap(t *testing.T) {
 func TestRedactInterface(t *testing.T) {
 	t.Parallel()
 
-	var in any = flat{Token: "iface-secret", Public: "iface-pub"}
-	out, ok := Redact(in).(flat)
+	var input any = flat{Token: "iface-secret", Public: "iface-pub"}
+	out, ok := Redact(input).(flat)
 	if !ok {
-		t.Fatalf("Redact() type = %T, want flat", Redact(in))
+		t.Fatalf("Redact() type = %T, want flat", Redact(input))
 	}
 	if out.Token != Mask {
 		t.Errorf("interface Token = %q, want %q", out.Token, Mask)
@@ -219,14 +223,14 @@ func TestRedactInterface(t *testing.T) {
 func TestRedactUnexportedFieldsSkipped(t *testing.T) {
 	t.Parallel()
 
-	type s struct {
+	type str struct {
 		Exported string `secret:"true"`
 		hidden   string
 	}
-	in := s{Exported: "exported-secret", hidden: "hidden-value"}
-	out, ok := Redact(in).(s)
+	input := str{Exported: "exported-secret", hidden: "hidden-value"}
+	out, ok := Redact(input).(str)
 	if !ok {
-		t.Fatalf("Redact() type = %T, want s", Redact(in))
+		t.Fatalf("Redact() type = %T, want str", Redact(input))
 	}
 	if out.Exported != Mask {
 		t.Errorf("Exported = %q, want %q", out.Exported, Mask)
@@ -241,30 +245,30 @@ func TestRedactDoesNotMutateOriginal(t *testing.T) {
 	t.Parallel()
 
 	inner := &flat{Token: "deep-tok", Public: "deep-pub"}
-	in := nested{
+	input := nested{
 		Top:    "top",
 		Inner:  flat{Token: "inner-tok", Public: "inner-pub"},
 		InnerP: inner,
 	}
 
-	_ = Redact(in)
+	_ = Redact(input)
 
 	// The original value, its nested structs, and its pointer target must be
 	// completely untouched.
-	if in.Top != "top" {
-		t.Errorf("Top mutated: %q", in.Top)
+	if input.Top != "top" {
+		t.Errorf("Top mutated: %q", input.Top)
 	}
-	if in.Inner.Token != "inner-tok" {
-		t.Errorf("Inner.Token mutated: %q", in.Inner.Token)
+	if input.Inner.Token != "inner-tok" {
+		t.Errorf("Inner.Token mutated: %q", input.Inner.Token)
 	}
-	if in.Inner.Public != "inner-pub" {
-		t.Errorf("Inner.Public mutated: %q", in.Inner.Public)
+	if input.Inner.Public != "inner-pub" {
+		t.Errorf("Inner.Public mutated: %q", input.Inner.Public)
 	}
-	if in.InnerP == nil {
+	if input.InnerP == nil {
 		t.Fatal("InnerP became nil")
 	}
-	if in.InnerP.Token != "deep-tok" {
-		t.Errorf("InnerP.Token mutated: %q", in.InnerP.Token)
+	if input.InnerP.Token != "deep-tok" {
+		t.Errorf("InnerP.Token mutated: %q", input.InnerP.Token)
 	}
 	if inner.Token != "deep-tok" {
 		t.Errorf("shared pointer target mutated: %q", inner.Token)
@@ -298,10 +302,10 @@ func TestRedactNilAndScalars(t *testing.T) {
 func TestRedactSecretFalseDoesNotMask(t *testing.T) {
 	t.Parallel()
 
-	in := withTags{A: "secret-a", B: "not-secret", C: "plain", D: 7, E: "secret-e"}
-	out, ok := Redact(in).(withTags)
+	input := withTags{A: "secret-a", B: "not-secret", C: "plain", D: 7, E: "secret-e"}
+	out, ok := Redact(input).(withTags)
 	if !ok {
-		t.Fatalf("Redact() type = %T, want withTags", Redact(in))
+		t.Fatalf("Redact() type = %T, want withTags", Redact(input))
 	}
 	if out.A != Mask {
 		t.Errorf("A = %q, want %q (secret:true)", out.A, Mask)
@@ -326,25 +330,25 @@ func TestRedactSecretFalseDoesNotMask(t *testing.T) {
 func TestMarshalJSON(t *testing.T) {
 	t.Parallel()
 
-	in := flat{Name: "srv", Token: "tok-json", Secret: "s3cr3t-json", Public: "pub-json"}
-	b, err := MarshalJSON(in)
+	input := flat{Name: "srv", Token: "tok-json", Secret: "s3cr3t-json", Public: "pub-json"}
+	encoded, err := MarshalJSON(input)
 	if err != nil {
 		t.Fatalf("MarshalJSON: %v", err)
 	}
-	raw := string(b)
+	raw := string(encoded)
 	if strings.Contains(raw, "tok-json") {
-		t.Errorf("MarshalJSON leaks Token: %s", raw)
+		t.Errorf("MarshalJSON leaks Token: %str", raw)
 	}
 	if strings.Contains(raw, "s3cr3t-json") {
-		t.Errorf("MarshalJSON leaks Secret: %s", raw)
+		t.Errorf("MarshalJSON leaks Secret: %str", raw)
 	}
 	if !strings.Contains(raw, Mask) {
-		t.Errorf("MarshalJSON missing mask, got: %s", raw)
+		t.Errorf("MarshalJSON missing mask, got: %str", raw)
 	}
 
 	// Must be valid JSON and decodable back.
 	var decoded map[string]string
-	if err := json.Unmarshal(b, &decoded); err != nil {
+	if err := json.Unmarshal(encoded, &decoded); err != nil {
 		t.Fatalf("MarshalJSON output not valid JSON: %v", err)
 	}
 	if decoded["token"] != Mask {
@@ -358,15 +362,15 @@ func TestMarshalJSON(t *testing.T) {
 func TestString(t *testing.T) {
 	t.Parallel()
 
-	in := flat{Name: "srv", Token: "tok-str", Secret: "s3cr3t-str", Public: "pub"}
-	s := String(in)
-	if strings.Contains(s, "tok-str") {
-		t.Errorf("String leaks Token: %s", s)
+	input := flat{Name: "srv", Token: "tok-str", Secret: "s3cr3t-str", Public: "pub"}
+	str := String(input)
+	if strings.Contains(str, "tok-str") {
+		t.Errorf("String leaks Token: %str", str)
 	}
-	if strings.Contains(s, "s3cr3t-str") {
-		t.Errorf("String leaks Secret: %s", s)
+	if strings.Contains(str, "s3cr3t-str") {
+		t.Errorf("String leaks Secret: %str", str)
 	}
-	if !strings.Contains(s, Mask) {
-		t.Errorf("String missing mask, got: %s", s)
+	if !strings.Contains(str, Mask) {
+		t.Errorf("String missing mask, got: %str", str)
 	}
 }

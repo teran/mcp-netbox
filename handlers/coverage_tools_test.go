@@ -20,7 +20,7 @@ func TestWriteErrorResult_PlainError(t *testing.T) {
 	if !res.IsError {
 		t.Error("res.IsError = false, want true")
 	}
-	if e != err {
+	if !errors.Is(e, err) {
 		t.Errorf("error = %v, want %v", e, err)
 	}
 	if res.StructuredContent != nil {
@@ -93,6 +93,7 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 			name: "update_site",
 			handler: func() (*mcp.CallToolResult, error) {
 				res, _, err := NewUpdateSiteHandler(nil)(ctx, nil, SiteUpdateInput{ID: 1})
+
 				return res, err
 			},
 		},
@@ -100,6 +101,7 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 			name: "delete_site",
 			handler: func() (*mcp.CallToolResult, error) {
 				res, _, err := NewDeleteSiteHandler(nil)(ctx, nil, SiteDeleteInput{ID: 1})
+
 				return res, err
 			},
 		},
@@ -107,6 +109,7 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 			name: "update_device",
 			handler: func() (*mcp.CallToolResult, error) {
 				res, _, err := NewUpdateDeviceHandler(nil)(ctx, nil, DeviceUpdateInput{ID: 1})
+
 				return res, err
 			},
 		},
@@ -114,6 +117,7 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 			name: "delete_device",
 			handler: func() (*mcp.CallToolResult, error) {
 				res, _, err := NewDeleteDeviceHandler(nil)(ctx, nil, DeviceDeleteInput{ID: 1})
+
 				return res, err
 			},
 		},

@@ -25,6 +25,7 @@ func getLogger() *logrus.Logger {
 	if l := defaultLogger.Load(); l != nil {
 		return l
 	}
+
 	return discardLogger()
 }
 
@@ -32,5 +33,6 @@ func getLogger() *logrus.Logger {
 func discardLogger() *logrus.Logger {
 	l := logrus.New()
 	l.SetOutput(io.Discard)
+
 	return l
 }

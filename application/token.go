@@ -1,4 +1,3 @@
-// Package application provides the business logic / use case layer.
 package application
 
 import (
@@ -17,6 +16,7 @@ func NewToken(token string) *Token {
 	if token == "" {
 		return nil
 	}
+
 	return &Token{value: token}
 }
 
@@ -25,6 +25,7 @@ func (t *Token) String() string {
 	if t == nil {
 		return ""
 	}
+
 	return "***redacted***"
 }
 
@@ -38,6 +39,7 @@ func (t *Token) Value() string {
 	if t == nil {
 		return ""
 	}
+
 	return t.value
 }
 

@@ -24,115 +24,172 @@ func NewNetworkService(repo domain.NetworkRepository, token string) *NetworkServ
 	}
 }
 
-func (s *NetworkService) ListSites(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Site], error) {
+// ListSites returns the page of sites matching params.
+func (s *NetworkService) ListSites(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Site], error) {
 	resp, err := s.repo.ListSites(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list sites: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListDevices(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Device], error) {
+// ListDevices returns the page of devices matching params.
+func (s *NetworkService) ListDevices(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Device], error) {
 	resp, err := s.repo.ListDevices(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list devices: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListIPAddresses(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.IPAddress], error) {
+// ListIPAddresses returns the page of IP addresses matching params.
+func (s *NetworkService) ListIPAddresses(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.IPAddress], error) {
 	resp, err := s.repo.ListIPAddresses(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list IP addresses: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListPrefixes(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Prefix], error) {
+// ListPrefixes returns the page of prefixes matching params.
+func (s *NetworkService) ListPrefixes(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Prefix], error) {
 	resp, err := s.repo.ListPrefixes(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list prefixes: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListVLANs(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VLAN], error) {
+// ListVLANs returns the page of VLANs matching params.
+func (s *NetworkService) ListVLANs(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.VLAN], error) {
 	resp, err := s.repo.ListVLANs(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list VLANs: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListVirtualMachines(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
+// ListVirtualMachines returns the page of virtual machines matching params.
+func (s *NetworkService) ListVirtualMachines(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualMachine], error) {
 	resp, err := s.repo.ListVirtualMachines(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list virtual machines: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListClusters(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Cluster], error) {
+// ListClusters returns the page of clusters matching params.
+func (s *NetworkService) ListClusters(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Cluster], error) {
 	resp, err := s.repo.ListClusters(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list clusters: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListCircuits(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Circuit], error) {
+// ListCircuits returns the page of circuits matching params.
+func (s *NetworkService) ListCircuits(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Circuit], error) {
 	resp, err := s.repo.ListCircuits(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list circuits: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListInterfaces(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Interface], error) {
+// ListInterfaces returns the page of device interfaces matching params.
+func (s *NetworkService) ListInterfaces(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Interface], error) {
 	resp, err := s.repo.ListInterfaces(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list interfaces: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListVMInterfaces(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VMInterface], error) {
+// ListVMInterfaces returns the page of virtual-machine interfaces matching params.
+func (s *NetworkService) ListVMInterfaces(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.VMInterface], error) {
 	resp, err := s.repo.ListVMInterfaces(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list VM interfaces: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListRacks(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Rack], error) {
+// ListRacks returns the page of racks matching params.
+func (s *NetworkService) ListRacks(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Rack], error) {
 	resp, err := s.repo.ListRacks(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list racks: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListCircuitTerminations(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
+// ListCircuitTerminations returns the page of circuit terminations matching params.
+func (s *NetworkService) ListCircuitTerminations(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitTermination], error) {
 	resp, err := s.repo.ListCircuitTerminations(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list circuit terminations: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) ListCables(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Cable], error) {
+// ListCables returns the page of cables matching params.
+func (s *NetworkService) ListCables(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Cable], error) {
 	resp, err := s.repo.ListCables(ctx, s.token.Value(), params)
 	if err != nil {
 		return nil, fmt.Errorf("list cables: %w", err)
 	}
+
 	return resp, nil
 }
 
-func (s *NetworkService) GetObject(ctx context.Context, objectType string, id int, params map[string]string) (domain.RawObject, error) {
+// GetObject returns the raw object of the given type and id, preserving the
+// exact JSON structure returned by NetBox.
+func (s *NetworkService) GetObject(
+	ctx context.Context, objectType string, id int, params map[string]string,
+) (domain.RawObject, error) {
 	resp, err := s.repo.GetObject(ctx, s.token.Value(), objectType, id, params)
 	if err != nil {
 		return nil, fmt.Errorf("get object: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -143,6 +200,7 @@ func (s *NetworkService) CreateSite(ctx context.Context, in domain.SiteWrite) (*
 	if err != nil {
 		return nil, fmt.Errorf("create site: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -152,6 +210,7 @@ func (s *NetworkService) UpdateSite(ctx context.Context, id int, in domain.SiteW
 	if err != nil {
 		return nil, fmt.Errorf("update site: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -160,6 +219,7 @@ func (s *NetworkService) DeleteSite(ctx context.Context, id int) error {
 	if err := s.repo.DeleteSite(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete site: %w", err)
 	}
+
 	return nil
 }
 
@@ -170,6 +230,7 @@ func (s *NetworkService) CreateDevice(ctx context.Context, in domain.DeviceWrite
 	if err != nil {
 		return nil, fmt.Errorf("create device: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -179,6 +240,7 @@ func (s *NetworkService) UpdateDevice(ctx context.Context, id int, in domain.Dev
 	if err != nil {
 		return nil, fmt.Errorf("update device: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -187,6 +249,7 @@ func (s *NetworkService) DeleteDevice(ctx context.Context, id int) error {
 	if err := s.repo.DeleteDevice(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete device: %w", err)
 	}
+
 	return nil
 }
 
@@ -197,15 +260,19 @@ func (s *NetworkService) CreateIPAddress(ctx context.Context, in domain.IPAddres
 	if err != nil {
 		return nil, fmt.Errorf("create IP address: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateIPAddress relays an IP address update to the repository.
-func (s *NetworkService) UpdateIPAddress(ctx context.Context, id int, in domain.IPAddressWrite) (*domain.IPAddress, error) {
+func (s *NetworkService) UpdateIPAddress(
+	ctx context.Context, id int, in domain.IPAddressWrite,
+) (*domain.IPAddress, error) {
 	resp, err := s.repo.UpdateIPAddress(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update IP address: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -214,6 +281,7 @@ func (s *NetworkService) DeleteIPAddress(ctx context.Context, id int) error {
 	if err := s.repo.DeleteIPAddress(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete IP address: %w", err)
 	}
+
 	return nil
 }
 
@@ -224,6 +292,7 @@ func (s *NetworkService) CreatePrefix(ctx context.Context, in domain.PrefixWrite
 	if err != nil {
 		return nil, fmt.Errorf("create prefix: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -233,6 +302,7 @@ func (s *NetworkService) UpdatePrefix(ctx context.Context, id int, in domain.Pre
 	if err != nil {
 		return nil, fmt.Errorf("update prefix: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -241,6 +311,7 @@ func (s *NetworkService) DeletePrefix(ctx context.Context, id int) error {
 	if err := s.repo.DeletePrefix(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete prefix: %w", err)
 	}
+
 	return nil
 }
 
@@ -251,6 +322,7 @@ func (s *NetworkService) CreateVLAN(ctx context.Context, in domain.VLANWrite) (*
 	if err != nil {
 		return nil, fmt.Errorf("create VLAN: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -260,6 +332,7 @@ func (s *NetworkService) UpdateVLAN(ctx context.Context, id int, in domain.VLANW
 	if err != nil {
 		return nil, fmt.Errorf("update VLAN: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -268,26 +341,33 @@ func (s *NetworkService) DeleteVLAN(ctx context.Context, id int) error {
 	if err := s.repo.DeleteVLAN(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete VLAN: %w", err)
 	}
+
 	return nil
 }
 
 // CreateVirtualMachine relays a virtual machine create to the repository.
 // ValidationError is wrapped (via %w) and left intact so callers can recover it
 // with errors.As.
-func (s *NetworkService) CreateVirtualMachine(ctx context.Context, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+func (s *NetworkService) CreateVirtualMachine(
+	ctx context.Context, in domain.VirtualMachineWrite,
+) (*domain.VirtualMachine, error) {
 	resp, err := s.repo.CreateVirtualMachine(ctx, s.token.Value(), in)
 	if err != nil {
 		return nil, fmt.Errorf("create virtual machine: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateVirtualMachine relays a virtual machine update to the repository.
-func (s *NetworkService) UpdateVirtualMachine(ctx context.Context, id int, in domain.VirtualMachineWrite) (*domain.VirtualMachine, error) {
+func (s *NetworkService) UpdateVirtualMachine(
+	ctx context.Context, id int, in domain.VirtualMachineWrite,
+) (*domain.VirtualMachine, error) {
 	resp, err := s.repo.UpdateVirtualMachine(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update virtual machine: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -296,6 +376,7 @@ func (s *NetworkService) DeleteVirtualMachine(ctx context.Context, id int) error
 	if err := s.repo.DeleteVirtualMachine(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete virtual machine: %w", err)
 	}
+
 	return nil
 }
 
@@ -306,6 +387,7 @@ func (s *NetworkService) CreateCluster(ctx context.Context, in domain.ClusterWri
 	if err != nil {
 		return nil, fmt.Errorf("create cluster: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -315,6 +397,7 @@ func (s *NetworkService) UpdateCluster(ctx context.Context, id int, in domain.Cl
 	if err != nil {
 		return nil, fmt.Errorf("update cluster: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -323,6 +406,7 @@ func (s *NetworkService) DeleteCluster(ctx context.Context, id int) error {
 	if err := s.repo.DeleteCluster(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete cluster: %w", err)
 	}
+
 	return nil
 }
 
@@ -333,6 +417,7 @@ func (s *NetworkService) CreateCircuit(ctx context.Context, in domain.CircuitWri
 	if err != nil {
 		return nil, fmt.Errorf("create circuit: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -342,6 +427,7 @@ func (s *NetworkService) UpdateCircuit(ctx context.Context, id int, in domain.Ci
 	if err != nil {
 		return nil, fmt.Errorf("update circuit: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -350,6 +436,7 @@ func (s *NetworkService) DeleteCircuit(ctx context.Context, id int) error {
 	if err := s.repo.DeleteCircuit(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete circuit: %w", err)
 	}
+
 	return nil
 }
 
@@ -360,6 +447,7 @@ func (s *NetworkService) CreateRack(ctx context.Context, in domain.RackWrite) (*
 	if err != nil {
 		return nil, fmt.Errorf("create rack: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -369,6 +457,7 @@ func (s *NetworkService) UpdateRack(ctx context.Context, id int, in domain.RackW
 	if err != nil {
 		return nil, fmt.Errorf("update rack: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -377,6 +466,7 @@ func (s *NetworkService) DeleteRack(ctx context.Context, id int) error {
 	if err := s.repo.DeleteRack(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete rack: %w", err)
 	}
+
 	return nil
 }
 
@@ -387,15 +477,19 @@ func (s *NetworkService) CreateInterface(ctx context.Context, in domain.Interfac
 	if err != nil {
 		return nil, fmt.Errorf("create interface: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateInterface relays an interface update to the repository.
-func (s *NetworkService) UpdateInterface(ctx context.Context, id int, in domain.InterfaceWrite) (*domain.Interface, error) {
+func (s *NetworkService) UpdateInterface(
+	ctx context.Context, id int, in domain.InterfaceWrite,
+) (*domain.Interface, error) {
 	resp, err := s.repo.UpdateInterface(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update interface: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -404,27 +498,34 @@ func (s *NetworkService) DeleteInterface(ctx context.Context, id int) error {
 	if err := s.repo.DeleteInterface(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete interface: %w", err)
 	}
+
 	return nil
 }
 
 // CreateCircuitTermination relays a circuit termination create to the
 // repository. ValidationError is wrapped (via %w) and left intact so callers
 // can recover it with errors.As.
-func (s *NetworkService) CreateCircuitTermination(ctx context.Context, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+func (s *NetworkService) CreateCircuitTermination(
+	ctx context.Context, in domain.CircuitTerminationWrite,
+) (*domain.CircuitTermination, error) {
 	resp, err := s.repo.CreateCircuitTermination(ctx, s.token.Value(), in)
 	if err != nil {
 		return nil, fmt.Errorf("create circuit termination: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateCircuitTermination relays a circuit termination update to the
 // repository.
-func (s *NetworkService) UpdateCircuitTermination(ctx context.Context, id int, in domain.CircuitTerminationWrite) (*domain.CircuitTermination, error) {
+func (s *NetworkService) UpdateCircuitTermination(
+	ctx context.Context, id int, in domain.CircuitTerminationWrite,
+) (*domain.CircuitTermination, error) {
 	resp, err := s.repo.UpdateCircuitTermination(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update circuit termination: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -434,6 +535,7 @@ func (s *NetworkService) DeleteCircuitTermination(ctx context.Context, id int) e
 	if err := s.repo.DeleteCircuitTermination(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete circuit termination: %w", err)
 	}
+
 	return nil
 }
 
@@ -444,6 +546,7 @@ func (s *NetworkService) CreateCable(ctx context.Context, in domain.CableWrite) 
 	if err != nil {
 		return nil, fmt.Errorf("create cable: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -453,6 +556,7 @@ func (s *NetworkService) UpdateCable(ctx context.Context, id int, in domain.Cabl
 	if err != nil {
 		return nil, fmt.Errorf("update cable: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -461,26 +565,33 @@ func (s *NetworkService) DeleteCable(ctx context.Context, id int) error {
 	if err := s.repo.DeleteCable(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete cable: %w", err)
 	}
+
 	return nil
 }
 
 // CreateVMInterface relays a VM interface create to the repository.
 // ValidationError is wrapped (via %w) and left intact so callers can recover
 // it with errors.As.
-func (s *NetworkService) CreateVMInterface(ctx context.Context, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+func (s *NetworkService) CreateVMInterface(
+	ctx context.Context, in domain.VMInterfaceWrite,
+) (*domain.VMInterface, error) {
 	resp, err := s.repo.CreateVMInterface(ctx, s.token.Value(), in)
 	if err != nil {
 		return nil, fmt.Errorf("create vm interface: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateVMInterface relays a VM interface update to the repository.
-func (s *NetworkService) UpdateVMInterface(ctx context.Context, id int, in domain.VMInterfaceWrite) (*domain.VMInterface, error) {
+func (s *NetworkService) UpdateVMInterface(
+	ctx context.Context, id int, in domain.VMInterfaceWrite,
+) (*domain.VMInterface, error) {
 	resp, err := s.repo.UpdateVMInterface(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update vm interface: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -489,6 +600,7 @@ func (s *NetworkService) DeleteVMInterface(ctx context.Context, id int) error {
 	if err := s.repo.DeleteVMInterface(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete vm interface: %w", err)
 	}
+
 	return nil
 }
 
@@ -499,15 +611,19 @@ func (s *NetworkService) CreateProvider(ctx context.Context, in domain.ProviderW
 	if err != nil {
 		return nil, fmt.Errorf("create provider: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateProvider relays a provider update to the repository.
-func (s *NetworkService) UpdateProvider(ctx context.Context, id int, in domain.ProviderWrite) (*domain.Provider, error) {
+func (s *NetworkService) UpdateProvider(
+	ctx context.Context, id int, in domain.ProviderWrite,
+) (*domain.Provider, error) {
 	resp, err := s.repo.UpdateProvider(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update provider: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -516,6 +632,7 @@ func (s *NetworkService) DeleteProvider(ctx context.Context, id int) error {
 	if err := s.repo.DeleteProvider(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete provider: %w", err)
 	}
+
 	return nil
 }
 
@@ -526,6 +643,7 @@ func (s *NetworkService) CreateTenant(ctx context.Context, in domain.TenantWrite
 	if err != nil {
 		return nil, fmt.Errorf("create tenant: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -535,6 +653,7 @@ func (s *NetworkService) UpdateTenant(ctx context.Context, id int, in domain.Ten
 	if err != nil {
 		return nil, fmt.Errorf("update tenant: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -543,26 +662,33 @@ func (s *NetworkService) DeleteTenant(ctx context.Context, id int) error {
 	if err := s.repo.DeleteTenant(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete tenant: %w", err)
 	}
+
 	return nil
 }
 
 // CreateManufacturer relays a manufacturer create to the repository.
 // ValidationError is wrapped (via %w) and left intact so callers can recover it
 // with errors.As.
-func (s *NetworkService) CreateManufacturer(ctx context.Context, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+func (s *NetworkService) CreateManufacturer(
+	ctx context.Context, in domain.ManufacturerWrite,
+) (*domain.Manufacturer, error) {
 	resp, err := s.repo.CreateManufacturer(ctx, s.token.Value(), in)
 	if err != nil {
 		return nil, fmt.Errorf("create manufacturer: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateManufacturer relays a manufacturer update to the repository.
-func (s *NetworkService) UpdateManufacturer(ctx context.Context, id int, in domain.ManufacturerWrite) (*domain.Manufacturer, error) {
+func (s *NetworkService) UpdateManufacturer(
+	ctx context.Context, id int, in domain.ManufacturerWrite,
+) (*domain.Manufacturer, error) {
 	resp, err := s.repo.UpdateManufacturer(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update manufacturer: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -571,6 +697,7 @@ func (s *NetworkService) DeleteManufacturer(ctx context.Context, id int) error {
 	if err := s.repo.DeleteManufacturer(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete manufacturer: %w", err)
 	}
+
 	return nil
 }
 
@@ -581,15 +708,19 @@ func (s *NetworkService) CreateDeviceType(ctx context.Context, in domain.DeviceT
 	if err != nil {
 		return nil, fmt.Errorf("create device type: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateDeviceType relays a device type update to the repository.
-func (s *NetworkService) UpdateDeviceType(ctx context.Context, id int, in domain.DeviceTypeWrite) (*domain.DeviceType, error) {
+func (s *NetworkService) UpdateDeviceType(
+	ctx context.Context, id int, in domain.DeviceTypeWrite,
+) (*domain.DeviceType, error) {
 	resp, err := s.repo.UpdateDeviceType(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update device type: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -598,6 +729,7 @@ func (s *NetworkService) DeleteDeviceType(ctx context.Context, id int) error {
 	if err := s.repo.DeleteDeviceType(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete device type: %w", err)
 	}
+
 	return nil
 }
 
@@ -608,15 +740,19 @@ func (s *NetworkService) CreateLocation(ctx context.Context, in domain.LocationW
 	if err != nil {
 		return nil, fmt.Errorf("create location: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateLocation relays a location update to the repository.
-func (s *NetworkService) UpdateLocation(ctx context.Context, id int, in domain.LocationWrite) (*domain.Location, error) {
+func (s *NetworkService) UpdateLocation(
+	ctx context.Context, id int, in domain.LocationWrite,
+) (*domain.Location, error) {
 	resp, err := s.repo.UpdateLocation(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update location: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -625,26 +761,33 @@ func (s *NetworkService) DeleteLocation(ctx context.Context, id int) error {
 	if err := s.repo.DeleteLocation(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete location: %w", err)
 	}
+
 	return nil
 }
 
 // CreateClusterType relays a cluster type create to the repository.
 // ValidationError is wrapped (via %w) and left intact so callers can recover
 // it with errors.As.
-func (s *NetworkService) CreateClusterType(ctx context.Context, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+func (s *NetworkService) CreateClusterType(
+	ctx context.Context, in domain.ClusterTypeWrite,
+) (*domain.ClusterType, error) {
 	resp, err := s.repo.CreateClusterType(ctx, s.token.Value(), in)
 	if err != nil {
 		return nil, fmt.Errorf("create cluster type: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateClusterType relays a cluster type update to the repository.
-func (s *NetworkService) UpdateClusterType(ctx context.Context, id int, in domain.ClusterTypeWrite) (*domain.ClusterType, error) {
+func (s *NetworkService) UpdateClusterType(
+	ctx context.Context, id int, in domain.ClusterTypeWrite,
+) (*domain.ClusterType, error) {
 	resp, err := s.repo.UpdateClusterType(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update cluster type: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -653,26 +796,33 @@ func (s *NetworkService) DeleteClusterType(ctx context.Context, id int) error {
 	if err := s.repo.DeleteClusterType(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete cluster type: %w", err)
 	}
+
 	return nil
 }
 
 // CreateClusterGroup relays a cluster group create to the repository.
 // ValidationError is wrapped (via %w) and left intact so callers can recover
 // it with errors.As.
-func (s *NetworkService) CreateClusterGroup(ctx context.Context, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+func (s *NetworkService) CreateClusterGroup(
+	ctx context.Context, in domain.ClusterGroupWrite,
+) (*domain.ClusterGroup, error) {
 	resp, err := s.repo.CreateClusterGroup(ctx, s.token.Value(), in)
 	if err != nil {
 		return nil, fmt.Errorf("create cluster group: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateClusterGroup relays a cluster group update to the repository.
-func (s *NetworkService) UpdateClusterGroup(ctx context.Context, id int, in domain.ClusterGroupWrite) (*domain.ClusterGroup, error) {
+func (s *NetworkService) UpdateClusterGroup(
+	ctx context.Context, id int, in domain.ClusterGroupWrite,
+) (*domain.ClusterGroup, error) {
 	resp, err := s.repo.UpdateClusterGroup(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update cluster group: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -681,26 +831,33 @@ func (s *NetworkService) DeleteClusterGroup(ctx context.Context, id int) error {
 	if err := s.repo.DeleteClusterGroup(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete cluster group: %w", err)
 	}
+
 	return nil
 }
 
 // CreateCircuitType relays a circuit type create to the repository.
 // ValidationError is wrapped (via %w) and left intact so callers can recover
 // it with errors.As.
-func (s *NetworkService) CreateCircuitType(ctx context.Context, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+func (s *NetworkService) CreateCircuitType(
+	ctx context.Context, in domain.CircuitTypeWrite,
+) (*domain.CircuitType, error) {
 	resp, err := s.repo.CreateCircuitType(ctx, s.token.Value(), in)
 	if err != nil {
 		return nil, fmt.Errorf("create circuit type: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateCircuitType relays a circuit type update to the repository.
-func (s *NetworkService) UpdateCircuitType(ctx context.Context, id int, in domain.CircuitTypeWrite) (*domain.CircuitType, error) {
+func (s *NetworkService) UpdateCircuitType(
+	ctx context.Context, id int, in domain.CircuitTypeWrite,
+) (*domain.CircuitType, error) {
 	resp, err := s.repo.UpdateCircuitType(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update circuit type: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -709,6 +866,7 @@ func (s *NetworkService) DeleteCircuitType(ctx context.Context, id int) error {
 	if err := s.repo.DeleteCircuitType(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete circuit type: %w", err)
 	}
+
 	return nil
 }
 
@@ -720,6 +878,7 @@ func (s *NetworkService) CreateVrf(ctx context.Context, in domain.VrfWrite) (*do
 	if err != nil {
 		return nil, fmt.Errorf("create vrf: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -729,6 +888,7 @@ func (s *NetworkService) UpdateVrf(ctx context.Context, id int, in domain.VrfWri
 	if err != nil {
 		return nil, fmt.Errorf("update vrf: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -737,6 +897,7 @@ func (s *NetworkService) DeleteVrf(ctx context.Context, id int) error {
 	if err := s.repo.DeleteVrf(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete vrf: %w", err)
 	}
+
 	return nil
 }
 
@@ -748,15 +909,19 @@ func (s *NetworkService) CreateVlanGroup(ctx context.Context, in domain.VlanGrou
 	if err != nil {
 		return nil, fmt.Errorf("create vlan group: %w", err)
 	}
+
 	return resp, nil
 }
 
 // UpdateVlanGroup relays a VLAN group update to the repository.
-func (s *NetworkService) UpdateVlanGroup(ctx context.Context, id int, in domain.VlanGroupWrite) (*domain.VlanGroup, error) {
+func (s *NetworkService) UpdateVlanGroup(
+	ctx context.Context, id int, in domain.VlanGroupWrite,
+) (*domain.VlanGroup, error) {
 	resp, err := s.repo.UpdateVlanGroup(ctx, s.token.Value(), id, in)
 	if err != nil {
 		return nil, fmt.Errorf("update vlan group: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -765,6 +930,7 @@ func (s *NetworkService) DeleteVlanGroup(ctx context.Context, id int) error {
 	if err := s.repo.DeleteVlanGroup(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete vlan group: %w", err)
 	}
+
 	return nil
 }
 
@@ -776,6 +942,7 @@ func (s *NetworkService) CreateRole(ctx context.Context, in domain.RoleWrite) (*
 	if err != nil {
 		return nil, fmt.Errorf("create role: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -785,6 +952,7 @@ func (s *NetworkService) UpdateRole(ctx context.Context, id int, in domain.RoleW
 	if err != nil {
 		return nil, fmt.Errorf("update role: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -793,6 +961,7 @@ func (s *NetworkService) DeleteRole(ctx context.Context, id int) error {
 	if err := s.repo.DeleteRole(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete role: %w", err)
 	}
+
 	return nil
 }
 
@@ -804,6 +973,7 @@ func (s *NetworkService) CreateContact(ctx context.Context, in domain.ContactWri
 	if err != nil {
 		return nil, fmt.Errorf("create contact: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -813,6 +983,7 @@ func (s *NetworkService) UpdateContact(ctx context.Context, id int, in domain.Co
 	if err != nil {
 		return nil, fmt.Errorf("update contact: %w", err)
 	}
+
 	return resp, nil
 }
 
@@ -821,5 +992,6 @@ func (s *NetworkService) DeleteContact(ctx context.Context, id int) error {
 	if err := s.repo.DeleteContact(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete contact: %w", err)
 	}
+
 	return nil
 }

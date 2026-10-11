@@ -194,11 +194,15 @@ func circuitTerminationCRUD(t *testing.T, c *e2eClient, runID string) {
 	t.Helper()
 
 	// circuit prerequisites: provider + circuit_type.
-	provider := c.call("create_provider", map[string]interface{}{"name": "e2e-ct-prov-" + runID, "slug": "e2e-ct-prov-" + runID})
+	provider := c.call("create_provider", map[string]interface{}{
+		"name": "e2e-ct-prov-" + runID, "slug": "e2e-ct-prov-" + runID,
+	})
 	providerID := c.mustID(provider)
 	t.Cleanup(func() { c.call("delete_provider", map[string]interface{}{"id": providerID}) })
 
-	circuitType := c.call("create_circuit_type", map[string]interface{}{"name": "e2e-ct-type-" + runID, "slug": "e2e-ct-type-" + runID})
+	circuitType := c.call("create_circuit_type", map[string]interface{}{
+		"name": "e2e-ct-type-" + runID, "slug": "e2e-ct-type-" + runID,
+	})
 	circuitTypeID := c.mustID(circuitType)
 	t.Cleanup(func() { c.call("delete_circuit_type", map[string]interface{}{"id": circuitTypeID}) })
 

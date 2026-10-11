@@ -63,10 +63,9 @@ func TestServiceFromContext(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// TestInjectClientMiddleware (exercised via NewMux)
-// ---------------------------------------------------------------------------
-
-func TestInjectClientMiddleware(t *testing.T) {
+// TestInjectClientMiddleware (exercised via NewMux).
+// -------------------------------------------------------- //nolint:godot // decorative separator; not a sentence.
+func TestInjectClientMiddleware(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 
 	t.Run("injects service when valid token is provided", func(t *testing.T) {
@@ -107,7 +106,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 		}
 		metrics := handlers.NewMetrics(prometheus.NewRegistry())
 
-		unreachable := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		unreachable := http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("downstream handler should not be reached when token is missing")
 		})
 
@@ -132,7 +131,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 		}
 		metrics := handlers.NewMetrics(prometheus.NewRegistry())
 
-		unreachable := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		unreachable := http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("downstream handler should not be reached")
 		})
 
@@ -154,7 +153,7 @@ func TestInjectClientMiddleware(t *testing.T) {
 // TestNewMux
 // ---------------------------------------------------------------------------
 
-func TestNewMux(t *testing.T) {
+func TestNewMux(t *testing.T) { //nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 
 	t.Run("/healthz returns 200 OK on the internal mux", func(t *testing.T) {
@@ -185,7 +184,7 @@ func TestNewMux(t *testing.T) {
 			RateLimitPerClient: 10,
 		}
 		metrics := handlers.NewMetrics(prometheus.NewRegistry())
-		mcpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mcpHandler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
 
@@ -209,7 +208,7 @@ func TestNewMux(t *testing.T) {
 			RateLimitPerClient: 10,
 		}
 		metrics := handlers.NewMetrics(prometheus.NewRegistry())
-		mcpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mcpHandler := http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			t.Error("MCP handler should not be called for unknown routes")
 		})
 
@@ -232,7 +231,7 @@ func TestNewMux(t *testing.T) {
 			RateLimitPerClient: 10,
 		}
 		metrics := handlers.NewMetrics(prometheus.NewRegistry())
-		mcpHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mcpHandler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
 

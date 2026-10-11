@@ -30,6 +30,7 @@ type (
 		LastUpdated     string         `json:"last_updated"`
 	}
 
+	// Device is a NetBox device (a physical piece of network infrastructure).
 	Device struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url,omitempty"`
@@ -54,6 +55,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// IPAddress is a NetBox IP address entry.
 	IPAddress struct {
 		ID                 int             `json:"id"`
 		URL                string          `json:"url,omitempty"`
@@ -75,6 +77,7 @@ type (
 		LastUpdated        string          `json:"last_updated"`
 	}
 
+	// Prefix is a NetBox IP prefix (CIDR block).
 	Prefix struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url,omitempty"`
@@ -98,6 +101,7 @@ type (
 		Family       *Family        `json:"family"`
 	}
 
+	// VLAN is a NetBox VLAN.
 	VLAN struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url,omitempty"`
@@ -117,6 +121,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// VirtualMachine is a NetBox virtual machine.
 	VirtualMachine struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url,omitempty"`
@@ -138,6 +143,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// Cluster is a NetBox virtualization cluster.
 	Cluster struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url,omitempty"`
@@ -155,6 +161,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// Circuit is a NetBox circuit.
 	Circuit struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url,omitempty"`
@@ -174,6 +181,7 @@ type (
 		CommitRate   int            `json:"commit_rate,omitempty"`
 	}
 
+	// CircuitTermination is a NetBox circuit termination.
 	CircuitTermination struct {
 		ID            int            `json:"id"`
 		URL           string         `json:"url,omitempty"`
@@ -190,6 +198,7 @@ type (
 		LastUpdated   string         `json:"last_updated"`
 	}
 
+	// Cable is a NetBox cable connection.
 	Cable struct {
 		ID           int               `json:"id"`
 		URL          string            `json:"url,omitempty"`
@@ -219,6 +228,7 @@ type (
 		Type string `json:"_type"`
 	}
 
+	// Rack is a NetBox equipment rack.
 	Rack struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url,omitempty"`
@@ -242,6 +252,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// Interface is a NetBox device interface.
 	Interface struct {
 		ID           int            `json:"id"`
 		URL          string         `json:"url,omitempty"`
@@ -260,6 +271,7 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// VMInterface is a NetBox virtual-machine interface.
 	VMInterface struct {
 		ID             int            `json:"id"`
 		URL            string         `json:"url,omitempty"`
@@ -488,6 +500,7 @@ type (
 )
 
 type (
+	// Nested is a compact reference to a related NetBox object (id + url + name + slug).
 	Nested struct {
 		ID   int    `json:"id"`
 		URL  string `json:"url"`
@@ -495,11 +508,13 @@ type (
 		Slug string `json:"slug,omitempty"`
 	}
 
+	// Label is a NetBox choice field carrying both the value and its display label.
 	Label struct {
 		Value string `json:"value"`
 		Label string `json:"label"`
 	}
 
+	// Tag is a NetBox tag attached to an object.
 	Tag struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
@@ -507,6 +522,7 @@ type (
 		URL  string `json:"url"`
 	}
 
+	// AssignedObject is the polymorphic reference to the object an IP address is assigned to.
 	AssignedObject struct {
 		ID     int     `json:"id"`
 		URL    string  `json:"url"`
@@ -514,6 +530,7 @@ type (
 		Name   string  `json:"name"`
 	}
 
+	// Family is the IP address family (IPv4/IPv6) of a prefix.
 	Family struct {
 		Value int    `json:"value"`
 		Label string `json:"label"`
