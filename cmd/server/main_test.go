@@ -205,9 +205,12 @@ func TestNewPrivateIPCheckingDialer_RejectsReserved(t *testing.T) {
 	t.Parallel()
 
 	dialer := newPrivateIPCheckingDialer(false)
+	rawConn := dialerRawConn(t)
 
 	// Loopback is always rejected, even when private is not allowed.
-	_, err := dialer.DialContext(context.Background(), "tcp", "127.0.0.1:8080")
+	// Exercise Control directly (no real network dial): a weakened reject
+	// check fails fast instead of hanging on a loopback connect.
+	err := dialer.Control("tcp", "127.0.0.1:8080", rawConn)
 	if err == nil {
 		t.Fatal("expected loopback dial to be rejected")
 	}
@@ -221,7 +224,13 @@ func TestNewPrivateIPCheckingDialer_RejectsPrivate(t *testing.T) {
 
 	// With allowPrivate=false an RFC1918 address is rejected.
 	dialer := newPrivateIPCheckingDialer(false)
-	_, err := dialer.DialContext(context.Background(), "tcp", "10.0.0.1:8080")
+	rawConn := dialerRawConn(t)
+
+	// Exercise Control directly instead of DialContext: dialing the private
+	// 10.0.0.1 would hang for dialTimeout (30s) whenever the reject check is
+	// weakened, turning a gremlins mutant into TIMED OUT instead of a fast
+	// KILLED.
+	err := dialer.Control("tcp", "10.0.0.1:8080", rawConn)
 	if err == nil {
 		t.Fatal("expected private dial to be rejected")
 	}
@@ -276,7 +285,9 @@ func TestNewPrivateIPCheckingDialer_RejectsLoopbackEvenWhenAllowed(t *testing.T)
 
 	// Loopback/unspecified is rejected regardless of allowPrivate.
 	dialer := newPrivateIPCheckingDialer(true)
-	_, err := dialer.DialContext(context.Background(), "tcp", "127.0.0.1:8080")
+	rawConn := dialerRawConn(t)
+
+	err := dialer.Control("tcp", "127.0.0.1:8080", rawConn)
 	if err == nil {
 		t.Fatal("expected loopback dial to be rejected even with allowPrivate=true")
 	}
@@ -286,8 +297,9 @@ func TestNewPrivateIPCheckingDialer_BadAddress(t *testing.T) {
 	t.Parallel()
 
 	dialer := newPrivateIPCheckingDialer(false)
+	rawConn := dialerRawConn(t)
 	// Missing port makes SplitHostPort fail inside Control.
-	_, err := dialer.DialContext(context.Background(), "tcp", "127.0.0.1")
+	err := dialer.Control("tcp", "127.0.0.1", rawConn)
 	if err == nil {
 		t.Fatal("expected dial with malformed address to fail")
 	}
@@ -297,8 +309,9 @@ func TestNewPrivateIPCheckingDialer_DNSFailure(t *testing.T) {
 	t.Parallel()
 
 	dialer := newPrivateIPCheckingDialer(false)
+	rawConn := dialerRawConn(t)
 	// A hostname that cannot be resolved triggers the DNS-lookup error branch.
-	_, err := dialer.DialContext(context.Background(), "tcp", "nonexistent.invalid:8080")
+	err := dialer.Control("tcp", "nonexistent.invalid:8080", rawConn)
 	if err == nil {
 		t.Fatal("expected dial with unresolvable hostname to fail")
 	}

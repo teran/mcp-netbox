@@ -27,6 +27,14 @@
 #                             mutation-coverage regressions (new untested
 #                             branches).
 unleash:
+  # Constrain each `go test` worker to a single CPU. On the 2-vCPU
+  # ubuntu-latest runner, gremlins' default workers=2 (CPU count) with
+  # GOMAXPROCS=2 gives 2 workers x 2 = 4 threads fighting over 2 cores
+  # (oversubscription), which slows tests past what the default
+  # timeout-coefficient (5) assumes and pushes timing-sensitive mutants into
+  # TIMED OUT. test-cpu=1 -> 2 workers x 1 = 2 cores, no oversubscription.
+  # This converts most TIMED OUT mutants into fast KILLED.
+  test-cpu: 1
   threshold:
     efficacy: 99.99
     mutant-coverage: 80
