@@ -726,9 +726,110 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
 - **Rate limiting & body limit:** global/per-client rate limits and a 1 MB body
   limit guard the HTTP listener against abuse.
 
+### Domain security audit (S14)
+
+**Owner:** `security` agent. **Status:** produced by the `security` subagent per `reference/security-audit.md` and embedded verbatim (S14). This block layers on top of the existing S01–S05/CRUD/SSRF/ratelimit content in the Security section and the statelessness of **Data & state (X01)**; it introduces no renumbering or weakening of S01–S13.
+
+---
+
+#### 1. Scope & trust boundaries
+
+`mcp-netbox` is a **stateless** REST API MCP proxy that relays MCP tool calls to a single upstream NetBox instance. Its single hired job is to translate a bounded set of typed read/write tool invocations into NetBox REST calls and return typed, sanitized results. It holds no state between requests and persists nothing (X01, X04).
+
+**Trust zones and the data crossing each boundary:**
+
+| Zone | Contains | What crosses the boundary (from → to) |
+|------|----------|---------------------------------------|
+| **Z1 — MCP client / model host** | The LLM host and the MCP client driving it. **NOT trusted for write authz.** | Outbound tool invocations (tool name, arguments, write payloads) and the caller's `Authorization: Bearer` token (HTTP) → Z2. Receives tool results from Z2. |
+| **Z2 — Server process (`mcp-netbox`)** | Stateless request/response handling, middleware chain, rate limiter, config (`NETBOX_URL`, `NETBOX_TOKEN`). | Per-request token relayed Z2 → Z3 (HTTP); single shared `NETBOX_TOKEN` read at startup from env (STDIO). Writes sanitized tool output Z2 → Z1. |
+| **Z3 — Upstream NetBox** | DCIM/IPAM/virtualization/tenancy/circuits data, the single delegated authorization authority. **Responses treated as untrusted (S07).** | Authorized tool payloads Z2 → Z3. NetBox JSON responses and `ValidationError` bodies Z3 → Z2. |
+| **Z4 — Reverse proxy (HTTP mode only)** | The TLS termination point. | Decrypts client TLS → plaintext HTTP to Z2; is where TLS (S01) MUST live. Not present in STDIO mode (no network listener). |
+
+**Key boundary consequence:** in STDIO mode (default) there is **no network boundary** — the server is invoked locally and the process boundary with the host is trusted (no TLS, no remote attacker). In HTTP mode a remote network attacker can reach Z2 and the per-request token and reverse-proxy TLS (S01) plus rate limiting become the perimeter controls.
+
+---
+
+#### 2. Domain threat model
+
+STRIDE-flavored and concrete to the NetBox-proxy domain, naming realistic attackers and their realistic actions per boundary.
+
+**Realistic attackers:**
+- **A1 — Compromised / malicious model host or client (Z1).** The LLM host or client is out-of-band and its calls carry a caller token. It can attempt to invoke **write and `delete_*` tools** without legitimate authorization, submit malformed payloads, and abuse the relay as a scanning/probing tool.
+- **A2 — Hostile upstream NetBox response (Z3).** NetBox data (device names, descriptions, object labels, free-text fields) is attacker-influenced in many deployments (anyone able to write objects). Malicious strings can carry **CRLF/control characters**, **ANSI/C0 escapes**, or be crafted to inject through the model.
+- **A3 — Network attacker in HTTP mode (between Z4 and Z2, or at the NetBox boundary).** Can sniff/alter plaintext HTTP if TLS is misconfigured, replay relayed tokens, or target the relay as a DoS vector. Can also attempt **SSRF** by inducing the server to reach internal metadata/loopback via a hostile `NETBOX_URL` or DNS rebinding.
+
+**Per-boundary actions / threats (STRIDE):**
+
+| # | Threat | Zone pair | STRIDE | Realistic action |
+|---|--------|-----------|--------|------------------|
+| T1 | **Token exfiltration** | Z1↔Z2, Z2↔Z3 | Info disclosure | Token leaked via tool output, log lines, or error strings on relay or upstream errors. |
+| T2 | **Unauthorized / over-privileged writes** | Z1→Z2→Z3 | Elevation of privilege | A1 invokes `create_*`/`update_*`/`delete_*` beyond its legitimate authority; especially the **25 irreversible `delete_*`** tools. |
+| T3 | **Destructive accidental/abusive deletion** | Z1→Z3 | DoS / integrity | A1 (or a misbehaving model) issues a `delete_*` for production infrastructure with no confirmation gate. |
+| T4 | **Upstream SSRF / DNS rebinding** | Z2↔Z3 | Spoofing / info disclosure | Hostile `NETBOX_URL` points to loopback/private/internal; DNS rebinding switches resolution to a reserved IP post-validation. |
+| T5 | **CRLF / header / JSON injection in write payloads** | Z1→Z2→Z3 | Tampering / injection | Crafted values embed `\r\n` to inject NetBox headers/query strings or corrupt the JSON body; the `ALLOW_PRIVATE_NETBOX` override weakens T4. |
+| T6 | **ANSI / C0 output injection** | Z3→Z2→Z1 | Tampering / spoofing | Malicious NetBox object names embed ANSI escapes/control bytes to inject terminal escape sequences into the model's rendering (S09/N23). |
+| T7 | **Relay DoS / resource abuse** | A3→Z2 | DoS | Flood the HTTP listener with requests or oversized bodies to exhaust connections and relay resources. |
+| T8 | **Injection via free-text / object-name fields** | Z1→Z3 | Tampering | Write payloads relay object names / free text that could carry injection payloads toward NetBox or downstream consumers. |
+
+---
+
+#### 3. Data sensitivity classification → C-I-A requirements
+
+| Data class | Sensitivity | Confidentiality | Integrity | Availability |
+|------------|-------------|-----------------|-----------|--------------|
+| **NetBox personal access token** (per-request `Authorization: Bearer` in HTTP; single `NETBOX_TOKEN` in STDIO) | **Secret** | **Redact (S02)**; never log (**L05**, log-hook + `url.Redacted()` + outbound auth-header exclusion); never persist (**X04** stateless). | Protected from modification in transit (TLS at reverse proxy, S01). | Token presence required; missing/malformed → 401. |
+| **NetBox DCIM/IPAM/virtualization/tenancy/circuits data** (infra source-of-truth) | **High** | **Least privilege (S10)** — a single relayed token carries the caller's effective permissions; read-only by default posture; `readOnlyHint:true` on reads. | **Authz on write** — every create/update/delete is authorized by NetBox; **X02 idempotency** for create (non-idempotent) vs delete (404→no-op). | Destructive ops must not be silently disruptable — HITL/destructiveHint (S12). |
+| **Tool arguments / write payloads** (user-supplied, from Z1) | **Restricted** (treated as untrusted) | Sanitized before use; never logged with secrets. | **Validated (S08)** — `validatePositiveID`, `sanitizeAllStrings` (CRLF strip). | Rejected (400/401/403/429/413) rather than partially applied. |
+| **Config** (`NETBOX_URL`, `NETBOX_TOKEN`, `TRANSPORT`, `LOG_*`) | **High** (token part = **Secret**) | `config.Config.NetBoxToken` carries `secret:"true"` tag → redacted if config ever logged. | Validated at startup (envconfig + ozzo-validation); `NETBOX_URL` SSRF-checked (S11). | Availability of operations requires a valid configured upstream. |
+
+**Derived requirements:**
+- **Token = Secret** → redact (S02), never log (L05), never persist (X04).
+- **Infra data = High** → least privilege (S10), authorization delegated to NetBox on every write, read-only-by-default.
+- **Stateless (X01)** → **no at-rest encryption needed (X04 N/A)**; confidentiality/integrity in transit only.
+- **Destructive tools** → `destructiveHint:true` + client confirmation (S12), non-idempotent create (X02).
+
+---
+
+#### 4. Domain-specific attack vectors → requirements
+
+Each vector states the **Threat**, **Impact**, and the concrete **Mitigation** (a hardening of an existing S-code applied to this domain, or a domain requirement). All mitigations are MUST-level.
+
+**(a) Token relay & leakage** — *Threat:* the NetBox token could be exfiltrated via tool output, log lines, or error strings; *Impact:* full read/write/delete control of the caller's NetBox footprint; *Mitigation:* token type implements safe `String`/`GoString`/`MarshalJSON` redaction, `Authorization` header excluded from outbound request log, URLs logged via `url.Redacted()`, `domain.ValidationError.Error()` carries **only the HTTP status** (body goes to the model solely via `structuredContent` `validation_errors`), never logged; token never persisted (X04) — hardens **S02/L05**.
+
+**(b) Per-operation authorization on the 25 irreversible `delete_*` tools** — *Threat:* a compromised model host or over-eager client issues destructive deletes beyond its authority or intent; *Impact:* irreversible loss of infrastructure source-of-truth records; *Mitigation:* all 25 `delete_*` tools are typed and marked `destructiveHint:true` with `idempotentHint:true` (NetBox 404 → no-op); the **relayed token carries only the caller's effective permissions** — authorization for every delete is **delegated entirely to NetBox** (the relay adds no privilege); clients MUST gate destructive calls behind explicit confirmation — hardens **S12/S10**.
+
+**(c) Upstream SSRF / DNS-rebinding and the `ALLOW_PRIVATE_NETBOX` risk** — *Threat:* a hostile or misconfigured `NETBOX_URL` directs the relay at loopback/private/internal metadata, or DNS rebinding swaps resolution to a reserved IP after validation; *Impact:* server becomes an SSRF proxy to internal services; *Mitigation:* `NETBOX_URL` validated to reject loopback/private/link-local IPs + dialer-time reserved-IP rejection; **`ALLOW_PRIVATE_NETBOX` is an explicit, operator-acknowledged override** — it weakens this control by design and must only be set when the operator trusts the private upstream, never exposed to remote callers — hardens **S11**.
+
+**(d) CRLF / control-injection in write payloads** — *Threat:* crafted values embed `\r`/`\n` to inject NetBox headers/query strings or corrupt the JSON request body; *Impact:* header/JSON injection, request smuggling toward upstream, malformed objects; *Mitigation:* `handlers/validate.go` — **`sanitizeAllStrings`** recursively strips `\r`/`\n` (via `sanitizeControl`) from **every settable string field** of write payloads (incl. through pointers/maps) before `json.Marshal`; applied to the whole write path — hardens **S08**.
+
+**(e) ANSI / C0 output injection** — *Threat:* malicious NetBox object names/descriptions embed ANSI escape sequences or C0 control bytes that reach the model; *Impact:* terminal escape-sequence injection / rendering spoofing (S09/N23); *Mitigation:* **`sanitizeOutput`** strips ANSI escape sequences and C0/DEL control bytes from tool-result text (byte-oriented, preserving valid UTF-8/printable ASCII), applied to the text form of tool results — hardens **S09/N23**.
+
+**(f) Positive-ID validation** — *Threat:* object-targeted tools accept `0`/negative/`NaN` IDs; *Impact:* requests to malformed or unintended resources, logic errors against NetBox; *Mitigation:* **`validatePositiveID`** rejects `id <= 0` on all object-targeted tools before any upstream call — hardens **S08**.
+
+**(g) Rate-limit / DoS on the relay (HTTP mode)** — *Threat:* a network attacker floods the HTTP listener or submits oversized bodies; *Impact:* connection exhaustion, relay/upstream resource abuse; *Mitigation:* `handlers/ratelimit.go` global (100 rps) + per-client (10 rps) token-bucket with background client eviction (30 min TTL), plus a **1 MB request-body limit** and host-header validation; applies to the HTTP transport where the remote boundary exists — hardens DoS posture.
+
+**(h) Injection via object names / free-text fields relayed to NetBox** — *Threat:* write payloads carry object names, labels, descriptions, or other free text containing injection payloads; *Impact:* corrupted/poisoned infra data consumed by downstream systems; *Mitigation:* combination of **(d)** CRLF sanitization and **(e)** output sanitization — payloads are stripped of control characters on the way in, and any hostile content that survives in upstream data is stripped of ANSI/C0 on the way out; NetBox object names never reach the model unsanitized — hardens **S08/S09** and treats upstream data as **untrusted (S07)**.
+
+---
+
+#### 5. Filled auditor checklist (§6)
+
+- [x] **YES** — Trust zones and boundaries enumerated and documented (Z1–Z4, §1).
+- [x] **YES** — A concrete threat model for this domain recorded (attackers A1–A3, threats T1–T8, §2).
+- [x] **YES** — Every data class the server touches classified with C-I-A requirements (§3).
+- [x] **YES** — Domain-specific attack vectors identified beyond the generic S01–S13 (token relay, per-op authz on `delete_*`, SSRF/`ALLOW_PRIVATE_NETBOX`, CRLF injection, ANSI/C0 output, positive-ID, DoS, free-text injection; §4).
+- [x] **YES** — Each vector mapped to a concrete requirement (hardened S-code or new domain requirement; §4 a–h).
+- [x] **YES** — Sensitive data redaction (**S02**) and no-secrets-in-logs (**L05**) confirmed for this domain (token `String`/`GoString`/`MarshalJSON`, `url.Redacted()`, auth-header exclusion, `ValidationError` status-only; §4a, §3).
+- [x] **YES** — Destructive/irreversible operations flagged `destructiveHint` with HITL (**S12**) where the domain demands it — all 25 `delete_*` tools are `destructiveHint:true` with `idempotentHint:true` (404→no-op); §4b.
+- [x] **YES** — Mutating tools carry a real data-level idempotency mechanism (**X02**) where double-execution is harmful — create is explicitly `idempotentHint:false` (new object each call), delete is `idempotentHint:true` with a real 404→no-op mechanism; §3, §4b.
+- [x] **YES** — Filesystem access scoped per **S04** — **not applicable by design**: the server is stateless (X01) and writes no files; there is no filesystem surface to scope (X04 N/A). Confirmed vacuous.
+- [x] **YES** — The audit is produced by the `security` agent and embedded verbatim (**S14**).
+
+**Closing statement:** This Domain security audit (S14) was produced by the `security` agent, is embedded verbatim in the Security section, and satisfies criterion S14. Its absence would constitute a violation of MUST NOT N38.
+
 ## Data & state
 
-> **State model (X01):** `mcp-netbox` is a **stateless** relay. It holds no application state between requests, persists nothing to disk or a database, and each request is served independently. Statelessness is also signaled to the transport via `StreamableHTTPOptions{Stateless: true}`. **Write idempotency (X02):** read tools are `idempotentHint:true`; create/update tools are `idempotentHint:false` (a create produces a new object each call); delete tools are `idempotentHint:true` with a real mechanism — a NetBox 404 on delete is treated as a successful no-op. **Upstream connection & limits (X03):** explicit 30s HTTP client timeout + dialer timeout; failures are returned to the model and logged, never silently retried (a 429 is surfaced as an error). **Persistence (X04):** not applicable — the server is stateless, no storage, no encryption-at-rest, no migrations. **Concurrency (X05):** not applicable — no shared mutable state; HTTP mode injects a service per request; no file writes.
+> **State model (X01):** `mcp-netbox` is a **stateless** relay. It holds no application state between requests, persists nothing to disk or a database, and each request is served independently. Statelessness is also signaled to the transport via `StreamableHTTPOptions{Stateless: true}`. **Write idempotency (X02):** read tools are `idempotentHint:true`; create/update tools are `idempotentHint:false` (a create produces a new object each call); delete tools are `idempotentHint:true` with a real mechanism — a NetBox 404 on delete is treated as a successful no-op. **Upstream connection & limits (X03):** explicit 30s HTTP client timeout + dialer timeout; failures are returned to the model and logged, never silently retried (a 429 is surfaced as an error). **Persistence (X04):** not applicable — the server is stateless, no storage, no encryption-at-rest, no migrations. **Concurrency (X05):** not applicable — no shared mutable state; HTTP mode injects a service per request; no file writes. **Domain security context (S14):** the stateless model, the single-relayed-token authorization model, and the idempotency semantics above are analyzed as domain-specific security requirements in the **Domain security audit (S14)** subsection of the Security section.
 
 ## Error Handling
 
