@@ -237,6 +237,26 @@ Logging uses **logrus**. Enablement follows the launch mode (L02):
   `X-Request-ID` header and emits its own per-request log record (method, path,
   `in_bytes`, `out_bytes`, status, duration) tagged with the same `request_id`, so
   client- and server-side records can be matched across the wire.
+- **Outbound HTTP detail logging (resty):** the NetBox client wires resty's
+  internal logger to the server's logrus logger (`infrastructure/netbox/resty_logger.go`)
+  and enables resty debug mode, so at `LOG_LEVEL=debug` or `LOG_LEVEL=trace`
+  resty emits its own request/response detail records (method, URI, headers,
+  response status/timing, bodies) for every outbound call, in addition to the
+  per-request access log above. Resty's `Logger` interface exposes no trace
+  level (`Errorf`/`Warnf`/`Debugf` only), so the detail records are emitted at
+  logrus debug level and are therefore visible under both `debug` and `trace`;
+  they are suppressed at `info` and above. The `Authorization` header is
+  redacted by resty's header sanitizer before the dump is formatted, so the
+  NetBox token is never written to the log at any level.
+- **Outbound User-Agent (M10):** every outbound HTTP request to NetBox carries
+  an identifying `User-Agent` header in the form
+  `mcp-netbox/<version> (https://github.com/teran/mcp-netbox)` (`infrastructure/netbox/useragent.go`).
+  `<version>` is the ldflags-embedded app version (`appVersion`) injected at
+  startup via `netbox.SetUserAgent` in `cmd/server/main.go`; when it is empty
+  (e.g. a local/dev build or unit tests) a non-empty identifying fallback
+  `mcp-netbox (https://github.com/teran/mcp-netbox)` is used so the header is
+  never empty or malformed (N44). The User-Agent is a public identifier and
+  never contains the NetBox token.
 
 ## MCP Tools
 

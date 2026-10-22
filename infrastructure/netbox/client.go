@@ -79,9 +79,20 @@ func NewClient(baseURL string, httpClient *http.Client) *Client {
 // NewClientWithMetrics is NewClient with an optional upstream-metrics handle.
 // The handle is nil-safe; passing nil disables upstream metrics recording.
 func NewClientWithMetrics(baseURL string, httpClient *http.Client, upstream *UpstreamMetrics) *Client {
+	// Wire resty's internal logger to the package logrus logger so resty emits
+	// its own request/response detail records (redacting the Authorization
+	// header), and enable debug mode so those records are produced. They only
+	// reach the log when the logrus level is debug or trace; otherwise the
+	// restyLogger adapter drops them. The custom access-log line in doRequest
+	// is emitted independently and is unaffected.
+	restyClient := resty.NewWithClient(httpClient).
+		SetLogger(restyLogger{}).
+		SetDebug(true).
+		SetHeader("User-Agent", userAgent())
+
 	return &Client{
 		baseURL:  strings.TrimSuffix(baseURL, "/"),
-		client:   resty.NewWithClient(httpClient),
+		client:   restyClient,
 		upstream: upstream,
 	}
 }

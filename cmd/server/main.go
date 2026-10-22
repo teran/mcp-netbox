@@ -159,6 +159,7 @@ func Run(cfg config.Config) error {
 	// client so that all logging honours LOG_LEVEL/LOG_FORMAT/LOG_FILENAME.
 	handlers.SetLogger(logger)
 	infra.SetLogger(logger)
+	infra.SetUserAgent(appVersion)
 
 	switch cfg.Transport {
 	case config.TransportStdio:
