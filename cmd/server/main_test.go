@@ -3,18 +3,27 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/json"
+	"encoding/pem"
 	"io"
+	"math/big"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"testing"
 	"time"
 
 	"github.com/teran/mcp-netbox/config"
+	"github.com/teran/mcp-netbox/infrastructure/circuitbreaker"
 )
 
 func freePort() string {
@@ -368,6 +377,116 @@ func TestRun_SetupLoggingError(t *testing.T) {
 	if err := Run(cfg); err == nil {
 		t.Fatal("Run() = nil, want error for invalid LOG_LEVEL")
 	}
+}
+
+// httpClientTransport unwraps the circuit-breaker RoundTripper to expose the
+// underlying *http.Transport for TLS configuration assertions.
+func httpClientTransport(t *testing.T, client *http.Client) *http.Transport {
+	t.Helper()
+
+	cbRT, ok := client.Transport.(*circuitbreaker.RoundTripper)
+	if !ok {
+		t.Fatalf("client.Transport type = %T, want *circuitbreaker.RoundTripper", client.Transport)
+	}
+	tr, ok := cbRT.RoundTripper.(*http.Transport)
+	if !ok {
+		t.Fatalf("wrapped transport type = %T, want *http.Transport", cbRT.RoundTripper)
+	}
+
+	return tr
+}
+
+func TestNewNetBoxHTTPClient_CustomCA(t *testing.T) {
+	t.Parallel()
+
+	certPEM := testSelfSignedCertPEM(t)
+	path := writeTempCAFile(t, certPEM)
+
+	cfg := config.Config{NetBoxCAFile: path}
+	client, _, err := newNetBoxHTTPClient(cfg)
+	if err != nil {
+		t.Fatalf("newNetBoxHTTPClient(custom CA) error: %v", err)
+	}
+
+	transport := httpClientTransport(t, client)
+	if transport.TLSClientConfig == nil {
+		t.Fatal("TLSClientConfig = nil, want set with custom RootCAs")
+	}
+	pool := transport.TLSClientConfig.RootCAs
+	if pool == nil {
+		t.Fatal("RootCAs = nil, want custom pool")
+	}
+	expected := x509.NewCertPool()
+	expected.AppendCertsFromPEM(certPEM)
+	if !expected.Equal(pool) {
+		t.Error("RootCAs does not contain the custom CA certificate")
+	}
+}
+
+func TestNewNetBoxHTTPClient_EmptyCAUsesSystemRoots(t *testing.T) {
+	t.Parallel()
+
+	client, _, err := newNetBoxHTTPClient(config.Config{})
+	if err != nil {
+		t.Fatalf("newNetBoxHTTPClient(no CA) error: %v", err)
+	}
+
+	transport := httpClientTransport(t, client)
+	if transport.TLSClientConfig == nil {
+		// No custom config and no TLSClientConfig means system roots are used.
+		t.Log("TLSClientConfig is nil (system roots)")
+
+		return
+	}
+	if transport.TLSClientConfig.RootCAs != nil {
+		t.Error("RootCAs = non-nil, want nil (system roots) when no CA file is set")
+	}
+}
+
+func TestNewNetBoxHTTPClient_MissingCAFileFails(t *testing.T) {
+	t.Parallel()
+
+	cfg := config.Config{NetBoxCAFile: filepath.Join(t.TempDir(), "missing.pem")}
+	if _, _, err := newNetBoxHTTPClient(cfg); err == nil {
+		t.Fatal("newNetBoxHTTPClient(missing CA) = nil error, want error")
+	}
+}
+
+// writeTempCAFile writes certPEM to a temp file and returns its path.
+func writeTempCAFile(t *testing.T, certPEM []byte) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "ca.pem")
+	if err := os.WriteFile(path, certPEM, 0o600); err != nil {
+		t.Fatalf("WriteFile error: %v", err)
+	}
+
+	return path
+}
+
+// testSelfSignedCertPEM generates a self-signed CA certificate and returns its
+// PEM-encoded certificate block.
+func testSelfSignedCertPEM(t *testing.T) []byte {
+	t.Helper()
+
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatalf("GenerateKey error: %v", err)
+	}
+
+	template := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		Subject:               pkix.Name{CommonName: "test-ca"},
+		IsCA:                  true,
+		BasicConstraintsValid: true,
+	}
+
+	der, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
+	if err != nil {
+		t.Fatalf("CreateCertificate error: %v", err)
+	}
+
+	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
 }
 
 func TestResolveTransport_ModeFlagWins(t *testing.T) {
