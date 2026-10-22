@@ -20,7 +20,7 @@ func TestClient_ListSites(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
-			if req.Header.Get("Authorization") != "Bearer test-token" {
+			if req.Header.Get("Authorization") != "Token test-token" {
 				writer.WriteHeader(http.StatusUnauthorized)
 
 				return
@@ -783,7 +783,7 @@ func TestNewClientUsesResty(t *testing.T) {
 	var sawAccept, sawAuth, sawQuery bool
 	srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		sawAccept = req.Header.Get("Accept") == "application/json"
-		sawAuth = req.Header.Get("Authorization") == "Bearer tok"
+		sawAuth = req.Header.Get("Authorization") == "Token tok"
 		sawQuery = req.URL.Query().Get("name") == "site-a" && req.URL.Query().Get("status") == "active"
 		writer.Header().Set("Content-Type", "application/json")
 		_, _ = writer.Write([]byte(`{"count":0,"results":[]}`))
@@ -1335,7 +1335,7 @@ func TestDoRequest_Success(t *testing.T) {
 
 			return
 		}
-		if req.Header.Get("Authorization") != "Bearer test-token" {
+		if req.Header.Get("Authorization") != "Token test-token" {
 			writer.WriteHeader(http.StatusUnauthorized)
 
 			return

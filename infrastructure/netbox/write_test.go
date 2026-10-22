@@ -47,8 +47,8 @@ func TestClient_CreateSite(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]string
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -321,8 +321,8 @@ func TestClient_CreateDevice(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -565,8 +565,8 @@ func TestClient_CreateIPAddress(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -799,8 +799,8 @@ func TestClient_CreatePrefix(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -1000,8 +1000,8 @@ func TestClient_CreateVLAN(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -1206,8 +1206,8 @@ func TestClient_CreateVirtualMachine(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -1412,8 +1412,8 @@ func TestClient_CreateCluster(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -1617,8 +1617,8 @@ func TestClient_CreateCircuit(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -1923,8 +1923,8 @@ func TestClient_CreateCircuitTermination(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -2201,8 +2201,8 @@ func TestClient_CreateCable(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -2423,8 +2423,8 @@ func TestClient_CreateVMInterface(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -2692,8 +2692,8 @@ func TestClient_CreateProvider(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -2893,8 +2893,8 @@ func TestClient_CreateTenant(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -3095,8 +3095,8 @@ func TestClient_CreateManufacturer(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -3302,8 +3302,8 @@ func TestClient_CreateDeviceType(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -3513,8 +3513,8 @@ func TestClient_CreateInterface(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -3753,8 +3753,8 @@ func TestClient_CreateRack(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4001,8 +4001,8 @@ func TestClient_CreateLocation(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4214,8 +4214,8 @@ func TestClient_CreateClusterType(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4423,8 +4423,8 @@ func TestClient_CreateClusterGroup(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4632,8 +4632,8 @@ func TestClient_CreateCircuitType(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -4842,8 +4842,8 @@ func TestClient_CreateVrf(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -5050,8 +5050,8 @@ func TestClient_CreateVlanGroup(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -5316,8 +5316,8 @@ func TestClient_CreateRole(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
@@ -5524,8 +5524,8 @@ func TestClient_CreateContact(t *testing.T) {
 		if gotCT != "application/json" {
 			t.Errorf("Content-Type = %q, want application/json", gotCT)
 		}
-		if gotAuth != "Bearer tok" {
-			t.Errorf("Authorization = %q, want Bearer tok", gotAuth)
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
 		}
 		var reqBody map[string]any
 		_ = json.Unmarshal(gotBody, &reqBody)
