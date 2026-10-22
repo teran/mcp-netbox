@@ -88,6 +88,23 @@ All configuration is via environment variables:
 
 The NetBox API token is supplied per-request in the `Authorization` header as `Bearer <token>` in HTTP mode. Both v1 (`Token <token>`) and v2 (`Bearer nbt_<key>.<token>`) tokens are supported. In STDIO mode the token is read from `NETBOX_TOKEN` at startup.
 
+## Outbound HTTP logging
+
+At `LOG_LEVEL=debug` or `LOG_LEVEL=trace`, the server additionally emits the
+HTTP client's request/response detail records for each outbound call to NetBox
+(method, URI, headers, response status, timing and bodies), alongside the
+regular per-request access log. These records are produced by the resty client
+and routed through the same logrus logger. The `Authorization` header (and any
+other auth/token/secret-bearing header) is redacted by the client before it is
+written, so the NetBox API token is **never** logged at any level. At
+`LOG_LEVEL=info` or above these detail records are suppressed.
+
+Every outbound HTTP request to NetBox identifies the client via a
+`User-Agent` header in the form `mcp-netbox/<version> (https://github.com/teran/mcp-netbox)`,
+where `<version>` is the ldflags-embedded app version (a git tag, or a `dev`
+fallback for local builds). This is a public identifier and never contains the
+NetBox token; it lets NetBox operators see which client is making requests.
+
 ## MCP Client Configuration
 
 The server supports two transports, selected via the `-mode http|stdio` flag
