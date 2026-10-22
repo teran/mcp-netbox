@@ -177,6 +177,7 @@ The MCP `Server` is shared; only the transport wiring differs.
 | `RATE_LIMIT_GLOBAL`    | No       | `100`   | Global rate limit (requests/second)  |
 | `RATE_LIMIT_PER_CLIENT`| No       | `10`    | Per-client IP rate limit (requests/second) |
 | `ALLOW_PRIVATE_NETBOX` | No       | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
+| `NETBOX_CA_FILE`       | No       | `""`    | Optional path to a PEM CA bundle used to trust a custom/private CA on the outbound HTTPS connection to NetBox. When set, the given certificates are trusted (in addition to the system root pool) for TLS to NetBox; the server fails fast at startup if the file cannot be read or contains no valid PEM certificates. When empty (default), the Go system root pool is used. Only affects the outbound client TLS to NetBox; the server's inbound TLS is unchanged. |
 | `TRUSTED_PROXY`        | No       | `""`    | CIDR prefix for the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server uses the first IP from `X-Forwarded-For` for rate limiting instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT`        | No       | `300s`  | HTTP write timeout (Go duration format, e.g. `300s`). Minimum 1s. Note: 0 will fail validation; use a reverse proxy for no timeout. |
 | `LOG_LEVEL`            | No       | (unset) | Logrus level (`trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`). **Unset ⇒ logging disabled.** |

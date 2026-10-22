@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"net"
@@ -182,7 +183,10 @@ func runStdio(cfg config.Config, logger *logrus.Logger) error {
 func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport mcp.Transport) error {
 	srv := newMCPServer(logger)
 
-	httpClient, _ := newNetBoxHTTPClient(cfg)
+	httpClient, _, err := newNetBoxHTTPClient(cfg)
+	if err != nil {
+		return fmt.Errorf("build NetBox HTTP client: %w", err)
+	}
 	netboxClient := infra.NewClient(cfg.NetBoxURL, httpClient)
 	svc := application.NewNetworkService(netboxClient, cfg.NetBoxToken)
 
@@ -217,7 +221,10 @@ func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport m
 func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 	srv := newMCPServer(logger)
 
-	sharedHTTPClient, breaker := newNetBoxHTTPClient(cfg)
+	sharedHTTPClient, breaker, err := newNetBoxHTTPClient(cfg)
+	if err != nil {
+		return fmt.Errorf("build NetBox HTTP client: %w", err)
+	}
 
 	promRegistry := prometheus.NewRegistry()
 	metrics := handlers.NewMetrics(promRegistry)
@@ -362,22 +369,35 @@ func newMCPServer(logger *logrus.Logger) *mcp.Server {
 }
 
 // newNetBoxHTTPClient builds the shared HTTP client used to talk to NetBox,
-// with DNS-rebinding protection and a circuit breaker transport. It returns
-// the client and the circuit breaker (used by the internal readyz endpoint).
-func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Breaker) {
+// with DNS-rebinding protection and a circuit breaker transport. When
+// NETBOX_CA_FILE is set, the outbound TLS to NetBox trusts the given custom CA
+// bundle instead of (in addition to) the system roots. It fails fast if the
+// configured CA file is unreadable or contains no valid PEM certificates. It
+// returns the client and the circuit breaker (used by the internal readyz
+// endpoint).
+func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Breaker, error) {
 	dialer := newPrivateIPCheckingDialer(cfg.AllowPrivateNetBox)
 
-	cbTransport := circuitbreaker.NewRoundTripper(
-		&http.Transport{
-			MaxIdleConns:        maxIdleConns,
-			MaxIdleConnsPerHost: maxIdleConnsPerHost,
-			IdleConnTimeout:     transportIdleConnTimeout,
-			DisableCompression:  false,
-			DisableKeepAlives:   false,
-			DialContext:         dialer.DialContext,
-		},
-		circuitbreaker.DefaultConfig(),
-	)
+	transport := &http.Transport{
+		MaxIdleConns:        maxIdleConns,
+		MaxIdleConnsPerHost: maxIdleConnsPerHost,
+		IdleConnTimeout:     transportIdleConnTimeout,
+		DisableCompression:  false,
+		DisableKeepAlives:   false,
+		DialContext:         dialer.DialContext,
+	}
+
+	// An empty NETBOX_CA_FILE means "use the system root pool" — no custom TLS
+	// config is set. When set, fail fast if the CA bundle cannot be loaded.
+	if cfg.NetBoxCAFile != "" {
+		pool, err := config.LoadCertPool(cfg.NetBoxCAFile)
+		if err != nil {
+			return nil, nil, fmt.Errorf("configure outbound CA for NetBox: %w", err)
+		}
+		transport.TLSClientConfig = &tls.Config{RootCAs: pool}
+	}
+
+	cbTransport := circuitbreaker.NewRoundTripper(transport, circuitbreaker.DefaultConfig())
 
 	return &http.Client{
 		Timeout: clientTimeout,
@@ -385,5 +405,5 @@ func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Break
 			return http.ErrUseLastResponse
 		},
 		Transport: cbTransport,
-	}, cbTransport.Breaker()
+	}, cbTransport.Breaker(), nil
 }

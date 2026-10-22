@@ -79,6 +79,7 @@ All configuration is via environment variables:
 | `RATE_LIMIT_GLOBAL` | No | `100` | Global rate limit (requests/second) |
 | `RATE_LIMIT_PER_CLIENT` | No | `10` | Per-client IP rate limit |
 | `ALLOW_PRIVATE_NETBOX` | No | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
+| `NETBOX_CA_FILE` | No | `""` | Optional path to a PEM CA bundle used to trust a custom/private CA on the outbound HTTPS connection to NetBox. When set, the given certificates are trusted (in addition to the system root pool) for TLS to NetBox; startup fails fast if the file cannot be read or contains no valid PEM certificates. Empty (default) = use the Go system root pool. Only affects outbound client TLS to NetBox. |
 | `TRUSTED_PROXY` | No | `""` | CIDR prefix of the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server extracts the client IP from the `X-Forwarded-For` header instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT` | No | `300s` (5 minutes) | HTTP write timeout (Go duration, minimum 1s). Note: 0 will fail validation; use a reverse proxy for no timeout. |
 | `LOG_LEVEL` | No | `info` (HTTP) / unset (STDIO) | Logrus level (`trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`). **HTTP:** always enabled, defaults to `info`. **STDIO:** unset ⇒ logging disabled. |

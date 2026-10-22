@@ -4,10 +4,14 @@ package config
 
 import (
 	"context"
+	"crypto/x509"
 	"fmt"
+	"io"
 	"net"
 	"net/netip"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -62,9 +66,13 @@ type Config struct {
 	TrustedProxy       string        `envconfig:"TRUSTED_PROXY" default:""`
 	WriteTimeout       time.Duration `envconfig:"WRITE_TIMEOUT" default:"300s"`
 	AllowPrivateNetBox bool          `envconfig:"ALLOW_PRIVATE_NETBOX" default:"false"`
-	LogLevel           string        `envconfig:"LOG_LEVEL" default:""`
-	LogFormat          string        `envconfig:"LOG_FORMAT" default:"text"`
-	LogFilename        string        `envconfig:"LOG_FILENAME" default:"/tmp/mcp-netbox.log"`
+	// NetBoxCAFile is an optional path to a PEM CA bundle used to trust a
+	// custom/private CA for the outbound HTTPS connection to NetBox. When empty,
+	// the Go system root pool is used. It is a file path, not a secret.
+	NetBoxCAFile string `envconfig:"NETBOX_CA_FILE" default:""`
+	LogLevel     string `envconfig:"LOG_LEVEL" default:""`
+	LogFormat    string `envconfig:"LOG_FORMAT" default:"text"`
+	LogFilename  string `envconfig:"LOG_FILENAME" default:"/tmp/mcp-netbox.log"`
 }
 
 func (c Config) validate() error {
@@ -248,6 +256,40 @@ func validateURLNotPrivateCheck(value any) error {
 	}
 
 	return nil
+}
+
+// LoadCertPool reads a PEM CA bundle from path and returns a new x509.CertPool
+// containing its certificates. It fails fast when the file cannot be read or
+// contains no valid PEM certificates. The caller must ensure path is non-empty
+// (an empty path means use the system root pool and LoadCertPool is not called).
+//
+// Access is scoped to the file's parent directory via os.Root (G304) so the
+// operator-supplied path cannot be redirected to an arbitrary sensitive file.
+func LoadCertPool(path string) (*x509.CertPool, error) {
+	root, err := os.OpenRoot(filepath.Dir(path))
+	if err != nil {
+		return nil, fmt.Errorf("open CA directory %q: %w", filepath.Dir(path), err)
+	}
+	defer func() { _ = root.Close() }()
+
+	name := filepath.Base(path)
+	file, err := root.Open(name)
+	if err != nil {
+		return nil, fmt.Errorf("read CA file %q: %w", path, err)
+	}
+	defer func() { _ = file.Close() }()
+
+	pemData, err := io.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("read CA file %q: %w", path, err)
+	}
+
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(pemData) {
+		return nil, fmt.Errorf("no valid certificates found in CA file %q", path)
+	}
+
+	return pool, nil
 }
 
 // Load reads and validates the server configuration from environment
