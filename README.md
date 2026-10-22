@@ -88,6 +88,8 @@ All configuration is via environment variables:
 
 The NetBox API token is supplied per-request in the `Authorization` header as `Bearer <token>` in HTTP mode. Both v1 (`Token <token>`) and v2 (`Bearer nbt_<key>.<token>`) tokens are supported. In STDIO mode the token is read from `NETBOX_TOKEN` at startup.
 
+The outbound NetBox client **auto-detects the token format** and selects the matching `Authorization` keyword: a **v2 token** (value starting with the `nbt_` prefix) is sent as `Authorization: Bearer <token>`, while a **v1 plaintext token** (everything else) is sent as `Authorization: Token <token>`. This lets the same client authenticate against both NetBox **≤4.4** (which only accepts the `Token` scheme and silently ignores `Bearer` → anonymous 403) and NetBox **≥4.5** (which accepts both schemes).
+
 ## Outbound HTTP logging
 
 At `LOG_LEVEL=debug` or `LOG_LEVEL=trace`, the server additionally emits the

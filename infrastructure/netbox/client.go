@@ -113,7 +113,7 @@ func (c *Client) doRequest(ctx context.Context, token, method, path string, para
 		SetResponseBodyLimit(maxBodySize).
 		SetResponseBodyUnlimitedReads(true).
 		SetHeader("Accept", "application/json").
-		SetHeader("Authorization", "Bearer "+token).
+		SetHeader("Authorization", authHeader(token)).
 		SetQueryParams(params)
 
 	if body != nil {
@@ -220,6 +220,21 @@ func statusCodeOf(resp *resty.Response) int {
 // requestIDHeader is the standard correlation header forwarded to upstream
 // HTTP calls.
 const requestIDHeader = "X-Request-ID"
+
+// authHeader builds the Authorization header value for the outbound NetBox
+// request. NetBox v2 personal access tokens (format nbt_<key>.<plaintext>) are
+// accepted via the Bearer scheme, while legacy v1 plaintext tokens only work
+// with the Token scheme (NetBox <=4.4 silently ignores Bearer and treats the
+// request as anonymous). Auto-detection by the nbt_ prefix lets the same client
+// authenticate against both NetBox <=4.4 and >=4.5. Empty and non-prefixed
+// tokens are treated as v1 (Token).
+func authHeader(token string) string {
+	if strings.HasPrefix(token, "nbt_") {
+		return "Bearer " + token
+	}
+
+	return "Token " + token
+}
 
 func (c *Client) get(ctx context.Context, token, path string, params map[string]string) ([]byte, error) {
 	return c.doRequest(ctx, token, http.MethodGet, path, params, nil)

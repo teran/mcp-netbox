@@ -188,6 +188,14 @@ The NetBox API token is supplied per-request in the `Authorization` header as
 `Bearer <token>` in HTTP mode. In STDIO mode it is read from `NETBOX_TOKEN` at
 startup (there is no HTTP header to carry it per request).
 
+The outbound NetBox client **auto-detects the token format** and selects the
+matching `Authorization` keyword: a **v2 token** (value starts with
+the `nbt_` prefix) is sent as `Authorization: Bearer <token>`, while a **v1
+plaintext token** (everything else) is sent as `Authorization: Token <token>`.
+This lets the same client authenticate against both NetBox **≤4.4** (which only
+accepts the `Token` scheme and silently ignores `Bearer` → anonymous 403) and
+NetBox **≥4.5** (which accepts both schemes for v1 and v2 tokens).
+
 The MCP server listens on the `/mcp` HTTP path via the Streamable HTTP handler
 when the launch mode is `http` (`-mode http` or `TRANSPORT=http`).
 
