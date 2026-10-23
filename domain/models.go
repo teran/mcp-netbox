@@ -1191,6 +1191,24 @@ type (
 		URL  string `json:"url"`
 	}
 
+	// CustomField is a NetBox extras custom field definition.
+	CustomField struct {
+		ID           int      `json:"id"`
+		URL          string   `json:"url"`
+		Name         string   `json:"name"`
+		Label        string   `json:"label"`
+		Type         string   `json:"type"`
+		ContentTypes []string `json:"object_types"`
+		GroupName    string   `json:"group_name"`
+		Description  string   `json:"description"`
+		Required     bool     `json:"required"`
+		Default      string   `json:"default"`
+		FilterLogic  string   `json:"filter_logic"`
+		Weight       int      `json:"weight"`
+		UIVisibility string   `json:"ui_visibility"`
+		Choices      []string `json:"choices"`
+	}
+
 	// AssignedObject is the polymorphic reference to the object an IP address is assigned to.
 	AssignedObject struct {
 		ID     int     `json:"id"`
@@ -1749,6 +1767,28 @@ type TagWrite struct {
 	Slug        *string `json:"slug,omitempty"`
 	Color       *string `json:"color,omitempty"`
 	Description *string `json:"description,omitempty"`
+}
+
+// CustomFieldWrite is the domain DTO for creating or updating a NetBox extras
+// custom field. It carries only the writable fields.
+//
+// Name and Label are plain strings because they are required on create; the
+// omitempty tags drop them from a PATCH body when not provided. Optional scalar
+// fields are pointers so that a partial-update (PATCH) can distinguish "not
+// provided" (nil) from "explicitly set to empty".
+type CustomFieldWrite struct {
+	Name         string   `json:"name,omitempty"`
+	Label        string   `json:"label,omitempty"`
+	Type         *string  `json:"type,omitempty"`
+	ContentTypes []string `json:"object_types,omitempty"`
+	GroupName    *string  `json:"group_name,omitempty"`
+	Description  *string  `json:"description,omitempty"`
+	Required     *bool    `json:"required,omitempty"`
+	Default      *string  `json:"default,omitempty"`
+	FilterLogic  *string  `json:"filter_logic,omitempty"`
+	Weight       *int     `json:"weight,omitempty"`
+	UIVisibility *string  `json:"ui_visibility,omitempty"`
+	Choices      []string `json:"choices,omitempty"`
 }
 
 // ContactWrite is the domain DTO for creating or updating a NetBox tenancy

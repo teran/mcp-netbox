@@ -74,6 +74,15 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"tool over get_object_by_id when you need multiple tags or don't yet know the exact ID.",
 		},
 		{
+			Name:  "get_custom_fields",
+			Title: "List Custom Fields",
+			Description: "List extras custom fields in NetBox with optional filters. Use q for free-text search, " +
+				"filter by content_type (e.g. dcim.device), or by tag. Results are paginated: set page and " +
+				"page_size (max 1000). An empty results array means no custom fields match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox custom fields. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple custom fields or don't yet know the exact ID.",
+		},
+		{
 			Name:  "get_devices",
 			Title: "List Devices",
 			Description: "List devices in NetBox with optional filters. Filter by site, role, manufacturer, " +
@@ -783,6 +792,35 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
 				"want to delete the tag, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_custom_field",
+			Title: "Create Custom Field",
+			Description: "Create a new extras custom field in NetBox. name and label are required; all other " +
+				"fields are optional. Provide type (e.g. text), object_types (list of object types), " +
+				"group_name, description, required (boolean), default, filter_logic, weight (integer), " +
+				"ui_visibility, and choices. Returns the created custom field.",
+			Instructions: "Use only when the caller explicitly wants to create a custom field and provides a " +
+				"name and label. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_custom_field",
+			Title: "Update Custom Field",
+			Description: "Partially update an extras custom field in NetBox by its numeric ID. Only the fields " +
+				"you explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated custom field.",
+			Instructions: "Use to modify one or more fields of an existing custom field. Provide id plus only the " +
+				"fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_custom_field",
+			Title: "Delete Custom Field",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an extras custom field " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the custom field, ideally by ID, and understands it is permanent and cannot be " +
 				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
 				"ask for explicit confirmation first.",
 		},

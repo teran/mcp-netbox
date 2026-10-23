@@ -3083,3 +3083,50 @@ func (s *NetworkService) DeleteTag(ctx context.Context, id int) error {
 
 	return nil
 }
+
+// ListCustomFields returns the page of extras custom fields matching params.
+func (s *NetworkService) ListCustomFields(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.CustomField], error) {
+	resp, err := s.repo.ListCustomFields(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list custom fields: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateCustomField relays an extras custom field create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateCustomField(
+	ctx context.Context, in domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	resp, err := s.repo.CreateCustomField(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create custom field: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateCustomField relays an extras custom field update to the repository.
+func (s *NetworkService) UpdateCustomField(
+	ctx context.Context, id int, in domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	resp, err := s.repo.UpdateCustomField(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update custom field: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteCustomField relays an extras custom field delete to the repository.
+func (s *NetworkService) DeleteCustomField(ctx context.Context, id int) error {
+	if err := s.repo.DeleteCustomField(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete custom field: %w", err)
+	}
+
+	return nil
+}

@@ -5011,4 +5011,76 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 			},
 		),
 	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_custom_fields"],
+		metrics,
+		"get_custom_fields",
+		WrapToolHandler[CustomFieldsInput, PaginatedOutput[domain.CustomField]](
+			metrics,
+			"get_custom_fields",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CustomFieldsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.CustomField], error) {
+				return NewGetCustomFieldsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_custom_field"],
+		metrics,
+		"create_custom_field",
+		WrapToolHandler[CustomFieldCreateInput, CustomFieldOutput](
+			metrics,
+			"create_custom_field",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CustomFieldCreateInput,
+			) (*mcp.CallToolResult, CustomFieldOutput, error) {
+				return NewCreateCustomFieldHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_custom_field"],
+		metrics,
+		"update_custom_field",
+		WrapToolHandler[CustomFieldUpdateInput, CustomFieldOutput](
+			metrics,
+			"update_custom_field",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CustomFieldUpdateInput,
+			) (*mcp.CallToolResult, CustomFieldOutput, error) {
+				return NewUpdateCustomFieldHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_custom_field"],
+		metrics,
+		"delete_custom_field",
+		WrapToolHandler[CustomFieldDeleteInput, struct{}](
+			metrics,
+			"delete_custom_field",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CustomFieldDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteCustomFieldHandler(svc)(ctx, req, in)
+			},
+		),
+	)
 }

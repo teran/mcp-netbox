@@ -1219,6 +1219,57 @@ type TagDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the tag to delete,required"`
 }
 
+// CustomFieldsInput represents the input fields for the get_custom_fields tool.
+type CustomFieldsInput struct {
+	Q           string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	ContentType string `json:"content_type,omitempty" jsonschema:"filter by content type (e.g. dcim.device)"`
+	Tag         string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page        int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize    int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// CustomFieldCreateInput represents the writable fields for creating a custom
+// field.
+type CustomFieldCreateInput struct {
+	Name         string   `json:"name" jsonschema:"custom field name (required)"`
+	Label        string   `json:"label" jsonschema:"custom field label (required)"`
+	Type         *string  `json:"type,omitempty" jsonschema:"field type (e.g. text)"`
+	ContentTypes []string `json:"object_types,omitempty" jsonschema:"list of object types this field applies to"`
+	GroupName    *string  `json:"group_name,omitempty" jsonschema:"group name"`
+	Description  *string  `json:"description,omitempty" jsonschema:"short description"`
+	Required     *bool    `json:"required,omitempty" jsonschema:"whether the field is required"`
+	Default      *string  `json:"default,omitempty" jsonschema:"default value"`
+	FilterLogic  *string  `json:"filter_logic,omitempty" jsonschema:"filter logic (e.g. exact)"`
+	Weight       *int     `json:"weight,omitempty" jsonschema:"weight (integer)"`
+	UIVisibility *string  `json:"ui_visibility,omitempty" jsonschema:"UI visibility (e.g. read-write)"`
+	Choices      []string `json:"choices,omitempty" jsonschema:"list of choices for select-type fields"`
+}
+
+// CustomFieldUpdateInput represents the writable fields for updating a custom
+// field. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type CustomFieldUpdateInput struct {
+	ID           int      `json:"id" jsonschema:"numeric ID of the custom field to update,required"`
+	Name         *string  `json:"name,omitempty" jsonschema:"custom field name"`
+	Label        *string  `json:"label,omitempty" jsonschema:"custom field label"`
+	Type         *string  `json:"type,omitempty" jsonschema:"field type (e.g. text)"`
+	ContentTypes []string `json:"object_types,omitempty" jsonschema:"list of object types this field applies to"`
+	GroupName    *string  `json:"group_name,omitempty" jsonschema:"group name"`
+	Description  *string  `json:"description,omitempty" jsonschema:"short description"`
+	Required     *bool    `json:"required,omitempty" jsonschema:"whether the field is required"`
+	Default      *string  `json:"default,omitempty" jsonschema:"default value"`
+	FilterLogic  *string  `json:"filter_logic,omitempty" jsonschema:"filter logic (e.g. exact)"`
+	Weight       *int     `json:"weight,omitempty" jsonschema:"weight (integer)"`
+	UIVisibility *string  `json:"ui_visibility,omitempty" jsonschema:"UI visibility (e.g. read-write)"`
+	Choices      []string `json:"choices,omitempty" jsonschema:"list of choices for select-type fields"`
+}
+
+// CustomFieldDeleteInput represents the input fields for deleting a custom
+// field.
+type CustomFieldDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the custom field to delete,required"`
+}
+
 // ManufacturerCreateInput represents the writable fields for creating a
 // manufacturer.
 type ManufacturerCreateInput struct {
@@ -1687,6 +1738,12 @@ type TenantOutput struct {
 // TagOutput represents the output for the create/update tag tools.
 type TagOutput struct {
 	Data domain.Tag `json:"data"`
+}
+
+// CustomFieldOutput represents the output for the create/update custom field
+// tools.
+type CustomFieldOutput struct {
+	Data domain.CustomField `json:"data"`
 }
 
 // ManufacturerOutput represents the output for the create/update manufacturer
@@ -2696,6 +2753,50 @@ func tagWriteFromUpdate(input TagUpdateInput) domain.TagWrite {
 	return write
 }
 
+// customFieldWriteFromCreate builds a domain.CustomFieldWrite from a create
+// input.
+func customFieldWriteFromCreate(input CustomFieldCreateInput) domain.CustomFieldWrite {
+	return domain.CustomFieldWrite{
+		Name:         input.Name,
+		Label:        input.Label,
+		Type:         input.Type,
+		ContentTypes: input.ContentTypes,
+		GroupName:    input.GroupName,
+		Description:  input.Description,
+		Required:     input.Required,
+		Default:      input.Default,
+		FilterLogic:  input.FilterLogic,
+		Weight:       input.Weight,
+		UIVisibility: input.UIVisibility,
+		Choices:      input.Choices,
+	}
+}
+
+// customFieldWriteFromUpdate builds a domain.CustomFieldWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func customFieldWriteFromUpdate(input CustomFieldUpdateInput) domain.CustomFieldWrite {
+	write := domain.CustomFieldWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	if input.Label != nil {
+		write.Label = *input.Label
+	}
+	write.Type = input.Type
+	write.ContentTypes = input.ContentTypes
+	write.GroupName = input.GroupName
+	write.Description = input.Description
+	write.Required = input.Required
+	write.Default = input.Default
+	write.FilterLogic = input.FilterLogic
+	write.Weight = input.Weight
+	write.UIVisibility = input.UIVisibility
+	write.Choices = input.Choices
+
+	return write
+}
+
 // manufacturerWriteFromCreate builds a domain.ManufacturerWrite from a create
 // input.
 func manufacturerWriteFromCreate(input ManufacturerCreateInput) domain.ManufacturerWrite {
@@ -3213,6 +3314,29 @@ func NewGetTagsHandler(
 			return params
 		},
 		errorLabel: "list tags",
+	})
+}
+
+// NewGetCustomFieldsHandler creates a handler for the get_custom_fields tool.
+func NewGetCustomFieldsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CustomFieldsInput, PaginatedOutput[domain.CustomField]] {
+	return newListHandler(listHandlerConfig[CustomFieldsInput, domain.CustomField]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.CustomField], error) {
+			return resolveService(ctx, svc).ListCustomFields(ctx, params)
+		},
+		buildParams: func(input CustomFieldsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "content_type", input.ContentType)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list custom fields",
 	})
 }
 
@@ -5138,6 +5262,92 @@ func NewDeleteTagHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Tag
 		}
 
 		if err := service.DeleteTag(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateCustomFieldHandler creates a handler for the create_custom_field
+// tool.
+func NewCreateCustomFieldHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CustomFieldCreateInput, CustomFieldOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CustomFieldCreateInput,
+	) (*mcp.CallToolResult, CustomFieldOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Label == "" {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, fmt.Errorf("label is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.CreateCustomField(ctx, customFieldWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CustomFieldOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CustomFieldOutput{Data: *result}, nil
+	}
+}
+
+// NewUpdateCustomFieldHandler creates a handler for the update_custom_field
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdateCustomFieldHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CustomFieldUpdateInput, CustomFieldOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CustomFieldUpdateInput,
+	) (*mcp.CallToolResult, CustomFieldOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.UpdateCustomField(ctx, input.ID, customFieldWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CustomFieldOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CustomFieldOutput{Data: *result}, nil
+	}
+}
+
+// NewDeleteCustomFieldHandler creates a handler for the delete_custom_field
+// tool.
+func NewDeleteCustomFieldHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CustomFieldDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CustomFieldDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteCustomField(ctx, input.ID); err != nil {
 			res, e := writeErrorResult(err)
 
 			return res, struct{}{}, e

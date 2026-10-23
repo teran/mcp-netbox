@@ -78,6 +78,74 @@ func TestVrfWriteFromUpdate_WithRd(t *testing.T) {
 	}
 }
 
+func TestCustomFieldWriteFromCreate(t *testing.T) {
+	t.Parallel()
+
+	typ := "text"
+	weight := 10
+	required := true
+	input := CustomFieldCreateInput{
+		Name:         "env",
+		Label:        "Environment",
+		Type:         &typ,
+		ContentTypes: []string{"dcim.device", "dcim.site"},
+		GroupName:    strPtr("core"),
+		Description:  strPtr("deployment environment"),
+		Required:     &required,
+		Default:      strPtr("prod"),
+		FilterLogic:  strPtr("exact"),
+		Weight:       &weight,
+		UIVisibility: strPtr("read-write"),
+		Choices:      []string{"prod", "dev"},
+	}
+	out := customFieldWriteFromCreate(input)
+	if out.Name != "env" || out.Label != "Environment" {
+		t.Errorf("out.Name/Label = %q/%q, want env/Environment", out.Name, out.Label)
+	}
+	if out.Type == nil || *out.Type != "text" {
+		t.Errorf("out.Type = %v, want text", out.Type)
+	}
+	if len(out.ContentTypes) != 2 || out.ContentTypes[0] != "dcim.device" {
+		t.Errorf("out.ContentTypes = %v, want [dcim.device dcim.site]", out.ContentTypes)
+	}
+	if out.Weight == nil || *out.Weight != 10 {
+		t.Errorf("out.Weight = %v, want 10", out.Weight)
+	}
+	if out.Required == nil || !*out.Required {
+		t.Errorf("out.Required = %v, want true", out.Required)
+	}
+	if out.Choices == nil || len(out.Choices) != 2 || out.Choices[1] != "dev" {
+		t.Errorf("out.Choices = %v, want [prod dev]", out.Choices)
+	}
+}
+
+func TestCustomFieldWriteFromUpdate(t *testing.T) {
+	t.Parallel()
+
+	name := "env"
+	label := "Environment"
+	in := CustomFieldUpdateInput{
+		ID:    7,
+		Name:  &name,
+		Label: &label,
+	}
+	out := customFieldWriteFromUpdate(in)
+	if out.Name != "env" {
+		t.Errorf("out.Name = %q, want env", out.Name)
+	}
+	if out.Label != "Environment" {
+		t.Errorf("out.Label = %q, want Environment", out.Label)
+	}
+
+	// Fields not provided must stay at their zero value so the PATCH body omits them.
+	if out.Type != nil {
+		t.Errorf("out.Type = %v, want nil", out.Type)
+	}
+	if out.Weight != nil {
+		t.Errorf("out.Weight = %v, want nil", out.Weight)
+	}
+}
+
 //nolint:funlen,maintidx // Table of write handlers hitting the errServiceNotAvailable branch.
 func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 	t.Parallel()
@@ -1126,6 +1194,30 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 			name: "delete_tag",
 			handler: func() (*mcp.CallToolResult, error) {
 				res, _, err := NewDeleteTagHandler(nil)(ctx, nil, TagDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_custom_field",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateCustomFieldHandler(nil)(ctx, nil, CustomFieldCreateInput{Name: "A", Label: "B"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_custom_field",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateCustomFieldHandler(nil)(ctx, nil, CustomFieldUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_custom_field",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteCustomFieldHandler(nil)(ctx, nil, CustomFieldDeleteInput{ID: 1})
 
 				return res, err
 			},

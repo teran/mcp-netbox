@@ -350,6 +350,7 @@ func readTools(t *testing.T, c *e2eClient, runID string) {
 		"get_roles",
 		"get_tenants",
 		"get_tags",
+		"get_custom_fields",
 	}
 
 	for _, name := range readTools {

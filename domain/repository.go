@@ -460,4 +460,9 @@ type NetworkRepository interface {
 	CreateTag(ctx context.Context, token string, in TagWrite) (*Tag, error)
 	UpdateTag(ctx context.Context, token string, id int, in TagWrite) (*Tag, error)
 	DeleteTag(ctx context.Context, token string, id int) error
+
+	ListCustomFields(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[CustomField], error)
+	CreateCustomField(ctx context.Context, token string, in CustomFieldWrite) (*CustomField, error)
+	UpdateCustomField(ctx context.Context, token string, id int, in CustomFieldWrite) (*CustomField, error)
+	DeleteCustomField(ctx context.Context, token string, id int) error
 }

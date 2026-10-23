@@ -717,6 +717,17 @@ type MockRepo struct {
 	CreateTagFunc func(ctx context.Context, token string, in domain.TagWrite) (*domain.Tag, error)
 	UpdateTagFunc func(ctx context.Context, token string, id int, in domain.TagWrite) (*domain.Tag, error)
 	DeleteTagFunc func(ctx context.Context, token string, id int) error
+
+	ListCustomFieldsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.CustomField], error)
+	CreateCustomFieldFunc func(
+		ctx context.Context, token string, in domain.CustomFieldWrite,
+	) (*domain.CustomField, error)
+	UpdateCustomFieldFunc func(
+		ctx context.Context, token string, id int, in domain.CustomFieldWrite,
+	) (*domain.CustomField, error)
+	DeleteCustomFieldFunc func(ctx context.Context, token string, id int) error
 }
 
 // ListSites delegates to ListSitesFunc.
@@ -2474,6 +2485,32 @@ func (m *MockRepo) UpdateTag(
 // DeleteTag delegates to DeleteTagFunc.
 func (m *MockRepo) DeleteTag(ctx context.Context, token string, id int) error {
 	return m.DeleteTagFunc(ctx, token, id)
+}
+
+// ListCustomFields delegates to ListCustomFieldsFunc.
+func (m *MockRepo) ListCustomFields(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.CustomField], error) {
+	return m.ListCustomFieldsFunc(ctx, token, params)
+}
+
+// CreateCustomField delegates to CreateCustomFieldFunc.
+func (m *MockRepo) CreateCustomField(
+	ctx context.Context, token string, in domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	return m.CreateCustomFieldFunc(ctx, token, in)
+}
+
+// UpdateCustomField delegates to UpdateCustomFieldFunc.
+func (m *MockRepo) UpdateCustomField(
+	ctx context.Context, token string, id int, in domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	return m.UpdateCustomFieldFunc(ctx, token, id, in)
+}
+
+// DeleteCustomField delegates to DeleteCustomFieldFunc.
+func (m *MockRepo) DeleteCustomField(ctx context.Context, token string, id int) error {
+	return m.DeleteCustomFieldFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -4262,5 +4299,31 @@ func (r *NilRepo) UpdateTag(_ context.Context, _ string, id int, in domain.TagWr
 
 // DeleteTag always succeeds.
 func (r *NilRepo) DeleteTag(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListCustomFields returns an empty custom field page.
+func (r *NilRepo) ListCustomFields(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.CustomField], error) {
+	return &domain.PaginatedResponse[domain.CustomField]{Count: 0, Results: []domain.CustomField{}}, nil
+}
+
+// CreateCustomField returns a custom field with id 1.
+func (r *NilRepo) CreateCustomField(
+	_ context.Context, _ string, in domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	return &domain.CustomField{ID: 1, Name: in.Name, Label: in.Label}, nil
+}
+
+// UpdateCustomField returns the custom field with the given id.
+func (r *NilRepo) UpdateCustomField(
+	_ context.Context, _ string, id int, in domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	return &domain.CustomField{ID: id, Name: in.Name, Label: in.Label}, nil
+}
+
+// DeleteCustomField always succeeds.
+func (r *NilRepo) DeleteCustomField(_ context.Context, _ string, _ int) error {
 	return nil
 }

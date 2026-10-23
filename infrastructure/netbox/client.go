@@ -100,6 +100,7 @@ var objectTypeToEndpoint = map[string]string{
 	"virtual_circuit_type":        "/api/circuits/virtual-circuit-types/",
 	"virtual_circuit_termination": "/api/circuits/virtual-circuit-terminations/",
 	"tag":                         "/api/extras/tags/",
+	"custom_field":                "/api/extras/custom-fields/",
 }
 
 // maxBodySize is the maximum response body size accepted from NetBox. Larger
@@ -4473,6 +4474,70 @@ func (c *Client) DeleteTag(ctx context.Context, token string, objectID int) erro
 	return mErr
 }
 
+// ListCustomFields returns a paginated list of extras custom fields.
+func (c *Client) ListCustomFields(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.CustomField], error,
+) {
+	raw, err := c.get(ctx, token, "/api/extras/custom-fields/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireCustomField]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal custom fields: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireCustomFieldToDomain), nil
+}
+
+// CreateCustomField creates a new custom field via POST
+// /api/extras/custom-fields/.
+func (c *Client) CreateCustomField(
+	ctx context.Context, token string, in domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	payload, err := json.Marshal(customFieldWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal custom field create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/extras/custom-fields/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalCustomField(raw)
+}
+
+// UpdateCustomField partially updates a custom field via PATCH
+// /api/extras/custom-fields/<id>/.
+func (c *Client) UpdateCustomField(
+	ctx context.Context, token string, objectID int, in domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	payload, err := json.Marshal(customFieldWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal custom field update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/extras/custom-fields/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalCustomField(raw)
+}
+
+// DeleteCustomField deletes a custom field via DELETE
+// /api/extras/custom-fields/<id>/. A 404 (already gone) is treated as an
+// idempotent no-op.
+func (c *Client) DeleteCustomField(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/extras/custom-fields/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
 // — conversion functions —
 
 // siteWriteToWire converts a domain write DTO to the wire request model. The
@@ -5860,6 +5925,60 @@ func wireTagToDomain(wire WireTag) domain.Tag {
 		URL:  wire.URL,
 		Name: wire.Name,
 		Slug: wire.Slug,
+	}
+}
+
+// customFieldWriteToWire converts a domain custom field write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func customFieldWriteToWire(input domain.CustomFieldWrite) WireCustomFieldWrite {
+	return WireCustomFieldWrite{
+		Name:         input.Name,
+		Label:        input.Label,
+		Type:         input.Type,
+		ContentTypes: input.ContentTypes,
+		GroupName:    input.GroupName,
+		Description:  input.Description,
+		Required:     input.Required,
+		Default:      input.Default,
+		FilterLogic:  input.FilterLogic,
+		Weight:       input.Weight,
+		UIVisibility: input.UIVisibility,
+		Choices:      input.Choices,
+	}
+}
+
+// unmarshalCustomField decodes an extras custom field response body into a
+// domain.CustomField.
+func unmarshalCustomField(raw domain.RawObject) (*domain.CustomField, error) {
+	var w WireCustomField
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal custom field: %w", err)
+	}
+	d := wireCustomFieldToDomain(w)
+
+	return &d, nil
+}
+
+// wireCustomFieldToDomain converts a wire extras custom field to the domain
+// model. The choice-object fields (type, filter_logic, ui_visible) are
+// flattened to their `value`.
+func wireCustomFieldToDomain(wire WireCustomField) domain.CustomField {
+	return domain.CustomField{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Label:        wire.Label,
+		Type:         wire.Type.Value,
+		ContentTypes: wire.ContentTypes,
+		GroupName:    wire.GroupName,
+		Description:  wire.Description,
+		Required:     wire.Required,
+		Default:      wire.Default,
+		FilterLogic:  wire.FilterLogic.Value,
+		Weight:       wire.Weight,
+		UIVisibility: wire.UIVisible.Value,
 	}
 }
 

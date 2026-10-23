@@ -1395,6 +1395,28 @@ func (s *stubRepo) DeleteTag(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) ListCustomFields(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.CustomField], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateCustomField(
+	_ context.Context, _ string, _ domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateCustomField(
+	_ context.Context, _ string, _ int, _ domain.CustomFieldWrite,
+) (*domain.CustomField, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteCustomField(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 

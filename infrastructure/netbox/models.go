@@ -415,6 +415,32 @@ type WireTagWrite struct {
 	Description *string `json:"description,omitempty"`
 }
 
+// WireChoice mirrors a NetBox "value/label" choice object (e.g. the custom
+// field `type` and `filter_logic` fields), which NetBox serializes as
+// {"value": "...", "label": "..."} rather than a plain string.
+type WireChoice struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+}
+
+// WireCustomFieldWrite is the wire request model for extras custom field
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireCustomFieldWrite struct {
+	Name         string   `json:"name,omitempty"`
+	Label        string   `json:"label,omitempty"`
+	Type         *string  `json:"type,omitempty"`
+	ContentTypes []string `json:"object_types,omitempty"`
+	GroupName    *string  `json:"group_name,omitempty"`
+	Description  *string  `json:"description,omitempty"`
+	Required     *bool    `json:"required,omitempty"`
+	Default      *string  `json:"default,omitempty"`
+	FilterLogic  *string  `json:"filter_logic,omitempty"`
+	Weight       *int     `json:"weight,omitempty"`
+	UIVisibility *string  `json:"ui_visibility,omitempty"`
+	Choices      []string `json:"choices,omitempty"`
+}
+
 // WireContactWrite is the wire request model for tenancy contact create/update
 // (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
 // fields.
@@ -2122,6 +2148,26 @@ type (
 		Name string `json:"name"`
 		Slug string `json:"slug"`
 		URL  string `json:"url"`
+	}
+
+	// WireCustomField mirrors the corresponding NetBox JSON API response object.
+	// NetBox 4.x serializes `type`, `filter_logic` and `ui_visible` as
+	// {"value","label"} choice objects (not plain strings), and the content
+	// types list is exposed as `object_types`.
+	WireCustomField struct {
+		ID           int        `json:"id"`
+		URL          string     `json:"url"`
+		Name         string     `json:"name"`
+		Label        string     `json:"label"`
+		Type         WireChoice `json:"type"`
+		ContentTypes []string   `json:"object_types"`
+		GroupName    string     `json:"group_name"`
+		Description  string     `json:"description"`
+		Required     bool       `json:"required"`
+		Default      string     `json:"default"`
+		FilterLogic  WireChoice `json:"filter_logic"`
+		Weight       int        `json:"weight"`
+		UIVisible    WireChoice `json:"ui_visible"`
 	}
 
 	// WireAssignedObj mirrors the corresponding NetBox JSON API response object.
