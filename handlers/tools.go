@@ -225,7 +225,7 @@ type CircuitsInput struct {
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
 type GetObjectInput struct {
-	ObjectType string            `json:"object_type" jsonschema:"object type: site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination, site_group, rack_group, rack_role, device_role, platform, virtual_chassis, power_panel, inventory_item_role, front_port, rear_port, console_port, console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type,required"` //nolint:lll // struct tag cannot be split across lines
+	ObjectType string            `json:"object_type" jsonschema:"object type: site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination, site_group, rack_group, rack_role, device_role, platform, virtual_chassis, power_panel, inventory_item_role, front_port, rear_port, console_port, console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type, provider_account, provider_network, circuit_group, circuit_group_assignment, virtual_circuit, virtual_circuit_type, virtual_circuit_termination,required"` //nolint:lll // struct tag cannot be split across lines
 	ID         int               `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
 	Params     map[string]string `json:"params,omitempty" jsonschema:"additional query parameters to pass to NetBox (optional)"` //nolint:lll // struct tag cannot be split across lines
 }
@@ -7175,6 +7175,317 @@ type VirtualMachineTypeOutput struct {
 	Data domain.VirtualMachineType `json:"data"`
 }
 
+// ProviderAccountsInput represents the input fields for the
+// get_provider_accounts tool.
+type ProviderAccountsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Provider string `json:"provider,omitempty" jsonschema:"filter by provider ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ProviderAccountCreateInput represents the writable fields for creating a
+// provider account.
+type ProviderAccountCreateInput struct {
+	Name         string         `json:"name" jsonschema:"provider account name (required)"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	Account      *string        `json:"account,omitempty" jsonschema:"account number/identifier"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderAccountUpdateInput represents the writable fields for updating a
+// provider account. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type ProviderAccountUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the provider account to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"provider account name"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	Account      *string        `json:"account,omitempty" jsonschema:"account number/identifier"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderAccountDeleteInput represents the input fields for deleting a
+// provider account.
+type ProviderAccountDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the provider account to delete,required"`
+}
+
+// ProviderAccountOutput represents the output for the create/update provider
+// account tools.
+type ProviderAccountOutput struct {
+	Data domain.ProviderAccount `json:"data"`
+}
+
+// ProviderNetworksInput represents the input fields for the
+// get_provider_networks tool.
+type ProviderNetworksInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Provider string `json:"provider,omitempty" jsonschema:"filter by provider ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ProviderNetworkCreateInput represents the writable fields for creating a
+// provider network.
+type ProviderNetworkCreateInput struct {
+	Name         string         `json:"name" jsonschema:"provider network name (required)"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderNetworkUpdateInput represents the writable fields for updating a
+// provider network. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type ProviderNetworkUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the provider network to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"provider network name"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderNetworkDeleteInput represents the input fields for deleting a
+// provider network.
+type ProviderNetworkDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the provider network to delete,required"`
+}
+
+// ProviderNetworkOutput represents the output for the create/update provider
+// network tools.
+type ProviderNetworkOutput struct {
+	Data domain.ProviderNetwork `json:"data"`
+}
+
+// CircuitGroupsInput represents the input fields for the get_circuit_groups
+// tool.
+type CircuitGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// CircuitGroupCreateInput represents the writable fields for creating a circuit
+// group.
+type CircuitGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"circuit group name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CircuitGroupUpdateInput represents the writable fields for updating a circuit
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type CircuitGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the circuit group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"circuit group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CircuitGroupDeleteInput represents the input fields for deleting a circuit
+// group.
+type CircuitGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the circuit group to delete,required"`
+}
+
+// CircuitGroupOutput represents the output for the create/update circuit group
+// tools.
+type CircuitGroupOutput struct {
+	Data domain.CircuitGroup `json:"data"`
+}
+
+// CircuitGroupAssignmentsInput represents the input fields for the
+// get_circuit_group_assignments tool.
+type CircuitGroupAssignmentsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Group    string `json:"group,omitempty" jsonschema:"filter by circuit group ID"`
+	Circuit  string `json:"circuit,omitempty" jsonschema:"filter by circuit ID"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// CircuitGroupAssignmentCreateInput represents the writable fields for creating
+// a circuit group assignment.
+type CircuitGroupAssignmentCreateInput struct {
+	Group      int     `json:"group" jsonschema:"circuit group ID (required)"`
+	MemberType string  `json:"member_type" jsonschema:"member content type (e.g. circuits.circuit),required"`
+	MemberID   int     `json:"member_id" jsonschema:"member object ID (required)"`
+	Priority   *string `json:"priority,omitempty" jsonschema:"priority (choice: primary/secondary/tertiary/inactive)"`
+}
+
+// CircuitGroupAssignmentUpdateInput represents the writable fields for updating
+// a circuit group assignment. All fields are optional; only the explicitly
+// provided ones are patched (PATCH merge).
+type CircuitGroupAssignmentUpdateInput struct {
+	ID         int     `json:"id" jsonschema:"numeric ID of the circuit group assignment to update,required"`
+	Group      *int    `json:"group,omitempty" jsonschema:"circuit group ID"`
+	MemberType *string `json:"member_type,omitempty" jsonschema:"member content type (e.g. circuits.circuit)"`
+	MemberID   *int    `json:"member_id,omitempty" jsonschema:"member object ID"`
+	Priority   *string `json:"priority,omitempty" jsonschema:"priority (choice: primary/secondary/tertiary/inactive)"`
+}
+
+// CircuitGroupAssignmentDeleteInput represents the input fields for deleting a
+// circuit group assignment.
+type CircuitGroupAssignmentDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the circuit group assignment to delete,required"`
+}
+
+// CircuitGroupAssignmentOutput represents the output for the create/update
+// circuit group assignment tools.
+type CircuitGroupAssignmentOutput struct {
+	Data domain.CircuitGroupAssignment `json:"data"`
+}
+
+// VirtualCircuitsInput represents the input fields for the get_virtual_circuits
+// tool.
+type VirtualCircuitsInput struct {
+	Q               string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Type            string `json:"type,omitempty" jsonschema:"filter by virtual circuit type ID"`
+	ProviderNetwork string `json:"provider_network,omitempty" jsonschema:"filter by provider network ID"`
+	Status          string `json:"status,omitempty" jsonschema:"filter by status (choice string)"`
+	Tag             string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page            int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize        int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualCircuitCreateInput represents the writable fields for creating a
+// virtual circuit.
+type VirtualCircuitCreateInput struct {
+	CID             string         `json:"cid" jsonschema:"unique circuit ID (required)"`
+	Type            *int           `json:"type,omitempty" jsonschema:"virtual circuit type ID"`
+	ProviderNetwork *int           `json:"provider_network,omitempty" jsonschema:"provider network ID"`
+	Status          *string        `json:"status,omitempty" jsonschema:"status (choice string)"`
+	Description     *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags            []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualCircuitUpdateInput represents the writable fields for updating a
+// virtual circuit. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type VirtualCircuitUpdateInput struct {
+	ID              int            `json:"id" jsonschema:"numeric ID of the virtual circuit to update,required"`
+	CID             *string        `json:"cid,omitempty" jsonschema:"unique circuit ID"`
+	Type            *int           `json:"type,omitempty" jsonschema:"virtual circuit type ID"`
+	ProviderNetwork *int           `json:"provider_network,omitempty" jsonschema:"provider network ID"`
+	Status          *string        `json:"status,omitempty" jsonschema:"status (choice string)"`
+	Description     *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags            []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualCircuitDeleteInput represents the input fields for deleting a virtual
+// circuit.
+type VirtualCircuitDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual circuit to delete,required"`
+}
+
+// VirtualCircuitOutput represents the output for the create/update virtual
+// circuit tools.
+type VirtualCircuitOutput struct {
+	Data domain.VirtualCircuit `json:"data"`
+}
+
+// VirtualCircuitTypesInput represents the input fields for the
+// get_virtual_circuit_types tool.
+type VirtualCircuitTypesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualCircuitTypeCreateInput represents the writable fields for creating a
+// virtual circuit type.
+type VirtualCircuitTypeCreateInput struct {
+	Name         string         `json:"name" jsonschema:"virtual circuit type name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualCircuitTypeUpdateInput represents the writable fields for updating a
+// virtual circuit type. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type VirtualCircuitTypeUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the virtual circuit type to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"virtual circuit type name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualCircuitTypeDeleteInput represents the input fields for deleting a
+// virtual circuit type.
+type VirtualCircuitTypeDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual circuit type to delete,required"`
+}
+
+// VirtualCircuitTypeOutput represents the output for the create/update virtual
+// circuit type tools.
+type VirtualCircuitTypeOutput struct {
+	Data domain.VirtualCircuitType `json:"data"`
+}
+
+// VirtualCircuitTerminationsInput represents the input fields for the
+// get_virtual_circuit_terminations tool.
+type VirtualCircuitTerminationsInput struct {
+	Q              string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	VirtualCircuit string `json:"virtual_circuit,omitempty" jsonschema:"filter by virtual circuit ID"`
+	InterfaceType  string `json:"interface_type,omitempty" jsonschema:"filter by interface type (e.g. dcim.interface)"`
+	InterfaceID    string `json:"interface_id,omitempty" jsonschema:"filter by interface ID"`
+	Page           int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize       int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualCircuitTerminationCreateInput represents the writable fields for
+// creating a virtual circuit termination.
+type VirtualCircuitTerminationCreateInput struct {
+	VirtualCircuit int     `json:"virtual_circuit" jsonschema:"virtual circuit ID (required)"`
+	Role           *string `json:"role,omitempty" jsonschema:"role (choice: peer/hub/spoke)"`
+	Interface      int     `json:"interface" jsonschema:"dcim interface ID (required)"`
+}
+
+// VirtualCircuitTerminationUpdateInput represents the writable fields for
+// updating a virtual circuit termination. All fields are optional; only the
+// explicitly provided ones are patched (PATCH merge).
+type VirtualCircuitTerminationUpdateInput struct {
+	ID             int     `json:"id" jsonschema:"numeric ID of the virtual circuit termination to update,required"`
+	VirtualCircuit *int    `json:"virtual_circuit,omitempty" jsonschema:"virtual circuit ID"`
+	Role           *string `json:"role,omitempty" jsonschema:"role (choice: peer/hub/spoke)"`
+	Interface      *int    `json:"interface,omitempty" jsonschema:"dcim interface ID"`
+}
+
+// VirtualCircuitTerminationDeleteInput represents the input fields for deleting
+// a virtual circuit termination.
+type VirtualCircuitTerminationDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual circuit termination to delete,required"`
+}
+
+// VirtualCircuitTerminationOutput represents the output for the create/update
+// virtual circuit termination tools.
+type VirtualCircuitTerminationOutput struct {
+	Data domain.VirtualCircuitTermination `json:"data"`
+}
+
 // AggregateCreateInput represents the writable fields for creating an aggregate.
 type AggregateCreateInput struct {
 	Prefix       string         `json:"prefix" jsonschema:"aggregate prefix (required)"`
@@ -8339,6 +8650,214 @@ func fhrpGroupAssignmentWriteFromUpdate(input FHRPGroupAssignmentUpdateInput) do
 		write.InterfaceID = *input.InterfaceID
 	}
 	write.Priority = input.Priority
+
+	return write
+}
+
+// providerAccountWriteFromCreate builds a domain.ProviderAccountWrite from a
+// create input.
+func providerAccountWriteFromCreate(input ProviderAccountCreateInput) domain.ProviderAccountWrite {
+	return domain.ProviderAccountWrite{
+		Name:         input.Name,
+		Provider:     input.Provider,
+		Account:      input.Account,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// providerAccountWriteFromUpdate builds a domain.ProviderAccountWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func providerAccountWriteFromUpdate(input ProviderAccountUpdateInput) domain.ProviderAccountWrite {
+	write := domain.ProviderAccountWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Provider = input.Provider
+	write.Account = input.Account
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// providerNetworkWriteFromCreate builds a domain.ProviderNetworkWrite from a
+// create input.
+func providerNetworkWriteFromCreate(input ProviderNetworkCreateInput) domain.ProviderNetworkWrite {
+	return domain.ProviderNetworkWrite{
+		Name:         input.Name,
+		Provider:     input.Provider,
+		Description:  input.Description,
+		Comments:     input.Comments,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// providerNetworkWriteFromUpdate builds a domain.ProviderNetworkWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func providerNetworkWriteFromUpdate(input ProviderNetworkUpdateInput) domain.ProviderNetworkWrite {
+	write := domain.ProviderNetworkWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Provider = input.Provider
+	write.Description = input.Description
+	write.Comments = input.Comments
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// circuitGroupWriteFromCreate builds a domain.CircuitGroupWrite from a create
+// input.
+func circuitGroupWriteFromCreate(input CircuitGroupCreateInput) domain.CircuitGroupWrite {
+	return domain.CircuitGroupWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// circuitGroupWriteFromUpdate builds a domain.CircuitGroupWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func circuitGroupWriteFromUpdate(input CircuitGroupUpdateInput) domain.CircuitGroupWrite {
+	write := domain.CircuitGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// circuitGroupAssignmentWriteFromCreate builds a domain.CircuitGroupAssignmentWrite
+// from a create input.
+func circuitGroupAssignmentWriteFromCreate(input CircuitGroupAssignmentCreateInput) domain.CircuitGroupAssignmentWrite {
+	return domain.CircuitGroupAssignmentWrite{
+		Group:      input.Group,
+		MemberType: input.MemberType,
+		MemberID:   input.MemberID,
+		Priority:   input.Priority,
+	}
+}
+
+// circuitGroupAssignmentWriteFromUpdate builds a domain.CircuitGroupAssignmentWrite
+// from an update input, mapping only the explicitly-provided (non-nil) fields
+// so the PATCH body is minimal.
+func circuitGroupAssignmentWriteFromUpdate(input CircuitGroupAssignmentUpdateInput) domain.CircuitGroupAssignmentWrite {
+	write := domain.CircuitGroupAssignmentWrite{}
+	if input.Group != nil {
+		write.Group = *input.Group
+	}
+	if input.MemberType != nil {
+		write.MemberType = *input.MemberType
+	}
+	if input.MemberID != nil {
+		write.MemberID = *input.MemberID
+	}
+	write.Priority = input.Priority
+
+	return write
+}
+
+// virtualCircuitWriteFromCreate builds a domain.VirtualCircuitWrite from a
+// create input.
+func virtualCircuitWriteFromCreate(input VirtualCircuitCreateInput) domain.VirtualCircuitWrite {
+	return domain.VirtualCircuitWrite{
+		CID:             input.CID,
+		Type:            input.Type,
+		ProviderNetwork: input.ProviderNetwork,
+		Status:          input.Status,
+		Description:     input.Description,
+		Tags:            input.Tags,
+		CustomFields:    input.CustomFields,
+	}
+}
+
+// virtualCircuitWriteFromUpdate builds a domain.VirtualCircuitWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func virtualCircuitWriteFromUpdate(input VirtualCircuitUpdateInput) domain.VirtualCircuitWrite {
+	write := domain.VirtualCircuitWrite{}
+	if input.CID != nil {
+		write.CID = *input.CID
+	}
+	write.Type = input.Type
+	write.ProviderNetwork = input.ProviderNetwork
+	write.Status = input.Status
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualCircuitTypeWriteFromCreate builds a domain.VirtualCircuitTypeWrite
+// from a create input.
+func virtualCircuitTypeWriteFromCreate(input VirtualCircuitTypeCreateInput) domain.VirtualCircuitTypeWrite {
+	return domain.VirtualCircuitTypeWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// virtualCircuitTypeWriteFromUpdate builds a domain.VirtualCircuitTypeWrite
+// from an update input, mapping only the explicitly-provided (non-nil) fields
+// so the PATCH body is minimal.
+func virtualCircuitTypeWriteFromUpdate(input VirtualCircuitTypeUpdateInput) domain.VirtualCircuitTypeWrite {
+	write := domain.VirtualCircuitTypeWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualCircuitTerminationWriteFromCreate builds a
+// domain.VirtualCircuitTerminationWrite from a create input.
+func virtualCircuitTerminationWriteFromCreate(
+	input VirtualCircuitTerminationCreateInput,
+) domain.VirtualCircuitTerminationWrite {
+	return domain.VirtualCircuitTerminationWrite{
+		VirtualCircuit: input.VirtualCircuit,
+		Role:           input.Role,
+		Interface:      input.Interface,
+	}
+}
+
+// virtualCircuitTerminationWriteFromUpdate builds a
+// domain.VirtualCircuitTerminationWrite from an update input, mapping only the
+// explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func virtualCircuitTerminationWriteFromUpdate(
+	input VirtualCircuitTerminationUpdateInput,
+) domain.VirtualCircuitTerminationWrite {
+	write := domain.VirtualCircuitTerminationWrite{}
+	if input.VirtualCircuit != nil {
+		write.VirtualCircuit = *input.VirtualCircuit
+	}
+	write.Role = input.Role
+	if input.Interface != nil {
+		write.Interface = *input.Interface
+	}
 
 	return write
 }
@@ -11174,6 +11693,755 @@ func NewDeleteVLANTranslationRuleHandler(
 		}
 
 		if err := service.DeleteVLANTranslationRule(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetProviderAccountsHandler creates a handler for the get_provider_accounts
+// tool.
+func NewGetProviderAccountsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderAccountsInput, PaginatedOutput[domain.ProviderAccount]] {
+	return newListHandler(listHandlerConfig[ProviderAccountsInput, domain.ProviderAccount]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.ProviderAccount], error) {
+			return resolveService(ctx, svc).ListProviderAccounts(ctx, params)
+		},
+		buildParams: func(input ProviderAccountsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "provider", input.Provider)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list provider accounts",
+	})
+}
+
+// NewCreateProviderAccountHandler creates a handler for the
+// create_provider_account tool.
+func NewCreateProviderAccountHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderAccountCreateInput, ProviderAccountOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderAccountCreateInput,
+	) (*mcp.CallToolResult, ProviderAccountOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderAccountOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ProviderAccountOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateProviderAccount(ctx, providerAccountWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ProviderAccountOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderAccountOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateProviderAccountHandler creates a handler for the
+// update_provider_account tool.
+func NewUpdateProviderAccountHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderAccountUpdateInput, ProviderAccountOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderAccountUpdateInput,
+	) (*mcp.CallToolResult, ProviderAccountOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderAccountOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderAccountOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateProviderAccount(ctx, input.ID, providerAccountWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ProviderAccountOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderAccountOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteProviderAccountHandler creates a handler for the
+// delete_provider_account tool.
+func NewDeleteProviderAccountHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderAccountDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderAccountDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteProviderAccount(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetProviderNetworksHandler creates a handler for the
+// get_provider_networks tool.
+func NewGetProviderNetworksHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderNetworksInput, PaginatedOutput[domain.ProviderNetwork]] {
+	return newListHandler(listHandlerConfig[ProviderNetworksInput, domain.ProviderNetwork]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.ProviderNetwork], error) {
+			return resolveService(ctx, svc).ListProviderNetworks(ctx, params)
+		},
+		buildParams: func(input ProviderNetworksInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "provider", input.Provider)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list provider networks",
+	})
+}
+
+// NewCreateProviderNetworkHandler creates a handler for the
+// create_provider_network tool.
+func NewCreateProviderNetworkHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderNetworkCreateInput, ProviderNetworkOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderNetworkCreateInput,
+	) (*mcp.CallToolResult, ProviderNetworkOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderNetworkOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ProviderNetworkOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateProviderNetwork(ctx, providerNetworkWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ProviderNetworkOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderNetworkOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateProviderNetworkHandler creates a handler for the
+// update_provider_network tool.
+func NewUpdateProviderNetworkHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderNetworkUpdateInput, ProviderNetworkOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderNetworkUpdateInput,
+	) (*mcp.CallToolResult, ProviderNetworkOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderNetworkOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderNetworkOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateProviderNetwork(ctx, input.ID, providerNetworkWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ProviderNetworkOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderNetworkOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteProviderNetworkHandler creates a handler for the
+// delete_provider_network tool.
+func NewDeleteProviderNetworkHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderNetworkDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderNetworkDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteProviderNetwork(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetCircuitGroupsHandler creates a handler for the get_circuit_groups tool.
+func NewGetCircuitGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupsInput, PaginatedOutput[domain.CircuitGroup]] {
+	return newListHandler(listHandlerConfig[CircuitGroupsInput, domain.CircuitGroup]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.CircuitGroup], error) {
+			return resolveService(ctx, svc).ListCircuitGroups(ctx, params)
+		},
+		buildParams: func(input CircuitGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list circuit groups",
+	})
+}
+
+// NewCreateCircuitGroupHandler creates a handler for the create_circuit_group
+// tool.
+func NewCreateCircuitGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupCreateInput, CircuitGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupCreateInput,
+	) (*mcp.CallToolResult, CircuitGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateCircuitGroup(ctx, circuitGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CircuitGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateCircuitGroupHandler creates a handler for the update_circuit_group
+// tool.
+func NewUpdateCircuitGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupUpdateInput, CircuitGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupUpdateInput,
+	) (*mcp.CallToolResult, CircuitGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateCircuitGroup(ctx, input.ID, circuitGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CircuitGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteCircuitGroupHandler creates a handler for the delete_circuit_group
+// tool.
+func NewDeleteCircuitGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteCircuitGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetCircuitGroupAssignmentsHandler creates a handler for the
+// get_circuit_group_assignments tool.
+func NewGetCircuitGroupAssignmentsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupAssignmentsInput, PaginatedOutput[domain.CircuitGroupAssignment]] {
+	return newListHandler(listHandlerConfig[CircuitGroupAssignmentsInput, domain.CircuitGroupAssignment]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.CircuitGroupAssignment], error) {
+			return resolveService(ctx, svc).ListCircuitGroupAssignments(ctx, params)
+		},
+		buildParams: func(input CircuitGroupAssignmentsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "group", input.Group)
+			addParam(params, "circuit", input.Circuit)
+
+			return params
+		},
+		errorLabel: "list circuit group assignments",
+	})
+}
+
+// NewCreateCircuitGroupAssignmentHandler creates a handler for the
+// create_circuit_group_assignment tool.
+func NewCreateCircuitGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupAssignmentCreateInput, CircuitGroupAssignmentOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupAssignmentCreateInput,
+	) (*mcp.CallToolResult, CircuitGroupAssignmentOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{}, errServiceNotAvailable
+		}
+		if input.Group == 0 {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{}, fmt.Errorf("group is required")
+		}
+		if input.MemberType == "" || input.MemberID == 0 {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{},
+				fmt.Errorf("member_type and member_id are required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateCircuitGroupAssignment(ctx, circuitGroupAssignmentWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CircuitGroupAssignmentOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitGroupAssignmentOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateCircuitGroupAssignmentHandler creates a handler for the
+// update_circuit_group_assignment tool.
+func NewUpdateCircuitGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupAssignmentUpdateInput, CircuitGroupAssignmentOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupAssignmentUpdateInput,
+	) (*mcp.CallToolResult, CircuitGroupAssignmentOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateCircuitGroupAssignment(ctx, input.ID, circuitGroupAssignmentWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CircuitGroupAssignmentOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitGroupAssignmentOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteCircuitGroupAssignmentHandler creates a handler for the
+// delete_circuit_group_assignment tool.
+func NewDeleteCircuitGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupAssignmentDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupAssignmentDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteCircuitGroupAssignment(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualCircuitsHandler creates a handler for the get_virtual_circuits
+// tool.
+func NewGetVirtualCircuitsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitsInput, PaginatedOutput[domain.VirtualCircuit]] {
+	return newListHandler(listHandlerConfig[VirtualCircuitsInput, domain.VirtualCircuit]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualCircuit], error) {
+			return resolveService(ctx, svc).ListVirtualCircuits(ctx, params)
+		},
+		buildParams: func(input VirtualCircuitsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "type", input.Type)
+			addParam(params, "provider_network", input.ProviderNetwork)
+			addParam(params, "status", input.Status)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual circuits",
+	})
+}
+
+// NewCreateVirtualCircuitHandler creates a handler for the
+// create_virtual_circuit tool.
+func NewCreateVirtualCircuitHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitCreateInput, VirtualCircuitOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitCreateInput,
+	) (*mcp.CallToolResult, VirtualCircuitOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitOutput{}, errServiceNotAvailable
+		}
+		if input.CID == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitOutput{}, fmt.Errorf("cid is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualCircuit(ctx, virtualCircuitWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualCircuitHandler creates a handler for the
+// update_virtual_circuit tool.
+func NewUpdateVirtualCircuitHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitUpdateInput, VirtualCircuitOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitUpdateInput,
+	) (*mcp.CallToolResult, VirtualCircuitOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualCircuit(ctx, input.ID, virtualCircuitWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualCircuitHandler creates a handler for the
+// delete_virtual_circuit tool.
+func NewDeleteVirtualCircuitHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualCircuit(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualCircuitTypesHandler creates a handler for the
+// get_virtual_circuit_types tool.
+func NewGetVirtualCircuitTypesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTypesInput, PaginatedOutput[domain.VirtualCircuitType]] {
+	return newListHandler(listHandlerConfig[VirtualCircuitTypesInput, domain.VirtualCircuitType]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualCircuitType], error) {
+			return resolveService(ctx, svc).ListVirtualCircuitTypes(ctx, params)
+		},
+		buildParams: func(input VirtualCircuitTypesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual circuit types",
+	})
+}
+
+// NewCreateVirtualCircuitTypeHandler creates a handler for the
+// create_virtual_circuit_type tool.
+func NewCreateVirtualCircuitTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTypeCreateInput, VirtualCircuitTypeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTypeCreateInput,
+	) (*mcp.CallToolResult, VirtualCircuitTypeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTypeOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTypeOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualCircuitType(ctx, virtualCircuitTypeWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitTypeOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualCircuitTypeHandler creates a handler for the
+// update_virtual_circuit_type tool.
+func NewUpdateVirtualCircuitTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTypeUpdateInput, VirtualCircuitTypeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTypeUpdateInput,
+	) (*mcp.CallToolResult, VirtualCircuitTypeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTypeOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTypeOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualCircuitType(ctx, input.ID, virtualCircuitTypeWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitTypeOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualCircuitTypeHandler creates a handler for the
+// delete_virtual_circuit_type tool.
+func NewDeleteVirtualCircuitTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTypeDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTypeDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualCircuitType(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualCircuitTerminationsHandler creates a handler for the
+// get_virtual_circuit_terminations tool.
+func NewGetVirtualCircuitTerminationsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTerminationsInput, PaginatedOutput[domain.VirtualCircuitTermination]] {
+	return newListHandler(listHandlerConfig[VirtualCircuitTerminationsInput, domain.VirtualCircuitTermination]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualCircuitTermination], error) {
+			return resolveService(ctx, svc).ListVirtualCircuitTerminations(ctx, params)
+		},
+		buildParams: func(input VirtualCircuitTerminationsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "virtual_circuit", input.VirtualCircuit)
+			addParam(params, "interface_type", input.InterfaceType)
+			addParam(params, "interface_id", input.InterfaceID)
+
+			return params
+		},
+		errorLabel: "list virtual circuit terminations",
+	})
+}
+
+// NewCreateVirtualCircuitTerminationHandler creates a handler for the
+// create_virtual_circuit_termination tool.
+func NewCreateVirtualCircuitTerminationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTerminationCreateInput, VirtualCircuitTerminationOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTerminationCreateInput,
+	) (*mcp.CallToolResult, VirtualCircuitTerminationOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTerminationOutput{}, errServiceNotAvailable
+		}
+		if input.VirtualCircuit == 0 {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTerminationOutput{},
+				fmt.Errorf("virtual_circuit is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualCircuitTermination(ctx, virtualCircuitTerminationWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitTerminationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitTerminationOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualCircuitTerminationHandler creates a handler for the
+// update_virtual_circuit_termination tool.
+func NewUpdateVirtualCircuitTerminationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTerminationUpdateInput, VirtualCircuitTerminationOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTerminationUpdateInput,
+	) (*mcp.CallToolResult, VirtualCircuitTerminationOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTerminationOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTerminationOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualCircuitTermination(
+			ctx, input.ID, virtualCircuitTerminationWriteFromUpdate(input),
+		)
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitTerminationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitTerminationOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualCircuitTerminationHandler creates a handler for the
+// delete_virtual_circuit_termination tool.
+func NewDeleteVirtualCircuitTerminationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTerminationDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTerminationDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualCircuitTermination(ctx, input.ID); err != nil {
 			res, e := writeErrorResult(err)
 
 			return res, struct{}{}, e

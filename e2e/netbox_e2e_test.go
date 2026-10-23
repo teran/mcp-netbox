@@ -340,6 +340,13 @@ func readTools(t *testing.T, c *e2eClient, runID string) {
 		"get_virtual_machines",
 		"get_clusters",
 		"get_vm_interfaces",
+		"get_provider_accounts",
+		"get_provider_networks",
+		"get_circuit_groups",
+		"get_circuit_group_assignments",
+		"get_virtual_circuits",
+		"get_virtual_circuit_types",
+		"get_virtual_circuit_terminations",
 	}
 
 	for _, name := range readTools {

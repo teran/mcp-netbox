@@ -60,3 +60,37 @@ grouping, and `group` (numeric tenant-group ID) wired into `create_tenant`/`upda
 
 This closes the gap so agents can manage the full tenant/tenant-group hierarchy end-to-end via
 MCP instead of falling back to the UI or raw API.
+
+---
+
+## Missing tool: Role & Tenant enumeration (read support)
+
+We model independent service lines (compute, object storage, block storage, managed
+databases, managed Kubernetes) as **Roles**, and install environments (incarnation ×
+environment) as **Tenants**. Prefixes and VLANs are then tagged with a `role` and a
+`tenant` alongside their `site`.
+
+The server has write tools for these (`create_role`/`update_role`/`delete_role` and
+`create_tenant`/`update_tenant`/`delete_tenant`), and `update_prefix`/`update_vlan`
+expose `role` and `tenant` fields. However, there is **no enumeration/lookup** for
+either entity:
+
+- **No `get_roles`** — cannot list existing roles to obtain their numeric IDs.
+- **No `get_tenants`** — cannot list existing tenants to obtain their numeric IDs.
+
+Without them, an agent cannot resolve a role/tenant **by name** to an ID before
+attaching it to a prefix or VLAN; it must fall back to the UI or raw API
+(`/api/ipam/roles/`, `/api/tenancy/tenants/`) just to discover IDs.
+
+**Suggestion:** add read tools mirroring the other list tools:
+
+- `get_roles` — list roles (optional `q`, `tag`, pagination), mirroring `get_sites`.
+- `get_tenants` — list tenants (optional `q`, `group`, `tag`, pagination).
+
+Also, for convenience when an environment is expressed as a **Tag** rather than a
+Tenant (so an incarnation can share fewer Tenants), consider read/write Tag support if
+not already present (`get_tags`, `create_tag`, `update_tag`, `delete_tag`).
+
+This rounds out the model so an agent can, end-to-end from MCP, enumerate roles and
+tenants, create them, and attach them (plus site) to prefixes and VLANs — without
+falling back to the UI or raw API.

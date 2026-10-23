@@ -1211,6 +1211,160 @@ func (s *stubRepo) DeleteVLANTranslationRule(_ context.Context, _ string, _ int)
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) ListProviderAccounts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ProviderAccount], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateProviderAccount(
+	_ context.Context, _ string, _ domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateProviderAccount(
+	_ context.Context, _ string, _ int, _ domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteProviderAccount(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListProviderNetworks(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ProviderNetwork], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateProviderNetwork(
+	_ context.Context, _ string, _ domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateProviderNetwork(
+	_ context.Context, _ string, _ int, _ domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteProviderNetwork(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListCircuitGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroup], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateCircuitGroup(
+	_ context.Context, _ string, _ domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateCircuitGroup(
+	_ context.Context, _ string, _ int, _ domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteCircuitGroup(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListCircuitGroupAssignments(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroupAssignment], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateCircuitGroupAssignment(
+	_ context.Context, _ string, _ domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateCircuitGroupAssignment(
+	_ context.Context, _ string, _ int, _ domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteCircuitGroupAssignment(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListVirtualCircuits(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuit], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateVirtualCircuit(
+	_ context.Context, _ string, _ domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVirtualCircuit(
+	_ context.Context, _ string, _ int, _ domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVirtualCircuit(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListVirtualCircuitTypes(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitType], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateVirtualCircuitType(
+	_ context.Context, _ string, _ domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVirtualCircuitType(
+	_ context.Context, _ string, _ int, _ domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVirtualCircuitType(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListVirtualCircuitTerminations(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitTermination], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateVirtualCircuitTermination(
+	_ context.Context, _ string, _ domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVirtualCircuitTermination(
+	_ context.Context, _ string, _ int, _ domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVirtualCircuitTermination(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 

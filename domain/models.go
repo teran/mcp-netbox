@@ -1067,6 +1067,105 @@ type (
 		Created     string `json:"created"`
 		LastUpdated string `json:"last_updated"`
 	}
+
+	// ProviderAccount is a NetBox circuits provider account (a billing/technical
+	// account held with a provider).
+	ProviderAccount struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Provider     *Nested        `json:"provider"`
+		Account      string         `json:"account,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// ProviderNetwork is a NetBox circuits provider network (a logical network
+	// offered by a provider).
+	ProviderNetwork struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Provider     *Nested        `json:"provider"`
+		Description  string         `json:"description,omitempty"`
+		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// CircuitGroup is a NetBox circuits circuit group (a logical grouping of
+	// circuits).
+	CircuitGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// CircuitGroupAssignment is a NetBox circuits circuit group assignment (the
+	// membership of a circuit in a circuit group).
+	CircuitGroupAssignment struct {
+		ID          int     `json:"id"`
+		URL         string  `json:"url,omitempty"`
+		Group       *Nested `json:"group"`
+		Member      *Nested `json:"member"`
+		Priority    *Label  `json:"priority,omitempty"`
+		Created     string  `json:"created"`
+		LastUpdated string  `json:"last_updated"`
+	}
+
+	// VirtualCircuit is a NetBox circuits virtual circuit (a logical circuit
+	// carried over a provider network).
+	VirtualCircuit struct {
+		ID              int            `json:"id"`
+		URL             string         `json:"url,omitempty"`
+		CID             string         `json:"cid,omitempty"`
+		Type            *Nested        `json:"type"`
+		ProviderNetwork *Nested        `json:"provider_network"`
+		Status          *Label         `json:"status,omitempty"`
+		Description     string         `json:"description,omitempty"`
+		Tags            []Tag          `json:"tags,omitempty"`
+		CustomFields    map[string]any `json:"custom_fields,omitempty"`
+		Created         string         `json:"created"`
+		LastUpdated     string         `json:"last_updated"`
+	}
+
+	// VirtualCircuitType is a NetBox circuits virtual circuit type (e.g. VPLS,
+	// VXLAN).
+	VirtualCircuitType struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// VirtualCircuitTermination is a NetBox circuits virtual circuit termination
+	// (the attachment of a virtual circuit to an interface).
+	VirtualCircuitTermination struct {
+		ID             int     `json:"id"`
+		URL            string  `json:"url,omitempty"`
+		VirtualCircuit *Nested `json:"virtual_circuit"`
+		Role           *Label  `json:"role,omitempty"`
+		Interface      *Nested `json:"interface"`
+		Created        string  `json:"created"`
+		LastUpdated    string  `json:"last_updated"`
+	}
 )
 
 type (
@@ -2257,6 +2356,118 @@ type VLANTranslationRuleWrite struct {
 	LocalVID    *int    `json:"local_vid,omitempty"`
 	RemoteVID   *int    `json:"remote_vid,omitempty"`
 	Description *string `json:"description,omitempty"`
+}
+
+// ProviderAccountWrite is the domain DTO for creating or updating a NetBox
+// circuits provider account. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Provider is the numeric NetBox
+// ID of the provider. Optional scalar fields are pointers so that a
+// partial-update (PATCH) can distinguish "not provided" (nil) from "explicitly
+// set to empty".
+type ProviderAccountWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Provider     *int           `json:"provider,omitempty"`
+	Account      *string        `json:"account,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ProviderNetworkWrite is the domain DTO for creating or updating a NetBox
+// circuits provider network. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Provider is the numeric NetBox
+// ID of the provider. Optional scalar fields are pointers so that a
+// partial-update (PATCH) can distinguish "not provided" (nil) from "explicitly
+// set to empty".
+type ProviderNetworkWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Provider     *int           `json:"provider,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// CircuitGroupWrite is the domain DTO for creating or updating a NetBox
+// circuits circuit group. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty".
+type CircuitGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// CircuitGroupAssignmentWrite is the domain DTO for creating or updating a
+// NetBox circuits circuit group assignment. It carries only the writable
+// fields.
+//
+// Group is required on create (the numeric NetBox ID of the circuit group).
+// MemberType is the NetBox content type string (e.g. "circuits.circuit" or
+// "circuits.virtualcircuit") and MemberID is the numeric NetBox ID of the
+// member. Priority is an optional choice string (primary/secondary/tertiary/
+// inactive).
+type CircuitGroupAssignmentWrite struct {
+	Group      int     `json:"group,omitempty"`
+	MemberType string  `json:"member_type,omitempty"`
+	MemberID   int     `json:"member_id,omitempty"`
+	Priority   *string `json:"priority,omitempty"`
+}
+
+// VirtualCircuitWrite is the domain DTO for creating or updating a NetBox
+// circuits virtual circuit. It carries only the writable fields.
+//
+// CID is a plain string because it is required on create (the unique circuit
+// ID); the omitempty tag drops it from a PATCH body when not provided. Type and
+// ProviderNetwork are the numeric NetBox IDs of the related objects; Status is
+// a choice-string value. Optional scalar fields are pointers so that a
+// partial-update (PATCH) can distinguish "not provided" (nil) from "explicitly
+// set to empty".
+type VirtualCircuitWrite struct {
+	CID             string         `json:"cid,omitempty"`
+	Type            *int           `json:"type,omitempty"`
+	ProviderNetwork *int           `json:"provider_network,omitempty"`
+	Status          *string        `json:"status,omitempty"`
+	Description     *string        `json:"description,omitempty"`
+	Tags            []string       `json:"tags,omitempty"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty"`
+}
+
+// VirtualCircuitTypeWrite is the domain DTO for creating or updating a NetBox
+// circuits virtual circuit type. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty".
+type VirtualCircuitTypeWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// VirtualCircuitTerminationWrite is the domain DTO for creating or updating a
+// NetBox circuits virtual circuit termination. It carries only the writable
+// fields.
+//
+// VirtualCircuit is required on create (the numeric NetBox ID of the parent
+// virtual circuit). Role is a choice-string value; Interface is the numeric
+// NetBox ID of the dcim.Interface the virtual circuit terminates on.
+type VirtualCircuitTerminationWrite struct {
+	VirtualCircuit int     `json:"virtual_circuit,omitempty"`
+	Role           *string `json:"role,omitempty"`
+	Interface      int     `json:"interface,omitempty"`
 }
 
 // PaginatedResponse wraps a paginated API response with the total count,

@@ -2679,3 +2679,341 @@ func (s *NetworkService) DeleteVirtualMachineType(ctx context.Context, id int) e
 
 	return nil
 }
+
+// ListProviderAccounts returns the page of provider accounts matching params.
+func (s *NetworkService) ListProviderAccounts(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.ProviderAccount], error) {
+	resp, err := s.repo.ListProviderAccounts(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list provider accounts: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateProviderAccount relays a provider account create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateProviderAccount(
+	ctx context.Context, in domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	resp, err := s.repo.CreateProviderAccount(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create provider account: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateProviderAccount relays a provider account update to the repository.
+func (s *NetworkService) UpdateProviderAccount(
+	ctx context.Context, id int, in domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	resp, err := s.repo.UpdateProviderAccount(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update provider account: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteProviderAccount relays a provider account delete to the repository.
+func (s *NetworkService) DeleteProviderAccount(ctx context.Context, id int) error {
+	if err := s.repo.DeleteProviderAccount(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete provider account: %w", err)
+	}
+
+	return nil
+}
+
+// ListProviderNetworks returns the page of provider networks matching params.
+func (s *NetworkService) ListProviderNetworks(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.ProviderNetwork], error) {
+	resp, err := s.repo.ListProviderNetworks(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list provider networks: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateProviderNetwork relays a provider network create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateProviderNetwork(
+	ctx context.Context, in domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	resp, err := s.repo.CreateProviderNetwork(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create provider network: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateProviderNetwork relays a provider network update to the repository.
+func (s *NetworkService) UpdateProviderNetwork(
+	ctx context.Context, id int, in domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	resp, err := s.repo.UpdateProviderNetwork(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update provider network: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteProviderNetwork relays a provider network delete to the repository.
+func (s *NetworkService) DeleteProviderNetwork(ctx context.Context, id int) error {
+	if err := s.repo.DeleteProviderNetwork(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete provider network: %w", err)
+	}
+
+	return nil
+}
+
+// ListCircuitGroups returns the page of circuit groups matching params.
+func (s *NetworkService) ListCircuitGroups(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroup], error) {
+	resp, err := s.repo.ListCircuitGroups(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list circuit groups: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateCircuitGroup relays a circuit group create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateCircuitGroup(
+	ctx context.Context, in domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	resp, err := s.repo.CreateCircuitGroup(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create circuit group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateCircuitGroup relays a circuit group update to the repository.
+func (s *NetworkService) UpdateCircuitGroup(
+	ctx context.Context, id int, in domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	resp, err := s.repo.UpdateCircuitGroup(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update circuit group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteCircuitGroup relays a circuit group delete to the repository.
+func (s *NetworkService) DeleteCircuitGroup(ctx context.Context, id int) error {
+	if err := s.repo.DeleteCircuitGroup(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete circuit group: %w", err)
+	}
+
+	return nil
+}
+
+// ListCircuitGroupAssignments returns the page of circuit group assignments
+// matching params.
+func (s *NetworkService) ListCircuitGroupAssignments(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroupAssignment], error) {
+	resp, err := s.repo.ListCircuitGroupAssignments(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list circuit group assignments: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateCircuitGroupAssignment relays a circuit group assignment create to the
+// repository. ValidationError is wrapped (via %w) and left intact so callers
+// can recover it with errors.As.
+func (s *NetworkService) CreateCircuitGroupAssignment(
+	ctx context.Context, in domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	resp, err := s.repo.CreateCircuitGroupAssignment(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create circuit group assignment: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateCircuitGroupAssignment relays a circuit group assignment update to the
+// repository.
+func (s *NetworkService) UpdateCircuitGroupAssignment(
+	ctx context.Context, id int, in domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	resp, err := s.repo.UpdateCircuitGroupAssignment(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update circuit group assignment: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteCircuitGroupAssignment relays a circuit group assignment delete to the
+// repository.
+func (s *NetworkService) DeleteCircuitGroupAssignment(ctx context.Context, id int) error {
+	if err := s.repo.DeleteCircuitGroupAssignment(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete circuit group assignment: %w", err)
+	}
+
+	return nil
+}
+
+// ListVirtualCircuits returns the page of virtual circuits matching params.
+func (s *NetworkService) ListVirtualCircuits(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuit], error) {
+	resp, err := s.repo.ListVirtualCircuits(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list virtual circuits: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateVirtualCircuit relays a virtual circuit create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateVirtualCircuit(
+	ctx context.Context, in domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	resp, err := s.repo.CreateVirtualCircuit(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create virtual circuit: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateVirtualCircuit relays a virtual circuit update to the repository.
+func (s *NetworkService) UpdateVirtualCircuit(
+	ctx context.Context, id int, in domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	resp, err := s.repo.UpdateVirtualCircuit(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update virtual circuit: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteVirtualCircuit relays a virtual circuit delete to the repository.
+func (s *NetworkService) DeleteVirtualCircuit(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVirtualCircuit(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete virtual circuit: %w", err)
+	}
+
+	return nil
+}
+
+// ListVirtualCircuitTypes returns the page of virtual circuit types matching
+// params.
+func (s *NetworkService) ListVirtualCircuitTypes(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitType], error) {
+	resp, err := s.repo.ListVirtualCircuitTypes(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list virtual circuit types: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateVirtualCircuitType relays a virtual circuit type create to the
+// repository. ValidationError is wrapped (via %w) and left intact so callers
+// can recover it with errors.As.
+func (s *NetworkService) CreateVirtualCircuitType(
+	ctx context.Context, in domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	resp, err := s.repo.CreateVirtualCircuitType(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create virtual circuit type: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateVirtualCircuitType relays a virtual circuit type update to the
+// repository.
+func (s *NetworkService) UpdateVirtualCircuitType(
+	ctx context.Context, id int, in domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	resp, err := s.repo.UpdateVirtualCircuitType(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update virtual circuit type: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteVirtualCircuitType relays a virtual circuit type delete to the
+// repository.
+func (s *NetworkService) DeleteVirtualCircuitType(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVirtualCircuitType(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete virtual circuit type: %w", err)
+	}
+
+	return nil
+}
+
+// ListVirtualCircuitTerminations returns the page of virtual circuit
+// terminations matching params.
+func (s *NetworkService) ListVirtualCircuitTerminations(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitTermination], error) {
+	resp, err := s.repo.ListVirtualCircuitTerminations(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list virtual circuit terminations: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateVirtualCircuitTermination relays a virtual circuit termination create
+// to the repository. ValidationError is wrapped (via %w) and left intact so
+// callers can recover it with errors.As.
+func (s *NetworkService) CreateVirtualCircuitTermination(
+	ctx context.Context, in domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	resp, err := s.repo.CreateVirtualCircuitTermination(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create virtual circuit termination: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateVirtualCircuitTermination relays a virtual circuit termination update
+// to the repository.
+func (s *NetworkService) UpdateVirtualCircuitTermination(
+	ctx context.Context, id int, in domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	resp, err := s.repo.UpdateVirtualCircuitTermination(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update virtual circuit termination: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteVirtualCircuitTermination relays a virtual circuit termination delete
+// to the repository.
+func (s *NetworkService) DeleteVirtualCircuitTermination(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVirtualCircuitTermination(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete virtual circuit termination: %w", err)
+	}
+
+	return nil
+}

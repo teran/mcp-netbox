@@ -4399,4 +4399,508 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 			},
 		),
 	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_provider_accounts"],
+		metrics,
+		"get_provider_accounts",
+		WrapToolHandler[ProviderAccountsInput, PaginatedOutput[domain.ProviderAccount]](
+			metrics,
+			"get_provider_accounts",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ProviderAccountsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ProviderAccount], error) {
+				return NewGetProviderAccountsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_provider_account"],
+		metrics,
+		"create_provider_account",
+		WrapToolHandler[ProviderAccountCreateInput, ProviderAccountOutput](
+			metrics,
+			"create_provider_account",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ProviderAccountCreateInput,
+			) (*mcp.CallToolResult, ProviderAccountOutput, error) {
+				return NewCreateProviderAccountHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_provider_account"],
+		metrics,
+		"update_provider_account",
+		WrapToolHandler[ProviderAccountUpdateInput, ProviderAccountOutput](
+			metrics,
+			"update_provider_account",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ProviderAccountUpdateInput,
+			) (*mcp.CallToolResult, ProviderAccountOutput, error) {
+				return NewUpdateProviderAccountHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_provider_account"],
+		metrics,
+		"delete_provider_account",
+		WrapToolHandler[ProviderAccountDeleteInput, struct{}](
+			metrics,
+			"delete_provider_account",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ProviderAccountDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteProviderAccountHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_provider_networks"],
+		metrics,
+		"get_provider_networks",
+		WrapToolHandler[ProviderNetworksInput, PaginatedOutput[domain.ProviderNetwork]](
+			metrics,
+			"get_provider_networks",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ProviderNetworksInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ProviderNetwork], error) {
+				return NewGetProviderNetworksHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_provider_network"],
+		metrics,
+		"create_provider_network",
+		WrapToolHandler[ProviderNetworkCreateInput, ProviderNetworkOutput](
+			metrics,
+			"create_provider_network",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ProviderNetworkCreateInput,
+			) (*mcp.CallToolResult, ProviderNetworkOutput, error) {
+				return NewCreateProviderNetworkHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_provider_network"],
+		metrics,
+		"update_provider_network",
+		WrapToolHandler[ProviderNetworkUpdateInput, ProviderNetworkOutput](
+			metrics,
+			"update_provider_network",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ProviderNetworkUpdateInput,
+			) (*mcp.CallToolResult, ProviderNetworkOutput, error) {
+				return NewUpdateProviderNetworkHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_provider_network"],
+		metrics,
+		"delete_provider_network",
+		WrapToolHandler[ProviderNetworkDeleteInput, struct{}](
+			metrics,
+			"delete_provider_network",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ProviderNetworkDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteProviderNetworkHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_circuit_groups"],
+		metrics,
+		"get_circuit_groups",
+		WrapToolHandler[CircuitGroupsInput, PaginatedOutput[domain.CircuitGroup]](
+			metrics,
+			"get_circuit_groups",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CircuitGroupsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.CircuitGroup], error) {
+				return NewGetCircuitGroupsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_circuit_group"],
+		metrics,
+		"create_circuit_group",
+		WrapToolHandler[CircuitGroupCreateInput, CircuitGroupOutput](
+			metrics,
+			"create_circuit_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CircuitGroupCreateInput,
+			) (*mcp.CallToolResult, CircuitGroupOutput, error) {
+				return NewCreateCircuitGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_circuit_group"],
+		metrics,
+		"update_circuit_group",
+		WrapToolHandler[CircuitGroupUpdateInput, CircuitGroupOutput](
+			metrics,
+			"update_circuit_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CircuitGroupUpdateInput,
+			) (*mcp.CallToolResult, CircuitGroupOutput, error) {
+				return NewUpdateCircuitGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_circuit_group"],
+		metrics,
+		"delete_circuit_group",
+		WrapToolHandler[CircuitGroupDeleteInput, struct{}](
+			metrics,
+			"delete_circuit_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CircuitGroupDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteCircuitGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_circuit_group_assignments"],
+		metrics,
+		"get_circuit_group_assignments",
+		WrapToolHandler[CircuitGroupAssignmentsInput, PaginatedOutput[domain.CircuitGroupAssignment]](
+			metrics,
+			"get_circuit_group_assignments",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CircuitGroupAssignmentsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.CircuitGroupAssignment], error) {
+				return NewGetCircuitGroupAssignmentsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_circuit_group_assignment"],
+		metrics,
+		"create_circuit_group_assignment",
+		WrapToolHandler[CircuitGroupAssignmentCreateInput, CircuitGroupAssignmentOutput](
+			metrics,
+			"create_circuit_group_assignment",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CircuitGroupAssignmentCreateInput,
+			) (*mcp.CallToolResult, CircuitGroupAssignmentOutput, error) {
+				return NewCreateCircuitGroupAssignmentHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_circuit_group_assignment"],
+		metrics,
+		"update_circuit_group_assignment",
+		WrapToolHandler[CircuitGroupAssignmentUpdateInput, CircuitGroupAssignmentOutput](
+			metrics,
+			"update_circuit_group_assignment",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CircuitGroupAssignmentUpdateInput,
+			) (*mcp.CallToolResult, CircuitGroupAssignmentOutput, error) {
+				return NewUpdateCircuitGroupAssignmentHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_circuit_group_assignment"],
+		metrics,
+		"delete_circuit_group_assignment",
+		WrapToolHandler[CircuitGroupAssignmentDeleteInput, struct{}](
+			metrics,
+			"delete_circuit_group_assignment",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in CircuitGroupAssignmentDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteCircuitGroupAssignmentHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_virtual_circuits"],
+		metrics,
+		"get_virtual_circuits",
+		WrapToolHandler[VirtualCircuitsInput, PaginatedOutput[domain.VirtualCircuit]](
+			metrics,
+			"get_virtual_circuits",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.VirtualCircuit], error) {
+				return NewGetVirtualCircuitsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_virtual_circuit"],
+		metrics,
+		"create_virtual_circuit",
+		WrapToolHandler[VirtualCircuitCreateInput, VirtualCircuitOutput](
+			metrics,
+			"create_virtual_circuit",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitCreateInput,
+			) (*mcp.CallToolResult, VirtualCircuitOutput, error) {
+				return NewCreateVirtualCircuitHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_virtual_circuit"],
+		metrics,
+		"update_virtual_circuit",
+		WrapToolHandler[VirtualCircuitUpdateInput, VirtualCircuitOutput](
+			metrics,
+			"update_virtual_circuit",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitUpdateInput,
+			) (*mcp.CallToolResult, VirtualCircuitOutput, error) {
+				return NewUpdateVirtualCircuitHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_virtual_circuit"],
+		metrics,
+		"delete_virtual_circuit",
+		WrapToolHandler[VirtualCircuitDeleteInput, struct{}](
+			metrics,
+			"delete_virtual_circuit",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteVirtualCircuitHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_virtual_circuit_types"],
+		metrics,
+		"get_virtual_circuit_types",
+		WrapToolHandler[VirtualCircuitTypesInput, PaginatedOutput[domain.VirtualCircuitType]](
+			metrics,
+			"get_virtual_circuit_types",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitTypesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.VirtualCircuitType], error) {
+				return NewGetVirtualCircuitTypesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_virtual_circuit_type"],
+		metrics,
+		"create_virtual_circuit_type",
+		WrapToolHandler[VirtualCircuitTypeCreateInput, VirtualCircuitTypeOutput](
+			metrics,
+			"create_virtual_circuit_type",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitTypeCreateInput,
+			) (*mcp.CallToolResult, VirtualCircuitTypeOutput, error) {
+				return NewCreateVirtualCircuitTypeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_virtual_circuit_type"],
+		metrics,
+		"update_virtual_circuit_type",
+		WrapToolHandler[VirtualCircuitTypeUpdateInput, VirtualCircuitTypeOutput](
+			metrics,
+			"update_virtual_circuit_type",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitTypeUpdateInput,
+			) (*mcp.CallToolResult, VirtualCircuitTypeOutput, error) {
+				return NewUpdateVirtualCircuitTypeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_virtual_circuit_type"],
+		metrics,
+		"delete_virtual_circuit_type",
+		WrapToolHandler[VirtualCircuitTypeDeleteInput, struct{}](
+			metrics,
+			"delete_virtual_circuit_type",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitTypeDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteVirtualCircuitTypeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_virtual_circuit_terminations"],
+		metrics,
+		"get_virtual_circuit_terminations",
+		WrapToolHandler[VirtualCircuitTerminationsInput, PaginatedOutput[domain.VirtualCircuitTermination]](
+			metrics,
+			"get_virtual_circuit_terminations",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitTerminationsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.VirtualCircuitTermination], error) {
+				return NewGetVirtualCircuitTerminationsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_virtual_circuit_termination"],
+		metrics,
+		"create_virtual_circuit_termination",
+		WrapToolHandler[VirtualCircuitTerminationCreateInput, VirtualCircuitTerminationOutput](
+			metrics,
+			"create_virtual_circuit_termination",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitTerminationCreateInput,
+			) (*mcp.CallToolResult, VirtualCircuitTerminationOutput, error) {
+				return NewCreateVirtualCircuitTerminationHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_virtual_circuit_termination"],
+		metrics,
+		"update_virtual_circuit_termination",
+		WrapToolHandler[VirtualCircuitTerminationUpdateInput, VirtualCircuitTerminationOutput](
+			metrics,
+			"update_virtual_circuit_termination",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitTerminationUpdateInput,
+			) (*mcp.CallToolResult, VirtualCircuitTerminationOutput, error) {
+				return NewUpdateVirtualCircuitTerminationHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_virtual_circuit_termination"],
+		metrics,
+		"delete_virtual_circuit_termination",
+		WrapToolHandler[VirtualCircuitTerminationDeleteInput, struct{}](
+			metrics,
+			"delete_virtual_circuit_termination",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualCircuitTerminationDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteVirtualCircuitTerminationHandler(svc)(ctx, req, in)
+			},
+		),
+	)
 }

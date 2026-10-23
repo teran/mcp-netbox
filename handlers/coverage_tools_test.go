@@ -934,6 +934,178 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 				return res, err
 			},
 		},
+		{
+			name: "create_provider_account",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateProviderAccountHandler(nil)(ctx, nil, ProviderAccountCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_provider_account",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateProviderAccountHandler(nil)(ctx, nil, ProviderAccountUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_provider_account",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteProviderAccountHandler(nil)(ctx, nil, ProviderAccountDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_provider_network",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateProviderNetworkHandler(nil)(ctx, nil, ProviderNetworkCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_provider_network",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateProviderNetworkHandler(nil)(ctx, nil, ProviderNetworkUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_provider_network",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteProviderNetworkHandler(nil)(ctx, nil, ProviderNetworkDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_circuit_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateCircuitGroupHandler(nil)(ctx, nil, CircuitGroupCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_circuit_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateCircuitGroupHandler(nil)(ctx, nil, CircuitGroupUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_circuit_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteCircuitGroupHandler(nil)(ctx, nil, CircuitGroupDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_circuit_group_assignment",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateCircuitGroupAssignmentHandler(nil)(ctx, nil, CircuitGroupAssignmentCreateInput{
+					Group: 5, MemberType: "circuits.circuit", MemberID: 9,
+				})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_circuit_group_assignment",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateCircuitGroupAssignmentHandler(nil)(ctx, nil, CircuitGroupAssignmentUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_circuit_group_assignment",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteCircuitGroupAssignmentHandler(nil)(ctx, nil, CircuitGroupAssignmentDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_virtual_circuit",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateVirtualCircuitHandler(nil)(ctx, nil, VirtualCircuitCreateInput{CID: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_virtual_circuit",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateVirtualCircuitHandler(nil)(ctx, nil, VirtualCircuitUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_virtual_circuit",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteVirtualCircuitHandler(nil)(ctx, nil, VirtualCircuitDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_virtual_circuit_type",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateVirtualCircuitTypeHandler(nil)(ctx, nil, VirtualCircuitTypeCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_virtual_circuit_type",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateVirtualCircuitTypeHandler(nil)(ctx, nil, VirtualCircuitTypeUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_virtual_circuit_type",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteVirtualCircuitTypeHandler(nil)(ctx, nil, VirtualCircuitTypeDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_virtual_circuit_termination",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateVirtualCircuitTerminationHandler(nil)(ctx, nil, VirtualCircuitTerminationCreateInput{
+					VirtualCircuit: 5,
+				})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_virtual_circuit_termination",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateVirtualCircuitTerminationHandler(nil)(ctx, nil, VirtualCircuitTerminationUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_virtual_circuit_termination",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteVirtualCircuitTerminationHandler(nil)(ctx, nil, VirtualCircuitTerminationDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
 	}
 
 	for _, tc := range cases {

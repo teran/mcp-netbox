@@ -30,68 +30,75 @@ import (
 var ErrNotFound = errors.New("not found")
 
 var objectTypeToEndpoint = map[string]string{
-	"site":                    "/api/dcim/sites/",
-	"region":                  "/api/dcim/regions/",
-	"device":                  "/api/dcim/devices/",
-	"prefix":                  "/api/ipam/prefixes/",
-	"ip_address":              "/api/ipam/ip-addresses/",
-	"vlan":                    "/api/ipam/vlans/",
-	"virtual_machine":         "/api/virtualization/virtual-machines/",
-	"cluster":                 "/api/virtualization/clusters/",
-	"circuit":                 "/api/circuits/circuits/",
-	"provider":                "/api/circuits/providers/",
-	"tenant":                  "/api/tenancy/tenants/",
-	"tenant_group":            "/api/tenancy/tenant-groups/",
-	"rack":                    "/api/dcim/racks/",
-	"manufacturer":            "/api/dcim/manufacturers/",
-	"device_type":             "/api/dcim/device-types/",
-	"location":                "/api/dcim/locations/",
-	"cluster_type":            "/api/virtualization/cluster-types/",
-	"cluster_group":           "/api/virtualization/cluster-groups/",
-	"circuit_type":            "/api/circuits/circuit-types/",
-	"vrf":                     "/api/ipam/vrfs/",
-	"vlan_group":              "/api/ipam/vlan-groups/",
-	"role":                    "/api/ipam/roles/",
-	"contact":                 "/api/tenancy/contacts/",
-	"cable":                   "/api/dcim/cables/",
-	"interface":               "/api/dcim/interfaces/",
-	"vm_interface":            "/api/virtualization/interfaces/",
-	"circuit_termination":     "/api/circuits/circuit-terminations/",
-	"site_group":              "/api/dcim/site-groups/",
-	"rack_group":              "/api/dcim/rack-groups/",
-	"rack_role":               "/api/dcim/rack-roles/",
-	"device_role":             "/api/dcim/device-roles/",
-	"platform":                "/api/dcim/platforms/",
-	"virtual_chassis":         "/api/dcim/virtual-chassis/",
-	"power_panel":             "/api/dcim/power-panels/",
-	"inventory_item_role":     "/api/dcim/inventory-item-roles/",
-	"front_port":              "/api/dcim/front-ports/",
-	"rear_port":               "/api/dcim/rear-ports/",
-	"console_port":            "/api/dcim/console-ports/",
-	"console_server_port":     "/api/dcim/console-server-ports/",
-	"power_port":              "/api/dcim/power-ports/",
-	"power_outlet":            "/api/dcim/power-outlets/",
-	"power_feed":              "/api/dcim/power-feeds/",
-	"device_bay":              "/api/dcim/device-bays/",
-	"rack_reservation":        "/api/dcim/rack-reservations/",
-	"inventory_item":          "/api/dcim/inventory-items/",
-	"mac_address":             "/api/dcim/mac-addresses/",
-	"rir":                     "/api/ipam/rirs/",
-	"aggregate":               "/api/ipam/aggregates/",
-	"ip_range":                "/api/ipam/ip-ranges/",
-	"asn":                     "/api/ipam/asns/",
-	"asn_range":               "/api/ipam/asn-ranges/",
-	"route_target":            "/api/ipam/route-targets/",
-	"service":                 "/api/ipam/services/",
-	"service_template":        "/api/ipam/service-templates/",
-	"fhrp_group":              "/api/ipam/fhrp-groups/",
-	"fhrp_group_assignment":   "/api/ipam/fhrp-group-assignments/",
-	"vlan_translation_policy": "/api/ipam/vlan-translation-policies/",
-	"vlan_translation_rule":   "/api/ipam/vlan-translation-rules/",
-	"contact_group":           "/api/tenancy/contact-groups/",
-	"contact_role":            "/api/tenancy/contact-roles/",
-	"virtual_disk":            "/api/virtualization/virtual-disks/",
-	"virtual_machine_type":    "/api/virtualization/virtual-machine-types/",
+	"site":                        "/api/dcim/sites/",
+	"region":                      "/api/dcim/regions/",
+	"device":                      "/api/dcim/devices/",
+	"prefix":                      "/api/ipam/prefixes/",
+	"ip_address":                  "/api/ipam/ip-addresses/",
+	"vlan":                        "/api/ipam/vlans/",
+	"virtual_machine":             "/api/virtualization/virtual-machines/",
+	"cluster":                     "/api/virtualization/clusters/",
+	"circuit":                     "/api/circuits/circuits/",
+	"provider":                    "/api/circuits/providers/",
+	"tenant":                      "/api/tenancy/tenants/",
+	"tenant_group":                "/api/tenancy/tenant-groups/",
+	"rack":                        "/api/dcim/racks/",
+	"manufacturer":                "/api/dcim/manufacturers/",
+	"device_type":                 "/api/dcim/device-types/",
+	"location":                    "/api/dcim/locations/",
+	"cluster_type":                "/api/virtualization/cluster-types/",
+	"cluster_group":               "/api/virtualization/cluster-groups/",
+	"circuit_type":                "/api/circuits/circuit-types/",
+	"vrf":                         "/api/ipam/vrfs/",
+	"vlan_group":                  "/api/ipam/vlan-groups/",
+	"role":                        "/api/ipam/roles/",
+	"contact":                     "/api/tenancy/contacts/",
+	"cable":                       "/api/dcim/cables/",
+	"interface":                   "/api/dcim/interfaces/",
+	"vm_interface":                "/api/virtualization/interfaces/",
+	"circuit_termination":         "/api/circuits/circuit-terminations/",
+	"site_group":                  "/api/dcim/site-groups/",
+	"rack_group":                  "/api/dcim/rack-groups/",
+	"rack_role":                   "/api/dcim/rack-roles/",
+	"device_role":                 "/api/dcim/device-roles/",
+	"platform":                    "/api/dcim/platforms/",
+	"virtual_chassis":             "/api/dcim/virtual-chassis/",
+	"power_panel":                 "/api/dcim/power-panels/",
+	"inventory_item_role":         "/api/dcim/inventory-item-roles/",
+	"front_port":                  "/api/dcim/front-ports/",
+	"rear_port":                   "/api/dcim/rear-ports/",
+	"console_port":                "/api/dcim/console-ports/",
+	"console_server_port":         "/api/dcim/console-server-ports/",
+	"power_port":                  "/api/dcim/power-ports/",
+	"power_outlet":                "/api/dcim/power-outlets/",
+	"power_feed":                  "/api/dcim/power-feeds/",
+	"device_bay":                  "/api/dcim/device-bays/",
+	"rack_reservation":            "/api/dcim/rack-reservations/",
+	"inventory_item":              "/api/dcim/inventory-items/",
+	"mac_address":                 "/api/dcim/mac-addresses/",
+	"rir":                         "/api/ipam/rirs/",
+	"aggregate":                   "/api/ipam/aggregates/",
+	"ip_range":                    "/api/ipam/ip-ranges/",
+	"asn":                         "/api/ipam/asns/",
+	"asn_range":                   "/api/ipam/asn-ranges/",
+	"route_target":                "/api/ipam/route-targets/",
+	"service":                     "/api/ipam/services/",
+	"service_template":            "/api/ipam/service-templates/",
+	"fhrp_group":                  "/api/ipam/fhrp-groups/",
+	"fhrp_group_assignment":       "/api/ipam/fhrp-group-assignments/",
+	"vlan_translation_policy":     "/api/ipam/vlan-translation-policies/",
+	"vlan_translation_rule":       "/api/ipam/vlan-translation-rules/",
+	"contact_group":               "/api/tenancy/contact-groups/",
+	"contact_role":                "/api/tenancy/contact-roles/",
+	"virtual_disk":                "/api/virtualization/virtual-disks/",
+	"virtual_machine_type":        "/api/virtualization/virtual-machine-types/",
+	"provider_account":            "/api/circuits/provider-accounts/",
+	"provider_network":            "/api/circuits/provider-networks/",
+	"circuit_group":               "/api/circuits/circuit-groups/",
+	"circuit_group_assignment":    "/api/circuits/circuit-group-assignments/",
+	"virtual_circuit":             "/api/circuits/virtual-circuits/",
+	"virtual_circuit_type":        "/api/circuits/virtual-circuit-types/",
+	"virtual_circuit_termination": "/api/circuits/virtual-circuit-terminations/",
 }
 
 // maxBodySize is the maximum response body size accepted from NetBox. Larger
@@ -1129,6 +1136,120 @@ func (c *Client) ListVirtualMachineTypes(ctx context.Context, token string, para
 	}
 
 	return convertPaginated(&wireResp, wireVirtualMachineTypeToDomain), nil
+}
+
+// ListProviderAccounts returns a paginated list of provider accounts.
+func (c *Client) ListProviderAccounts(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.ProviderAccount], error,
+) {
+	raw, err := c.get(ctx, token, "/api/circuits/provider-accounts/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireProviderAccount]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal provider accounts: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireProviderAccountToDomain), nil
+}
+
+// ListProviderNetworks returns a paginated list of provider networks.
+func (c *Client) ListProviderNetworks(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.ProviderNetwork], error,
+) {
+	raw, err := c.get(ctx, token, "/api/circuits/provider-networks/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireProviderNetwork]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal provider networks: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireProviderNetworkToDomain), nil
+}
+
+// ListCircuitGroups returns a paginated list of circuit groups.
+func (c *Client) ListCircuitGroups(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.CircuitGroup], error,
+) {
+	raw, err := c.get(ctx, token, "/api/circuits/circuit-groups/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireCircuitGroup]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal circuit groups: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireCircuitGroupToDomain), nil
+}
+
+// ListCircuitGroupAssignments returns a paginated list of circuit group
+// assignments.
+func (c *Client) ListCircuitGroupAssignments(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroupAssignment], error) {
+	raw, err := c.get(ctx, token, "/api/circuits/circuit-group-assignments/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireCircuitGroupAssignment]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal circuit group assignments: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireCircuitGroupAssignmentToDomain), nil
+}
+
+// ListVirtualCircuits returns a paginated list of virtual circuits.
+func (c *Client) ListVirtualCircuits(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.VirtualCircuit], error,
+) {
+	raw, err := c.get(ctx, token, "/api/circuits/virtual-circuits/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireVirtualCircuit]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual circuits: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireVirtualCircuitToDomain), nil
+}
+
+// ListVirtualCircuitTypes returns a paginated list of virtual circuit types.
+func (c *Client) ListVirtualCircuitTypes(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.VirtualCircuitType], error,
+) {
+	raw, err := c.get(ctx, token, "/api/circuits/virtual-circuit-types/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireVirtualCircuitType]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual circuit types: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireVirtualCircuitTypeToDomain), nil
+}
+
+// ListVirtualCircuitTerminations returns a paginated list of virtual circuit
+// terminations.
+func (c *Client) ListVirtualCircuitTerminations(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitTermination], error) {
+	raw, err := c.get(ctx, token, "/api/circuits/virtual-circuit-terminations/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireVirtualCircuitTermination]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual circuit terminations: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireVirtualCircuitTerminationToDomain), nil
 }
 
 // GetObject retrieves a single object by its type and ID.
@@ -3926,6 +4047,335 @@ func (c *Client) UpdateVirtualMachineType(
 // /api/virtualization/virtual-machine-types/<id>/.
 func (c *Client) DeleteVirtualMachineType(ctx context.Context, token string, objectID int) error {
 	path := fmt.Sprintf("/api/virtualization/virtual-machine-types/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateProviderAccount creates a new provider account via POST
+// /api/circuits/provider-accounts/.
+func (c *Client) CreateProviderAccount(
+	ctx context.Context, token string, in domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	payload, err := json.Marshal(providerAccountWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal provider account create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/provider-accounts/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalProviderAccount(raw)
+}
+
+// UpdateProviderAccount partially updates a provider account via PATCH
+// /api/circuits/provider-accounts/<id>/.
+func (c *Client) UpdateProviderAccount(
+	ctx context.Context, token string, objectID int, in domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	payload, err := json.Marshal(providerAccountWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal provider account update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/provider-accounts/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalProviderAccount(raw)
+}
+
+// DeleteProviderAccount deletes a provider account via DELETE
+// /api/circuits/provider-accounts/<id>/.
+func (c *Client) DeleteProviderAccount(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/circuits/provider-accounts/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateProviderNetwork creates a new provider network via POST
+// /api/circuits/provider-networks/.
+func (c *Client) CreateProviderNetwork(
+	ctx context.Context, token string, in domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	payload, err := json.Marshal(providerNetworkWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal provider network create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/provider-networks/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalProviderNetwork(raw)
+}
+
+// UpdateProviderNetwork partially updates a provider network via PATCH
+// /api/circuits/provider-networks/<id>/.
+func (c *Client) UpdateProviderNetwork(
+	ctx context.Context, token string, objectID int, in domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	payload, err := json.Marshal(providerNetworkWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal provider network update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/provider-networks/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalProviderNetwork(raw)
+}
+
+// DeleteProviderNetwork deletes a provider network via DELETE
+// /api/circuits/provider-networks/<id>/.
+func (c *Client) DeleteProviderNetwork(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/circuits/provider-networks/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateCircuitGroup creates a new circuit group via POST
+// /api/circuits/circuit-groups/.
+func (c *Client) CreateCircuitGroup(
+	ctx context.Context, token string, in domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	payload, err := json.Marshal(circuitGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit group create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/circuit-groups/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalCircuitGroup(raw)
+}
+
+// UpdateCircuitGroup partially updates a circuit group via PATCH
+// /api/circuits/circuit-groups/<id>/.
+func (c *Client) UpdateCircuitGroup(
+	ctx context.Context, token string, objectID int, in domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	payload, err := json.Marshal(circuitGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit group update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/circuit-groups/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalCircuitGroup(raw)
+}
+
+// DeleteCircuitGroup deletes a circuit group via DELETE
+// /api/circuits/circuit-groups/<id>/.
+func (c *Client) DeleteCircuitGroup(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/circuits/circuit-groups/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateCircuitGroupAssignment creates a new circuit group assignment via POST
+// /api/circuits/circuit-group-assignments/.
+func (c *Client) CreateCircuitGroupAssignment(
+	ctx context.Context, token string, in domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	payload, err := json.Marshal(circuitGroupAssignmentWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit group assignment create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/circuit-group-assignments/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalCircuitGroupAssignment(raw)
+}
+
+// UpdateCircuitGroupAssignment partially updates a circuit group assignment via
+// PATCH /api/circuits/circuit-group-assignments/<id>/.
+func (c *Client) UpdateCircuitGroupAssignment(
+	ctx context.Context, token string, objectID int, in domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	payload, err := json.Marshal(circuitGroupAssignmentWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal circuit group assignment update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/circuit-group-assignments/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalCircuitGroupAssignment(raw)
+}
+
+// DeleteCircuitGroupAssignment deletes a circuit group assignment via DELETE
+// /api/circuits/circuit-group-assignments/<id>/.
+func (c *Client) DeleteCircuitGroupAssignment(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/circuits/circuit-group-assignments/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateVirtualCircuit creates a new virtual circuit via POST
+// /api/circuits/virtual-circuits/.
+func (c *Client) CreateVirtualCircuit(
+	ctx context.Context, token string, in domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	payload, err := json.Marshal(virtualCircuitWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual circuit create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/virtual-circuits/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualCircuit(raw)
+}
+
+// UpdateVirtualCircuit partially updates a virtual circuit via PATCH
+// /api/circuits/virtual-circuits/<id>/.
+func (c *Client) UpdateVirtualCircuit(
+	ctx context.Context, token string, objectID int, in domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	payload, err := json.Marshal(virtualCircuitWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual circuit update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/virtual-circuits/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualCircuit(raw)
+}
+
+// DeleteVirtualCircuit deletes a virtual circuit via DELETE
+// /api/circuits/virtual-circuits/<id>/.
+func (c *Client) DeleteVirtualCircuit(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/circuits/virtual-circuits/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateVirtualCircuitType creates a new virtual circuit type via POST
+// /api/circuits/virtual-circuit-types/.
+func (c *Client) CreateVirtualCircuitType(
+	ctx context.Context, token string, in domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	payload, err := json.Marshal(virtualCircuitTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual circuit type create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/virtual-circuit-types/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualCircuitType(raw)
+}
+
+// UpdateVirtualCircuitType partially updates a virtual circuit type via PATCH
+// /api/circuits/virtual-circuit-types/<id>/.
+func (c *Client) UpdateVirtualCircuitType(
+	ctx context.Context, token string, objectID int, in domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	payload, err := json.Marshal(virtualCircuitTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual circuit type update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/virtual-circuit-types/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualCircuitType(raw)
+}
+
+// DeleteVirtualCircuitType deletes a virtual circuit type via DELETE
+// /api/circuits/virtual-circuit-types/<id>/.
+func (c *Client) DeleteVirtualCircuitType(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/circuits/virtual-circuit-types/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateVirtualCircuitTermination creates a new virtual circuit termination via
+// POST /api/circuits/virtual-circuit-terminations/.
+func (c *Client) CreateVirtualCircuitTermination(
+	ctx context.Context, token string, in domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	payload, err := json.Marshal(virtualCircuitTerminationWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual circuit termination create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/circuits/virtual-circuit-terminations/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualCircuitTermination(raw)
+}
+
+// UpdateVirtualCircuitTermination partially updates a virtual circuit
+// termination via PATCH /api/circuits/virtual-circuit-terminations/<id>/.
+func (c *Client) UpdateVirtualCircuitTermination(
+	ctx context.Context, token string, objectID int, in domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	payload, err := json.Marshal(virtualCircuitTerminationWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual circuit termination update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/circuits/virtual-circuit-terminations/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualCircuitTermination(raw)
+}
+
+// DeleteVirtualCircuitTermination deletes a virtual circuit termination via
+// DELETE /api/circuits/virtual-circuit-terminations/<id>/.
+func (c *Client) DeleteVirtualCircuitTermination(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/circuits/virtual-circuit-terminations/%d/", objectID)
 	body, err := c.delete(ctx, token, path)
 	_, mErr := writeResult(http.StatusNoContent, body, err)
 
@@ -6910,5 +7360,302 @@ func wireVLANTranslationRuleToDomain(wire WireVLANTranslationRule) domain.VLANTr
 		Description: wire.Description,
 		Created:     wire.Created,
 		LastUpdated: wire.LastUpdated,
+	}
+}
+
+// providerAccountWriteToWire converts a domain provider account write DTO to
+// the wire request model. The fields map one-to-one; nil pointers on the domain
+// side remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func providerAccountWriteToWire(input domain.ProviderAccountWrite) WireProviderAccountWrite {
+	return WireProviderAccountWrite{
+		Name:         input.Name,
+		Provider:     input.Provider,
+		Account:      input.Account,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalProviderAccount decodes a provider account response body into a
+// domain.ProviderAccount.
+func unmarshalProviderAccount(raw domain.RawObject) (*domain.ProviderAccount, error) {
+	var w WireProviderAccount
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal provider account: %w", err)
+	}
+	d := wireProviderAccountToDomain(w)
+
+	return &d, nil
+}
+
+// wireProviderAccountToDomain converts a wire provider account to the domain
+// model.
+func wireProviderAccountToDomain(wire WireProviderAccount) domain.ProviderAccount {
+	return domain.ProviderAccount{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Provider:     wireNestedToDomain(wire.Provider),
+		Account:      wire.Account,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// providerNetworkWriteToWire converts a domain provider network write DTO to
+// the wire request model. The fields map one-to-one; nil pointers on the domain
+// side remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func providerNetworkWriteToWire(input domain.ProviderNetworkWrite) WireProviderNetworkWrite {
+	return WireProviderNetworkWrite{
+		Name:         input.Name,
+		Provider:     input.Provider,
+		Description:  input.Description,
+		Comments:     input.Comments,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalProviderNetwork decodes a provider network response body into a
+// domain.ProviderNetwork.
+func unmarshalProviderNetwork(raw domain.RawObject) (*domain.ProviderNetwork, error) {
+	var w WireProviderNetwork
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal provider network: %w", err)
+	}
+	d := wireProviderNetworkToDomain(w)
+
+	return &d, nil
+}
+
+// wireProviderNetworkToDomain converts a wire provider network to the domain
+// model.
+func wireProviderNetworkToDomain(wire WireProviderNetwork) domain.ProviderNetwork {
+	return domain.ProviderNetwork{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Provider:     wireNestedToDomain(wire.Provider),
+		Description:  wire.Description,
+		Comments:     wire.Comments,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// circuitGroupWriteToWire converts a domain circuit group write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func circuitGroupWriteToWire(input domain.CircuitGroupWrite) WireCircuitGroupWrite {
+	return WireCircuitGroupWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalCircuitGroup decodes a circuit group response body into a
+// domain.CircuitGroup.
+func unmarshalCircuitGroup(raw domain.RawObject) (*domain.CircuitGroup, error) {
+	var w WireCircuitGroup
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal circuit group: %w", err)
+	}
+	d := wireCircuitGroupToDomain(w)
+
+	return &d, nil
+}
+
+// wireCircuitGroupToDomain converts a wire circuit group to the domain model.
+func wireCircuitGroupToDomain(wire WireCircuitGroup) domain.CircuitGroup {
+	return domain.CircuitGroup{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// circuitGroupAssignmentWriteToWire converts a domain circuit group assignment
+// write DTO to the wire request model. The fields map one-to-one; nil pointers
+// on the domain side remain nil on the wire side so json.Marshal omits them
+// (required for a partial PATCH body).
+func circuitGroupAssignmentWriteToWire(input domain.CircuitGroupAssignmentWrite) WireCircuitGroupAssignmentWrite {
+	return WireCircuitGroupAssignmentWrite{
+		Group:      input.Group,
+		MemberType: input.MemberType,
+		MemberID:   input.MemberID,
+		Priority:   input.Priority,
+	}
+}
+
+// unmarshalCircuitGroupAssignment decodes a circuit group assignment response
+// body into a domain.CircuitGroupAssignment.
+func unmarshalCircuitGroupAssignment(raw domain.RawObject) (*domain.CircuitGroupAssignment, error) {
+	var w WireCircuitGroupAssignment
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal circuit group assignment: %w", err)
+	}
+	d := wireCircuitGroupAssignmentToDomain(w)
+
+	return &d, nil
+}
+
+// wireCircuitGroupAssignmentToDomain converts a wire circuit group assignment
+// to the domain model.
+func wireCircuitGroupAssignmentToDomain(wire WireCircuitGroupAssignment) domain.CircuitGroupAssignment {
+	return domain.CircuitGroupAssignment{
+		ID:          wire.ID,
+		URL:         wire.URL,
+		Group:       wireNestedToDomain(wire.Group),
+		Member:      wireNestedToDomain(wire.Member),
+		Priority:    wireLabelToDomain(wire.Priority),
+		Created:     wire.Created,
+		LastUpdated: wire.LastUpdated,
+	}
+}
+
+// virtualCircuitWriteToWire converts a domain virtual circuit write DTO to the
+// wire request model. The fields map one-to-one; nil pointers on the domain
+// side remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func virtualCircuitWriteToWire(input domain.VirtualCircuitWrite) WireVirtualCircuitWrite {
+	return WireVirtualCircuitWrite{
+		CID:             input.CID,
+		Type:            input.Type,
+		ProviderNetwork: input.ProviderNetwork,
+		Status:          input.Status,
+		Description:     input.Description,
+		Tags:            input.Tags,
+		CustomFields:    input.CustomFields,
+	}
+}
+
+// unmarshalVirtualCircuit decodes a virtual circuit response body into a
+// domain.VirtualCircuit.
+func unmarshalVirtualCircuit(raw domain.RawObject) (*domain.VirtualCircuit, error) {
+	var w WireVirtualCircuit
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual circuit: %w", err)
+	}
+	d := wireVirtualCircuitToDomain(w)
+
+	return &d, nil
+}
+
+// wireVirtualCircuitToDomain converts a wire virtual circuit to the domain
+// model.
+func wireVirtualCircuitToDomain(wire WireVirtualCircuit) domain.VirtualCircuit {
+	return domain.VirtualCircuit{
+		ID:              wire.ID,
+		URL:             wire.URL,
+		CID:             wire.CID,
+		Type:            wireNestedToDomain(wire.Type),
+		ProviderNetwork: wireNestedToDomain(wire.ProviderNetwork),
+		Status:          wireLabelToDomain(wire.Status),
+		Description:     wire.Description,
+		Tags:            wireTagsToDomain(wire.Tags),
+		CustomFields:    wire.CustomFields,
+		Created:         wire.Created,
+		LastUpdated:     wire.LastUpdated,
+	}
+}
+
+// virtualCircuitTypeWriteToWire converts a domain virtual circuit type write
+// DTO to the wire request model. The fields map one-to-one; nil pointers on the
+// domain side remain nil on the wire side so json.Marshal omits them (required
+// for a partial PATCH body).
+func virtualCircuitTypeWriteToWire(input domain.VirtualCircuitTypeWrite) WireVirtualCircuitTypeWrite {
+	return WireVirtualCircuitTypeWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalVirtualCircuitType decodes a virtual circuit type response body into
+// a domain.VirtualCircuitType.
+func unmarshalVirtualCircuitType(raw domain.RawObject) (*domain.VirtualCircuitType, error) {
+	var w WireVirtualCircuitType
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual circuit type: %w", err)
+	}
+	d := wireVirtualCircuitTypeToDomain(w)
+
+	return &d, nil
+}
+
+// wireVirtualCircuitTypeToDomain converts a wire virtual circuit type to the
+// domain model.
+func wireVirtualCircuitTypeToDomain(wire WireVirtualCircuitType) domain.VirtualCircuitType {
+	return domain.VirtualCircuitType{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Display:      wire.Display,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// virtualCircuitTerminationWriteToWire converts a domain virtual circuit
+// termination write DTO to the wire request model. The fields map one-to-one;
+// nil pointers on the domain side remain nil on the wire side so json.Marshal
+// omits them (required for a partial PATCH body).
+func virtualCircuitTerminationWriteToWire(
+	input domain.VirtualCircuitTerminationWrite,
+) WireVirtualCircuitTerminationWrite {
+	return WireVirtualCircuitTerminationWrite{
+		VirtualCircuit: input.VirtualCircuit,
+		Role:           input.Role,
+		Interface:      input.Interface,
+	}
+}
+
+// unmarshalVirtualCircuitTermination decodes a virtual circuit termination
+// response body into a domain.VirtualCircuitTermination.
+func unmarshalVirtualCircuitTermination(raw domain.RawObject) (*domain.VirtualCircuitTermination, error) {
+	var w WireVirtualCircuitTermination
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual circuit termination: %w", err)
+	}
+	d := wireVirtualCircuitTerminationToDomain(w)
+
+	return &d, nil
+}
+
+// wireVirtualCircuitTerminationToDomain converts a wire virtual circuit
+// termination to the domain model.
+func wireVirtualCircuitTerminationToDomain(wire WireVirtualCircuitTermination) domain.VirtualCircuitTermination {
+	return domain.VirtualCircuitTermination{
+		ID:             wire.ID,
+		URL:            wire.URL,
+		VirtualCircuit: wireNestedToDomain(wire.VirtualCircuit),
+		Role:           wireLabelToDomain(wire.Role),
+		Interface:      wireNestedToDomain(wire.Interface),
+		Created:        wire.Created,
+		LastUpdated:    wire.LastUpdated,
 	}
 }

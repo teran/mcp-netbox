@@ -385,4 +385,71 @@ type NetworkRepository interface {
 		ctx context.Context, token string, id int, in VirtualMachineTypeWrite,
 	) (*VirtualMachineType, error)
 	DeleteVirtualMachineType(ctx context.Context, token string, id int) error
+
+	ListProviderAccounts(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[ProviderAccount], error)
+	CreateProviderAccount(ctx context.Context, token string, in ProviderAccountWrite) (*ProviderAccount, error)
+	UpdateProviderAccount(
+		ctx context.Context, token string, id int, in ProviderAccountWrite,
+	) (*ProviderAccount, error)
+	DeleteProviderAccount(ctx context.Context, token string, id int) error
+
+	ListProviderNetworks(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[ProviderNetwork], error)
+	CreateProviderNetwork(ctx context.Context, token string, in ProviderNetworkWrite) (*ProviderNetwork, error)
+	UpdateProviderNetwork(
+		ctx context.Context, token string, id int, in ProviderNetworkWrite,
+	) (*ProviderNetwork, error)
+	DeleteProviderNetwork(ctx context.Context, token string, id int) error
+
+	ListCircuitGroups(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[CircuitGroup], error)
+	CreateCircuitGroup(ctx context.Context, token string, in CircuitGroupWrite) (*CircuitGroup, error)
+	UpdateCircuitGroup(ctx context.Context, token string, id int, in CircuitGroupWrite) (*CircuitGroup, error)
+	DeleteCircuitGroup(ctx context.Context, token string, id int) error
+
+	ListCircuitGroupAssignments(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[CircuitGroupAssignment], error)
+	CreateCircuitGroupAssignment(
+		ctx context.Context, token string, in CircuitGroupAssignmentWrite,
+	) (*CircuitGroupAssignment, error)
+	UpdateCircuitGroupAssignment(
+		ctx context.Context, token string, id int, in CircuitGroupAssignmentWrite,
+	) (*CircuitGroupAssignment, error)
+	DeleteCircuitGroupAssignment(ctx context.Context, token string, id int) error
+
+	ListVirtualCircuits(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[VirtualCircuit], error)
+	CreateVirtualCircuit(ctx context.Context, token string, in VirtualCircuitWrite) (*VirtualCircuit, error)
+	UpdateVirtualCircuit(
+		ctx context.Context, token string, id int, in VirtualCircuitWrite,
+	) (*VirtualCircuit, error)
+	DeleteVirtualCircuit(ctx context.Context, token string, id int) error
+
+	ListVirtualCircuitTypes(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[VirtualCircuitType], error)
+	CreateVirtualCircuitType(
+		ctx context.Context, token string, in VirtualCircuitTypeWrite,
+	) (*VirtualCircuitType, error)
+	UpdateVirtualCircuitType(
+		ctx context.Context, token string, id int, in VirtualCircuitTypeWrite,
+	) (*VirtualCircuitType, error)
+	DeleteVirtualCircuitType(ctx context.Context, token string, id int) error
+
+	ListVirtualCircuitTerminations(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[VirtualCircuitTermination], error)
+	CreateVirtualCircuitTermination(
+		ctx context.Context, token string, in VirtualCircuitTerminationWrite,
+	) (*VirtualCircuitTermination, error)
+	UpdateVirtualCircuitTermination(
+		ctx context.Context, token string, id int, in VirtualCircuitTerminationWrite,
+	) (*VirtualCircuitTermination, error)
+	DeleteVirtualCircuitTermination(ctx context.Context, token string, id int) error
 }

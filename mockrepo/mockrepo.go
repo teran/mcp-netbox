@@ -633,6 +633,76 @@ type MockRepo struct {
 		ctx context.Context, token string, id int, in domain.VirtualMachineTypeWrite,
 	) (*domain.VirtualMachineType, error)
 	DeleteVirtualMachineTypeFunc func(ctx context.Context, token string, id int) error
+	ListProviderAccountsFunc     func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ProviderAccount], error)
+	CreateProviderAccountFunc func(
+		ctx context.Context, token string, in domain.ProviderAccountWrite,
+	) (*domain.ProviderAccount, error)
+	UpdateProviderAccountFunc func(
+		ctx context.Context, token string, id int, in domain.ProviderAccountWrite,
+	) (*domain.ProviderAccount, error)
+	DeleteProviderAccountFunc func(ctx context.Context, token string, id int) error
+	ListProviderNetworksFunc  func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ProviderNetwork], error)
+	CreateProviderNetworkFunc func(
+		ctx context.Context, token string, in domain.ProviderNetworkWrite,
+	) (*domain.ProviderNetwork, error)
+	UpdateProviderNetworkFunc func(
+		ctx context.Context, token string, id int, in domain.ProviderNetworkWrite,
+	) (*domain.ProviderNetwork, error)
+	DeleteProviderNetworkFunc func(ctx context.Context, token string, id int) error
+	ListCircuitGroupsFunc     func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.CircuitGroup], error)
+	CreateCircuitGroupFunc func(
+		ctx context.Context, token string, in domain.CircuitGroupWrite,
+	) (*domain.CircuitGroup, error)
+	UpdateCircuitGroupFunc func(
+		ctx context.Context, token string, id int, in domain.CircuitGroupWrite,
+	) (*domain.CircuitGroup, error)
+	DeleteCircuitGroupFunc          func(ctx context.Context, token string, id int) error
+	ListCircuitGroupAssignmentsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.CircuitGroupAssignment], error)
+	CreateCircuitGroupAssignmentFunc func(
+		ctx context.Context, token string, in domain.CircuitGroupAssignmentWrite,
+	) (*domain.CircuitGroupAssignment, error)
+	UpdateCircuitGroupAssignmentFunc func(
+		ctx context.Context, token string, id int, in domain.CircuitGroupAssignmentWrite,
+	) (*domain.CircuitGroupAssignment, error)
+	DeleteCircuitGroupAssignmentFunc func(ctx context.Context, token string, id int) error
+	ListVirtualCircuitsFunc          func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.VirtualCircuit], error)
+	CreateVirtualCircuitFunc func(
+		ctx context.Context, token string, in domain.VirtualCircuitWrite,
+	) (*domain.VirtualCircuit, error)
+	UpdateVirtualCircuitFunc func(
+		ctx context.Context, token string, id int, in domain.VirtualCircuitWrite,
+	) (*domain.VirtualCircuit, error)
+	DeleteVirtualCircuitFunc    func(ctx context.Context, token string, id int) error
+	ListVirtualCircuitTypesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.VirtualCircuitType], error)
+	CreateVirtualCircuitTypeFunc func(
+		ctx context.Context, token string, in domain.VirtualCircuitTypeWrite,
+	) (*domain.VirtualCircuitType, error)
+	UpdateVirtualCircuitTypeFunc func(
+		ctx context.Context, token string, id int, in domain.VirtualCircuitTypeWrite,
+	) (*domain.VirtualCircuitType, error)
+	DeleteVirtualCircuitTypeFunc       func(ctx context.Context, token string, id int) error
+	ListVirtualCircuitTerminationsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.VirtualCircuitTermination], error)
+	CreateVirtualCircuitTerminationFunc func(
+		ctx context.Context, token string, in domain.VirtualCircuitTerminationWrite,
+	) (*domain.VirtualCircuitTermination, error)
+	UpdateVirtualCircuitTerminationFunc func(
+		ctx context.Context, token string, id int, in domain.VirtualCircuitTerminationWrite,
+	) (*domain.VirtualCircuitTermination, error)
+	DeleteVirtualCircuitTerminationFunc func(ctx context.Context, token string, id int) error
 }
 
 // ListSites delegates to ListSitesFunc.
@@ -2168,6 +2238,188 @@ func (m *MockRepo) UpdateVirtualMachineType(
 // DeleteVirtualMachineType delegates to DeleteVirtualMachineTypeFunc.
 func (m *MockRepo) DeleteVirtualMachineType(ctx context.Context, token string, id int) error {
 	return m.DeleteVirtualMachineTypeFunc(ctx, token, id)
+}
+
+// ListProviderAccounts delegates to ListProviderAccountsFunc.
+func (m *MockRepo) ListProviderAccounts(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ProviderAccount], error) {
+	return m.ListProviderAccountsFunc(ctx, token, params)
+}
+
+// CreateProviderAccount delegates to CreateProviderAccountFunc.
+func (m *MockRepo) CreateProviderAccount(
+	ctx context.Context, token string, in domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	return m.CreateProviderAccountFunc(ctx, token, in)
+}
+
+// UpdateProviderAccount delegates to UpdateProviderAccountFunc.
+func (m *MockRepo) UpdateProviderAccount(
+	ctx context.Context, token string, id int, in domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	return m.UpdateProviderAccountFunc(ctx, token, id, in)
+}
+
+// DeleteProviderAccount delegates to DeleteProviderAccountFunc.
+func (m *MockRepo) DeleteProviderAccount(ctx context.Context, token string, id int) error {
+	return m.DeleteProviderAccountFunc(ctx, token, id)
+}
+
+// ListProviderNetworks delegates to ListProviderNetworksFunc.
+func (m *MockRepo) ListProviderNetworks(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ProviderNetwork], error) {
+	return m.ListProviderNetworksFunc(ctx, token, params)
+}
+
+// CreateProviderNetwork delegates to CreateProviderNetworkFunc.
+func (m *MockRepo) CreateProviderNetwork(
+	ctx context.Context, token string, in domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	return m.CreateProviderNetworkFunc(ctx, token, in)
+}
+
+// UpdateProviderNetwork delegates to UpdateProviderNetworkFunc.
+func (m *MockRepo) UpdateProviderNetwork(
+	ctx context.Context, token string, id int, in domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	return m.UpdateProviderNetworkFunc(ctx, token, id, in)
+}
+
+// DeleteProviderNetwork delegates to DeleteProviderNetworkFunc.
+func (m *MockRepo) DeleteProviderNetwork(ctx context.Context, token string, id int) error {
+	return m.DeleteProviderNetworkFunc(ctx, token, id)
+}
+
+// ListCircuitGroups delegates to ListCircuitGroupsFunc.
+func (m *MockRepo) ListCircuitGroups(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroup], error) {
+	return m.ListCircuitGroupsFunc(ctx, token, params)
+}
+
+// CreateCircuitGroup delegates to CreateCircuitGroupFunc.
+func (m *MockRepo) CreateCircuitGroup(
+	ctx context.Context, token string, in domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	return m.CreateCircuitGroupFunc(ctx, token, in)
+}
+
+// UpdateCircuitGroup delegates to UpdateCircuitGroupFunc.
+func (m *MockRepo) UpdateCircuitGroup(
+	ctx context.Context, token string, id int, in domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	return m.UpdateCircuitGroupFunc(ctx, token, id, in)
+}
+
+// DeleteCircuitGroup delegates to DeleteCircuitGroupFunc.
+func (m *MockRepo) DeleteCircuitGroup(ctx context.Context, token string, id int) error {
+	return m.DeleteCircuitGroupFunc(ctx, token, id)
+}
+
+// ListCircuitGroupAssignments delegates to ListCircuitGroupAssignmentsFunc.
+func (m *MockRepo) ListCircuitGroupAssignments(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroupAssignment], error) {
+	return m.ListCircuitGroupAssignmentsFunc(ctx, token, params)
+}
+
+// CreateCircuitGroupAssignment delegates to CreateCircuitGroupAssignmentFunc.
+func (m *MockRepo) CreateCircuitGroupAssignment(
+	ctx context.Context, token string, in domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	return m.CreateCircuitGroupAssignmentFunc(ctx, token, in)
+}
+
+// UpdateCircuitGroupAssignment delegates to UpdateCircuitGroupAssignmentFunc.
+func (m *MockRepo) UpdateCircuitGroupAssignment(
+	ctx context.Context, token string, id int, in domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	return m.UpdateCircuitGroupAssignmentFunc(ctx, token, id, in)
+}
+
+// DeleteCircuitGroupAssignment delegates to DeleteCircuitGroupAssignmentFunc.
+func (m *MockRepo) DeleteCircuitGroupAssignment(ctx context.Context, token string, id int) error {
+	return m.DeleteCircuitGroupAssignmentFunc(ctx, token, id)
+}
+
+// ListVirtualCircuits delegates to ListVirtualCircuitsFunc.
+func (m *MockRepo) ListVirtualCircuits(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuit], error) {
+	return m.ListVirtualCircuitsFunc(ctx, token, params)
+}
+
+// CreateVirtualCircuit delegates to CreateVirtualCircuitFunc.
+func (m *MockRepo) CreateVirtualCircuit(
+	ctx context.Context, token string, in domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	return m.CreateVirtualCircuitFunc(ctx, token, in)
+}
+
+// UpdateVirtualCircuit delegates to UpdateVirtualCircuitFunc.
+func (m *MockRepo) UpdateVirtualCircuit(
+	ctx context.Context, token string, id int, in domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	return m.UpdateVirtualCircuitFunc(ctx, token, id, in)
+}
+
+// DeleteVirtualCircuit delegates to DeleteVirtualCircuitFunc.
+func (m *MockRepo) DeleteVirtualCircuit(ctx context.Context, token string, id int) error {
+	return m.DeleteVirtualCircuitFunc(ctx, token, id)
+}
+
+// ListVirtualCircuitTypes delegates to ListVirtualCircuitTypesFunc.
+func (m *MockRepo) ListVirtualCircuitTypes(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitType], error) {
+	return m.ListVirtualCircuitTypesFunc(ctx, token, params)
+}
+
+// CreateVirtualCircuitType delegates to CreateVirtualCircuitTypeFunc.
+func (m *MockRepo) CreateVirtualCircuitType(
+	ctx context.Context, token string, in domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	return m.CreateVirtualCircuitTypeFunc(ctx, token, in)
+}
+
+// UpdateVirtualCircuitType delegates to UpdateVirtualCircuitTypeFunc.
+func (m *MockRepo) UpdateVirtualCircuitType(
+	ctx context.Context, token string, id int, in domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	return m.UpdateVirtualCircuitTypeFunc(ctx, token, id, in)
+}
+
+// DeleteVirtualCircuitType delegates to DeleteVirtualCircuitTypeFunc.
+func (m *MockRepo) DeleteVirtualCircuitType(ctx context.Context, token string, id int) error {
+	return m.DeleteVirtualCircuitTypeFunc(ctx, token, id)
+}
+
+// ListVirtualCircuitTerminations delegates to ListVirtualCircuitTerminationsFunc.
+func (m *MockRepo) ListVirtualCircuitTerminations(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitTermination], error) {
+	return m.ListVirtualCircuitTerminationsFunc(ctx, token, params)
+}
+
+// CreateVirtualCircuitTermination delegates to CreateVirtualCircuitTerminationFunc.
+func (m *MockRepo) CreateVirtualCircuitTermination(
+	ctx context.Context, token string, in domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	return m.CreateVirtualCircuitTerminationFunc(ctx, token, in)
+}
+
+// UpdateVirtualCircuitTermination delegates to UpdateVirtualCircuitTerminationFunc.
+func (m *MockRepo) UpdateVirtualCircuitTermination(
+	ctx context.Context, token string, id int, in domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	return m.UpdateVirtualCircuitTerminationFunc(ctx, token, id, in)
+}
+
+// DeleteVirtualCircuitTermination delegates to DeleteVirtualCircuitTerminationFunc.
+func (m *MockRepo) DeleteVirtualCircuitTermination(ctx context.Context, token string, id int) error {
+	return m.DeleteVirtualCircuitTerminationFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -3730,5 +3982,195 @@ func (r *NilRepo) UpdateVirtualMachineType(
 
 // DeleteVirtualMachineType always succeeds.
 func (r *NilRepo) DeleteVirtualMachineType(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListProviderAccounts returns an empty provider account page.
+func (r *NilRepo) ListProviderAccounts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ProviderAccount], error) {
+	return &domain.PaginatedResponse[domain.ProviderAccount]{Count: 0, Results: []domain.ProviderAccount{}}, nil
+}
+
+// CreateProviderAccount returns a provider account with id 1.
+func (r *NilRepo) CreateProviderAccount(
+	_ context.Context, _ string, in domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	return &domain.ProviderAccount{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateProviderAccount returns the provider account with the given id.
+func (r *NilRepo) UpdateProviderAccount(
+	_ context.Context, _ string, id int, in domain.ProviderAccountWrite,
+) (*domain.ProviderAccount, error) {
+	return &domain.ProviderAccount{ID: id, Name: in.Name}, nil
+}
+
+// DeleteProviderAccount always succeeds.
+func (r *NilRepo) DeleteProviderAccount(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListProviderNetworks returns an empty provider network page.
+func (r *NilRepo) ListProviderNetworks(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ProviderNetwork], error) {
+	return &domain.PaginatedResponse[domain.ProviderNetwork]{Count: 0, Results: []domain.ProviderNetwork{}}, nil
+}
+
+// CreateProviderNetwork returns a provider network with id 1.
+func (r *NilRepo) CreateProviderNetwork(
+	_ context.Context, _ string, in domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	return &domain.ProviderNetwork{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateProviderNetwork returns the provider network with the given id.
+func (r *NilRepo) UpdateProviderNetwork(
+	_ context.Context, _ string, id int, in domain.ProviderNetworkWrite,
+) (*domain.ProviderNetwork, error) {
+	return &domain.ProviderNetwork{ID: id, Name: in.Name}, nil
+}
+
+// DeleteProviderNetwork always succeeds.
+func (r *NilRepo) DeleteProviderNetwork(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListCircuitGroups returns an empty circuit group page.
+func (r *NilRepo) ListCircuitGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroup], error) {
+	return &domain.PaginatedResponse[domain.CircuitGroup]{Count: 0, Results: []domain.CircuitGroup{}}, nil
+}
+
+// CreateCircuitGroup returns a circuit group with id 1.
+func (r *NilRepo) CreateCircuitGroup(
+	_ context.Context, _ string, in domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	return &domain.CircuitGroup{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateCircuitGroup returns the circuit group with the given id.
+func (r *NilRepo) UpdateCircuitGroup(
+	_ context.Context, _ string, id int, in domain.CircuitGroupWrite,
+) (*domain.CircuitGroup, error) {
+	return &domain.CircuitGroup{ID: id, Name: in.Name}, nil
+}
+
+// DeleteCircuitGroup always succeeds.
+func (r *NilRepo) DeleteCircuitGroup(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListCircuitGroupAssignments returns an empty circuit group assignment page.
+func (r *NilRepo) ListCircuitGroupAssignments(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.CircuitGroupAssignment], error) {
+	return &domain.PaginatedResponse[domain.CircuitGroupAssignment]{
+		Count: 0, Results: []domain.CircuitGroupAssignment{},
+	}, nil
+}
+
+// CreateCircuitGroupAssignment returns a circuit group assignment with id 1.
+func (r *NilRepo) CreateCircuitGroupAssignment(
+	_ context.Context, _ string, in domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	return &domain.CircuitGroupAssignment{ID: 1, Group: &domain.Nested{ID: in.Group}}, nil
+}
+
+// UpdateCircuitGroupAssignment returns the circuit group assignment with the
+// given id.
+func (r *NilRepo) UpdateCircuitGroupAssignment(
+	_ context.Context, _ string, id int, _ domain.CircuitGroupAssignmentWrite,
+) (*domain.CircuitGroupAssignment, error) {
+	return &domain.CircuitGroupAssignment{ID: id}, nil
+}
+
+// DeleteCircuitGroupAssignment always succeeds.
+func (r *NilRepo) DeleteCircuitGroupAssignment(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListVirtualCircuits returns an empty virtual circuit page.
+func (r *NilRepo) ListVirtualCircuits(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuit], error) {
+	return &domain.PaginatedResponse[domain.VirtualCircuit]{Count: 0, Results: []domain.VirtualCircuit{}}, nil
+}
+
+// CreateVirtualCircuit returns a virtual circuit with id 1.
+func (r *NilRepo) CreateVirtualCircuit(
+	_ context.Context, _ string, in domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	return &domain.VirtualCircuit{ID: 1, CID: in.CID}, nil
+}
+
+// UpdateVirtualCircuit returns the virtual circuit with the given id.
+func (r *NilRepo) UpdateVirtualCircuit(
+	_ context.Context, _ string, id int, in domain.VirtualCircuitWrite,
+) (*domain.VirtualCircuit, error) {
+	return &domain.VirtualCircuit{ID: id, CID: in.CID}, nil
+}
+
+// DeleteVirtualCircuit always succeeds.
+func (r *NilRepo) DeleteVirtualCircuit(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListVirtualCircuitTypes returns an empty virtual circuit type page.
+func (r *NilRepo) ListVirtualCircuitTypes(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitType], error) {
+	return &domain.PaginatedResponse[domain.VirtualCircuitType]{Count: 0, Results: []domain.VirtualCircuitType{}}, nil
+}
+
+// CreateVirtualCircuitType returns a virtual circuit type with id 1.
+func (r *NilRepo) CreateVirtualCircuitType(
+	_ context.Context, _ string, in domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	return &domain.VirtualCircuitType{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateVirtualCircuitType returns the virtual circuit type with the given id.
+func (r *NilRepo) UpdateVirtualCircuitType(
+	_ context.Context, _ string, id int, in domain.VirtualCircuitTypeWrite,
+) (*domain.VirtualCircuitType, error) {
+	return &domain.VirtualCircuitType{ID: id, Name: in.Name}, nil
+}
+
+// DeleteVirtualCircuitType always succeeds.
+func (r *NilRepo) DeleteVirtualCircuitType(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListVirtualCircuitTerminations returns an empty virtual circuit termination
+// page.
+func (r *NilRepo) ListVirtualCircuitTerminations(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualCircuitTermination], error) {
+	return &domain.PaginatedResponse[domain.VirtualCircuitTermination]{
+		Count: 0, Results: []domain.VirtualCircuitTermination{},
+	}, nil
+}
+
+// CreateVirtualCircuitTermination returns a virtual circuit termination with id
+// 1.
+func (r *NilRepo) CreateVirtualCircuitTermination(
+	_ context.Context, _ string, in domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	return &domain.VirtualCircuitTermination{ID: 1, VirtualCircuit: &domain.Nested{ID: in.VirtualCircuit}}, nil
+}
+
+// UpdateVirtualCircuitTermination returns the virtual circuit termination with
+// the given id.
+func (r *NilRepo) UpdateVirtualCircuitTermination(
+	_ context.Context, _ string, id int, _ domain.VirtualCircuitTerminationWrite,
+) (*domain.VirtualCircuitTermination, error) {
+	return &domain.VirtualCircuitTermination{ID: id}, nil
+}
+
+// DeleteVirtualCircuitTermination always succeeds.
+func (r *NilRepo) DeleteVirtualCircuitTermination(_ context.Context, _ string, _ int) error {
 	return nil
 }

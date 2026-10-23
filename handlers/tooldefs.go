@@ -114,7 +114,9 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, " +
 				"inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, " +
 				"service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, " +
-				"vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type). " +
+				"vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type, " +
+				"provider_account, provider_network, circuit_group, circuit_group_assignment, virtual_circuit, " +
+				"virtual_circuit_type, virtual_circuit_termination). " +
 				"Returns a 404-style error if the object does " +
 				"not exist or the token lacks permission.",
 			Instructions: "Use when you already know the object type and numeric ID. For searching without " +
@@ -2139,6 +2141,241 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"want to delete the VLAN translation rule, ideally by ID, and understands it is permanent " +
 				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
 				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_provider_accounts",
+			Title: "List Provider Accounts",
+			Description: "List circuits provider accounts in NetBox. Filter by provider or tag, or use q " +
+				"for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no provider accounts match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox provider accounts. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple provider accounts or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_provider_account",
+			Title: "Create Provider Account",
+			Description: "Create a circuits provider account in NetBox. Name is required; provide provider, " +
+				"account, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new provider account.",
+		},
+		{
+			Name:  "update_provider_account",
+			Title: "Update Provider Account",
+			Description: "Partially update a circuits provider account in NetBox by its numeric ID. Only " +
+				"the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing provider account.",
+		},
+		{
+			Name:  "delete_provider_account",
+			Title: "Delete Provider Account",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a provider account " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the provider account, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_provider_networks",
+			Title: "List Provider Networks",
+			Description: "List circuits provider networks in NetBox. Filter by provider or tag, or use q " +
+				"for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no provider networks match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox provider networks. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple provider networks or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_provider_network",
+			Title: "Create Provider Network",
+			Description: "Create a circuits provider network in NetBox. Name is required; provide provider, " +
+				"description, comments, tags and custom_fields as needed.",
+			Instructions: "Use to add a new provider network.",
+		},
+		{
+			Name:  "update_provider_network",
+			Title: "Update Provider Network",
+			Description: "Partially update a circuits provider network in NetBox by its numeric ID. Only " +
+				"the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing provider network.",
+		},
+		{
+			Name:  "delete_provider_network",
+			Title: "Delete Provider Network",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a provider network " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the provider network, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_circuit_groups",
+			Title: "List Circuit Groups",
+			Description: "List circuits circuit groups in NetBox. Filter by tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no circuit groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox circuit groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple circuit groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_circuit_group",
+			Title: "Create Circuit Group",
+			Description: "Create a circuits circuit group in NetBox. Name is required; provide description, " +
+				"tags and custom_fields as needed.",
+			Instructions: "Use to add a new circuit group.",
+		},
+		{
+			Name:  "update_circuit_group",
+			Title: "Update Circuit Group",
+			Description: "Partially update a circuits circuit group in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing circuit group.",
+		},
+		{
+			Name:  "delete_circuit_group",
+			Title: "Delete Circuit Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a circuit group from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the circuit group, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_circuit_group_assignments",
+			Title: "List Circuit Group Assignments",
+			Description: "List circuits circuit group assignments in NetBox. Filter by group or circuit, or " +
+				"use q for free-text search. Results are paginated: set page and page_size (max 1000). An " +
+				"empty results array means no circuit group assignments match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox circuit group assignments. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple assignments or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_circuit_group_assignment",
+			Title: "Create Circuit Group Assignment",
+			Description: "Create a circuits circuit group assignment in NetBox. Group and circuit are " +
+				"required; provide priority as needed.",
+			Instructions: "Use to map a circuit to a circuit group.",
+		},
+		{
+			Name:  "update_circuit_group_assignment",
+			Title: "Update Circuit Group Assignment",
+			Description: "Partially update a circuits circuit group assignment in NetBox by its numeric " +
+				"ID. Only the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing circuit group assignment.",
+		},
+		{
+			Name:  "delete_circuit_group_assignment",
+			Title: "Delete Circuit Group Assignment",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a circuit group " +
+				"assignment from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the circuit group assignment, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_circuits",
+			Title: "List Virtual Circuits",
+			Description: "List circuits virtual circuits in NetBox. Filter by type, provider_network, " +
+				"status or tag, or use q for free-text search. Results are paginated: set page and page_size " +
+				"(max 1000). An empty results array means no virtual circuits match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual circuits. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple virtual circuits or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_virtual_circuit",
+			Title: "Create Virtual Circuit",
+			Description: "Create a circuits virtual circuit in NetBox. Name is required; provide type, " +
+				"provider_network, status, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new virtual circuit.",
+		},
+		{
+			Name:  "update_virtual_circuit",
+			Title: "Update Virtual Circuit",
+			Description: "Partially update a circuits virtual circuit in NetBox by its numeric ID. Only " +
+				"the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual circuit.",
+		},
+		{
+			Name:  "delete_virtual_circuit",
+			Title: "Delete Virtual Circuit",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual circuit " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual circuit, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_circuit_types",
+			Title: "List Virtual Circuit Types",
+			Description: "List circuits virtual circuit types in NetBox. Filter by tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no virtual circuit types match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual circuit types. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple virtual circuit types or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_virtual_circuit_type",
+			Title: "Create Virtual Circuit Type",
+			Description: "Create a circuits virtual circuit type in NetBox. Name is required; provide slug, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new virtual circuit type.",
+		},
+		{
+			Name:  "update_virtual_circuit_type",
+			Title: "Update Virtual Circuit Type",
+			Description: "Partially update a circuits virtual circuit type in NetBox by its numeric ID. " +
+				"Only the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual circuit type.",
+		},
+		{
+			Name:  "delete_virtual_circuit_type",
+			Title: "Delete Virtual Circuit Type",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual circuit " +
+				"type from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual circuit type, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_circuit_terminations",
+			Title: "List Virtual Circuit Terminations",
+			Description: "List circuits virtual circuit terminations in NetBox. Filter by virtual_circuit, " +
+				"interface_type or interface_id, or use q for free-text search. Results are paginated: set " +
+				"page and page_size (max 1000). An empty results array means no terminations match the " +
+				"filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual circuit terminations. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple terminations or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_virtual_circuit_termination",
+			Title: "Create Virtual Circuit Termination",
+			Description: "Create a circuits virtual circuit termination in NetBox. Virtual circuit is " +
+				"required; provide role, interface_type and interface_id as needed.",
+			Instructions: "Use to attach a virtual circuit to an interface.",
+		},
+		{
+			Name:  "update_virtual_circuit_termination",
+			Title: "Update Virtual Circuit Termination",
+			Description: "Partially update a circuits virtual circuit termination in NetBox by its numeric " +
+				"ID. Only the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual circuit termination.",
+		},
+		{
+			Name:  "delete_virtual_circuit_termination",
+			Title: "Delete Virtual Circuit Termination",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual circuit " +
+				"termination from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual circuit termination, ideally by ID, and understands it is " +
+				"permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without " +
+				"confirming deletion, ask for explicit confirmation first.",
 		},
 	}
 }
