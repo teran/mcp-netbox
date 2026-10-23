@@ -1737,6 +1737,20 @@ type RoleWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// TagWrite is the domain DTO for creating or updating a NetBox extras tag. It
+// carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields (slug,
+// color, description) are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty".
+type TagWrite struct {
+	Name        string  `json:"name,omitempty"`
+	Slug        *string `json:"slug,omitempty"`
+	Color       *string `json:"color,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
 // ContactWrite is the domain DTO for creating or updating a NetBox tenancy
 // contact. It carries only the writable fields.
 //

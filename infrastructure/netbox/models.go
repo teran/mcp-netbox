@@ -406,6 +406,15 @@ type WireRoleWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireTagWrite is the wire request model for extras tag create/update (POST/
+// PATCH body). Its json tags intentionally mirror NetBox's writable fields.
+type WireTagWrite struct {
+	Name        string  `json:"name,omitempty"`
+	Slug        *string `json:"slug,omitempty"`
+	Color       *string `json:"color,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
 // WireContactWrite is the wire request model for tenancy contact create/update
 // (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
 // fields.

@@ -4903,4 +4903,112 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 			},
 		),
 	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_roles"],
+		metrics,
+		"get_roles",
+		WrapToolHandler[RolesInput, PaginatedOutput[domain.Role]](
+			metrics,
+			"get_roles",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RolesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.Role], error) {
+				return NewGetRolesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_tenants"],
+		metrics,
+		"get_tenants",
+		WrapToolHandler[TenantsInput, PaginatedOutput[domain.Tenant]](
+			metrics,
+			"get_tenants",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TenantsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.Tenant], error) {
+				return NewGetTenantsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_tags"],
+		metrics,
+		"get_tags",
+		WrapToolHandler[TagsInput, PaginatedOutput[domain.Tag]](
+			metrics,
+			"get_tags",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TagsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.Tag], error) {
+				return NewGetTagsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_tag"],
+		metrics,
+		"create_tag",
+		WrapToolHandler[TagCreateInput, TagOutput](
+			metrics,
+			"create_tag",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TagCreateInput,
+			) (*mcp.CallToolResult, TagOutput, error) {
+				return NewCreateTagHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_tag"],
+		metrics,
+		"update_tag",
+		WrapToolHandler[TagUpdateInput, TagOutput](
+			metrics,
+			"update_tag",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TagUpdateInput,
+			) (*mcp.CallToolResult, TagOutput, error) {
+				return NewUpdateTagHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_tag"],
+		metrics,
+		"delete_tag",
+		WrapToolHandler[TagDeleteInput, struct{}](
+			metrics,
+			"delete_tag",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TagDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteTagHandler(svc)(ctx, req, in)
+			},
+		),
+	)
 }

@@ -1365,6 +1365,36 @@ func (s *stubRepo) DeleteVirtualCircuitTermination(_ context.Context, _ string, 
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) ListRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Role], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) ListTenants(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Tenant], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) ListTags(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Tag], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateTag(_ context.Context, _ string, _ domain.TagWrite) (*domain.Tag, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateTag(_ context.Context, _ string, _ int, _ domain.TagWrite) (*domain.Tag, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteTag(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 

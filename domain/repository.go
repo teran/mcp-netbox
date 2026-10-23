@@ -452,4 +452,12 @@ type NetworkRepository interface {
 		ctx context.Context, token string, id int, in VirtualCircuitTerminationWrite,
 	) (*VirtualCircuitTermination, error)
 	DeleteVirtualCircuitTermination(ctx context.Context, token string, id int) error
+
+	ListRoles(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Role], error)
+	ListTenants(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Tenant], error)
+
+	ListTags(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Tag], error)
+	CreateTag(ctx context.Context, token string, in TagWrite) (*Tag, error)
+	UpdateTag(ctx context.Context, token string, id int, in TagWrite) (*Tag, error)
+	DeleteTag(ctx context.Context, token string, id int) error
 }

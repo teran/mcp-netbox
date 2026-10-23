@@ -99,6 +99,7 @@ var objectTypeToEndpoint = map[string]string{
 	"virtual_circuit":             "/api/circuits/virtual-circuits/",
 	"virtual_circuit_type":        "/api/circuits/virtual-circuit-types/",
 	"virtual_circuit_termination": "/api/circuits/virtual-circuit-terminations/",
+	"tag":                         "/api/extras/tags/",
 }
 
 // maxBodySize is the maximum response body size accepted from NetBox. Larger
@@ -4382,6 +4383,96 @@ func (c *Client) DeleteVirtualCircuitTermination(ctx context.Context, token stri
 	return mErr
 }
 
+// ListRoles returns a paginated list of IPAM roles.
+func (c *Client) ListRoles(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.Role], error,
+) {
+	raw, err := c.get(ctx, token, "/api/ipam/roles/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireRole]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal roles: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireRoleToDomain), nil
+}
+
+// ListTenants returns a paginated list of tenancy tenants.
+func (c *Client) ListTenants(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.Tenant], error,
+) {
+	raw, err := c.get(ctx, token, "/api/tenancy/tenants/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireTenant]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tenants: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireTenantToDomain), nil
+}
+
+// ListTags returns a paginated list of extras tags.
+func (c *Client) ListTags(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.Tag], error,
+) {
+	raw, err := c.get(ctx, token, "/api/extras/tags/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireTag]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tags: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireTagToDomain), nil
+}
+
+// CreateTag creates a new tag via POST /api/extras/tags/.
+func (c *Client) CreateTag(ctx context.Context, token string, in domain.TagWrite) (*domain.Tag, error) {
+	payload, err := json.Marshal(tagWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal tag create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/extras/tags/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalTag(raw)
+}
+
+// UpdateTag partially updates a tag via PATCH /api/extras/tags/<id>/.
+func (c *Client) UpdateTag(ctx context.Context, token string, objectID int, in domain.TagWrite) (
+	*domain.Tag, error,
+) {
+	payload, err := json.Marshal(tagWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal tag update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/extras/tags/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalTag(raw)
+}
+
+// DeleteTag deletes a tag via DELETE /api/extras/tags/<id>/.
+func (c *Client) DeleteTag(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/extras/tags/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
 // — conversion functions —
 
 // siteWriteToWire converts a domain write DTO to the wire request model. The
@@ -5736,6 +5827,39 @@ func wireRoleToDomain(wire WireRole) domain.Role {
 		CustomFields: wire.CustomFields,
 		Created:      wire.Created,
 		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// tagWriteToWire converts a domain tag write DTO to the wire request model. The
+// fields map one-to-one; nil pointers on the domain side remain nil on the wire
+// side so json.Marshal omits them (required for a partial PATCH body).
+func tagWriteToWire(input domain.TagWrite) WireTagWrite {
+	return WireTagWrite{
+		Name:        input.Name,
+		Slug:        input.Slug,
+		Color:       input.Color,
+		Description: input.Description,
+	}
+}
+
+// unmarshalTag decodes an extras tag response body into a domain.Tag.
+func unmarshalTag(raw domain.RawObject) (*domain.Tag, error) {
+	var w WireTag
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tag: %w", err)
+	}
+	d := wireTagToDomain(w)
+
+	return &d, nil
+}
+
+// wireTagToDomain converts a wire extras tag to the domain model.
+func wireTagToDomain(wire WireTag) domain.Tag {
+	return domain.Tag{
+		ID:   wire.ID,
+		URL:  wire.URL,
+		Name: wire.Name,
+		Slug: wire.Slug,
 	}
 }
 

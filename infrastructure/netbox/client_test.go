@@ -932,6 +932,7 @@ func TestWireObjectTypeToEndpoint(t *testing.T) {
 		{"virtual_chassis", "/api/dcim/virtual-chassis/"},
 		{"power_panel", "/api/dcim/power-panels/"},
 		{"inventory_item_role", "/api/dcim/inventory-item-roles/"},
+		{"tag", "/api/extras/tags/"},
 	}
 
 	for _, testCase := range cases {

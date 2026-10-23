@@ -47,6 +47,33 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"read-only tool over get_object_by_id when you need multiple tenant groups or don't yet know the exact ID.",
 		},
 		{
+			Name:  "get_roles",
+			Title: "List Roles",
+			Description: "List IPAM roles in NetBox with optional filters. Use q for free-text search, or filter " +
+				"by tag. Results are paginated: set page and page_size (max 1000). An empty results array means " +
+				"no roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox IPAM roles. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple roles or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_tenants",
+			Title: "List Tenants",
+			Description: "List tenancy tenants in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by group (tenant group ID) or tag. Results are paginated: set page and page_size (max " +
+				"1000). An empty results array means no tenants match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox tenants. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple tenants or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_tags",
+			Title: "List Tags",
+			Description: "List extras tags in NetBox with optional filters. Use q for free-text search, or filter " +
+				"by tag. Results are paginated: set page and page_size (max 1000). An empty results array means " +
+				"no tags match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox tags. All filters are additive. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple tags or don't yet know the exact ID.",
+		},
+		{
 			Name:  "get_devices",
 			Title: "List Devices",
 			Description: "List devices in NetBox with optional filters. Filter by site, role, manufacturer, " +
@@ -116,7 +143,7 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, " +
 				"vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type, " +
 				"provider_account, provider_network, circuit_group, circuit_group_assignment, virtual_circuit, " +
-				"virtual_circuit_type, virtual_circuit_termination). " +
+				"virtual_circuit_type, virtual_circuit_termination, tag). " +
 				"Returns a 404-style error if the object does " +
 				"not exist or the token lacks permission.",
 			Instructions: "Use when you already know the object type and numeric ID. For searching without " +
@@ -729,6 +756,33 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
 				"want to delete the tenant, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_tag",
+			Title: "Create Tag",
+			Description: "Create a new extras tag in NetBox. name is required; all other fields are " +
+				"optional. Provide slug/color/description as strings. Returns the created tag.",
+			Instructions: "Use only when the caller explicitly wants to create a tag and provides a name. " +
+				"This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_tag",
+			Title: "Update Tag",
+			Description: "Partially update an extras tag in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated tag.",
+			Instructions: "Use to modify one or more fields of an existing tag. Provide id plus only the " +
+				"fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_tag",
+			Title: "Delete Tag",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an extras tag from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the tag, ideally by ID, and understands it is permanent and cannot be " +
 				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
 				"ask for explicit confirmation first.",
 		},

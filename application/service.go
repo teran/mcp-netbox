@@ -3017,3 +3017,69 @@ func (s *NetworkService) DeleteVirtualCircuitTermination(ctx context.Context, id
 
 	return nil
 }
+
+// ListRoles returns the page of IPAM roles matching params.
+func (s *NetworkService) ListRoles(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Role], error) {
+	resp, err := s.repo.ListRoles(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list roles: %w", err)
+	}
+
+	return resp, nil
+}
+
+// ListTenants returns the page of tenancy tenants matching params.
+func (s *NetworkService) ListTenants(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Tenant], error) {
+	resp, err := s.repo.ListTenants(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list tenants: %w", err)
+	}
+
+	return resp, nil
+}
+
+// ListTags returns the page of extras tags matching params.
+func (s *NetworkService) ListTags(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Tag], error) {
+	resp, err := s.repo.ListTags(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list tags: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateTag relays an extras tag create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateTag(ctx context.Context, in domain.TagWrite) (*domain.Tag, error) {
+	resp, err := s.repo.CreateTag(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create tag: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateTag relays an extras tag update to the repository.
+func (s *NetworkService) UpdateTag(ctx context.Context, id int, in domain.TagWrite) (*domain.Tag, error) {
+	resp, err := s.repo.UpdateTag(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update tag: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteTag relays an extras tag delete to the repository.
+func (s *NetworkService) DeleteTag(ctx context.Context, id int) error {
+	if err := s.repo.DeleteTag(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete tag: %w", err)
+	}
+
+	return nil
+}

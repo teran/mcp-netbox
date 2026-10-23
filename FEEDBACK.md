@@ -94,3 +94,39 @@ not already present (`get_tags`, `create_tag`, `update_tag`, `delete_tag`).
 This rounds out the model so an agent can, end-to-end from MCP, enumerate roles and
 tenants, create them, and attach them (plus site) to prefixes and VLANs — without
 falling back to the UI or raw API.
+
+---
+
+## Missing tool: Custom Field management
+
+We want to attach a reference to an external ticket to prefixes and VLANs (for example,
+the work item under which the network was allocated). The natural NetBox mechanism is a
+**Custom Field** on those objects, populated via `custom_fields` when creating/updating a
+prefix or VLAN.
+
+The create/update tools for many object types (prefix, VLAN, tenant, site, etc.) already
+expose a `custom_fields` map, so **populating** existing custom field values works via
+MCP. However, there are **no tools to manage the custom field definitions themselves**:
+
+- **No `get_custom_fields`** — cannot enumerate existing custom fields.
+- **No `create_custom_field`** — cannot define a new custom field.
+- **No `update_custom_field`** — cannot alter an existing custom field definition.
+- **No `delete_custom_field`** — cannot remove a custom field.
+
+Without `create_custom_field`, an agent cannot set up a new custom field (such as a
+ticket-reference field on prefixes/VLANs) purely from MCP; the definition has to be
+created out-of-band via the UI or raw API (`/api/extras/custom-fields/`), and only then
+can values be populated through the existing `custom_fields` parameter.
+
+**Suggestion:** add Custom Field tools in the usual read → write/update → delete grouping:
+
+- `get_custom_fields` — list custom fields (optional `q`, `content_type`/object-type
+  filter, `tag`, pagination).
+- `create_custom_field` — `name`/`label` required, plus `type`, `content_types`
+  (which object types the field applies to), `group_name`, `description`, `required`,
+  `default`, `filter_logic`, `weight`, `ui_visibility`, `choices` (for select/multi-select).
+- `update_custom_field` — partial PATCH merge by numeric ID.
+- `delete_custom_field` — destructive, guarded like the other delete tools.
+
+This closes the gap so an agent can define, enumerate, and fill custom fields — including
+ticket references on prefixes and VLANs — entirely from MCP.

@@ -1106,6 +1106,30 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 				return res, err
 			},
 		},
+		{
+			name: "create_tag",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateTagHandler(nil)(ctx, nil, TagCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_tag",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateTagHandler(nil)(ctx, nil, TagUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_tag",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteTagHandler(nil)(ctx, nil, TagDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
 	}
 
 	for _, tc := range cases {

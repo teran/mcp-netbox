@@ -703,6 +703,20 @@ type MockRepo struct {
 		ctx context.Context, token string, id int, in domain.VirtualCircuitTerminationWrite,
 	) (*domain.VirtualCircuitTermination, error)
 	DeleteVirtualCircuitTerminationFunc func(ctx context.Context, token string, id int) error
+
+	ListRolesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.Role], error)
+	ListTenantsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.Tenant], error)
+
+	ListTagsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.Tag], error)
+	CreateTagFunc func(ctx context.Context, token string, in domain.TagWrite) (*domain.Tag, error)
+	UpdateTagFunc func(ctx context.Context, token string, id int, in domain.TagWrite) (*domain.Tag, error)
+	DeleteTagFunc func(ctx context.Context, token string, id int) error
 }
 
 // ListSites delegates to ListSitesFunc.
@@ -2420,6 +2434,46 @@ func (m *MockRepo) UpdateVirtualCircuitTermination(
 // DeleteVirtualCircuitTermination delegates to DeleteVirtualCircuitTerminationFunc.
 func (m *MockRepo) DeleteVirtualCircuitTermination(ctx context.Context, token string, id int) error {
 	return m.DeleteVirtualCircuitTerminationFunc(ctx, token, id)
+}
+
+// ListRoles delegates to ListRolesFunc.
+func (m *MockRepo) ListRoles(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.Role], error) {
+	return m.ListRolesFunc(ctx, token, params)
+}
+
+// ListTenants delegates to ListTenantsFunc.
+func (m *MockRepo) ListTenants(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.Tenant], error) {
+	return m.ListTenantsFunc(ctx, token, params)
+}
+
+// ListTags delegates to ListTagsFunc.
+func (m *MockRepo) ListTags(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.Tag], error) {
+	return m.ListTagsFunc(ctx, token, params)
+}
+
+// CreateTag delegates to CreateTagFunc.
+func (m *MockRepo) CreateTag(
+	ctx context.Context, token string, in domain.TagWrite,
+) (*domain.Tag, error) {
+	return m.CreateTagFunc(ctx, token, in)
+}
+
+// UpdateTag delegates to UpdateTagFunc.
+func (m *MockRepo) UpdateTag(
+	ctx context.Context, token string, id int, in domain.TagWrite,
+) (*domain.Tag, error) {
+	return m.UpdateTagFunc(ctx, token, id, in)
+}
+
+// DeleteTag delegates to DeleteTagFunc.
+func (m *MockRepo) DeleteTag(ctx context.Context, token string, id int) error {
+	return m.DeleteTagFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -4172,5 +4226,41 @@ func (r *NilRepo) UpdateVirtualCircuitTermination(
 
 // DeleteVirtualCircuitTermination always succeeds.
 func (r *NilRepo) DeleteVirtualCircuitTermination(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListRoles returns an empty role page.
+func (r *NilRepo) ListRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Role], error) {
+	return &domain.PaginatedResponse[domain.Role]{Count: 0, Results: []domain.Role{}}, nil
+}
+
+// ListTenants returns an empty tenant page.
+func (r *NilRepo) ListTenants(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Tenant], error) {
+	return &domain.PaginatedResponse[domain.Tenant]{Count: 0, Results: []domain.Tenant{}}, nil
+}
+
+// ListTags returns an empty tag page.
+func (r *NilRepo) ListTags(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Tag], error) {
+	return &domain.PaginatedResponse[domain.Tag]{Count: 0, Results: []domain.Tag{}}, nil
+}
+
+// CreateTag returns a tag with id 1.
+func (r *NilRepo) CreateTag(_ context.Context, _ string, in domain.TagWrite) (*domain.Tag, error) {
+	return &domain.Tag{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateTag returns the tag with the given id.
+func (r *NilRepo) UpdateTag(_ context.Context, _ string, id int, in domain.TagWrite) (*domain.Tag, error) {
+	return &domain.Tag{ID: id, Name: in.Name}, nil
+}
+
+// DeleteTag always succeeds.
+func (r *NilRepo) DeleteTag(_ context.Context, _ string, _ int) error {
 	return nil
 }

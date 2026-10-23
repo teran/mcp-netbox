@@ -46,6 +46,31 @@ type TenantGroupsInput struct {
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
+// RolesInput represents the input fields for the get_roles tool.
+type RolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// TenantsInput represents the input fields for the get_tenants tool.
+type TenantsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Group    string `json:"group,omitempty" jsonschema:"filter by tenant group (ID)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// TagsInput represents the input fields for the get_tags tool.
+type TagsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
 // SiteGroupsInput represents the input fields for the get_site_groups tool.
 type SiteGroupsInput struct {
 	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
@@ -1171,6 +1196,29 @@ type TenantDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the tenant to delete,required"`
 }
 
+// TagCreateInput represents the writable fields for creating a tag.
+type TagCreateInput struct {
+	Name        string  `json:"name" jsonschema:"tag name (required)"`
+	Slug        *string `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Color       *string `json:"color,omitempty" jsonschema:"color (hex value, e.g. ff0000)"`
+	Description *string `json:"description,omitempty" jsonschema:"short description"`
+}
+
+// TagUpdateInput represents the writable fields for updating a tag. All fields
+// are optional; only the explicitly provided ones are patched (PATCH merge).
+type TagUpdateInput struct {
+	ID          int     `json:"id" jsonschema:"numeric ID of the tag to update,required"`
+	Name        *string `json:"name,omitempty" jsonschema:"tag name"`
+	Slug        *string `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Color       *string `json:"color,omitempty" jsonschema:"color (hex value, e.g. ff0000)"`
+	Description *string `json:"description,omitempty" jsonschema:"short description"`
+}
+
+// TagDeleteInput represents the input fields for deleting a tag.
+type TagDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the tag to delete,required"`
+}
+
 // ManufacturerCreateInput represents the writable fields for creating a
 // manufacturer.
 type ManufacturerCreateInput struct {
@@ -1634,6 +1682,11 @@ type ProviderOutput struct {
 // TenantOutput represents the output for the create/update tenant tools.
 type TenantOutput struct {
 	Data domain.Tenant `json:"data"`
+}
+
+// TagOutput represents the output for the create/update tag tools.
+type TagOutput struct {
+	Data domain.Tag `json:"data"`
 }
 
 // ManufacturerOutput represents the output for the create/update manufacturer
@@ -2619,6 +2672,30 @@ func tenantWriteFromUpdate(input TenantUpdateInput) domain.TenantWrite {
 	return write
 }
 
+// tagWriteFromCreate builds a domain.TagWrite from a create input.
+func tagWriteFromCreate(input TagCreateInput) domain.TagWrite {
+	return domain.TagWrite{
+		Name:        input.Name,
+		Slug:        input.Slug,
+		Color:       input.Color,
+		Description: input.Description,
+	}
+}
+
+// tagWriteFromUpdate builds a domain.TagWrite from an update input, mapping
+// only the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func tagWriteFromUpdate(input TagUpdateInput) domain.TagWrite {
+	write := domain.TagWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Color = input.Color
+	write.Description = input.Description
+
+	return write
+}
+
 // manufacturerWriteFromCreate builds a domain.ManufacturerWrite from a create
 // input.
 func manufacturerWriteFromCreate(input ManufacturerCreateInput) domain.ManufacturerWrite {
@@ -3075,6 +3152,67 @@ func NewGetTenantGroupsHandler(
 			return params
 		},
 		errorLabel: "list tenant groups",
+	})
+}
+
+// NewGetRolesHandler creates a handler for the get_roles tool.
+func NewGetRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RolesInput, PaginatedOutput[domain.Role]] {
+	return newListHandler(listHandlerConfig[RolesInput, domain.Role]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Role], error) {
+			return resolveService(ctx, svc).ListRoles(ctx, params)
+		},
+		buildParams: func(input RolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list roles",
+	})
+}
+
+// NewGetTenantsHandler creates a handler for the get_tenants tool.
+func NewGetTenantsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TenantsInput, PaginatedOutput[domain.Tenant]] {
+	return newListHandler(listHandlerConfig[TenantsInput, domain.Tenant]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Tenant], error) {
+			return resolveService(ctx, svc).ListTenants(ctx, params)
+		},
+		buildParams: func(input TenantsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "group", input.Group)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list tenants",
+	})
+}
+
+// NewGetTagsHandler creates a handler for the get_tags tool.
+func NewGetTagsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TagsInput, PaginatedOutput[domain.Tag]] {
+	return newListHandler(listHandlerConfig[TagsInput, domain.Tag]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Tag], error) {
+			return resolveService(ctx, svc).ListTags(ctx, params)
+		},
+		buildParams: func(input TagsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list tags",
 	})
 }
 
@@ -4926,6 +5064,80 @@ func NewDeleteTenantHandler(svc *application.NetworkService) mcp.ToolHandlerFor[
 		}
 
 		if err := service.DeleteTenant(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateTagHandler creates a handler for the create_tag tool.
+func NewCreateTagHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TagCreateInput, TagOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TagCreateInput,
+	) (*mcp.CallToolResult, TagOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, TagOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, TagOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.CreateTag(ctx, tagWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, TagOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TagOutput{Data: *result}, nil
+	}
+}
+
+// NewUpdateTagHandler creates a handler for the update_tag tool. It performs a
+// partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateTagHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TagUpdateInput, TagOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TagUpdateInput,
+	) (*mcp.CallToolResult, TagOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, TagOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, TagOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.UpdateTag(ctx, input.ID, tagWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, TagOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TagOutput{Data: *result}, nil
+	}
+}
+
+// NewDeleteTagHandler creates a handler for the delete_tag tool.
+func NewDeleteTagHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TagDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TagDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteTag(ctx, input.ID); err != nil {
 			res, e := writeErrorResult(err)
 
 			return res, struct{}{}, e
