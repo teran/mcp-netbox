@@ -60,6 +60,7 @@ func init() {
 	registerCRUD("ip_address", ipAddressCRUD)
 	registerCRUD("virtual_machine", virtualMachineCRUD)
 	registerCRUD("tenant", tenantCRUD)
+	registerCRUD("tenant_group", tenantGroupCRUD)
 	registerCRUD("circuit", circuitCRUD)
 }
 
@@ -325,6 +326,8 @@ func readTools(t *testing.T, c *e2eClient, runID string) {
 
 	readTools := []string{
 		"get_sites",
+		"get_regions",
+		"get_tenant_groups",
 		"get_racks",
 		"get_devices",
 		"get_interfaces",
@@ -470,6 +473,29 @@ func tenantCRUD(t *testing.T, c *e2eClient, runID string) {
 
 	c.call("delete_tenant", map[string]interface{}{"id": id})
 	c.callExpectError("get_object_by_id", map[string]interface{}{"object_type": "tenant", "id": id})
+}
+
+func tenantGroupCRUD(t *testing.T, c *e2eClient, runID string) {
+	t.Helper()
+	name := "e2e-tenant-group-" + runID
+
+	created := c.call("create_tenant_group", map[string]interface{}{"name": name, "slug": name})
+	id := c.mustID(created)
+	if got := c.str(c.data(created), "name"); got != name {
+		t.Fatalf("created tenant group name = %q, want %q", got, name)
+	}
+
+	if data := c.data(c.getByID("tenant_group", id)); c.str(data, "name") != name {
+		t.Fatalf("get tenant group name = %q, want %q", c.str(data, "name"), name)
+	}
+
+	c.call("update_tenant_group", map[string]interface{}{"id": id, "description": "updated"})
+	if data := c.data(c.getByID("tenant_group", id)); c.str(data, "description") != "updated" {
+		t.Fatalf("get tenant group after update description = %q, want %q", c.str(data, "description"), "updated")
+	}
+
+	c.call("delete_tenant_group", map[string]interface{}{"id": id})
+	c.callExpectError("get_object_by_id", map[string]interface{}{"object_type": "tenant_group", "id": id})
 }
 
 func circuitCRUD(t *testing.T, c *e2eClient, runID string) {

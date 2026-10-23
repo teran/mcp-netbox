@@ -56,6 +56,48 @@ func TestNetworkService_ListSites(t *testing.T) {
 	})
 }
 
+func TestNetworkService_ListRegions(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRegionsFunc: func(
+				_ context.Context, token string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Region], error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want %q", token, "test-token")
+				}
+
+				return &domain.PaginatedResponse[domain.Region]{
+					Count:   1,
+					Results: []domain.Region{{ID: 1, Name: "Test"}},
+				}, nil
+			},
+		})
+		resp, err := svc.ListRegions(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListRegions() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("Count = %d, want %d", resp.Count, 1)
+		}
+	})
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRegionsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Region], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListRegions(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
 func TestNetworkService_ListDevices(t *testing.T) {
 	t.Parallel()
 
@@ -656,6 +698,157 @@ func TestNetworkService_DeleteSite(t *testing.T) {
 		err := svc.DeleteSite(context.Background(), 3)
 		if err == nil || !containsService(err.Error(), "delete site:") {
 			t.Errorf("err = %v, want it to contain 'delete site:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreateRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRegionFunc: func(_ context.Context, token string, inData domain.RegionWrite) (*domain.Region, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+
+				return &domain.Region{ID: 1, Name: inData.Name}, nil
+			},
+		})
+		region, err := svc.CreateRegion(context.Background(), domain.RegionWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateRegion() returned error: %v", err)
+		}
+		if region.ID != 1 || region.Name != "A" {
+			t.Errorf("region = %+v, want id 1 name A", region)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRegionFunc: func(_ context.Context, _ string, _ domain.RegionWrite) (*domain.Region, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreateRegion(context.Background(), domain.RegionWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != valErr {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+		if string(got.Body) != `{"name":["required"]}` {
+			t.Errorf("Body = %s, want original body", got.Body)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRegionFunc: func(_ context.Context, _ string, _ domain.RegionWrite) (*domain.Region, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateRegion(context.Background(), domain.RegionWrite{Name: "A"})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !containsService(err.Error(), "create region:") {
+			t.Errorf("err = %q, want it to contain 'create region:'", err.Error())
+		}
+	})
+}
+
+func TestNetworkService_UpdateRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRegionFunc: func(_ context.Context, _ string, id int, inData domain.RegionWrite) (*domain.Region, error) {
+				return &domain.Region{ID: id, Name: inData.Name}, nil
+			},
+		})
+		region, err := svc.UpdateRegion(context.Background(), 7, domain.RegionWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateRegion() returned error: %v", err)
+		}
+		if region.ID != 7 || region.Name != "Renamed" {
+			t.Errorf("region = %+v, want id 7 name Renamed", region)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRegionFunc: func(_ context.Context, _ string, _ int, _ domain.RegionWrite) (*domain.Region, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.UpdateRegion(context.Background(), 7, domain.RegionWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRegionFunc: func(_ context.Context, _ string, _ int, _ domain.RegionWrite) (*domain.Region, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateRegion(context.Background(), 7, domain.RegionWrite{})
+		if err == nil || !containsService(err.Error(), "update region:") {
+			t.Errorf("err = %v, want it to contain 'update region:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRegionFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeleteRegion(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteRegion() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRegionFunc: func(_ context.Context, _ string, _ int) error {
+				return valErr
+			},
+		})
+		err := svc.DeleteRegion(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRegionFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteRegion(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete region:") {
+			t.Errorf("err = %v, want it to contain 'delete region:'", err)
 		}
 	})
 }

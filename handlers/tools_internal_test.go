@@ -19,6 +19,12 @@ func (s *stubRepo) ListSites(
 	return nil, errors.New("not implemented")
 }
 
+func (s *stubRepo) ListRegions(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Region], error) {
+	return nil, errors.New("not implemented")
+}
+
 func (s *stubRepo) ListDevices(
 	_ context.Context, _ string, _ map[string]string,
 ) (*domain.PaginatedResponse[domain.Device], error) {
@@ -106,6 +112,40 @@ func (s *stubRepo) UpdateSite(_ context.Context, _ string, _ int, _ domain.SiteW
 }
 
 func (s *stubRepo) DeleteSite(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateRegion(_ context.Context, _ string, _ domain.RegionWrite) (*domain.Region, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateRegion(_ context.Context, _ string, _ int, _ domain.RegionWrite) (*domain.Region, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteRegion(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListTenantGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.TenantGroup], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateTenantGroup(
+	_ context.Context, _ string, _ domain.TenantGroupWrite,
+) (*domain.TenantGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateTenantGroup(
+	_ context.Context, _ string, _ int, _ domain.TenantGroupWrite,
+) (*domain.TenantGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteTenantGroup(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 

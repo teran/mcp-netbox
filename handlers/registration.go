@@ -154,6 +154,42 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 
 	registerTool(
 		server,
+		toolDefIndex()["get_regions"],
+		metrics,
+		"get_regions",
+		WrapToolHandler[RegionsInput, PaginatedOutput[domain.Region]](
+			metrics,
+			"get_regions",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RegionsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.Region], error) {
+				return NewGetRegionsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_tenant_groups"],
+		metrics,
+		"get_tenant_groups",
+		WrapToolHandler[TenantGroupsInput, PaginatedOutput[domain.TenantGroup]](
+			metrics,
+			"get_tenant_groups",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TenantGroupsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.TenantGroup], error) {
+				return NewGetTenantGroupsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
 		toolDefIndex()["get_devices"],
 		metrics,
 		"get_devices",
@@ -436,6 +472,114 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 				in SiteDeleteInput,
 			) (*mcp.CallToolResult, struct{}, error) {
 				return NewDeleteSiteHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_region"],
+		metrics,
+		"create_region",
+		WrapToolHandler[RegionCreateInput, RegionOutput](
+			metrics,
+			"create_region",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RegionCreateInput,
+			) (*mcp.CallToolResult, RegionOutput, error) {
+				return NewCreateRegionHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_region"],
+		metrics,
+		"update_region",
+		WrapToolHandler[RegionUpdateInput, RegionOutput](
+			metrics,
+			"update_region",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RegionUpdateInput,
+			) (*mcp.CallToolResult, RegionOutput, error) {
+				return NewUpdateRegionHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_region"],
+		metrics,
+		"delete_region",
+		WrapToolHandler[RegionDeleteInput, struct{}](
+			metrics,
+			"delete_region",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RegionDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteRegionHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_tenant_group"],
+		metrics,
+		"create_tenant_group",
+		WrapToolHandler[TenantGroupCreateInput, TenantGroupOutput](
+			metrics,
+			"create_tenant_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TenantGroupCreateInput,
+			) (*mcp.CallToolResult, TenantGroupOutput, error) {
+				return NewCreateTenantGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_tenant_group"],
+		metrics,
+		"update_tenant_group",
+		WrapToolHandler[TenantGroupUpdateInput, TenantGroupOutput](
+			metrics,
+			"update_tenant_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TenantGroupUpdateInput,
+			) (*mcp.CallToolResult, TenantGroupOutput, error) {
+				return NewUpdateTenantGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_tenant_group"],
+		metrics,
+		"delete_tenant_group",
+		WrapToolHandler[TenantGroupDeleteInput, struct{}](
+			metrics,
+			"delete_tenant_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in TenantGroupDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteTenantGroupHandler(svc)(ctx, req, in)
 			},
 		),
 	)

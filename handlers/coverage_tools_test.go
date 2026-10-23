@@ -78,6 +78,7 @@ func TestVrfWriteFromUpdate_WithRd(t *testing.T) {
 	}
 }
 
+//nolint:funlen // Table of write handlers hitting the errServiceNotAvailable branch.
 func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 	t.Parallel()
 
@@ -101,6 +102,38 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 			name: "delete_site",
 			handler: func() (*mcp.CallToolResult, error) {
 				res, _, err := NewDeleteSiteHandler(nil)(ctx, nil, SiteDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_region",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateRegionHandler(nil)(ctx, nil, RegionUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_region",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteRegionHandler(nil)(ctx, nil, RegionDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_tenant_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateTenantGroupHandler(nil)(ctx, nil, TenantGroupUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_tenant_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteTenantGroupHandler(nil)(ctx, nil, TenantGroupDeleteInput{ID: 1})
 
 				return res, err
 			},

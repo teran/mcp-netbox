@@ -108,6 +108,70 @@ func TestClient_ListSites(t *testing.T) {
 	})
 }
 
+// TestClient_ListRegions exercises the region list endpoint.
+func TestClient_ListRegions(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			if req.Header.Get("Authorization") != "Token test-token" {
+				writer.WriteHeader(http.StatusUnauthorized)
+
+				return
+			}
+			if req.URL.Path != "/api/dcim/regions/" {
+				writer.WriteHeader(http.StatusNotFound)
+
+				return
+			}
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = writer.Write([]byte(`{
+				"count": 1,
+				"next": null,
+				"previous": null,
+				"results": [{
+					"id": 1,
+					"name": "Test Region",
+					"slug": "test-region",
+					"created": "2024-01-01",
+					"last_updated": "2024-01-01T00:00:00Z"
+				}]
+			}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		resp, err := client.ListRegions(context.Background(), "test-token", nil)
+		if err != nil {
+			t.Fatalf("ListRegions() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("Count = %d, want %d", resp.Count, 1)
+		}
+		if len(resp.Results) != 1 {
+			t.Fatalf("len(Results) = %d, want %d", len(resp.Results), 1)
+		}
+		if resp.Results[0].Name != "Test Region" {
+			t.Errorf("Name = %q, want %q", resp.Results[0].Name, "Test Region")
+		}
+	})
+
+	t.Run("not_found", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.ListRegions(context.Background(), "token", nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
 func TestClient_ListDevices(t *testing.T) {
 	t.Parallel()
 

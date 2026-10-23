@@ -22,6 +22,29 @@ type WireSiteWrite struct {
 	CustomFields    map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireRegionWrite is the wire request model for region create/update (POST/PATCH
+// body). Its json tags intentionally mirror NetBox's writable fields.
+type WireRegionWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireTenantGroupWrite is the wire request model for tenant group create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields.
+type WireTenantGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // WireDeviceWrite is the wire request model for device create/update (POST/PATCH
 // body). Its json tags intentionally mirror NetBox's writable fields. Related
 // objects are expressed as numeric IDs.
@@ -265,6 +288,7 @@ type WireProviderWrite struct {
 type WireTenantWrite struct {
 	Name         string         `json:"name,omitempty"`
 	Slug         *string        `json:"slug,omitempty"`
+	Group        *int           `json:"group,omitempty"`
 	Description  *string        `json:"description,omitempty"`
 	Comments     *string        `json:"comments,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
@@ -421,6 +445,36 @@ type (
 		CustomFields    map[string]any `json:"custom_fields,omitempty"`
 		Created         string         `json:"created"`
 		LastUpdated     string         `json:"last_updated"`
+	}
+
+	// WireRegion mirrors the corresponding NetBox JSON API response object.
+	WireRegion struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Parent       *WireNested    `json:"parent"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireTenantGroup mirrors the corresponding NetBox JSON API response object.
+	WireTenantGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Parent       *WireNested    `json:"parent"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
 	}
 
 	// WireDevice mirrors the corresponding NetBox JSON API response object.
@@ -705,6 +759,7 @@ type (
 		Name         string         `json:"name"`
 		Slug         string         `json:"slug,omitempty"`
 		Display      string         `json:"display,omitempty"`
+		Group        *WireNested    `json:"group"`
 		Description  string         `json:"description,omitempty"`
 		Comments     string         `json:"comments,omitempty"`
 		Tags         []WireTag      `json:"tags,omitempty"`

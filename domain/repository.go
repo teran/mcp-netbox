@@ -31,6 +31,8 @@ func (r *RawObject) UnmarshalJSON(b []byte) error {
 //nolint:interfacebloat // Single port mirrors NetBox entity surface; splitting would ripple.
 type NetworkRepository interface {
 	ListSites(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Site], error)
+	ListRegions(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Region], error)
+	ListTenantGroups(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[TenantGroup], error)
 	ListDevices(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Device], error)
 	ListIPAddresses(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[IPAddress], error)
 	ListPrefixes(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Prefix], error)
@@ -52,6 +54,14 @@ type NetworkRepository interface {
 	CreateSite(ctx context.Context, token string, in SiteWrite) (*Site, error)
 	UpdateSite(ctx context.Context, token string, id int, in SiteWrite) (*Site, error)
 	DeleteSite(ctx context.Context, token string, id int) error
+
+	CreateRegion(ctx context.Context, token string, in RegionWrite) (*Region, error)
+	UpdateRegion(ctx context.Context, token string, id int, in RegionWrite) (*Region, error)
+	DeleteRegion(ctx context.Context, token string, id int) error
+
+	CreateTenantGroup(ctx context.Context, token string, in TenantGroupWrite) (*TenantGroup, error)
+	UpdateTenantGroup(ctx context.Context, token string, id int, in TenantGroupWrite) (*TenantGroup, error)
+	DeleteTenantGroup(ctx context.Context, token string, id int) error
 
 	CreateDevice(ctx context.Context, token string, in DeviceWrite) (*Device, error)
 	UpdateDevice(ctx context.Context, token string, id int, in DeviceWrite) (*Device, error)

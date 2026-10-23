@@ -31,6 +31,7 @@ var ErrNotFound = errors.New("not found")
 
 var objectTypeToEndpoint = map[string]string{
 	"site":                "/api/dcim/sites/",
+	"region":              "/api/dcim/regions/",
 	"device":              "/api/dcim/devices/",
 	"prefix":              "/api/ipam/prefixes/",
 	"ip_address":          "/api/ipam/ip-addresses/",
@@ -40,6 +41,7 @@ var objectTypeToEndpoint = map[string]string{
 	"circuit":             "/api/circuits/circuits/",
 	"provider":            "/api/circuits/providers/",
 	"tenant":              "/api/tenancy/tenants/",
+	"tenant_group":        "/api/tenancy/tenant-groups/",
 	"rack":                "/api/dcim/racks/",
 	"manufacturer":        "/api/dcim/manufacturers/",
 	"device_type":         "/api/dcim/device-types/",
@@ -309,6 +311,38 @@ func (c *Client) ListSites(ctx context.Context, token string, params map[string]
 	return convertPaginated(&wireResp, wireSiteToDomain), nil
 }
 
+// ListRegions returns a paginated list of regions.
+func (c *Client) ListRegions(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.Region], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/regions/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireRegion]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal regions: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireRegionToDomain), nil
+}
+
+// ListTenantGroups returns a paginated list of tenant groups.
+func (c *Client) ListTenantGroups(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.TenantGroup], error,
+) {
+	raw, err := c.get(ctx, token, "/api/tenancy/tenant-groups/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireTenantGroup]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tenant groups: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireTenantGroupToDomain), nil
+}
+
 // ListDevices returns a paginated list of devices.
 func (c *Client) ListDevices(ctx context.Context, token string, params map[string]string) (
 	*domain.PaginatedResponse[domain.Device], error,
@@ -555,6 +589,94 @@ func (c *Client) UpdateSite(ctx context.Context, token string, objectID int, in 
 // DeleteSite deletes a site via DELETE /api/dcim/sites/<id>/.
 func (c *Client) DeleteSite(ctx context.Context, token string, objectID int) error {
 	path := fmt.Sprintf("/api/dcim/sites/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateRegion creates a new region via POST /api/dcim/regions/.
+func (c *Client) CreateRegion(ctx context.Context, token string, in domain.RegionWrite) (*domain.Region, error) {
+	payload, err := json.Marshal(regionWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal region create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/regions/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRegion(raw)
+}
+
+// UpdateRegion partially updates a region via PATCH /api/dcim/regions/<id>/.
+func (c *Client) UpdateRegion(ctx context.Context, token string, objectID int, in domain.RegionWrite) (
+	*domain.Region, error,
+) {
+	payload, err := json.Marshal(regionWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal region update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/regions/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRegion(raw)
+}
+
+// DeleteRegion deletes a region via DELETE /api/dcim/regions/<id>/.
+func (c *Client) DeleteRegion(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/regions/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateTenantGroup creates a new tenant group via POST /api/tenancy/tenant-groups/.
+func (c *Client) CreateTenantGroup(ctx context.Context, token string, in domain.TenantGroupWrite) (
+	*domain.TenantGroup, error,
+) {
+	payload, err := json.Marshal(tenantGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal tenant group create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/tenancy/tenant-groups/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalTenantGroup(raw)
+}
+
+// UpdateTenantGroup partially updates a tenant group via PATCH
+// /api/tenancy/tenant-groups/<id>/.
+func (c *Client) UpdateTenantGroup(ctx context.Context, token string, objectID int, in domain.TenantGroupWrite) (
+	*domain.TenantGroup, error,
+) {
+	payload, err := json.Marshal(tenantGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal tenant group update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/tenancy/tenant-groups/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalTenantGroup(raw)
+}
+
+// DeleteTenantGroup deletes a tenant group via DELETE
+// /api/tenancy/tenant-groups/<id>/.
+func (c *Client) DeleteTenantGroup(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/tenancy/tenant-groups/%d/", objectID)
 	body, err := c.delete(ctx, token, path)
 	_, mErr := writeResult(http.StatusNoContent, body, err)
 
@@ -1672,6 +1794,59 @@ func unmarshalSite(raw domain.RawObject) (*domain.Site, error) {
 	return &d, nil
 }
 
+// regionWriteToWire converts a domain region write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func regionWriteToWire(input domain.RegionWrite) WireRegionWrite {
+	return WireRegionWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalRegion decodes a region response body into a domain.Region.
+func unmarshalRegion(raw domain.RawObject) (*domain.Region, error) {
+	var w WireRegion
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal region: %w", err)
+	}
+	d := wireRegionToDomain(w)
+
+	return &d, nil
+}
+
+// tenantGroupWriteToWire converts a domain tenant group write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func tenantGroupWriteToWire(input domain.TenantGroupWrite) WireTenantGroupWrite {
+	return WireTenantGroupWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalTenantGroup decodes a tenant group response body into a
+// domain.TenantGroup.
+func unmarshalTenantGroup(raw domain.RawObject) (*domain.TenantGroup, error) {
+	var w WireTenantGroup
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tenant group: %w", err)
+	}
+	d := wireTenantGroupToDomain(w)
+
+	return &d, nil
+}
+
 // deviceWriteToWire converts a domain device write DTO to the wire request
 // model. The fields map one-to-one; nil pointers on the domain side remain nil
 // on the wire side so json.Marshal omits them (required for a partial PATCH
@@ -2130,6 +2305,7 @@ func tenantWriteToWire(input domain.TenantWrite) WireTenantWrite {
 	return WireTenantWrite{
 		Name:         input.Name,
 		Slug:         input.Slug,
+		Group:        input.Group,
 		Description:  input.Description,
 		Comments:     input.Comments,
 		Tags:         input.Tags,
@@ -2156,6 +2332,7 @@ func wireTenantToDomain(wire WireTenant) domain.Tenant {
 		Name:         wire.Name,
 		Slug:         wire.Slug,
 		Display:      wire.Display,
+		Group:        wireNestedToDomain(wire.Group),
 		Description:  wire.Description,
 		Comments:     wire.Comments,
 		Tags:         wireTagsToDomain(wire.Tags),
@@ -2320,6 +2497,39 @@ func wireSiteToDomain(wire WireSite) domain.Site {
 		CustomFields:    wire.CustomFields,
 		Created:         wire.Created,
 		LastUpdated:     wire.LastUpdated,
+	}
+}
+
+func wireRegionToDomain(wire WireRegion) domain.Region {
+	return domain.Region{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Display:      wire.Display,
+		Description:  wire.Description,
+		Parent:       wireNestedToDomain(wire.Parent),
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// wireTenantGroupToDomain converts a wire tenant group to the domain model.
+func wireTenantGroupToDomain(wire WireTenantGroup) domain.TenantGroup {
+	return domain.TenantGroup{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Display:      wire.Display,
+		Description:  wire.Description,
+		Parent:       wireNestedToDomain(wire.Parent),
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
 	}
 }
 

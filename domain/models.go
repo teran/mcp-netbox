@@ -30,6 +30,36 @@ type (
 		LastUpdated     string         `json:"last_updated"`
 	}
 
+	// Region is a NetBox region (a geographic grouping of sites).
+	Region struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Parent       *Nested        `json:"parent"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// TenantGroup is a NetBox tenancy tenant group (a grouping of tenants).
+	TenantGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Parent       *Nested        `json:"parent"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
 	// Device is a NetBox device (a physical piece of network infrastructure).
 	Device struct {
 		ID           int            `json:"id"`
@@ -316,6 +346,7 @@ type (
 		Name         string         `json:"name"`
 		Slug         string         `json:"slug,omitempty"`
 		Display      string         `json:"display,omitempty"`
+		Group        *Nested        `json:"group"`
 		Description  string         `json:"description,omitempty"`
 		Comments     string         `json:"comments,omitempty"`
 		Tags         []Tag          `json:"tags,omitempty"`
@@ -558,6 +589,40 @@ type SiteWrite struct {
 	Comments        *string        `json:"comments,omitempty"`
 	Tags            []string       `json:"tags,omitempty"`
 	CustomFields    map[string]any `json:"custom_fields,omitempty"`
+}
+
+// RegionWrite is the domain DTO for creating or updating a NetBox region. It
+// carries only the writable fields.
+//
+// Optional scalar fields are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty" (pointer to
+// ""). Name is a plain string because it is required on create; the omitempty
+// tag drops it from a PATCH body when not provided. Parent references the
+// numeric NetBox ID of the parent region.
+type RegionWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// TenantGroupWrite is the domain DTO for creating or updating a NetBox tenancy
+// tenant group. It carries only the writable fields.
+//
+// Optional scalar fields are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty" (pointer to
+// ""). Name is a plain string because it is required on create; the omitempty
+// tag drops it from a PATCH body when not provided. Parent references the
+// numeric NetBox ID of the parent tenant group.
+type TenantGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
 // DeviceWrite is the domain DTO for creating or updating a NetBox device. It
@@ -865,10 +930,13 @@ type ProviderWrite struct {
 // Name is a plain string because it is required on create; the omitempty tag
 // drops it from a PATCH body when not provided. Optional scalar fields are
 // pointers so that a partial-update (PATCH) can distinguish "not provided"
-// (nil) from "explicitly set to empty" (pointer to "").
+// (nil) from "explicitly set to empty" (pointer to ""). Group is a pointer to
+// the numeric tenant-group ID and is optional (a tenant may exist without a
+// group).
 type TenantWrite struct {
 	Name         string         `json:"name,omitempty"`
 	Slug         *string        `json:"slug,omitempty"`
+	Group        *int           `json:"group,omitempty"`
 	Description  *string        `json:"description,omitempty"`
 	Comments     *string        `json:"comments,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`

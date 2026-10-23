@@ -14,6 +14,9 @@ type MockRepo struct {
 	ListSitesFunc func(
 		ctx context.Context, token string, params map[string]string,
 	) (*domain.PaginatedResponse[domain.Site], error)
+	ListRegionsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.Region], error)
 	ListDevicesFunc func(
 		ctx context.Context, token string, params map[string]string,
 	) (*domain.PaginatedResponse[domain.Device], error)
@@ -60,7 +63,24 @@ type MockRepo struct {
 		ctx context.Context, token string, id int, in domain.SiteWrite,
 	) (*domain.Site, error)
 	DeleteSiteFunc   func(ctx context.Context, token string, id int) error
-	CreateDeviceFunc func(
+	CreateRegionFunc func(
+		ctx context.Context, token string, in domain.RegionWrite,
+	) (*domain.Region, error)
+	UpdateRegionFunc func(
+		ctx context.Context, token string, id int, in domain.RegionWrite,
+	) (*domain.Region, error)
+	DeleteRegionFunc     func(ctx context.Context, token string, id int) error
+	ListTenantGroupsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.TenantGroup], error)
+	CreateTenantGroupFunc func(
+		ctx context.Context, token string, in domain.TenantGroupWrite,
+	) (*domain.TenantGroup, error)
+	UpdateTenantGroupFunc func(
+		ctx context.Context, token string, id int, in domain.TenantGroupWrite,
+	) (*domain.TenantGroup, error)
+	DeleteTenantGroupFunc func(ctx context.Context, token string, id int) error
+	CreateDeviceFunc      func(
 		ctx context.Context, token string, in domain.DeviceWrite,
 	) (*domain.Device, error)
 	UpdateDeviceFunc func(
@@ -237,6 +257,13 @@ func (m *MockRepo) ListSites(
 	return m.ListSitesFunc(ctx, token, params)
 }
 
+// ListRegions delegates to ListRegionsFunc.
+func (m *MockRepo) ListRegions(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.Region], error) {
+	return m.ListRegionsFunc(ctx, token, params)
+}
+
 // ListDevices delegates to ListDevicesFunc.
 func (m *MockRepo) ListDevices(
 	ctx context.Context, token string, params map[string]string,
@@ -345,6 +372,51 @@ func (m *MockRepo) UpdateSite(
 // DeleteSite delegates to DeleteSiteFunc.
 func (m *MockRepo) DeleteSite(ctx context.Context, token string, id int) error {
 	return m.DeleteSiteFunc(ctx, token, id)
+}
+
+// CreateRegion delegates to CreateRegionFunc.
+func (m *MockRepo) CreateRegion(
+	ctx context.Context, token string, in domain.RegionWrite,
+) (*domain.Region, error) {
+	return m.CreateRegionFunc(ctx, token, in)
+}
+
+// UpdateRegion delegates to UpdateRegionFunc.
+func (m *MockRepo) UpdateRegion(
+	ctx context.Context, token string, id int, in domain.RegionWrite,
+) (*domain.Region, error) {
+	return m.UpdateRegionFunc(ctx, token, id, in)
+}
+
+// DeleteRegion delegates to DeleteRegionFunc.
+func (m *MockRepo) DeleteRegion(ctx context.Context, token string, id int) error {
+	return m.DeleteRegionFunc(ctx, token, id)
+}
+
+// ListTenantGroups delegates to ListTenantGroupsFunc.
+func (m *MockRepo) ListTenantGroups(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.TenantGroup], error) {
+	return m.ListTenantGroupsFunc(ctx, token, params)
+}
+
+// CreateTenantGroup delegates to CreateTenantGroupFunc.
+func (m *MockRepo) CreateTenantGroup(
+	ctx context.Context, token string, in domain.TenantGroupWrite,
+) (*domain.TenantGroup, error) {
+	return m.CreateTenantGroupFunc(ctx, token, in)
+}
+
+// UpdateTenantGroup delegates to UpdateTenantGroupFunc.
+func (m *MockRepo) UpdateTenantGroup(
+	ctx context.Context, token string, id int, in domain.TenantGroupWrite,
+) (*domain.TenantGroup, error) {
+	return m.UpdateTenantGroupFunc(ctx, token, id, in)
+}
+
+// DeleteTenantGroup delegates to DeleteTenantGroupFunc.
+func (m *MockRepo) DeleteTenantGroup(ctx context.Context, token string, id int) error {
+	return m.DeleteTenantGroupFunc(ctx, token, id)
 }
 
 // CreateDevice delegates to CreateDeviceFunc.
@@ -814,6 +886,13 @@ func (r *NilRepo) ListSites(
 	return &domain.PaginatedResponse[domain.Site]{Count: 0, Results: []domain.Site{}}, nil
 }
 
+// ListRegions returns an empty region page.
+func (r *NilRepo) ListRegions(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Region], error) {
+	return &domain.PaginatedResponse[domain.Region]{Count: 0, Results: []domain.Region{}}, nil
+}
+
 // ListDevices returns an empty device page.
 func (r *NilRepo) ListDevices(
 	_ context.Context, _ string, _ map[string]string,
@@ -921,6 +1000,51 @@ func (r *NilRepo) UpdateSite(
 
 // DeleteSite always succeeds.
 func (r *NilRepo) DeleteSite(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// CreateRegion returns a region with id 1.
+func (r *NilRepo) CreateRegion(
+	_ context.Context, _ string, in domain.RegionWrite,
+) (*domain.Region, error) {
+	return &domain.Region{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateRegion returns the region with the given id.
+func (r *NilRepo) UpdateRegion(
+	_ context.Context, _ string, id int, in domain.RegionWrite,
+) (*domain.Region, error) {
+	return &domain.Region{ID: id, Name: in.Name}, nil
+}
+
+// DeleteRegion always succeeds.
+func (r *NilRepo) DeleteRegion(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListTenantGroups returns an empty tenant group page.
+func (r *NilRepo) ListTenantGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.TenantGroup], error) {
+	return &domain.PaginatedResponse[domain.TenantGroup]{Count: 0, Results: []domain.TenantGroup{}}, nil
+}
+
+// CreateTenantGroup returns a tenant group with id 1.
+func (r *NilRepo) CreateTenantGroup(
+	_ context.Context, _ string, in domain.TenantGroupWrite,
+) (*domain.TenantGroup, error) {
+	return &domain.TenantGroup{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateTenantGroup returns the tenant group with the given id.
+func (r *NilRepo) UpdateTenantGroup(
+	_ context.Context, _ string, id int, in domain.TenantGroupWrite,
+) (*domain.TenantGroup, error) {
+	return &domain.TenantGroup{ID: id, Name: in.Name}, nil
+}
+
+// DeleteTenantGroup always succeeds.
+func (r *NilRepo) DeleteTenantGroup(_ context.Context, _ string, _ int) error {
 	return nil
 }
 

@@ -30,6 +30,18 @@ func TestMockRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,ma
 			t.Errorf("ListSites = (%v, %v), want count 1, nil", got, err)
 		}
 	})
+	t.Run("ListRegions", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListRegionsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Region], error) {
+				return &domain.PaginatedResponse[domain.Region]{Count: 1}, nil
+			},
+		}).ListRegions(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListRegions = (%v, %v), want count 1, nil", got, err)
+		}
+	})
 	t.Run("ListDevices", func(t *testing.T) {
 		got, err := (&MockRepo{
 			ListDevicesFunc: func(
@@ -222,6 +234,44 @@ func TestMockRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,ma
 		}).DeleteSite(context.Background(), "t", 3)
 		if err != nil {
 			t.Errorf("DeleteSite = %v", err)
+		}
+	})
+	t.Run("CreateRegion", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateRegionFunc: func(
+				_ context.Context, _ string, in domain.RegionWrite,
+			) (*domain.Region, error) {
+				return &domain.Region{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateRegion(context.Background(), "t", domain.RegionWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateRegion = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRegion", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateRegionFunc: func(
+				_ context.Context, _ string, id int, in domain.RegionWrite,
+			) (*domain.Region, error) {
+				return &domain.Region{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateRegion(context.Background(), "t", 7, domain.RegionWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRegion = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRegion", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteRegionFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRegion(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRegion = %v", err)
 		}
 	})
 	t.Run("CreateDevice", func(t *testing.T) {
@@ -1176,6 +1226,9 @@ func TestNilRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,mai
 	if r, err := repo.ListSites(ctx, "t", nil); err != nil || r.Count != 0 {
 		assertEmpty("ListSites", r.Count, err)
 	}
+	if r, err := repo.ListRegions(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListRegions", r.Count, err)
+	}
 	if r, err := repo.ListDevices(ctx, "t", nil); err != nil || r.Count != 0 {
 		assertEmpty("ListDevices", r.Count, err)
 	}
@@ -1227,6 +1280,15 @@ func TestNilRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,mai
 	}
 	if err := repo.DeleteSite(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteSite = %v", err)
+	}
+	if r, err := repo.CreateRegion(ctx, "t", domain.RegionWrite{Name: "A"}); err != nil || r.Name != "A" {
+		t.Errorf("CreateRegion = (%v, %v)", r, err)
+	}
+	if r, err := repo.UpdateRegion(ctx, "t", 7, domain.RegionWrite{Name: "A"}); err != nil || r.ID != 7 {
+		t.Errorf("UpdateRegion = (%v, %v)", r, err)
+	}
+	if err := repo.DeleteRegion(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRegion = %v", err)
 	}
 	if d, err := repo.CreateDevice(ctx, "t", domain.DeviceWrite{Name: "A"}); err != nil || d.Name != "A" {
 		t.Errorf("CreateDevice = (%v, %v)", d, err)

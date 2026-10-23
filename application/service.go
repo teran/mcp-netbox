@@ -36,6 +36,30 @@ func (s *NetworkService) ListSites(
 	return resp, nil
 }
 
+// ListRegions returns the page of regions matching params.
+func (s *NetworkService) ListRegions(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Region], error) {
+	resp, err := s.repo.ListRegions(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list regions: %w", err)
+	}
+
+	return resp, nil
+}
+
+// ListTenantGroups returns the page of tenant groups matching params.
+func (s *NetworkService) ListTenantGroups(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.TenantGroup], error) {
+	resp, err := s.repo.ListTenantGroups(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list tenant groups: %w", err)
+	}
+
+	return resp, nil
+}
+
 // ListDevices returns the page of devices matching params.
 func (s *NetworkService) ListDevices(
 	ctx context.Context, params map[string]string,
@@ -218,6 +242,71 @@ func (s *NetworkService) UpdateSite(ctx context.Context, id int, in domain.SiteW
 func (s *NetworkService) DeleteSite(ctx context.Context, id int) error {
 	if err := s.repo.DeleteSite(ctx, s.token.Value(), id); err != nil {
 		return fmt.Errorf("delete site: %w", err)
+	}
+
+	return nil
+}
+
+// CreateRegion relays a region create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateRegion(ctx context.Context, in domain.RegionWrite) (*domain.Region, error) {
+	resp, err := s.repo.CreateRegion(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create region: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateRegion relays a region update to the repository.
+func (s *NetworkService) UpdateRegion(ctx context.Context, id int, in domain.RegionWrite) (*domain.Region, error) {
+	resp, err := s.repo.UpdateRegion(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update region: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteRegion relays a region delete to the repository.
+func (s *NetworkService) DeleteRegion(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRegion(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete region: %w", err)
+	}
+
+	return nil
+}
+
+// CreateTenantGroup relays a tenant group create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateTenantGroup(
+	ctx context.Context, in domain.TenantGroupWrite,
+) (*domain.TenantGroup, error) {
+	resp, err := s.repo.CreateTenantGroup(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create tenant group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateTenantGroup relays a tenant group update to the repository.
+func (s *NetworkService) UpdateTenantGroup(
+	ctx context.Context, id int, in domain.TenantGroupWrite,
+) (*domain.TenantGroup, error) {
+	resp, err := s.repo.UpdateTenantGroup(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update tenant group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteTenantGroup relays a tenant group delete to the repository.
+func (s *NetworkService) DeleteTenantGroup(ctx context.Context, id int) error {
+	if err := s.repo.DeleteTenantGroup(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete tenant group: %w", err)
 	}
 
 	return nil

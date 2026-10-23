@@ -28,6 +28,24 @@ type SitesInput struct {
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
+// RegionsInput represents the input fields for the get_regions tool.
+type RegionsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent region ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// TenantGroupsInput represents the input fields for the get_tenant_groups tool.
+type TenantGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent tenant group ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
 // DevicesInput represents the input fields for the get_devices tool.
 type DevicesInput struct {
 	Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
@@ -131,7 +149,7 @@ type CircuitsInput struct {
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
 type GetObjectInput struct {
-	ObjectType string            `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination,required"` //nolint:lll // struct tag cannot be split across lines
+	ObjectType string            `json:"object_type" jsonschema:"object type: site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination,required"` //nolint:lll // struct tag cannot be split across lines
 	ID         int               `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
 	Params     map[string]string `json:"params,omitempty" jsonschema:"additional query parameters to pass to NetBox (optional)"` //nolint:lll // struct tag cannot be split across lines
 }
@@ -233,6 +251,63 @@ type SiteUpdateInput struct {
 // SiteDeleteInput represents the input fields for deleting a site.
 type SiteDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the site to delete,required"`
+}
+
+// RegionCreateInput represents the writable fields for creating a region.
+type RegionCreateInput struct {
+	Name         string         `json:"name" jsonschema:"region name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent region ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RegionUpdateInput represents the writable fields for updating a region. All fields
+// are optional; only the explicitly provided ones are patched (PATCH merge).
+type RegionUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the region to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"region name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent region ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RegionDeleteInput represents the input fields for deleting a region.
+type RegionDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the region to delete,required"`
+}
+
+// TenantGroupCreateInput represents the writable fields for creating a tenant
+// group.
+type TenantGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"tenant group name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent tenant group ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// TenantGroupUpdateInput represents the writable fields for updating a tenant
+// group. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type TenantGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the tenant group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"tenant group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent tenant group ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// TenantGroupDeleteInput represents the input fields for deleting a tenant
+// group.
+type TenantGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the tenant group to delete,required"`
 }
 
 // DeviceCreateInput represents the writable fields for creating a device.
@@ -754,6 +829,7 @@ type ProviderDeleteInput struct {
 type TenantCreateInput struct {
 	Name         string         `json:"name" jsonschema:"tenant name (required)"`
 	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Group        *int           `json:"group,omitempty" jsonschema:"tenant group ID"`
 	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
 	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
 	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
@@ -767,6 +843,7 @@ type TenantUpdateInput struct {
 	ID           int            `json:"id" jsonschema:"numeric ID of the tenant to update,required"`
 	Name         *string        `json:"name,omitempty" jsonschema:"tenant name"`
 	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Group        *int           `json:"group,omitempty" jsonschema:"tenant group ID"`
 	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
 	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
 	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
@@ -1115,6 +1192,17 @@ type SiteOutput struct {
 	Data domain.Site `json:"data"`
 }
 
+// RegionOutput represents the output for the create/update region tools.
+type RegionOutput struct {
+	Data domain.Region `json:"data"`
+}
+
+// TenantGroupOutput represents the output for the create/update tenant group
+// tools.
+type TenantGroupOutput struct {
+	Data domain.TenantGroup `json:"data"`
+}
+
 // DeviceOutput represents the output for the create/update device tools.
 type DeviceOutput struct {
 	Data domain.Device `json:"data"`
@@ -1298,6 +1386,65 @@ func siteWriteFromUpdate(input SiteUpdateInput) domain.SiteWrite {
 	write.PhysicalAddress = input.PhysicalAddress
 	write.ShippingAddress = input.ShippingAddress
 	write.Comments = input.Comments
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// regionWriteFromCreate builds a domain.RegionWrite from a create input.
+func regionWriteFromCreate(input RegionCreateInput) domain.RegionWrite {
+	return domain.RegionWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// regionWriteFromUpdate builds a domain.RegionWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func regionWriteFromUpdate(input RegionUpdateInput) domain.RegionWrite {
+	write := domain.RegionWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// tenantGroupWriteFromCreate builds a domain.TenantGroupWrite from a create
+// input.
+func tenantGroupWriteFromCreate(input TenantGroupCreateInput) domain.TenantGroupWrite {
+	return domain.TenantGroupWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// tenantGroupWriteFromUpdate builds a domain.TenantGroupWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func tenantGroupWriteFromUpdate(input TenantGroupUpdateInput) domain.TenantGroupWrite {
+	write := domain.TenantGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Parent = input.Parent
+	write.Description = input.Description
 	write.Tags = input.Tags
 	write.CustomFields = input.CustomFields
 
@@ -1842,6 +1989,7 @@ func tenantWriteFromCreate(input TenantCreateInput) domain.TenantWrite {
 	return domain.TenantWrite{
 		Name:         input.Name,
 		Slug:         input.Slug,
+		Group:        input.Group,
 		Description:  input.Description,
 		Comments:     input.Comments,
 		Tags:         input.Tags,
@@ -1858,6 +2006,7 @@ func tenantWriteFromUpdate(input TenantUpdateInput) domain.TenantWrite {
 		write.Name = *input.Name
 	}
 	write.Slug = input.Slug
+	write.Group = input.Group
 	write.Description = input.Description
 	write.Comments = input.Comments
 	write.Tags = input.Tags
@@ -2283,6 +2432,48 @@ func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Site
 	})
 }
 
+// NewGetRegionsHandler creates a handler for the get_regions tool.
+func NewGetRegionsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RegionsInput, PaginatedOutput[domain.Region]] {
+	return newListHandler(listHandlerConfig[RegionsInput, domain.Region]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Region], error) {
+			return resolveService(ctx, svc).ListRegions(ctx, params)
+		},
+		buildParams: func(input RegionsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list regions",
+	})
+}
+
+// NewGetTenantGroupsHandler creates a handler for the get_tenant_groups tool.
+func NewGetTenantGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TenantGroupsInput, PaginatedOutput[domain.TenantGroup]] {
+	return newListHandler(listHandlerConfig[TenantGroupsInput, domain.TenantGroup]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.TenantGroup], error) {
+			return resolveService(ctx, svc).ListTenantGroups(ctx, params)
+		},
+		buildParams: func(input TenantGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list tenant groups",
+	})
+}
+
 // NewGetDevicesHandler creates a handler for the get_devices tool.
 func NewGetDevicesHandler(
 	svc *application.NetworkService,
@@ -2701,6 +2892,161 @@ func NewDeleteSiteHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Si
 		}
 
 		if err := service.DeleteSite(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateRegionHandler creates a handler for the create_region tool.
+func NewCreateRegionHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RegionCreateInput, RegionOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RegionCreateInput,
+	) (*mcp.CallToolResult, RegionOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RegionOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RegionOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		region, err := service.CreateRegion(ctx, regionWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RegionOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RegionOutput{Data: *region}, nil
+	}
+}
+
+// NewUpdateRegionHandler creates a handler for the update_region tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRegionHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RegionUpdateInput, RegionOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RegionUpdateInput,
+	) (*mcp.CallToolResult, RegionOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RegionOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RegionOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		region, err := service.UpdateRegion(ctx, input.ID, regionWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RegionOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RegionOutput{Data: *region}, nil
+	}
+}
+
+// NewDeleteRegionHandler creates a handler for the delete_region tool.
+func NewDeleteRegionHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RegionDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RegionDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRegion(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateTenantGroupHandler creates a handler for the create_tenant_group
+// tool.
+func NewCreateTenantGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TenantGroupCreateInput, TenantGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TenantGroupCreateInput,
+	) (*mcp.CallToolResult, TenantGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, TenantGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, TenantGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.CreateTenantGroup(ctx, tenantGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, TenantGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TenantGroupOutput{Data: *result}, nil
+	}
+}
+
+// NewUpdateTenantGroupHandler creates a handler for the update_tenant_group
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdateTenantGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TenantGroupUpdateInput, TenantGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TenantGroupUpdateInput,
+	) (*mcp.CallToolResult, TenantGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, TenantGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, TenantGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.UpdateTenantGroup(ctx, input.ID, tenantGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, TenantGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TenantGroupOutput{Data: *result}, nil
+	}
+}
+
+// NewDeleteTenantGroupHandler creates a handler for the delete_tenant_group
+// tool.
+func NewDeleteTenantGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TenantGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TenantGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteTenantGroup(ctx, input.ID); err != nil {
 			res, e := writeErrorResult(err)
 
 			return res, struct{}{}, e

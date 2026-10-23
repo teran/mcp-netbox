@@ -238,6 +238,203 @@ func TestClient_DeleteSite(t *testing.T) {
 	})
 }
 
+//nolint:funlen // Large table-driven/declarative function; splitting is not sensible.
+func TestClient_CreateRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath, gotCT, gotAuth string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotCT = req.Header.Get("Content-Type")
+			gotAuth = req.Header.Get("Authorization")
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusCreated)
+			_, _ = writer.Write([]byte(`{"id":1,"name":"Region A","slug":"region-a","created":"2024-01-01","last_update` +
+				`d":"2024-01-01T00:00:00Z"}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		region, err := client.CreateRegion(context.Background(), "tok", domain.RegionWrite{Name: "Region A"})
+		if err != nil {
+			t.Fatalf("CreateRegion() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPost {
+			t.Errorf("method = %q, want POST", gotMethod)
+		}
+		if gotPath != "/api/dcim/regions/" {
+			t.Errorf("path = %q, want /api/dcim/regions/", gotPath)
+		}
+		if gotCT != "application/json" {
+			t.Errorf("Content-Type = %q, want application/json", gotCT)
+		}
+		if gotAuth != "Token tok" {
+			t.Errorf("Authorization = %q, want Token tok", gotAuth)
+		}
+		var reqBody map[string]string
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["name"] != "Region A" {
+			t.Errorf("request body = %s, want name Region A", gotBody)
+		}
+		if region.ID != 1 || region.Name != "Region A" {
+			t.Errorf("region = %+v, want id 1 name Region A", region)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"name":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.CreateRegion(context.Background(), "tok", domain.RegionWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if validationErr.StatusCode != http.StatusBadRequest {
+			t.Errorf("StatusCode = %d, want 400", validationErr.StatusCode)
+		}
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
+		}
+	})
+}
+
+func TestClient_UpdateRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success patch", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		var gotBody []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			gotBody, _ = io.ReadAll(req.Body)
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			_, _ = writer.Write([]byte(`{"id":7,"name":"Renamed","slug":"renamed","created":"","last_updated":""}`))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		desc := "updated"
+		region, err := client.UpdateRegion(
+			context.Background(), "tok", 7, domain.RegionWrite{Name: "Renamed", Description: &desc},
+		)
+		if err != nil {
+			t.Fatalf("UpdateRegion() returned error: %v", err)
+		}
+		if gotMethod != http.MethodPatch {
+			t.Errorf("method = %q, want PATCH", gotMethod)
+		}
+		if gotPath != "/api/dcim/regions/7/" {
+			t.Errorf("path = %q, want /api/dcim/regions/7/", gotPath)
+		}
+		if region.ID != 7 || region.Name != "Renamed" {
+			t.Errorf("region = %+v, want id 7 name Renamed", region)
+		}
+		var reqBody map[string]any
+		_ = json.Unmarshal(gotBody, &reqBody)
+		if reqBody["description"] != "updated" {
+			t.Errorf("request body = %s, want description present", gotBody)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"slug":["This field is required."]}`
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		_, err := client.UpdateRegion(context.Background(), "tok", 7, domain.RegionWrite{Name: "X"})
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
+		}
+	})
+}
+
+func TestClient_DeleteRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success 204", func(t *testing.T) {
+		t.Parallel()
+		var gotMethod, gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			gotMethod = req.Method
+			gotPath = req.URL.Path
+			writer.WriteHeader(http.StatusNoContent)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteRegion(context.Background(), "tok", 3); err != nil {
+			t.Fatalf("DeleteRegion() returned error: %v", err)
+		}
+		if gotMethod != http.MethodDelete {
+			t.Errorf("method = %q, want DELETE", gotMethod)
+		}
+		if gotPath != "/api/dcim/regions/3/" {
+			t.Errorf("path = %q, want /api/dcim/regions/3/", gotPath)
+		}
+	})
+
+	t.Run("validation error 400", func(t *testing.T) {
+		t.Parallel()
+		body := `{"detail":"Cannot delete object with dependent objects."}`
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = writer.Write([]byte(body))
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		err := client.DeleteRegion(context.Background(), "tok", 3)
+		var validationErr *domain.ValidationError
+		if !errors.As(err, &validationErr) {
+			t.Fatalf("err = %v, want *domain.ValidationError", err)
+		}
+		if string(validationErr.Body) != body {
+			t.Errorf("Body = %s, want %s", validationErr.Body, body)
+		}
+	})
+
+	t.Run("not found 404 (idempotent no-op)", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		client := NewClient(srv.URL, http.DefaultClient)
+		if err := client.DeleteRegion(context.Background(), "tok", 999); err != nil {
+			t.Fatalf("DeleteRegion() returned error: %v", err)
+		}
+	})
+}
+
 func TestMapWriteStatus(t *testing.T) {
 	t.Parallel()
 
@@ -511,6 +708,17 @@ func TestSiteWriteToWire(t *testing.T) {
 	wire := siteWriteToWire(in)
 	if wire.Name != "A" || wire.Slug == nil || *wire.Slug != "a" {
 		t.Errorf("wire = %+v, want name A slug a", wire)
+	}
+}
+
+func TestRegionWriteToWire(t *testing.T) {
+	t.Parallel()
+
+	parent := 2
+	in := domain.RegionWrite{Name: "A", Parent: &parent}
+	wire := regionWriteToWire(in)
+	if wire.Name != "A" || wire.Parent == nil || *wire.Parent != 2 {
+		t.Errorf("wire = %+v, want name A parent 2", wire)
 	}
 }
 

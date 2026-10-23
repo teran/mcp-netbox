@@ -20,7 +20,7 @@ README badge URLs, the CI workflow triggers, and the image/release tagging schem
 - **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected at startup via the `-mode http|stdio` flag (default `stdio`); the `TRANSPORT` env var remains a backward-compatible override.
 - **Token from request headers (HTTP)** — the NetBox API token is read from the `Authorization` header of each MCP request, not from an environment variable. This enables per-user authentication in multi-tenant setups.
 - **Token from environment (STDIO)** — in STDIO mode the NetBox token is read once from `NETBOX_TOKEN` at startup (there is no HTTP header to carry it per request).
-- **Full CRUD** — 14 read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for all 25 entities (89 tools total). `create_*`/`update_*` modify NetBox (POST / partial PATCH); `delete_*` is **irreversible** and flagged `DestructiveHint: true`.
+- **Full CRUD** — 16 read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for all 27 entities (97 tools total). `create_*`/`update_*` modify NetBox (POST / partial PATCH); `delete_*` is **irreversible** and flagged `DestructiveHint: true`.
 - **Transparent token relay** — the MCP server never inspects or validates the token; it passes it through to NetBox, which handles all authentication and authorization.
 
 ## Transport Decision
@@ -270,8 +270,8 @@ Logging uses **logrus**. Enablement follows the launch mode (L02):
 
 Every tool is registered with **Annotations** and per-tool **Instructions** metadata.
 
-The server exposes **89 tools**: 14 read-only queries and, for each of the 25
-entities, a `create_*`, an `update_*`, and a `delete_*` (75 write tools).
+The server exposes **97 tools**: 16 read-only queries and, for each of the 27
+entities, a `create_*`, an `update_*`, and a `delete_*` (81 write tools).
 
 The server-wide instructions (`ServerOptions.Instructions`) tell clients that
 all **list** tools are **paginated** (use `page` 1-based and `page_size` max
@@ -281,9 +281,9 @@ env in STDIO).
 
 The tools split into three annotation groups:
 
-- **Read tools** (14): `readOnlyHint: true`, `idempotentHint: true`, `destructiveHint: false`, `openWorldHint: false` — they never mutate state.
-- **Write tools — create/update** (50): `readOnlyHint: false`, `idempotentHint: false` (a create produces a new object each call), `destructiveHint: false`, `openWorldHint: false`.
-- **Write tools — delete** (25): `readOnlyHint: false`, `idempotentHint: true` (deleting a non-existent object is a no-op), `destructiveHint: true` (irreversible), `openWorldHint: false`.
+- **Read tools** (16): `readOnlyHint: true`, `idempotentHint: true`, `destructiveHint: false`, `openWorldHint: false` — they never mutate state.
+- **Write tools — create/update** (54): `readOnlyHint: false`, `idempotentHint: false` (a create produces a new object each call), `destructiveHint: false`, `openWorldHint: false`.
+- **Write tools — delete** (27): `readOnlyHint: false`, `idempotentHint: true` (deleting a non-existent object is a no-op), `destructiveHint: true` (irreversible), `openWorldHint: false`.
 
 The per-tool `title` and `instructions` are listed under each read tool below.
 
@@ -511,7 +511,7 @@ Retrieve any NetBox object by its type and numeric ID.
 
 | Parameter    | Type   | Required | Description                                    |
 |--------------|--------|----------|------------------------------------------------|
-| `object_type`| string | yes      | Object type. One of: `site`, `device`, `prefix`, `ip_address`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `provider`, `tenant`, `rack`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`, `cable`, `interface`, `vm_interface`, `circuit_termination` |
+| `object_type`| string | yes      | Object type. One of: `site`, `region`, `device`, `prefix`, `ip_address`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `provider`, `tenant`, `tenant_group`, `rack`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`, `cable`, `interface`, `vm_interface`, `circuit_termination` |
 | `id`         | int    | yes      | Numeric ID of the object                       |
 | `params`     | map    | no       | Additional query parameters to pass to NetBox (optional) |
 
@@ -655,6 +655,50 @@ List cables in NetBox with optional filters.
 
 **Instructions**: Filter by `type`, `status`, `site`, `color`, or `label`, or use `q`. Paginated; an empty array means no cables match.
 
+---
+
+### 15. `get_regions`
+
+List regions in NetBox with optional filters. Regions are the top level of the DCIM site hierarchy; sites reference a region by ID.
+
+**Input**:
+
+| Parameter    | Type   | Required | Description                                  |
+|--------------|--------|----------|----------------------------------------------|
+| `parent`     | int    | no       | Filter by parent region (numeric ID)         |
+| `tag`        | string | no       | Filter by tag (slug)                         |
+| `page`       | int    | no       | Page number (default: 1)                     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
+| `q`          | string | no       | Free-text search across all fields           |
+
+**Output**: Paginated list of regions.
+
+**Annotations**: `title` — "List Regions"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Use `q` for free-text search, or filter by `parent` (region ID) or `tag`. Results are paginated (`page`, `page_size` max 1000); an empty array means no regions match, not an error.
+
+---
+
+### 16. `get_tenant_groups`
+
+List tenant groups in NetBox with optional filters. Tenant groups categorize Tenants (e.g. cloud installs / environments).
+
+**Input**:
+
+| Parameter    | Type   | Required | Description                                  |
+|--------------|--------|----------|----------------------------------------------|
+| `parent`     | int    | no       | Filter by parent tenant group (numeric ID)   |
+| `tag`        | string | no       | Filter by tag (slug)                         |
+| `page`       | int    | no       | Page number (default: 1)                     |
+| `page_size`  | int    | no       | Results per page (default: 25, max: 1000)     |
+| `q`          | string | no       | Free-text search across all fields           |
+
+**Output**: Paginated list of tenant groups.
+
+**Annotations**: `title` — "List Tenant Groups"; `readOnlyHint: true`; `destructiveHint: false`; `idempotentHint: true`; `openWorldHint: false`.
+
+**Instructions**: Use `q` for free-text search, or filter by `parent` (tenant group ID) or `tag`. Results are paginated (`page`, `page_size` max 1000); an empty array means no tenant groups match, not an error.
+
 ## Protocol surface
 
 `mcp-netbox` implements a subset of the MCP client-server capabilities. The
@@ -662,7 +706,7 @@ following table states what is implemented versus out of scope:
 
 | Capability | Status | Notes |
 |------------|--------|-------|
-| `tools` | **Implemented** | 89 tools — 14 read + 75 typed write (see [MCP Tools](#mcp-tools)) |
+| `tools` | **Implemented** | 97 tools — 16 read + 81 typed write (see [MCP Tools](#mcp-tools)) |
 | `resources` | **Implemented** | Read-only markdown guidance served under the namespaced URI `netbox://guidance/*`; unknown URIs return not-found. Content is secrets-safe and ANSI-safe; application data flows **only** through tools, never resources (M08/M09/N37) |
 | `prompts` | Out of scope | No prompt templates exposed |
 | `sampling` | Out of scope | The server never requests model sampling |
@@ -792,7 +836,7 @@ STRIDE-flavored and concrete to the NetBox-proxy domain, naming realistic attack
 | # | Threat | Zone pair | STRIDE | Realistic action |
 |---|--------|-----------|--------|------------------|
 | T1 | **Token exfiltration** | Z1↔Z2, Z2↔Z3 | Info disclosure | Token leaked via tool output, log lines, or error strings on relay or upstream errors. |
-| T2 | **Unauthorized / over-privileged writes** | Z1→Z2→Z3 | Elevation of privilege | A1 invokes `create_*`/`update_*`/`delete_*` beyond its legitimate authority; especially the **25 irreversible `delete_*`** tools. |
+| T2 | **Unauthorized / over-privileged writes** | Z1→Z2→Z3 | Elevation of privilege | A1 invokes `create_*`/`update_*`/`delete_*` beyond its legitimate authority; especially the **27 irreversible `delete_*`** tools. |
 | T3 | **Destructive accidental/abusive deletion** | Z1→Z3 | DoS / integrity | A1 (or a misbehaving model) issues a `delete_*` for production infrastructure with no confirmation gate. |
 | T4 | **Upstream SSRF / DNS rebinding** | Z2↔Z3 | Spoofing / info disclosure | Hostile `NETBOX_URL` points to loopback/private/internal; DNS rebinding switches resolution to a reserved IP post-validation. |
 | T5 | **CRLF / header / JSON injection in write payloads** | Z1→Z2→Z3 | Tampering / injection | Crafted values embed `\r\n` to inject NetBox headers/query strings or corrupt the JSON body; the `ALLOW_PRIVATE_NETBOX` override weakens T4. |
@@ -825,7 +869,7 @@ Each vector states the **Threat**, **Impact**, and the concrete **Mitigation** (
 
 **(a) Token relay & leakage** — *Threat:* the NetBox token could be exfiltrated via tool output, log lines, or error strings; *Impact:* full read/write/delete control of the caller's NetBox footprint; *Mitigation:* token type implements safe `String`/`GoString`/`MarshalJSON` redaction, `Authorization` header excluded from outbound request log, URLs logged via `url.Redacted()`, `domain.ValidationError.Error()` carries **only the HTTP status** (body goes to the model solely via `structuredContent` `validation_errors`), never logged; token never persisted (X04) — hardens **S02/L05**.
 
-**(b) Per-operation authorization on the 25 irreversible `delete_*` tools** — *Threat:* a compromised model host or over-eager client issues destructive deletes beyond its authority or intent; *Impact:* irreversible loss of infrastructure source-of-truth records; *Mitigation:* all 25 `delete_*` tools are typed and marked `destructiveHint:true` with `idempotentHint:true` (NetBox 404 → no-op); the **relayed token carries only the caller's effective permissions** — authorization for every delete is **delegated entirely to NetBox** (the relay adds no privilege); clients MUST gate destructive calls behind explicit confirmation — hardens **S12/S10**.
+**(b) Per-operation authorization on the 27 irreversible `delete_*` tools** — *Threat:* a compromised model host or over-eager client issues destructive deletes beyond its authority or intent; *Impact:* irreversible loss of infrastructure source-of-truth records; *Mitigation:* all 27 `delete_*` tools are typed and marked `destructiveHint:true` with `idempotentHint:true` (NetBox 404 → no-op); the **relayed token carries only the caller's effective permissions** — authorization for every delete is **delegated entirely to NetBox** (the relay adds no privilege); clients MUST gate destructive calls behind explicit confirmation — hardens **S12/S10**.
 
 **(c) Upstream SSRF / DNS-rebinding and the `ALLOW_PRIVATE_NETBOX` risk** — *Threat:* a hostile or misconfigured `NETBOX_URL` directs the relay at loopback/private/internal metadata, or DNS rebinding swaps resolution to a reserved IP after validation; *Impact:* server becomes an SSRF proxy to internal services; *Mitigation:* `NETBOX_URL` validated to reject loopback/private/link-local IPs + dialer-time reserved-IP rejection; **`ALLOW_PRIVATE_NETBOX` is an explicit, operator-acknowledged override** — it weakens this control by design and must only be set when the operator trusts the private upstream, never exposed to remote callers — hardens **S11**.
 
@@ -849,7 +893,7 @@ Each vector states the **Threat**, **Impact**, and the concrete **Mitigation** (
 - [x] **YES** — Domain-specific attack vectors identified beyond the generic S01–S13 (token relay, per-op authz on `delete_*`, SSRF/`ALLOW_PRIVATE_NETBOX`, CRLF injection, ANSI/C0 output, positive-ID, DoS, free-text injection; §4).
 - [x] **YES** — Each vector mapped to a concrete requirement (hardened S-code or new domain requirement; §4 a–h).
 - [x] **YES** — Sensitive data redaction (**S02**) and no-secrets-in-logs (**L05**) confirmed for this domain (token `String`/`GoString`/`MarshalJSON`, `url.Redacted()`, auth-header exclusion, `ValidationError` status-only; §4a, §3).
-- [x] **YES** — Destructive/irreversible operations flagged `destructiveHint` with HITL (**S12**) where the domain demands it — all 25 `delete_*` tools are `destructiveHint:true` with `idempotentHint:true` (404→no-op); §4b.
+- [x] **YES** — Destructive/irreversible operations flagged `destructiveHint` with HITL (**S12**) where the domain demands it — all 27 `delete_*` tools are `destructiveHint:true` with `idempotentHint:true` (404→no-op); §4b.
 - [x] **YES** — Mutating tools carry a real data-level idempotency mechanism (**X02**) where double-execution is harmful — create is explicitly `idempotentHint:false` (new object each call), delete is `idempotentHint:true` with a real 404→no-op mechanism; §3, §4b.
 - [x] **YES** — Filesystem access scoped per **S04** — **not applicable by design**: the server is stateless (X01) and writes no files; there is no filesystem surface to scope (X04 N/A). Confirmed vacuous.
 - [x] **YES** — The audit is produced by the `security` agent and embedded verbatim (**S14**).

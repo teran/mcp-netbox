@@ -29,6 +29,24 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"read-only tool over get_object_by_id when you need multiple sites or don't yet know the exact ID.",
 		},
 		{
+			Name:  "get_regions",
+			Title: "List Regions",
+			Description: "List regions in NetBox with optional filters. Use q for free-text search, or filter by " +
+				"parent (region ID), or tag. Results are paginated: set page and page_size (max 1000). " +
+				"An empty results array means no regions match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox regions. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple regions or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_tenant_groups",
+			Title: "List Tenant Groups",
+			Description: "List tenant groups in NetBox with optional filters. Use q for free-text search, or filter " +
+				"by parent (tenant group ID), or tag. Results are paginated: set page and page_size (max 1000). " +
+				"An empty results array means no tenant groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox tenant groups. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple tenant groups or don't yet know the exact ID.",
+		},
+		{
 			Name:  "get_devices",
 			Title: "List Devices",
 			Description: "List devices in NetBox with optional filters. Filter by site, role, manufacturer, " +
@@ -90,7 +108,7 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 			Name:  "get_object_by_id",
 			Title: "Get Object by ID",
 			Description: "Retrieve any single NetBox object by its type and numeric ID. object_type is " +
-				"required (e.g. site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, " +
+				"required (e.g. site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, " +
 				"provider, tenant, rack, cable, interface). Returns a 404-style error if the object does " +
 				"not exist or the token lacks permission.",
 			Instructions: "Use when you already know the object type and numeric ID. For searching without " +
@@ -161,6 +179,62 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"dependent objects) from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
 				"want to delete the site, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_region",
+			Title: "Create Region",
+			Description: "Create a new region in NetBox. name is required; all other fields are optional. " +
+				"Provide parent as a numeric region ID (look it up first), and tags as a list of tag names. " +
+				"Returns the created region.",
+			Instructions: "Use only when the caller explicitly wants to create a region and provides a name. " +
+				"This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:  "update_region",
+			Title: "Update Region",
+			Description: "Partially update a region in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated region.",
+			Instructions: "Use to modify one or more fields of an existing region. Provide id plus only the " +
+				"fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_region",
+			Title: "Delete Region",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a region (and its " +
+				"dependent objects) from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the region, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_tenant_group",
+			Title: "Create Tenant Group",
+			Description: "Create a new tenancy tenant group in NetBox. name is required; all other fields are " +
+				"optional. Provide parent as a numeric tenant group ID (look it up first), and tags as a list of " +
+				"tag names. Returns the created tenant group.",
+			Instructions: "Use only when the caller explicitly wants to create a tenant group and provides a name. " +
+				"This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:  "update_tenant_group",
+			Title: "Update Tenant Group",
+			Description: "Partially update a tenancy tenant group in NetBox by its numeric ID. Only the fields " +
+				"you explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated tenant group.",
+			Instructions: "Use to modify one or more fields of an existing tenant group. Provide id plus only the " +
+				"fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_tenant_group",
+			Title: "Delete Tenant Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a tenancy tenant group " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the tenant group, ideally by ID, and understands it is permanent and cannot be " +
 				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
 				"ask for explicit confirmation first.",
 		},
@@ -552,7 +626,8 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 			Name:  "create_tenant",
 			Title: "Create Tenant",
 			Description: "Create a new tenancy tenant in NetBox. name is required; all other fields are " +
-				"optional. Provide slug/description/comments as strings, and tags as a list of tag names. " +
+				"optional. Provide slug/description/comments as strings, group as a numeric tenant group ID, " +
+				"and tags as a list of tag names. " +
 				"Returns the created tenant.",
 			Instructions: "Use only when the caller explicitly wants to create a tenant and provides a " +
 				"name. This tool mutates NetBox; confirm the key attributes before calling.",
