@@ -823,6 +823,189 @@ type (
 		Created      string         `json:"created"`
 		LastUpdated  string         `json:"last_updated"`
 	}
+
+	// RIR is a NetBox IPAM RIR (regional internet registry).
+	RIR struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug,omitempty"`
+		Display      string         `json:"display,omitempty"`
+		IsPrivate    bool           `json:"is_private"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// Aggregate is a NetBox IPAM aggregate (a top-level prefix block).
+	Aggregate struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Prefix       string         `json:"prefix"`
+		Display      string         `json:"display,omitempty"`
+		RIR          *Nested        `json:"rir"`
+		Tenant       *Nested        `json:"tenant"`
+		DateAdded    string         `json:"date_added,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// IPRange is a NetBox IPAM IP range (a contiguous block of addresses).
+	IPRange struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		StartAddress string         `json:"start_address"`
+		EndAddress   string         `json:"end_address"`
+		Display      string         `json:"display,omitempty"`
+		VRF          *Nested        `json:"vrf"`
+		Tenant       *Nested        `json:"tenant"`
+		Status       *Label         `json:"status"`
+		Role         *Nested        `json:"role"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// ASN is a NetBox IPAM autonomous system number.
+	ASN struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		ASN          int            `json:"asn"`
+		Display      string         `json:"display,omitempty"`
+		RIR          *Nested        `json:"rir"`
+		Tenant       *Nested        `json:"tenant"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// ASNRange is a NetBox IPAM ASN range (a contiguous block of AS numbers).
+	ASNRange struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Start        int            `json:"start"`
+		End          int            `json:"end"`
+		RIR          *Nested        `json:"rir"`
+		Tenant       *Nested        `json:"tenant"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// RouteTarget is a NetBox IPAM route target.
+	RouteTarget struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Tenant       *Nested        `json:"tenant"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// Service is a NetBox IPAM service (a network service on a device/VM).
+	Service struct {
+		ID               int            `json:"id"`
+		URL              string         `json:"url,omitempty"`
+		Name             string         `json:"name"`
+		Display          string         `json:"display,omitempty"`
+		ParentObjectType string         `json:"parent_object_type"`
+		ParentObjectID   int            `json:"parent_object_id"`
+		Parent           *Nested        `json:"parent"`
+		Protocol         *Label         `json:"protocol"`
+		Ports            []int          `json:"ports,omitempty"`
+		Description      string         `json:"description,omitempty"`
+		Tags             []Tag          `json:"tags,omitempty"`
+		CustomFields     map[string]any `json:"custom_fields,omitempty"`
+		Created          string         `json:"created"`
+		LastUpdated      string         `json:"last_updated"`
+	}
+
+	// ServiceTemplate is a NetBox IPAM service template (a reusable service).
+	ServiceTemplate struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Protocol     *Label         `json:"protocol"`
+		Ports        []int          `json:"ports,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// FHRPGroup is a NetBox IPAM FHRP (first-hop redundancy protocol) group.
+	FHRPGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Protocol     *Label         `json:"protocol"`
+		GroupID      int            `json:"group_id"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// FHRPGroupAssignment is a NetBox IPAM FHRP group assignment (the mapping
+	// of an FHRP group to an IP address).
+	FHRPGroupAssignment struct {
+		ID            int     `json:"id"`
+		URL           string  `json:"url,omitempty"`
+		Group         *Nested `json:"group"`
+		InterfaceType string  `json:"interface_type"`
+		InterfaceID   int     `json:"interface_id"`
+		Interface     *Nested `json:"interface"`
+		Priority      int     `json:"priority"`
+		Created       string  `json:"created"`
+		LastUpdated   string  `json:"last_updated"`
+	}
+
+	// VLANTranslationPolicy is a NetBox IPAM VLAN translation policy.
+	VLANTranslationPolicy struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// VLANTranslationRule is a NetBox IPAM VLAN translation rule.
+	VLANTranslationRule struct {
+		ID          int    `json:"id"`
+		URL         string `json:"url,omitempty"`
+		Display     string `json:"display,omitempty"`
+		Policy      int    `json:"policy"`
+		LocalVID    int    `json:"local_vid"`
+		RemoteVID   int    `json:"remote_vid"`
+		Description string `json:"description,omitempty"`
+		Created     string `json:"created"`
+		LastUpdated string `json:"last_updated"`
+	}
 )
 
 type (
@@ -1755,6 +1938,200 @@ type MACAddressWrite struct {
 	Description        *string        `json:"description,omitempty"`
 	Tags               []string       `json:"tags,omitempty"`
 	CustomFields       map[string]any `json:"custom_fields,omitempty"`
+}
+
+// RIRWrite is the domain DTO for creating or updating a NetBox IPAM RIR. It
+// carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". IsPrivate is a pointer so an update can
+// set it to false explicitly.
+type RIRWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	IsPrivate    *bool          `json:"is_private,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// AggregateWrite is the domain DTO for creating or updating a NetBox IPAM
+// aggregate. It carries only the writable fields.
+//
+// Prefix is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". RIR and Tenant are numeric NetBox IDs.
+type AggregateWrite struct {
+	Prefix       string         `json:"prefix,omitempty"`
+	RIR          *int           `json:"rir,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	DateAdded    *string        `json:"date_added,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// IPRangeWrite is the domain DTO for creating or updating a NetBox IPAM IP
+// range. It carries only the writable fields.
+//
+// StartAddress and EndAddress are plain strings because both are required on
+// create; their omitempty tags drop them from a PATCH body when not provided.
+// Optional scalar fields are pointers so that a partial-update (PATCH) can
+// distinguish "not provided" (nil) from "explicitly set to empty". VRF, Tenant
+// and Role are numeric NetBox IDs; Status is a choice-string value.
+type IPRangeWrite struct {
+	StartAddress string         `json:"start_address,omitempty"`
+	EndAddress   string         `json:"end_address,omitempty"`
+	VRF          *int           `json:"vrf,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ASNWrite is the domain DTO for creating or updating a NetBox IPAM ASN. It
+// carries only the writable fields.
+//
+// ASN is a plain number because it is required on create. Optional scalar
+// fields are pointers so that a partial-update (PATCH) can distinguish "not
+// provided" (nil) from "explicitly set to empty". RIR and Tenant are numeric
+// NetBox IDs.
+type ASNWrite struct {
+	ASN          int            `json:"asn,omitempty"`
+	RIR          *int           `json:"rir,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ASNRangeWrite is the domain DTO for creating or updating a NetBox IPAM ASN
+// range. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". RIR and Tenant are numeric NetBox IDs.
+type ASNRangeWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Start        *int           `json:"start,omitempty"`
+	End          *int           `json:"end,omitempty"`
+	RIR          *int           `json:"rir,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// RouteTargetWrite is the domain DTO for creating or updating a NetBox IPAM
+// route target. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Tenant is a numeric NetBox ID.
+type RouteTargetWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ServiceWrite is the domain DTO for creating or updating a NetBox IPAM
+// service. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". ParentObjectType and ParentObjectID
+// identify the assigned parent object (e.g. a device or virtual machine);
+// Protocol is a choice-string value; Ports is a list of port numbers.
+type ServiceWrite struct {
+	Name             string         `json:"name,omitempty"`
+	ParentObjectType *string        `json:"parent_object_type,omitempty"`
+	ParentObjectID   *int           `json:"parent_object_id,omitempty"`
+	Protocol         *string        `json:"protocol,omitempty"`
+	Ports            []int          `json:"ports,omitempty"`
+	Description      *string        `json:"description,omitempty"`
+	Tags             []string       `json:"tags,omitempty"`
+	CustomFields     map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ServiceTemplateWrite is the domain DTO for creating or updating a NetBox IPAM
+// service template. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Protocol is a choice-string value;
+// Ports is a list of port numbers.
+type ServiceTemplateWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Protocol     *string        `json:"protocol,omitempty"`
+	Ports        []int          `json:"ports,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// FHRPGroupWrite is the domain DTO for creating or updating a NetBox IPAM FHRP
+// group. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Protocol is a choice-string value.
+type FHRPGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Protocol     *string        `json:"protocol,omitempty"`
+	GroupID      *int           `json:"group_id,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// FHRPGroupAssignmentWrite is the domain DTO for creating or updating a NetBox
+// IPAM FHRP group assignment. It carries only the writable fields.
+//
+// Group and IPAddress are required on create (the numeric NetBox IDs of the FHRP
+// group and interface). Priority is optional.
+type FHRPGroupAssignmentWrite struct {
+	Group         int    `json:"group,omitempty"`
+	InterfaceType string `json:"interface_type,omitempty"`
+	InterfaceID   int    `json:"interface_id,omitempty"`
+	Priority      *int   `json:"priority,omitempty"`
+}
+
+// VLANTranslationPolicyWrite is the domain DTO for creating or updating a NetBox
+// IPAM VLAN translation policy. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided.
+type VLANTranslationPolicyWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// VLANTranslationRuleWrite is the domain DTO for creating or updating a NetBox
+// IPAM VLAN translation rule. It carries only the writable fields.
+//
+// Policy is required on create (the numeric NetBox ID of the parent policy).
+// LocalVID and RemoteVID are the translated VLAN identifiers (VLAN VIDs);
+// Description is a free-text note.
+type VLANTranslationRuleWrite struct {
+	Policy      int     `json:"policy,omitempty"`
+	LocalVID    *int    `json:"local_vid,omitempty"`
+	RemoteVID   *int    `json:"remote_vid,omitempty"`
+	Description *string `json:"description,omitempty"`
 }
 
 // PaginatedResponse wraps a paginated API response with the total count,

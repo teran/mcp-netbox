@@ -196,6 +196,19 @@ func TestSetup_StdioLogDirMissing(t *testing.T) {
 	}
 }
 
+func TestSetup_StdioLogPathIsDirectory(t *testing.T) {
+	// A stdio transport whose LOG_FILENAME resolves to an existing directory
+	// must fail Setup: opening a directory for append-write is an error, so the
+	// openLogFile error branch is exercised.
+	cfg := baseConfig()
+	cfg.Transport = config.TransportStdio
+	cfg.LogFilename = t.TempDir()
+
+	if _, err := Setup(cfg); err == nil {
+		t.Fatal("Setup = nil, want error when LOG_FILENAME is a directory")
+	}
+}
+
 // captureLogger builds a logger via Setup(cfg) (so the redaction hook is
 // installed) and redirects its output to a buffer so assertions can inspect
 // the rendered text.

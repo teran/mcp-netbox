@@ -1961,3 +1961,537 @@ func (s *NetworkService) DeleteMACAddress(ctx context.Context, id int) error {
 
 	return nil
 }
+
+// ListRIRs returns the page of RIRs matching params.
+func (s *NetworkService) ListRIRs(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.RIR], error,
+) {
+	resp, err := s.repo.ListRIRs(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list RIRs: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateRIR relays an RIR create to the repository.
+func (s *NetworkService) CreateRIR(ctx context.Context, in domain.RIRWrite) (*domain.RIR, error) {
+	resp, err := s.repo.CreateRIR(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create RIR: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateRIR relays an RIR update to the repository.
+func (s *NetworkService) UpdateRIR(ctx context.Context, id int, in domain.RIRWrite) (*domain.RIR, error) {
+	resp, err := s.repo.UpdateRIR(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update RIR: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteRIR relays an RIR delete to the repository.
+func (s *NetworkService) DeleteRIR(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRIR(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete RIR: %w", err)
+	}
+
+	return nil
+}
+
+// ListAggregates returns the page of aggregates matching params.
+func (s *NetworkService) ListAggregates(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.Aggregate], error,
+) {
+	resp, err := s.repo.ListAggregates(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list aggregates: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateAggregate relays an aggregate create to the repository.
+func (s *NetworkService) CreateAggregate(ctx context.Context, in domain.AggregateWrite) (*domain.Aggregate, error) {
+	resp, err := s.repo.CreateAggregate(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create aggregate: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateAggregate relays an aggregate update to the repository.
+func (s *NetworkService) UpdateAggregate(
+	ctx context.Context, id int, in domain.AggregateWrite,
+) (*domain.Aggregate, error) {
+	resp, err := s.repo.UpdateAggregate(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update aggregate: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteAggregate relays an aggregate delete to the repository.
+func (s *NetworkService) DeleteAggregate(ctx context.Context, id int) error {
+	if err := s.repo.DeleteAggregate(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete aggregate: %w", err)
+	}
+
+	return nil
+}
+
+// ListIPRanges returns the page of IP ranges matching params.
+func (s *NetworkService) ListIPRanges(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.IPRange], error,
+) {
+	resp, err := s.repo.ListIPRanges(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list IP ranges: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateIPRange relays an IP range create to the repository.
+func (s *NetworkService) CreateIPRange(ctx context.Context, in domain.IPRangeWrite) (*domain.IPRange, error) {
+	resp, err := s.repo.CreateIPRange(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create IP range: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateIPRange relays an IP range update to the repository.
+func (s *NetworkService) UpdateIPRange(
+	ctx context.Context, id int, in domain.IPRangeWrite,
+) (*domain.IPRange, error) {
+	resp, err := s.repo.UpdateIPRange(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update IP range: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteIPRange relays an IP range delete to the repository.
+func (s *NetworkService) DeleteIPRange(ctx context.Context, id int) error {
+	if err := s.repo.DeleteIPRange(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete IP range: %w", err)
+	}
+
+	return nil
+}
+
+// ListASNs returns the page of ASNs matching params.
+func (s *NetworkService) ListASNs(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.ASN], error,
+) {
+	resp, err := s.repo.ListASNs(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list ASNs: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateASN relays an ASN create to the repository.
+func (s *NetworkService) CreateASN(ctx context.Context, in domain.ASNWrite) (*domain.ASN, error) {
+	resp, err := s.repo.CreateASN(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create ASN: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateASN relays an ASN update to the repository.
+func (s *NetworkService) UpdateASN(ctx context.Context, id int, in domain.ASNWrite) (*domain.ASN, error) {
+	resp, err := s.repo.UpdateASN(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update ASN: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteASN relays an ASN delete to the repository.
+func (s *NetworkService) DeleteASN(ctx context.Context, id int) error {
+	if err := s.repo.DeleteASN(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete ASN: %w", err)
+	}
+
+	return nil
+}
+
+// ListASNRanges returns the page of ASN ranges matching params.
+func (s *NetworkService) ListASNRanges(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.ASNRange], error,
+) {
+	resp, err := s.repo.ListASNRanges(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list ASN ranges: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateASNRange relays an ASN range create to the repository.
+func (s *NetworkService) CreateASNRange(ctx context.Context, in domain.ASNRangeWrite) (*domain.ASNRange, error) {
+	resp, err := s.repo.CreateASNRange(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create ASN range: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateASNRange relays an ASN range update to the repository.
+func (s *NetworkService) UpdateASNRange(
+	ctx context.Context, id int, in domain.ASNRangeWrite,
+) (*domain.ASNRange, error) {
+	resp, err := s.repo.UpdateASNRange(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update ASN range: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteASNRange relays an ASN range delete to the repository.
+func (s *NetworkService) DeleteASNRange(ctx context.Context, id int) error {
+	if err := s.repo.DeleteASNRange(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete ASN range: %w", err)
+	}
+
+	return nil
+}
+
+// ListRouteTargets returns the page of route targets matching params.
+func (s *NetworkService) ListRouteTargets(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.RouteTarget], error,
+) {
+	resp, err := s.repo.ListRouteTargets(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list route targets: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateRouteTarget relays a route target create to the repository.
+func (s *NetworkService) CreateRouteTarget(
+	ctx context.Context, in domain.RouteTargetWrite,
+) (*domain.RouteTarget, error) {
+	resp, err := s.repo.CreateRouteTarget(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create route target: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateRouteTarget relays a route target update to the repository.
+func (s *NetworkService) UpdateRouteTarget(
+	ctx context.Context, id int, in domain.RouteTargetWrite,
+) (*domain.RouteTarget, error) {
+	resp, err := s.repo.UpdateRouteTarget(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update route target: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteRouteTarget relays a route target delete to the repository.
+func (s *NetworkService) DeleteRouteTarget(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRouteTarget(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete route target: %w", err)
+	}
+
+	return nil
+}
+
+// ListServices returns the page of services matching params.
+func (s *NetworkService) ListServices(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.Service], error,
+) {
+	resp, err := s.repo.ListServices(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list services: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateService relays a service create to the repository.
+func (s *NetworkService) CreateService(ctx context.Context, in domain.ServiceWrite) (*domain.Service, error) {
+	resp, err := s.repo.CreateService(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create service: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateService relays a service update to the repository.
+func (s *NetworkService) UpdateService(
+	ctx context.Context, id int, in domain.ServiceWrite,
+) (*domain.Service, error) {
+	resp, err := s.repo.UpdateService(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update service: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteService relays a service delete to the repository.
+func (s *NetworkService) DeleteService(ctx context.Context, id int) error {
+	if err := s.repo.DeleteService(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete service: %w", err)
+	}
+
+	return nil
+}
+
+// ListServiceTemplates returns the page of service templates matching params.
+func (s *NetworkService) ListServiceTemplates(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.ServiceTemplate], error,
+) {
+	resp, err := s.repo.ListServiceTemplates(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list service templates: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateServiceTemplate relays a service template create to the repository.
+func (s *NetworkService) CreateServiceTemplate(
+	ctx context.Context, in domain.ServiceTemplateWrite,
+) (*domain.ServiceTemplate, error) {
+	resp, err := s.repo.CreateServiceTemplate(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create service template: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateServiceTemplate relays a service template update to the repository.
+func (s *NetworkService) UpdateServiceTemplate(
+	ctx context.Context, id int, in domain.ServiceTemplateWrite,
+) (*domain.ServiceTemplate, error) {
+	resp, err := s.repo.UpdateServiceTemplate(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update service template: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteServiceTemplate relays a service template delete to the repository.
+func (s *NetworkService) DeleteServiceTemplate(ctx context.Context, id int) error {
+	if err := s.repo.DeleteServiceTemplate(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete service template: %w", err)
+	}
+
+	return nil
+}
+
+// ListFHRPGroups returns the page of FHRP groups matching params.
+func (s *NetworkService) ListFHRPGroups(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.FHRPGroup], error,
+) {
+	resp, err := s.repo.ListFHRPGroups(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list FHRP groups: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateFHRPGroup relays an FHRP group create to the repository.
+func (s *NetworkService) CreateFHRPGroup(ctx context.Context, in domain.FHRPGroupWrite) (*domain.FHRPGroup, error) {
+	resp, err := s.repo.CreateFHRPGroup(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create FHRP group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateFHRPGroup relays an FHRP group update to the repository.
+func (s *NetworkService) UpdateFHRPGroup(
+	ctx context.Context, id int, in domain.FHRPGroupWrite,
+) (*domain.FHRPGroup, error) {
+	resp, err := s.repo.UpdateFHRPGroup(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update FHRP group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteFHRPGroup relays an FHRP group delete to the repository.
+func (s *NetworkService) DeleteFHRPGroup(ctx context.Context, id int) error {
+	if err := s.repo.DeleteFHRPGroup(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete FHRP group: %w", err)
+	}
+
+	return nil
+}
+
+// ListFHRPGroupAssignments returns the page of FHRP group assignments matching
+// params.
+func (s *NetworkService) ListFHRPGroupAssignments(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.FHRPGroupAssignment], error,
+) {
+	resp, err := s.repo.ListFHRPGroupAssignments(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list FHRP group assignments: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateFHRPGroupAssignment relays an FHRP group assignment create to the
+// repository.
+func (s *NetworkService) CreateFHRPGroupAssignment(
+	ctx context.Context, in domain.FHRPGroupAssignmentWrite,
+) (*domain.FHRPGroupAssignment, error) {
+	resp, err := s.repo.CreateFHRPGroupAssignment(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create FHRP group assignment: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateFHRPGroupAssignment relays an FHRP group assignment update to the
+// repository.
+func (s *NetworkService) UpdateFHRPGroupAssignment(
+	ctx context.Context, id int, in domain.FHRPGroupAssignmentWrite,
+) (*domain.FHRPGroupAssignment, error) {
+	resp, err := s.repo.UpdateFHRPGroupAssignment(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update FHRP group assignment: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteFHRPGroupAssignment relays an FHRP group assignment delete to the
+// repository.
+func (s *NetworkService) DeleteFHRPGroupAssignment(ctx context.Context, id int) error {
+	if err := s.repo.DeleteFHRPGroupAssignment(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete FHRP group assignment: %w", err)
+	}
+
+	return nil
+}
+
+// ListVLANTranslationPolicies returns the page of VLAN translation policies
+// matching params.
+func (s *NetworkService) ListVLANTranslationPolicies(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.VLANTranslationPolicy], error,
+) {
+	resp, err := s.repo.ListVLANTranslationPolicies(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list VLAN translation policies: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateVLANTranslationPolicy relays a VLAN translation policy create to the
+// repository.
+func (s *NetworkService) CreateVLANTranslationPolicy(
+	ctx context.Context, in domain.VLANTranslationPolicyWrite,
+) (*domain.VLANTranslationPolicy, error) {
+	resp, err := s.repo.CreateVLANTranslationPolicy(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create VLAN translation policy: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateVLANTranslationPolicy relays a VLAN translation policy update to the
+// repository.
+func (s *NetworkService) UpdateVLANTranslationPolicy(
+	ctx context.Context, id int, in domain.VLANTranslationPolicyWrite,
+) (*domain.VLANTranslationPolicy, error) {
+	resp, err := s.repo.UpdateVLANTranslationPolicy(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update VLAN translation policy: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteVLANTranslationPolicy relays a VLAN translation policy delete to the
+// repository.
+func (s *NetworkService) DeleteVLANTranslationPolicy(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVLANTranslationPolicy(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete VLAN translation policy: %w", err)
+	}
+
+	return nil
+}
+
+// ListVLANTranslationRules returns the page of VLAN translation rules matching
+// params.
+func (s *NetworkService) ListVLANTranslationRules(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.VLANTranslationRule], error,
+) {
+	resp, err := s.repo.ListVLANTranslationRules(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list VLAN translation rules: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateVLANTranslationRule relays a VLAN translation rule create to the
+// repository.
+func (s *NetworkService) CreateVLANTranslationRule(
+	ctx context.Context, in domain.VLANTranslationRuleWrite,
+) (*domain.VLANTranslationRule, error) {
+	resp, err := s.repo.CreateVLANTranslationRule(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create VLAN translation rule: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateVLANTranslationRule relays a VLAN translation rule update to the
+// repository.
+func (s *NetworkService) UpdateVLANTranslationRule(
+	ctx context.Context, id int, in domain.VLANTranslationRuleWrite,
+) (*domain.VLANTranslationRule, error) {
+	resp, err := s.repo.UpdateVLANTranslationRule(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update VLAN translation rule: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteVLANTranslationRule relays a VLAN translation rule delete to the
+// repository.
+func (s *NetworkService) DeleteVLANTranslationRule(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVLANTranslationRule(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete VLAN translation rule: %w", err)
+	}
+
+	return nil
+}

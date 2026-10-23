@@ -3247,4 +3247,868 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 			},
 		),
 	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_rirs"],
+		metrics,
+		"get_rirs",
+		WrapToolHandler[RIRsInput, PaginatedOutput[domain.RIR]](
+			metrics,
+			"get_rirs",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RIRsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.RIR], error) {
+				return NewGetRIRsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_rir"],
+		metrics,
+		"create_rir",
+		WrapToolHandler[RIRCreateInput, RIROutput](
+			metrics,
+			"create_rir",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RIRCreateInput,
+			) (*mcp.CallToolResult, RIROutput, error) {
+				return NewCreateRIRHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_rir"],
+		metrics,
+		"update_rir",
+		WrapToolHandler[RIRUpdateInput, RIROutput](
+			metrics,
+			"update_rir",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RIRUpdateInput,
+			) (*mcp.CallToolResult, RIROutput, error) {
+				return NewUpdateRIRHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_rir"],
+		metrics,
+		"delete_rir",
+		WrapToolHandler[RIRDeleteInput, struct{}](
+			metrics,
+			"delete_rir",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RIRDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteRIRHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_aggregates"],
+		metrics,
+		"get_aggregates",
+		WrapToolHandler[AggregatesInput, PaginatedOutput[domain.Aggregate]](
+			metrics,
+			"get_aggregates",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in AggregatesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.Aggregate], error) {
+				return NewGetAggregatesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_aggregate"],
+		metrics,
+		"create_aggregate",
+		WrapToolHandler[AggregateCreateInput, AggregateOutput](
+			metrics,
+			"create_aggregate",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in AggregateCreateInput,
+			) (*mcp.CallToolResult, AggregateOutput, error) {
+				return NewCreateAggregateHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_aggregate"],
+		metrics,
+		"update_aggregate",
+		WrapToolHandler[AggregateUpdateInput, AggregateOutput](
+			metrics,
+			"update_aggregate",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in AggregateUpdateInput,
+			) (*mcp.CallToolResult, AggregateOutput, error) {
+				return NewUpdateAggregateHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_aggregate"],
+		metrics,
+		"delete_aggregate",
+		WrapToolHandler[AggregateDeleteInput, struct{}](
+			metrics,
+			"delete_aggregate",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in AggregateDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteAggregateHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_ip_ranges"],
+		metrics,
+		"get_ip_ranges",
+		WrapToolHandler[IPRangesInput, PaginatedOutput[domain.IPRange]](
+			metrics,
+			"get_ip_ranges",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in IPRangesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.IPRange], error) {
+				return NewGetIPRangesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_ip_range"],
+		metrics,
+		"create_ip_range",
+		WrapToolHandler[IPRangeCreateInput, IPRangeOutput](
+			metrics,
+			"create_ip_range",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in IPRangeCreateInput,
+			) (*mcp.CallToolResult, IPRangeOutput, error) {
+				return NewCreateIPRangeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_ip_range"],
+		metrics,
+		"update_ip_range",
+		WrapToolHandler[IPRangeUpdateInput, IPRangeOutput](
+			metrics,
+			"update_ip_range",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in IPRangeUpdateInput,
+			) (*mcp.CallToolResult, IPRangeOutput, error) {
+				return NewUpdateIPRangeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_ip_range"],
+		metrics,
+		"delete_ip_range",
+		WrapToolHandler[IPRangeDeleteInput, struct{}](
+			metrics,
+			"delete_ip_range",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in IPRangeDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteIPRangeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_asns"],
+		metrics,
+		"get_asns",
+		WrapToolHandler[ASNsInput, PaginatedOutput[domain.ASN]](
+			metrics,
+			"get_asns",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ASNsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ASN], error) {
+				return NewGetASNsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_asn"],
+		metrics,
+		"create_asn",
+		WrapToolHandler[ASNCreateInput, ASNOutput](
+			metrics,
+			"create_asn",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ASNCreateInput,
+			) (*mcp.CallToolResult, ASNOutput, error) {
+				return NewCreateASNHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_asn"],
+		metrics,
+		"update_asn",
+		WrapToolHandler[ASNUpdateInput, ASNOutput](
+			metrics,
+			"update_asn",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ASNUpdateInput,
+			) (*mcp.CallToolResult, ASNOutput, error) {
+				return NewUpdateASNHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_asn"],
+		metrics,
+		"delete_asn",
+		WrapToolHandler[ASNDeleteInput, struct{}](
+			metrics,
+			"delete_asn",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ASNDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteASNHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_asn_ranges"],
+		metrics,
+		"get_asn_ranges",
+		WrapToolHandler[ASNRangesInput, PaginatedOutput[domain.ASNRange]](
+			metrics,
+			"get_asn_ranges",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ASNRangesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ASNRange], error) {
+				return NewGetASNRangesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_asn_range"],
+		metrics,
+		"create_asn_range",
+		WrapToolHandler[ASNRangeCreateInput, ASNRangeOutput](
+			metrics,
+			"create_asn_range",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ASNRangeCreateInput,
+			) (*mcp.CallToolResult, ASNRangeOutput, error) {
+				return NewCreateASNRangeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_asn_range"],
+		metrics,
+		"update_asn_range",
+		WrapToolHandler[ASNRangeUpdateInput, ASNRangeOutput](
+			metrics,
+			"update_asn_range",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ASNRangeUpdateInput,
+			) (*mcp.CallToolResult, ASNRangeOutput, error) {
+				return NewUpdateASNRangeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_asn_range"],
+		metrics,
+		"delete_asn_range",
+		WrapToolHandler[ASNRangeDeleteInput, struct{}](
+			metrics,
+			"delete_asn_range",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ASNRangeDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteASNRangeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_route_targets"],
+		metrics,
+		"get_route_targets",
+		WrapToolHandler[RouteTargetsInput, PaginatedOutput[domain.RouteTarget]](
+			metrics,
+			"get_route_targets",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RouteTargetsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.RouteTarget], error) {
+				return NewGetRouteTargetsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_route_target"],
+		metrics,
+		"create_route_target",
+		WrapToolHandler[RouteTargetCreateInput, RouteTargetOutput](
+			metrics,
+			"create_route_target",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RouteTargetCreateInput,
+			) (*mcp.CallToolResult, RouteTargetOutput, error) {
+				return NewCreateRouteTargetHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_route_target"],
+		metrics,
+		"update_route_target",
+		WrapToolHandler[RouteTargetUpdateInput, RouteTargetOutput](
+			metrics,
+			"update_route_target",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RouteTargetUpdateInput,
+			) (*mcp.CallToolResult, RouteTargetOutput, error) {
+				return NewUpdateRouteTargetHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_route_target"],
+		metrics,
+		"delete_route_target",
+		WrapToolHandler[RouteTargetDeleteInput, struct{}](
+			metrics,
+			"delete_route_target",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RouteTargetDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteRouteTargetHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_services"],
+		metrics,
+		"get_services",
+		WrapToolHandler[ServicesInput, PaginatedOutput[domain.Service]](
+			metrics,
+			"get_services",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ServicesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.Service], error) {
+				return NewGetServicesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_service"],
+		metrics,
+		"create_service",
+		WrapToolHandler[ServiceCreateInput, ServiceOutput](
+			metrics,
+			"create_service",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ServiceCreateInput,
+			) (*mcp.CallToolResult, ServiceOutput, error) {
+				return NewCreateServiceHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_service"],
+		metrics,
+		"update_service",
+		WrapToolHandler[ServiceUpdateInput, ServiceOutput](
+			metrics,
+			"update_service",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ServiceUpdateInput,
+			) (*mcp.CallToolResult, ServiceOutput, error) {
+				return NewUpdateServiceHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_service"],
+		metrics,
+		"delete_service",
+		WrapToolHandler[ServiceDeleteInput, struct{}](
+			metrics,
+			"delete_service",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ServiceDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteServiceHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_service_templates"],
+		metrics,
+		"get_service_templates",
+		WrapToolHandler[ServiceTemplatesInput, PaginatedOutput[domain.ServiceTemplate]](
+			metrics,
+			"get_service_templates",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ServiceTemplatesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ServiceTemplate], error) {
+				return NewGetServiceTemplatesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_service_template"],
+		metrics,
+		"create_service_template",
+		WrapToolHandler[ServiceTemplateCreateInput, ServiceTemplateOutput](
+			metrics,
+			"create_service_template",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ServiceTemplateCreateInput,
+			) (*mcp.CallToolResult, ServiceTemplateOutput, error) {
+				return NewCreateServiceTemplateHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_service_template"],
+		metrics,
+		"update_service_template",
+		WrapToolHandler[ServiceTemplateUpdateInput, ServiceTemplateOutput](
+			metrics,
+			"update_service_template",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ServiceTemplateUpdateInput,
+			) (*mcp.CallToolResult, ServiceTemplateOutput, error) {
+				return NewUpdateServiceTemplateHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_service_template"],
+		metrics,
+		"delete_service_template",
+		WrapToolHandler[ServiceTemplateDeleteInput, struct{}](
+			metrics,
+			"delete_service_template",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ServiceTemplateDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteServiceTemplateHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_fhrp_groups"],
+		metrics,
+		"get_fhrp_groups",
+		WrapToolHandler[FHRPGroupsInput, PaginatedOutput[domain.FHRPGroup]](
+			metrics,
+			"get_fhrp_groups",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FHRPGroupsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.FHRPGroup], error) {
+				return NewGetFHRPGroupsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_fhrp_group"],
+		metrics,
+		"create_fhrp_group",
+		WrapToolHandler[FHRPGroupCreateInput, FHRPGroupOutput](
+			metrics,
+			"create_fhrp_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FHRPGroupCreateInput,
+			) (*mcp.CallToolResult, FHRPGroupOutput, error) {
+				return NewCreateFHRPGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_fhrp_group"],
+		metrics,
+		"update_fhrp_group",
+		WrapToolHandler[FHRPGroupUpdateInput, FHRPGroupOutput](
+			metrics,
+			"update_fhrp_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FHRPGroupUpdateInput,
+			) (*mcp.CallToolResult, FHRPGroupOutput, error) {
+				return NewUpdateFHRPGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_fhrp_group"],
+		metrics,
+		"delete_fhrp_group",
+		WrapToolHandler[FHRPGroupDeleteInput, struct{}](
+			metrics,
+			"delete_fhrp_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FHRPGroupDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteFHRPGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_fhrp_group_assignments"],
+		metrics,
+		"get_fhrp_group_assignments",
+		WrapToolHandler[FHRPGroupAssignmentsInput, PaginatedOutput[domain.FHRPGroupAssignment]](
+			metrics,
+			"get_fhrp_group_assignments",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FHRPGroupAssignmentsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.FHRPGroupAssignment], error) {
+				return NewGetFHRPGroupAssignmentsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_fhrp_group_assignment"],
+		metrics,
+		"create_fhrp_group_assignment",
+		WrapToolHandler[FHRPGroupAssignmentCreateInput, FHRPGroupAssignmentOutput](
+			metrics,
+			"create_fhrp_group_assignment",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FHRPGroupAssignmentCreateInput,
+			) (*mcp.CallToolResult, FHRPGroupAssignmentOutput, error) {
+				return NewCreateFHRPGroupAssignmentHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_fhrp_group_assignment"],
+		metrics,
+		"update_fhrp_group_assignment",
+		WrapToolHandler[FHRPGroupAssignmentUpdateInput, FHRPGroupAssignmentOutput](
+			metrics,
+			"update_fhrp_group_assignment",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FHRPGroupAssignmentUpdateInput,
+			) (*mcp.CallToolResult, FHRPGroupAssignmentOutput, error) {
+				return NewUpdateFHRPGroupAssignmentHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_fhrp_group_assignment"],
+		metrics,
+		"delete_fhrp_group_assignment",
+		WrapToolHandler[FHRPGroupAssignmentDeleteInput, struct{}](
+			metrics,
+			"delete_fhrp_group_assignment",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FHRPGroupAssignmentDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteFHRPGroupAssignmentHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_vlan_translation_policies"],
+		metrics,
+		"get_vlan_translation_policies",
+		WrapToolHandler[VLANTranslationPoliciesInput, PaginatedOutput[domain.VLANTranslationPolicy]](
+			metrics,
+			"get_vlan_translation_policies",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VLANTranslationPoliciesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.VLANTranslationPolicy], error) {
+				return NewGetVLANTranslationPoliciesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_vlan_translation_policy"],
+		metrics,
+		"create_vlan_translation_policy",
+		WrapToolHandler[VLANTranslationPolicyCreateInput, VLANTranslationPolicyOutput](
+			metrics,
+			"create_vlan_translation_policy",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VLANTranslationPolicyCreateInput,
+			) (*mcp.CallToolResult, VLANTranslationPolicyOutput, error) {
+				return NewCreateVLANTranslationPolicyHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_vlan_translation_policy"],
+		metrics,
+		"update_vlan_translation_policy",
+		WrapToolHandler[VLANTranslationPolicyUpdateInput, VLANTranslationPolicyOutput](
+			metrics,
+			"update_vlan_translation_policy",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VLANTranslationPolicyUpdateInput,
+			) (*mcp.CallToolResult, VLANTranslationPolicyOutput, error) {
+				return NewUpdateVLANTranslationPolicyHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_vlan_translation_policy"],
+		metrics,
+		"delete_vlan_translation_policy",
+		WrapToolHandler[VLANTranslationPolicyDeleteInput, struct{}](
+			metrics,
+			"delete_vlan_translation_policy",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VLANTranslationPolicyDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteVLANTranslationPolicyHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_vlan_translation_rules"],
+		metrics,
+		"get_vlan_translation_rules",
+		WrapToolHandler[VLANTranslationRulesInput, PaginatedOutput[domain.VLANTranslationRule]](
+			metrics,
+			"get_vlan_translation_rules",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VLANTranslationRulesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.VLANTranslationRule], error) {
+				return NewGetVLANTranslationRulesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_vlan_translation_rule"],
+		metrics,
+		"create_vlan_translation_rule",
+		WrapToolHandler[VLANTranslationRuleCreateInput, VLANTranslationRuleOutput](
+			metrics,
+			"create_vlan_translation_rule",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VLANTranslationRuleCreateInput,
+			) (*mcp.CallToolResult, VLANTranslationRuleOutput, error) {
+				return NewCreateVLANTranslationRuleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_vlan_translation_rule"],
+		metrics,
+		"update_vlan_translation_rule",
+		WrapToolHandler[VLANTranslationRuleUpdateInput, VLANTranslationRuleOutput](
+			metrics,
+			"update_vlan_translation_rule",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VLANTranslationRuleUpdateInput,
+			) (*mcp.CallToolResult, VLANTranslationRuleOutput, error) {
+				return NewUpdateVLANTranslationRuleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_vlan_translation_rule"],
+		metrics,
+		"delete_vlan_translation_rule",
+		WrapToolHandler[VLANTranslationRuleDeleteInput, struct{}](
+			metrics,
+			"delete_vlan_translation_rule",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VLANTranslationRuleDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteVLANTranslationRuleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
 }

@@ -671,6 +671,143 @@ type WireMACAddressWrite struct {
 	CustomFields       map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireRIRWrite is the wire request model for IPAM RIR create/update. Its json
+// tags intentionally mirror NetBox's writable fields.
+type WireRIRWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	IsPrivate    *bool          `json:"is_private,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireAggregateWrite is the wire request model for IPAM aggregate
+// create/update. Its json tags intentionally mirror NetBox's writable fields.
+type WireAggregateWrite struct {
+	Prefix       string         `json:"prefix,omitempty"`
+	RIR          *int           `json:"rir,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	DateAdded    *string        `json:"date_added,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireIPRangeWrite is the wire request model for IPAM IP range create/update.
+// Its json tags intentionally mirror NetBox's writable fields.
+type WireIPRangeWrite struct {
+	StartAddress string         `json:"start_address,omitempty"`
+	EndAddress   string         `json:"end_address,omitempty"`
+	VRF          *int           `json:"vrf,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Status       *string        `json:"status,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireASNWrite is the wire request model for IPAM ASN create/update. Its json
+// tags intentionally mirror NetBox's writable fields.
+type WireASNWrite struct {
+	ASN          int            `json:"asn,omitempty"`
+	RIR          *int           `json:"rir,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireASNRangeWrite is the wire request model for IPAM ASN range create/update.
+// Its json tags intentionally mirror NetBox's writable fields.
+type WireASNRangeWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Start        *int           `json:"start,omitempty"`
+	End          *int           `json:"end,omitempty"`
+	RIR          *int           `json:"rir,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireRouteTargetWrite is the wire request model for IPAM route target
+// create/update. Its json tags intentionally mirror NetBox's writable fields.
+type WireRouteTargetWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireServiceWrite is the wire request model for IPAM service create/update.
+// Its json tags intentionally mirror NetBox's writable fields.
+type WireServiceWrite struct {
+	Name             string         `json:"name,omitempty"`
+	ParentObjectType *string        `json:"parent_object_type,omitempty"`
+	ParentObjectID   *int           `json:"parent_object_id,omitempty"`
+	Protocol         *string        `json:"protocol,omitempty"`
+	Ports            []int          `json:"ports,omitempty"`
+	Description      *string        `json:"description,omitempty"`
+	Tags             []string       `json:"tags,omitempty"`
+	CustomFields     map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireServiceTemplateWrite is the wire request model for IPAM service template
+// create/update. Its json tags intentionally mirror NetBox's writable fields.
+type WireServiceTemplateWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Protocol     *string        `json:"protocol,omitempty"`
+	Ports        []int          `json:"ports,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireFHRPGroupWrite is the wire request model for IPAM FHRP group
+// create/update. Its json tags intentionally mirror NetBox's writable fields.
+type WireFHRPGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Protocol     *string        `json:"protocol,omitempty"`
+	GroupID      *int           `json:"group_id,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireFHRPGroupAssignmentWrite is the wire request model for IPAM FHRP group
+// assignment create/update. Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireFHRPGroupAssignmentWrite struct {
+	Group         int    `json:"group,omitempty"`
+	InterfaceType string `json:"interface_type,omitempty"`
+	InterfaceID   int    `json:"interface_id,omitempty"`
+	Priority      *int   `json:"priority,omitempty"`
+}
+
+// WireVLANTranslationPolicyWrite is the wire request model for IPAM VLAN
+// translation policy create/update. Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireVLANTranslationPolicyWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireVLANTranslationRuleWrite is the wire request model for IPAM VLAN
+// translation rule create/update. Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireVLANTranslationRuleWrite struct {
+	Policy      int     `json:"policy,omitempty"`
+	LocalVID    *int    `json:"local_vid,omitempty"`
+	RemoteVID   *int    `json:"remote_vid,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
 // Wire types mirror the NetBox JSON API response objects.
 type (
 	// WireSite mirrors the corresponding NetBox JSON API response object.
@@ -1478,6 +1615,192 @@ type (
 		CustomFields map[string]any `json:"custom_fields,omitempty"`
 		Created      string         `json:"created"`
 		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireRIR mirrors the corresponding NetBox JSON API response object.
+	WireRIR struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		IsPrivate    bool           `json:"is_private"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireAggregate mirrors the corresponding NetBox JSON API response object.
+	WireAggregate struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Prefix       string         `json:"prefix"`
+		Display      string         `json:"display,omitempty"`
+		RIR          *WireNested    `json:"rir"`
+		Tenant       *WireNested    `json:"tenant"`
+		DateAdded    string         `json:"date_added"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireIPRange mirrors the corresponding NetBox JSON API response object.
+	WireIPRange struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		StartAddress string         `json:"start_address"`
+		EndAddress   string         `json:"end_address"`
+		Display      string         `json:"display,omitempty"`
+		VRF          *WireNested    `json:"vrf"`
+		Tenant       *WireNested    `json:"tenant"`
+		Status       *WireLabel     `json:"status"`
+		Role         *WireNested    `json:"role"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireASN mirrors the corresponding NetBox JSON API response object.
+	WireASN struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		ASN          int            `json:"asn"`
+		Display      string         `json:"display,omitempty"`
+		RIR          *WireNested    `json:"rir"`
+		Tenant       *WireNested    `json:"tenant"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireASNRange mirrors the corresponding NetBox JSON API response object.
+	WireASNRange struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Start        int            `json:"start"`
+		End          int            `json:"end"`
+		RIR          *WireNested    `json:"rir"`
+		Tenant       *WireNested    `json:"tenant"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireRouteTarget mirrors the corresponding NetBox JSON API response object.
+	WireRouteTarget struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Tenant       *WireNested    `json:"tenant"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireService mirrors the corresponding NetBox JSON API response object.
+	WireService struct {
+		ID               int            `json:"id"`
+		URL              string         `json:"url"`
+		Name             string         `json:"name"`
+		Display          string         `json:"display,omitempty"`
+		ParentObjectType string         `json:"parent_object_type"`
+		ParentObjectID   int            `json:"parent_object_id"`
+		Parent           *WireNested    `json:"parent"`
+		Protocol         *WireLabel     `json:"protocol"`
+		Ports            []int          `json:"ports,omitempty"`
+		Description      string         `json:"description,omitempty"`
+		Tags             []WireTag      `json:"tags,omitempty"`
+		CustomFields     map[string]any `json:"custom_fields,omitempty"`
+		Created          string         `json:"created"`
+		LastUpdated      string         `json:"last_updated"`
+	}
+
+	// WireServiceTemplate mirrors the corresponding NetBox JSON API response
+	// object.
+	WireServiceTemplate struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Protocol     *WireLabel     `json:"protocol"`
+		Ports        []int          `json:"ports,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireFHRPGroup mirrors the corresponding NetBox JSON API response object.
+	WireFHRPGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Protocol     string         `json:"protocol"`
+		GroupID      int            `json:"group_id"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireFHRPGroupAssignment mirrors the corresponding NetBox JSON API
+	// response object.
+	WireFHRPGroupAssignment struct {
+		ID            int         `json:"id"`
+		URL           string      `json:"url"`
+		Group         *WireNested `json:"group"`
+		InterfaceType string      `json:"interface_type"`
+		InterfaceID   int         `json:"interface_id"`
+		Interface     *WireNested `json:"interface"`
+		Priority      int         `json:"priority"`
+		Created       string      `json:"created"`
+		LastUpdated   string      `json:"last_updated"`
+	}
+
+	// WireVLANTranslationPolicy mirrors the corresponding NetBox JSON API
+	// response object.
+	WireVLANTranslationPolicy struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireVLANTranslationRule mirrors the corresponding NetBox JSON API response
+	// object.
+	WireVLANTranslationRule struct {
+		ID          int    `json:"id"`
+		URL         string `json:"url"`
+		Display     string `json:"display,omitempty"`
+		Policy      int    `json:"policy"`
+		LocalVID    int    `json:"local_vid"`
+		RemoteVID   int    `json:"remote_vid"`
+		Description string `json:"description,omitempty"`
+		Created     string `json:"created"`
+		LastUpdated string `json:"last_updated"`
 	}
 )
 

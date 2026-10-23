@@ -546,6 +546,298 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 				return res, err
 			},
 		},
+		{
+			name: "create_rir",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateRIRHandler(nil)(ctx, nil, RIRCreateInput{Name: "ARIN"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_rir",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateRIRHandler(nil)(ctx, nil, RIRUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_rir",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteRIRHandler(nil)(ctx, nil, RIRDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_aggregate",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateAggregateHandler(nil)(ctx, nil, AggregateCreateInput{Prefix: "10.0.0.0/8"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_aggregate",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateAggregateHandler(nil)(ctx, nil, AggregateUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_aggregate",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteAggregateHandler(nil)(ctx, nil, AggregateDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_ip_range",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateIPRangeHandler(nil)(ctx, nil, IPRangeCreateInput{
+					StartAddress: "10.0.0.1", EndAddress: "10.0.0.10",
+				})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_ip_range",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateIPRangeHandler(nil)(ctx, nil, IPRangeUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_ip_range",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteIPRangeHandler(nil)(ctx, nil, IPRangeDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_asn",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateASNHandler(nil)(ctx, nil, ASNCreateInput{ASN: 64512})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_asn",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateASNHandler(nil)(ctx, nil, ASNUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_asn",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteASNHandler(nil)(ctx, nil, ASNDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_asn_range",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateASNRangeHandler(nil)(ctx, nil, ASNRangeCreateInput{Name: "PRIVATE"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_asn_range",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateASNRangeHandler(nil)(ctx, nil, ASNRangeUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_asn_range",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteASNRangeHandler(nil)(ctx, nil, ASNRangeDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_route_target",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateRouteTargetHandler(nil)(ctx, nil, RouteTargetCreateInput{Name: "65000:100"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_route_target",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateRouteTargetHandler(nil)(ctx, nil, RouteTargetUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_route_target",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteRouteTargetHandler(nil)(ctx, nil, RouteTargetDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_service",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateServiceHandler(nil)(ctx, nil, ServiceCreateInput{Name: "web"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_service",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateServiceHandler(nil)(ctx, nil, ServiceUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_service",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteServiceHandler(nil)(ctx, nil, ServiceDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_service_template",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateServiceTemplateHandler(nil)(ctx, nil, ServiceTemplateCreateInput{Name: "web"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_service_template",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateServiceTemplateHandler(nil)(ctx, nil, ServiceTemplateUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_service_template",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteServiceTemplateHandler(nil)(ctx, nil, ServiceTemplateDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_fhrp_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateFHRPGroupHandler(nil)(ctx, nil, FHRPGroupCreateInput{Name: "gw"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_fhrp_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateFHRPGroupHandler(nil)(ctx, nil, FHRPGroupUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_fhrp_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteFHRPGroupHandler(nil)(ctx, nil, FHRPGroupDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_fhrp_group_assignment",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateFHRPGroupAssignmentHandler(nil)(ctx, nil, FHRPGroupAssignmentCreateInput{
+					Group: 5, InterfaceType: "dcim.interface", InterfaceID: 9,
+				})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_fhrp_group_assignment",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateFHRPGroupAssignmentHandler(nil)(ctx, nil, FHRPGroupAssignmentUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_fhrp_group_assignment",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteFHRPGroupAssignmentHandler(nil)(ctx, nil, FHRPGroupAssignmentDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_vlan_translation_policy",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateVLANTranslationPolicyHandler(nil)(ctx, nil, VLANTranslationPolicyCreateInput{Name: "p"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_vlan_translation_policy",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateVLANTranslationPolicyHandler(nil)(ctx, nil, VLANTranslationPolicyUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_vlan_translation_policy",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteVLANTranslationPolicyHandler(nil)(ctx, nil, VLANTranslationPolicyDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_vlan_translation_rule",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateVLANTranslationRuleHandler(nil)(ctx, nil, VLANTranslationRuleCreateInput{Policy: 5})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_vlan_translation_rule",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateVLANTranslationRuleHandler(nil)(ctx, nil, VLANTranslationRuleUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_vlan_translation_rule",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteVLANTranslationRuleHandler(nil)(ctx, nil, VLANTranslationRuleDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
 	}
 
 	for _, tc := range cases {

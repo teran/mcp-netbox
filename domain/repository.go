@@ -273,4 +273,86 @@ type NetworkRepository interface {
 	CreateMACAddress(ctx context.Context, token string, in MACAddressWrite) (*MACAddress, error)
 	UpdateMACAddress(ctx context.Context, token string, id int, in MACAddressWrite) (*MACAddress, error)
 	DeleteMACAddress(ctx context.Context, token string, id int) error
+
+	ListRIRs(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[RIR], error)
+	CreateRIR(ctx context.Context, token string, in RIRWrite) (*RIR, error)
+	UpdateRIR(ctx context.Context, token string, id int, in RIRWrite) (*RIR, error)
+	DeleteRIR(ctx context.Context, token string, id int) error
+
+	ListAggregates(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Aggregate], error)
+	CreateAggregate(ctx context.Context, token string, in AggregateWrite) (*Aggregate, error)
+	UpdateAggregate(ctx context.Context, token string, id int, in AggregateWrite) (*Aggregate, error)
+	DeleteAggregate(ctx context.Context, token string, id int) error
+
+	ListIPRanges(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[IPRange], error)
+	CreateIPRange(ctx context.Context, token string, in IPRangeWrite) (*IPRange, error)
+	UpdateIPRange(ctx context.Context, token string, id int, in IPRangeWrite) (*IPRange, error)
+	DeleteIPRange(ctx context.Context, token string, id int) error
+
+	ListASNs(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[ASN], error)
+	CreateASN(ctx context.Context, token string, in ASNWrite) (*ASN, error)
+	UpdateASN(ctx context.Context, token string, id int, in ASNWrite) (*ASN, error)
+	DeleteASN(ctx context.Context, token string, id int) error
+
+	ListASNRanges(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[ASNRange], error)
+	CreateASNRange(ctx context.Context, token string, in ASNRangeWrite) (*ASNRange, error)
+	UpdateASNRange(ctx context.Context, token string, id int, in ASNRangeWrite) (*ASNRange, error)
+	DeleteASNRange(ctx context.Context, token string, id int) error
+
+	ListRouteTargets(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[RouteTarget], error)
+	CreateRouteTarget(ctx context.Context, token string, in RouteTargetWrite) (*RouteTarget, error)
+	UpdateRouteTarget(ctx context.Context, token string, id int, in RouteTargetWrite) (*RouteTarget, error)
+	DeleteRouteTarget(ctx context.Context, token string, id int) error
+
+	ListServices(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Service], error)
+	CreateService(ctx context.Context, token string, in ServiceWrite) (*Service, error)
+	UpdateService(ctx context.Context, token string, id int, in ServiceWrite) (*Service, error)
+	DeleteService(ctx context.Context, token string, id int) error
+
+	ListServiceTemplates(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[ServiceTemplate], error)
+	CreateServiceTemplate(ctx context.Context, token string, in ServiceTemplateWrite) (*ServiceTemplate, error)
+	UpdateServiceTemplate(
+		ctx context.Context, token string, id int, in ServiceTemplateWrite,
+	) (*ServiceTemplate, error)
+	DeleteServiceTemplate(ctx context.Context, token string, id int) error
+
+	ListFHRPGroups(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[FHRPGroup], error)
+	CreateFHRPGroup(ctx context.Context, token string, in FHRPGroupWrite) (*FHRPGroup, error)
+	UpdateFHRPGroup(ctx context.Context, token string, id int, in FHRPGroupWrite) (*FHRPGroup, error)
+	DeleteFHRPGroup(ctx context.Context, token string, id int) error
+
+	ListFHRPGroupAssignments(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[FHRPGroupAssignment], error)
+	CreateFHRPGroupAssignment(
+		ctx context.Context, token string, in FHRPGroupAssignmentWrite,
+	) (*FHRPGroupAssignment, error)
+	UpdateFHRPGroupAssignment(
+		ctx context.Context, token string, id int, in FHRPGroupAssignmentWrite,
+	) (*FHRPGroupAssignment, error)
+	DeleteFHRPGroupAssignment(ctx context.Context, token string, id int) error
+
+	ListVLANTranslationPolicies(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[VLANTranslationPolicy], error)
+	CreateVLANTranslationPolicy(
+		ctx context.Context, token string, in VLANTranslationPolicyWrite,
+	) (*VLANTranslationPolicy, error)
+	UpdateVLANTranslationPolicy(
+		ctx context.Context, token string, id int, in VLANTranslationPolicyWrite,
+	) (*VLANTranslationPolicy, error)
+	DeleteVLANTranslationPolicy(ctx context.Context, token string, id int) error
+
+	ListVLANTranslationRules(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[VLANTranslationRule], error)
+	CreateVLANTranslationRule(
+		ctx context.Context, token string, in VLANTranslationRuleWrite,
+	) (*VLANTranslationRule, error)
+	UpdateVLANTranslationRule(
+		ctx context.Context, token string, id int, in VLANTranslationRuleWrite,
+	) (*VLANTranslationRule, error)
+	DeleteVLANTranslationRule(ctx context.Context, token string, id int) error
 }

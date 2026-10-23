@@ -112,7 +112,9 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"provider, tenant, rack, cable, interface, site_group, rack_group, rack_role, device_role, platform, " +
 				"virtual_chassis, power_panel, inventory_item_role, front_port, rear_port, console_port, " +
 				"console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, " +
-				"inventory_item, mac_address). Returns a 404-style error if the object does " +
+				"inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, " +
+				"service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, " +
+				"vlan_translation_rule). Returns a 404-style error if the object does " +
 				"not exist or the token lacks permission.",
 			Instructions: "Use when you already know the object type and numeric ID. For searching without " +
 				"an ID, prefer the dedicated list tools.",
@@ -1605,6 +1607,404 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"want to delete the MAC address, ideally by ID, and understands it is permanent and cannot " +
 				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
 				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_rirs",
+			Title: "List RIRs",
+			Description: "List regional internet registries (RIRs) in NetBox. Filter by tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no RIRs match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox RIRs. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple RIRs or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_rir",
+			Title: "Create RIR",
+			Description: "Create a regional internet registry (RIR) in NetBox. Name is required; provide " +
+				"slug, is_private, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new RIR.",
+		},
+		{
+			Name:  "update_rir",
+			Title: "Update RIR",
+			Description: "Partially update an RIR in NetBox by its numeric ID. Only the provided fields are " +
+				"patched (PATCH merge).",
+			Instructions: "Use to modify an existing RIR.",
+		},
+		{
+			Name:  "delete_rir",
+			Title: "Delete RIR",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an RIR from NetBox " +
+				"by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the RIR, ideally by ID, and understands it is permanent and cannot be undone. " +
+				"If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for " +
+				"explicit confirmation first.",
+		},
+		{
+			Name:  "get_aggregates",
+			Title: "List Aggregates",
+			Description: "List IPAM aggregates in NetBox. Filter by rir, tenant or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no aggregates match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox aggregates. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple aggregates or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_aggregate",
+			Title: "Create Aggregate",
+			Description: "Create an IPAM aggregate in NetBox. Prefix is required; provide rir, tenant, " +
+				"date_added, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new aggregate.",
+		},
+		{
+			Name:  "update_aggregate",
+			Title: "Update Aggregate",
+			Description: "Partially update an aggregate in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing aggregate.",
+		},
+		{
+			Name:  "delete_aggregate",
+			Title: "Delete Aggregate",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an aggregate from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the aggregate, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_ip_ranges",
+			Title: "List IP Ranges",
+			Description: "List IPAM IP ranges in NetBox. Filter by vrf, tenant, status, role or tag, or use " +
+				"q for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no IP ranges match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox IP ranges. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple IP ranges or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_ip_range",
+			Title: "Create IP Range",
+			Description: "Create an IPAM IP range in NetBox. Start address and end address are required; " +
+				"provide vrf, tenant, status, role, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new IP range.",
+		},
+		{
+			Name:  "update_ip_range",
+			Title: "Update IP Range",
+			Description: "Partially update an IP range in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing IP range.",
+		},
+		{
+			Name:  "delete_ip_range",
+			Title: "Delete IP Range",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an IP range from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the IP range, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_asns",
+			Title: "List ASNs",
+			Description: "List autonomous system numbers (ASNs) in NetBox. Filter by rir, tenant or tag, or " +
+				"use q for free-text search. Results are paginated: set page and page_size (max 1000). An " +
+				"empty results array means no ASNs match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox ASNs. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple ASNs or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_asn",
+			Title: "Create ASN",
+			Description: "Create an autonomous system number (ASN) in NetBox. Asn is required; provide " +
+				"rir, tenant, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new ASN.",
+		},
+		{
+			Name:  "update_asn",
+			Title: "Update ASN",
+			Description: "Partially update an ASN in NetBox by its numeric ID. Only the provided fields are " +
+				"patched (PATCH merge).",
+			Instructions: "Use to modify an existing ASN.",
+		},
+		{
+			Name:  "delete_asn",
+			Title: "Delete ASN",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an ASN from NetBox " +
+				"by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the ASN, ideally by ID, and understands it is permanent and cannot be undone. " +
+				"If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for " +
+				"explicit confirmation first.",
+		},
+		{
+			Name:  "get_asn_ranges",
+			Title: "List ASN Ranges",
+			Description: "List IPAM ASN ranges in NetBox. Filter by rir, tenant or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no ASN ranges match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox ASN ranges. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple ASN ranges or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_asn_range",
+			Title: "Create ASN Range",
+			Description: "Create an IPAM ASN range in NetBox. Name is required; provide start, end, rir, " +
+				"tenant, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new ASN range.",
+		},
+		{
+			Name:  "update_asn_range",
+			Title: "Update ASN Range",
+			Description: "Partially update an ASN range in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing ASN range.",
+		},
+		{
+			Name:  "delete_asn_range",
+			Title: "Delete ASN Range",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an ASN range from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the ASN range, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_route_targets",
+			Title: "List Route Targets",
+			Description: "List IPAM route targets in NetBox. Filter by tenant or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no route targets match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox route targets. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple route targets or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_route_target",
+			Title: "Create Route Target",
+			Description: "Create an IPAM route target in NetBox. Name is required; provide tenant, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new route target.",
+		},
+		{
+			Name:  "update_route_target",
+			Title: "Update Route Target",
+			Description: "Partially update a route target in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing route target.",
+		},
+		{
+			Name:  "delete_route_target",
+			Title: "Delete Route Target",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a route target from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the route target, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_services",
+			Title: "List Services",
+			Description: "List IPAM services in NetBox. Filter by device, virtual_machine or tag, or use q " +
+				"for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no services match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox services. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple services or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_service",
+			Title: "Create Service",
+			Description: "Create an IPAM service in NetBox. Name is required; provide device, " +
+				"virtual_machine, protocol, ports, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new service.",
+		},
+		{
+			Name:  "update_service",
+			Title: "Update Service",
+			Description: "Partially update a service in NetBox by its numeric ID. Only the provided fields " +
+				"are patched (PATCH merge).",
+			Instructions: "Use to modify an existing service.",
+		},
+		{
+			Name:  "delete_service",
+			Title: "Delete Service",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a service from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the service, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_service_templates",
+			Title: "List Service Templates",
+			Description: "List IPAM service templates in NetBox. Filter by protocol or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no service templates match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox service templates. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple service templates or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_service_template",
+			Title: "Create Service Template",
+			Description: "Create an IPAM service template in NetBox. Name is required; provide protocol, " +
+				"ports, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new service template.",
+		},
+		{
+			Name:  "update_service_template",
+			Title: "Update Service Template",
+			Description: "Partially update a service template in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing service template.",
+		},
+		{
+			Name:  "delete_service_template",
+			Title: "Delete Service Template",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a service template " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the service template, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_fhrp_groups",
+			Title: "List FHRP Groups",
+			Description: "List IPAM FHRP (first-hop redundancy protocol) groups in NetBox. Filter by " +
+				"protocol or tag, or use q for free-text search. Results are paginated: set page and page_size " +
+				"(max 1000). An empty results array means no FHRP groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox FHRP groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple FHRP groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_fhrp_group",
+			Title: "Create FHRP Group",
+			Description: "Create an IPAM FHRP group in NetBox. Name is required; provide protocol, group_id, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new FHRP group.",
+		},
+		{
+			Name:  "update_fhrp_group",
+			Title: "Update FHRP Group",
+			Description: "Partially update an FHRP group in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing FHRP group.",
+		},
+		{
+			Name:  "delete_fhrp_group",
+			Title: "Delete FHRP Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an FHRP group from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the FHRP group, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_fhrp_group_assignments",
+			Title: "List FHRP Group Assignments",
+			Description: "List IPAM FHRP group assignments in NetBox. Filter by group or ip_address, or use " +
+				"q for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no FHRP group assignments match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox FHRP group assignments. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple FHRP group assignments or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_fhrp_group_assignment",
+			Title: "Create FHRP Group Assignment",
+			Description: "Create an IPAM FHRP group assignment in NetBox. Group and ip_address are " +
+				"required; provide priority as needed.",
+			Instructions: "Use to map an FHRP group to an IP address.",
+		},
+		{
+			Name:  "update_fhrp_group_assignment",
+			Title: "Update FHRP Group Assignment",
+			Description: "Partially update an FHRP group assignment in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing FHRP group assignment.",
+		},
+		{
+			Name:  "delete_fhrp_group_assignment",
+			Title: "Delete FHRP Group Assignment",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an FHRP group " +
+				"assignment from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the FHRP group assignment, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_vlan_translation_policies",
+			Title: "List VLAN Translation Policies",
+			Description: "List IPAM VLAN translation policies in NetBox. Filter by tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no VLAN translation policies match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox VLAN translation policies. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple policies or don't yet know the " +
+				"exact ID.",
+		},
+		{
+			Name:  "create_vlan_translation_policy",
+			Title: "Create VLAN Translation Policy",
+			Description: "Create an IPAM VLAN translation policy in NetBox. Name is required; provide " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new VLAN translation policy.",
+		},
+		{
+			Name:  "update_vlan_translation_policy",
+			Title: "Update VLAN Translation Policy",
+			Description: "Partially update a VLAN translation policy in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing VLAN translation policy.",
+		},
+		{
+			Name:  "delete_vlan_translation_policy",
+			Title: "Delete VLAN Translation Policy",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a VLAN translation " +
+				"policy from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the VLAN translation policy, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_vlan_translation_rules",
+			Title: "List VLAN Translation Rules",
+			Description: "List IPAM VLAN translation rules in NetBox. Filter by policy, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no VLAN translation rules match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox VLAN translation rules. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple rules or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_vlan_translation_rule",
+			Title: "Create VLAN Translation Rule",
+			Description: "Create an IPAM VLAN translation rule in NetBox. Policy is required; provide " +
+				"local_vid and remote_vid as needed.",
+			Instructions: "Use to add a new VLAN translation rule.",
+		},
+		{
+			Name:  "update_vlan_translation_rule",
+			Title: "Update VLAN Translation Rule",
+			Description: "Partially update a VLAN translation rule in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing VLAN translation rule.",
+		},
+		{
+			Name:  "delete_vlan_translation_rule",
+			Title: "Delete VLAN Translation Rule",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a VLAN translation " +
+				"rule from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the VLAN translation rule, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
 		},
 	}
 }

@@ -457,6 +457,138 @@ type MockRepo struct {
 		ctx context.Context, token string, id int, in domain.MACAddressWrite,
 	) (*domain.MACAddress, error)
 	DeleteMACAddressFunc func(ctx context.Context, token string, id int) error
+
+	ListRIRsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.RIR], error)
+	CreateRIRFunc func(
+		ctx context.Context, token string, in domain.RIRWrite,
+	) (*domain.RIR, error)
+	UpdateRIRFunc func(
+		ctx context.Context, token string, id int, in domain.RIRWrite,
+	) (*domain.RIR, error)
+	DeleteRIRFunc func(ctx context.Context, token string, id int) error
+
+	ListAggregatesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.Aggregate], error)
+	CreateAggregateFunc func(
+		ctx context.Context, token string, in domain.AggregateWrite,
+	) (*domain.Aggregate, error)
+	UpdateAggregateFunc func(
+		ctx context.Context, token string, id int, in domain.AggregateWrite,
+	) (*domain.Aggregate, error)
+	DeleteAggregateFunc func(ctx context.Context, token string, id int) error
+
+	ListIPRangesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.IPRange], error)
+	CreateIPRangeFunc func(
+		ctx context.Context, token string, in domain.IPRangeWrite,
+	) (*domain.IPRange, error)
+	UpdateIPRangeFunc func(
+		ctx context.Context, token string, id int, in domain.IPRangeWrite,
+	) (*domain.IPRange, error)
+	DeleteIPRangeFunc func(ctx context.Context, token string, id int) error
+
+	ListASNsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ASN], error)
+	CreateASNFunc func(
+		ctx context.Context, token string, in domain.ASNWrite,
+	) (*domain.ASN, error)
+	UpdateASNFunc func(
+		ctx context.Context, token string, id int, in domain.ASNWrite,
+	) (*domain.ASN, error)
+	DeleteASNFunc func(ctx context.Context, token string, id int) error
+
+	ListASNRangesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ASNRange], error)
+	CreateASNRangeFunc func(
+		ctx context.Context, token string, in domain.ASNRangeWrite,
+	) (*domain.ASNRange, error)
+	UpdateASNRangeFunc func(
+		ctx context.Context, token string, id int, in domain.ASNRangeWrite,
+	) (*domain.ASNRange, error)
+	DeleteASNRangeFunc func(ctx context.Context, token string, id int) error
+
+	ListRouteTargetsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.RouteTarget], error)
+	CreateRouteTargetFunc func(
+		ctx context.Context, token string, in domain.RouteTargetWrite,
+	) (*domain.RouteTarget, error)
+	UpdateRouteTargetFunc func(
+		ctx context.Context, token string, id int, in domain.RouteTargetWrite,
+	) (*domain.RouteTarget, error)
+	DeleteRouteTargetFunc func(ctx context.Context, token string, id int) error
+
+	ListServicesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.Service], error)
+	CreateServiceFunc func(
+		ctx context.Context, token string, in domain.ServiceWrite,
+	) (*domain.Service, error)
+	UpdateServiceFunc func(
+		ctx context.Context, token string, id int, in domain.ServiceWrite,
+	) (*domain.Service, error)
+	DeleteServiceFunc func(ctx context.Context, token string, id int) error
+
+	ListServiceTemplatesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ServiceTemplate], error)
+	CreateServiceTemplateFunc func(
+		ctx context.Context, token string, in domain.ServiceTemplateWrite,
+	) (*domain.ServiceTemplate, error)
+	UpdateServiceTemplateFunc func(
+		ctx context.Context, token string, id int, in domain.ServiceTemplateWrite,
+	) (*domain.ServiceTemplate, error)
+	DeleteServiceTemplateFunc func(ctx context.Context, token string, id int) error
+
+	ListFHRPGroupsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.FHRPGroup], error)
+	CreateFHRPGroupFunc func(
+		ctx context.Context, token string, in domain.FHRPGroupWrite,
+	) (*domain.FHRPGroup, error)
+	UpdateFHRPGroupFunc func(
+		ctx context.Context, token string, id int, in domain.FHRPGroupWrite,
+	) (*domain.FHRPGroup, error)
+	DeleteFHRPGroupFunc func(ctx context.Context, token string, id int) error
+
+	ListFHRPGroupAssignmentsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.FHRPGroupAssignment], error)
+	CreateFHRPGroupAssignmentFunc func(
+		ctx context.Context, token string, in domain.FHRPGroupAssignmentWrite,
+	) (*domain.FHRPGroupAssignment, error)
+	UpdateFHRPGroupAssignmentFunc func(
+		ctx context.Context, token string, id int, in domain.FHRPGroupAssignmentWrite,
+	) (*domain.FHRPGroupAssignment, error)
+	DeleteFHRPGroupAssignmentFunc func(ctx context.Context, token string, id int) error
+
+	ListVLANTranslationPoliciesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.VLANTranslationPolicy], error)
+	CreateVLANTranslationPolicyFunc func(
+		ctx context.Context, token string, in domain.VLANTranslationPolicyWrite,
+	) (*domain.VLANTranslationPolicy, error)
+	UpdateVLANTranslationPolicyFunc func(
+		ctx context.Context, token string, id int, in domain.VLANTranslationPolicyWrite,
+	) (*domain.VLANTranslationPolicy, error)
+	DeleteVLANTranslationPolicyFunc func(ctx context.Context, token string, id int) error
+
+	ListVLANTranslationRulesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.VLANTranslationRule], error)
+	CreateVLANTranslationRuleFunc func(
+		ctx context.Context, token string, in domain.VLANTranslationRuleWrite,
+	) (*domain.VLANTranslationRule, error)
+	UpdateVLANTranslationRuleFunc func(
+		ctx context.Context, token string, id int, in domain.VLANTranslationRuleWrite,
+	) (*domain.VLANTranslationRule, error)
+	DeleteVLANTranslationRuleFunc func(ctx context.Context, token string, id int) error
 }
 
 // ListSites delegates to ListSitesFunc.
@@ -1576,6 +1708,318 @@ func (m *MockRepo) UpdateMACAddress(
 // DeleteMACAddress delegates to DeleteMACAddressFunc.
 func (m *MockRepo) DeleteMACAddress(ctx context.Context, token string, id int) error {
 	return m.DeleteMACAddressFunc(ctx, token, id)
+}
+
+// ListRIRs delegates to ListRIRsFunc.
+func (m *MockRepo) ListRIRs(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.RIR], error) {
+	return m.ListRIRsFunc(ctx, token, params)
+}
+
+// CreateRIR delegates to CreateRIRFunc.
+func (m *MockRepo) CreateRIR(
+	ctx context.Context, token string, in domain.RIRWrite,
+) (*domain.RIR, error) {
+	return m.CreateRIRFunc(ctx, token, in)
+}
+
+// UpdateRIR delegates to UpdateRIRFunc.
+func (m *MockRepo) UpdateRIR(
+	ctx context.Context, token string, id int, in domain.RIRWrite,
+) (*domain.RIR, error) {
+	return m.UpdateRIRFunc(ctx, token, id, in)
+}
+
+// DeleteRIR delegates to DeleteRIRFunc.
+func (m *MockRepo) DeleteRIR(ctx context.Context, token string, id int) error {
+	return m.DeleteRIRFunc(ctx, token, id)
+}
+
+// ListAggregates delegates to ListAggregatesFunc.
+func (m *MockRepo) ListAggregates(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.Aggregate], error) {
+	return m.ListAggregatesFunc(ctx, token, params)
+}
+
+// CreateAggregate delegates to CreateAggregateFunc.
+func (m *MockRepo) CreateAggregate(
+	ctx context.Context, token string, in domain.AggregateWrite,
+) (*domain.Aggregate, error) {
+	return m.CreateAggregateFunc(ctx, token, in)
+}
+
+// UpdateAggregate delegates to UpdateAggregateFunc.
+func (m *MockRepo) UpdateAggregate(
+	ctx context.Context, token string, id int, in domain.AggregateWrite,
+) (*domain.Aggregate, error) {
+	return m.UpdateAggregateFunc(ctx, token, id, in)
+}
+
+// DeleteAggregate delegates to DeleteAggregateFunc.
+func (m *MockRepo) DeleteAggregate(ctx context.Context, token string, id int) error {
+	return m.DeleteAggregateFunc(ctx, token, id)
+}
+
+// ListIPRanges delegates to ListIPRangesFunc.
+func (m *MockRepo) ListIPRanges(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.IPRange], error) {
+	return m.ListIPRangesFunc(ctx, token, params)
+}
+
+// CreateIPRange delegates to CreateIPRangeFunc.
+func (m *MockRepo) CreateIPRange(
+	ctx context.Context, token string, in domain.IPRangeWrite,
+) (*domain.IPRange, error) {
+	return m.CreateIPRangeFunc(ctx, token, in)
+}
+
+// UpdateIPRange delegates to UpdateIPRangeFunc.
+func (m *MockRepo) UpdateIPRange(
+	ctx context.Context, token string, id int, in domain.IPRangeWrite,
+) (*domain.IPRange, error) {
+	return m.UpdateIPRangeFunc(ctx, token, id, in)
+}
+
+// DeleteIPRange delegates to DeleteIPRangeFunc.
+func (m *MockRepo) DeleteIPRange(ctx context.Context, token string, id int) error {
+	return m.DeleteIPRangeFunc(ctx, token, id)
+}
+
+// ListASNs delegates to ListASNsFunc.
+func (m *MockRepo) ListASNs(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ASN], error) {
+	return m.ListASNsFunc(ctx, token, params)
+}
+
+// CreateASN delegates to CreateASNFunc.
+func (m *MockRepo) CreateASN(
+	ctx context.Context, token string, in domain.ASNWrite,
+) (*domain.ASN, error) {
+	return m.CreateASNFunc(ctx, token, in)
+}
+
+// UpdateASN delegates to UpdateASNFunc.
+func (m *MockRepo) UpdateASN(
+	ctx context.Context, token string, id int, in domain.ASNWrite,
+) (*domain.ASN, error) {
+	return m.UpdateASNFunc(ctx, token, id, in)
+}
+
+// DeleteASN delegates to DeleteASNFunc.
+func (m *MockRepo) DeleteASN(ctx context.Context, token string, id int) error {
+	return m.DeleteASNFunc(ctx, token, id)
+}
+
+// ListASNRanges delegates to ListASNRangesFunc.
+func (m *MockRepo) ListASNRanges(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ASNRange], error) {
+	return m.ListASNRangesFunc(ctx, token, params)
+}
+
+// CreateASNRange delegates to CreateASNRangeFunc.
+func (m *MockRepo) CreateASNRange(
+	ctx context.Context, token string, in domain.ASNRangeWrite,
+) (*domain.ASNRange, error) {
+	return m.CreateASNRangeFunc(ctx, token, in)
+}
+
+// UpdateASNRange delegates to UpdateASNRangeFunc.
+func (m *MockRepo) UpdateASNRange(
+	ctx context.Context, token string, id int, in domain.ASNRangeWrite,
+) (*domain.ASNRange, error) {
+	return m.UpdateASNRangeFunc(ctx, token, id, in)
+}
+
+// DeleteASNRange delegates to DeleteASNRangeFunc.
+func (m *MockRepo) DeleteASNRange(ctx context.Context, token string, id int) error {
+	return m.DeleteASNRangeFunc(ctx, token, id)
+}
+
+// ListRouteTargets delegates to ListRouteTargetsFunc.
+func (m *MockRepo) ListRouteTargets(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.RouteTarget], error) {
+	return m.ListRouteTargetsFunc(ctx, token, params)
+}
+
+// CreateRouteTarget delegates to CreateRouteTargetFunc.
+func (m *MockRepo) CreateRouteTarget(
+	ctx context.Context, token string, in domain.RouteTargetWrite,
+) (*domain.RouteTarget, error) {
+	return m.CreateRouteTargetFunc(ctx, token, in)
+}
+
+// UpdateRouteTarget delegates to UpdateRouteTargetFunc.
+func (m *MockRepo) UpdateRouteTarget(
+	ctx context.Context, token string, id int, in domain.RouteTargetWrite,
+) (*domain.RouteTarget, error) {
+	return m.UpdateRouteTargetFunc(ctx, token, id, in)
+}
+
+// DeleteRouteTarget delegates to DeleteRouteTargetFunc.
+func (m *MockRepo) DeleteRouteTarget(ctx context.Context, token string, id int) error {
+	return m.DeleteRouteTargetFunc(ctx, token, id)
+}
+
+// ListServices delegates to ListServicesFunc.
+func (m *MockRepo) ListServices(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.Service], error) {
+	return m.ListServicesFunc(ctx, token, params)
+}
+
+// CreateService delegates to CreateServiceFunc.
+func (m *MockRepo) CreateService(
+	ctx context.Context, token string, in domain.ServiceWrite,
+) (*domain.Service, error) {
+	return m.CreateServiceFunc(ctx, token, in)
+}
+
+// UpdateService delegates to UpdateServiceFunc.
+func (m *MockRepo) UpdateService(
+	ctx context.Context, token string, id int, in domain.ServiceWrite,
+) (*domain.Service, error) {
+	return m.UpdateServiceFunc(ctx, token, id, in)
+}
+
+// DeleteService delegates to DeleteServiceFunc.
+func (m *MockRepo) DeleteService(ctx context.Context, token string, id int) error {
+	return m.DeleteServiceFunc(ctx, token, id)
+}
+
+// ListServiceTemplates delegates to ListServiceTemplatesFunc.
+func (m *MockRepo) ListServiceTemplates(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ServiceTemplate], error) {
+	return m.ListServiceTemplatesFunc(ctx, token, params)
+}
+
+// CreateServiceTemplate delegates to CreateServiceTemplateFunc.
+func (m *MockRepo) CreateServiceTemplate(
+	ctx context.Context, token string, in domain.ServiceTemplateWrite,
+) (*domain.ServiceTemplate, error) {
+	return m.CreateServiceTemplateFunc(ctx, token, in)
+}
+
+// UpdateServiceTemplate delegates to UpdateServiceTemplateFunc.
+func (m *MockRepo) UpdateServiceTemplate(
+	ctx context.Context, token string, id int, in domain.ServiceTemplateWrite,
+) (*domain.ServiceTemplate, error) {
+	return m.UpdateServiceTemplateFunc(ctx, token, id, in)
+}
+
+// DeleteServiceTemplate delegates to DeleteServiceTemplateFunc.
+func (m *MockRepo) DeleteServiceTemplate(ctx context.Context, token string, id int) error {
+	return m.DeleteServiceTemplateFunc(ctx, token, id)
+}
+
+// ListFHRPGroups delegates to ListFHRPGroupsFunc.
+func (m *MockRepo) ListFHRPGroups(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.FHRPGroup], error) {
+	return m.ListFHRPGroupsFunc(ctx, token, params)
+}
+
+// CreateFHRPGroup delegates to CreateFHRPGroupFunc.
+func (m *MockRepo) CreateFHRPGroup(
+	ctx context.Context, token string, in domain.FHRPGroupWrite,
+) (*domain.FHRPGroup, error) {
+	return m.CreateFHRPGroupFunc(ctx, token, in)
+}
+
+// UpdateFHRPGroup delegates to UpdateFHRPGroupFunc.
+func (m *MockRepo) UpdateFHRPGroup(
+	ctx context.Context, token string, id int, in domain.FHRPGroupWrite,
+) (*domain.FHRPGroup, error) {
+	return m.UpdateFHRPGroupFunc(ctx, token, id, in)
+}
+
+// DeleteFHRPGroup delegates to DeleteFHRPGroupFunc.
+func (m *MockRepo) DeleteFHRPGroup(ctx context.Context, token string, id int) error {
+	return m.DeleteFHRPGroupFunc(ctx, token, id)
+}
+
+// ListFHRPGroupAssignments delegates to ListFHRPGroupAssignmentsFunc.
+func (m *MockRepo) ListFHRPGroupAssignments(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.FHRPGroupAssignment], error) {
+	return m.ListFHRPGroupAssignmentsFunc(ctx, token, params)
+}
+
+// CreateFHRPGroupAssignment delegates to CreateFHRPGroupAssignmentFunc.
+func (m *MockRepo) CreateFHRPGroupAssignment(
+	ctx context.Context, token string, in domain.FHRPGroupAssignmentWrite,
+) (*domain.FHRPGroupAssignment, error) {
+	return m.CreateFHRPGroupAssignmentFunc(ctx, token, in)
+}
+
+// UpdateFHRPGroupAssignment delegates to UpdateFHRPGroupAssignmentFunc.
+func (m *MockRepo) UpdateFHRPGroupAssignment(
+	ctx context.Context, token string, id int, in domain.FHRPGroupAssignmentWrite,
+) (*domain.FHRPGroupAssignment, error) {
+	return m.UpdateFHRPGroupAssignmentFunc(ctx, token, id, in)
+}
+
+// DeleteFHRPGroupAssignment delegates to DeleteFHRPGroupAssignmentFunc.
+func (m *MockRepo) DeleteFHRPGroupAssignment(ctx context.Context, token string, id int) error {
+	return m.DeleteFHRPGroupAssignmentFunc(ctx, token, id)
+}
+
+// ListVLANTranslationPolicies delegates to ListVLANTranslationPoliciesFunc.
+func (m *MockRepo) ListVLANTranslationPolicies(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VLANTranslationPolicy], error) {
+	return m.ListVLANTranslationPoliciesFunc(ctx, token, params)
+}
+
+// CreateVLANTranslationPolicy delegates to CreateVLANTranslationPolicyFunc.
+func (m *MockRepo) CreateVLANTranslationPolicy(
+	ctx context.Context, token string, in domain.VLANTranslationPolicyWrite,
+) (*domain.VLANTranslationPolicy, error) {
+	return m.CreateVLANTranslationPolicyFunc(ctx, token, in)
+}
+
+// UpdateVLANTranslationPolicy delegates to UpdateVLANTranslationPolicyFunc.
+func (m *MockRepo) UpdateVLANTranslationPolicy(
+	ctx context.Context, token string, id int, in domain.VLANTranslationPolicyWrite,
+) (*domain.VLANTranslationPolicy, error) {
+	return m.UpdateVLANTranslationPolicyFunc(ctx, token, id, in)
+}
+
+// DeleteVLANTranslationPolicy delegates to DeleteVLANTranslationPolicyFunc.
+func (m *MockRepo) DeleteVLANTranslationPolicy(ctx context.Context, token string, id int) error {
+	return m.DeleteVLANTranslationPolicyFunc(ctx, token, id)
+}
+
+// ListVLANTranslationRules delegates to ListVLANTranslationRulesFunc.
+func (m *MockRepo) ListVLANTranslationRules(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VLANTranslationRule], error) {
+	return m.ListVLANTranslationRulesFunc(ctx, token, params)
+}
+
+// CreateVLANTranslationRule delegates to CreateVLANTranslationRuleFunc.
+func (m *MockRepo) CreateVLANTranslationRule(
+	ctx context.Context, token string, in domain.VLANTranslationRuleWrite,
+) (*domain.VLANTranslationRule, error) {
+	return m.CreateVLANTranslationRuleFunc(ctx, token, in)
+}
+
+// UpdateVLANTranslationRule delegates to UpdateVLANTranslationRuleFunc.
+func (m *MockRepo) UpdateVLANTranslationRule(
+	ctx context.Context, token string, id int, in domain.VLANTranslationRuleWrite,
+) (*domain.VLANTranslationRule, error) {
+	return m.UpdateVLANTranslationRuleFunc(ctx, token, id, in)
+}
+
+// DeleteVLANTranslationRule delegates to DeleteVLANTranslationRuleFunc.
+func (m *MockRepo) DeleteVLANTranslationRule(ctx context.Context, token string, id int) error {
+	return m.DeleteVLANTranslationRuleFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -2708,5 +3152,331 @@ func (r *NilRepo) UpdateMACAddress(
 
 // DeleteMACAddress always succeeds.
 func (r *NilRepo) DeleteMACAddress(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListRIRs returns an empty RIR page.
+func (r *NilRepo) ListRIRs(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RIR], error) {
+	return &domain.PaginatedResponse[domain.RIR]{Count: 0, Results: []domain.RIR{}}, nil
+}
+
+// CreateRIR returns an RIR with id 1.
+func (r *NilRepo) CreateRIR(
+	_ context.Context, _ string, in domain.RIRWrite,
+) (*domain.RIR, error) {
+	return &domain.RIR{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateRIR returns the RIR with the given id.
+func (r *NilRepo) UpdateRIR(
+	_ context.Context, _ string, id int, in domain.RIRWrite,
+) (*domain.RIR, error) {
+	return &domain.RIR{ID: id, Name: in.Name}, nil
+}
+
+// DeleteRIR always succeeds.
+func (r *NilRepo) DeleteRIR(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListAggregates returns an empty aggregate page.
+func (r *NilRepo) ListAggregates(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Aggregate], error) {
+	return &domain.PaginatedResponse[domain.Aggregate]{Count: 0, Results: []domain.Aggregate{}}, nil
+}
+
+// CreateAggregate returns an aggregate with id 1.
+func (r *NilRepo) CreateAggregate(
+	_ context.Context, _ string, in domain.AggregateWrite,
+) (*domain.Aggregate, error) {
+	return &domain.Aggregate{ID: 1, Prefix: in.Prefix}, nil
+}
+
+// UpdateAggregate returns the aggregate with the given id.
+func (r *NilRepo) UpdateAggregate(
+	_ context.Context, _ string, id int, in domain.AggregateWrite,
+) (*domain.Aggregate, error) {
+	return &domain.Aggregate{ID: id, Prefix: in.Prefix}, nil
+}
+
+// DeleteAggregate always succeeds.
+func (r *NilRepo) DeleteAggregate(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListIPRanges returns an empty IP range page.
+func (r *NilRepo) ListIPRanges(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.IPRange], error) {
+	return &domain.PaginatedResponse[domain.IPRange]{Count: 0, Results: []domain.IPRange{}}, nil
+}
+
+// CreateIPRange returns an IP range with id 1.
+func (r *NilRepo) CreateIPRange(
+	_ context.Context, _ string, in domain.IPRangeWrite,
+) (*domain.IPRange, error) {
+	return &domain.IPRange{ID: 1, StartAddress: in.StartAddress, EndAddress: in.EndAddress}, nil
+}
+
+// UpdateIPRange returns the IP range with the given id.
+func (r *NilRepo) UpdateIPRange(
+	_ context.Context, _ string, id int, in domain.IPRangeWrite,
+) (*domain.IPRange, error) {
+	return &domain.IPRange{ID: id, StartAddress: in.StartAddress, EndAddress: in.EndAddress}, nil
+}
+
+// DeleteIPRange always succeeds.
+func (r *NilRepo) DeleteIPRange(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListASNs returns an empty ASN page.
+func (r *NilRepo) ListASNs(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ASN], error) {
+	return &domain.PaginatedResponse[domain.ASN]{Count: 0, Results: []domain.ASN{}}, nil
+}
+
+// CreateASN returns an ASN with id 1.
+func (r *NilRepo) CreateASN(
+	_ context.Context, _ string, in domain.ASNWrite,
+) (*domain.ASN, error) {
+	return &domain.ASN{ID: 1, ASN: in.ASN}, nil
+}
+
+// UpdateASN returns the ASN with the given id.
+func (r *NilRepo) UpdateASN(
+	_ context.Context, _ string, id int, in domain.ASNWrite,
+) (*domain.ASN, error) {
+	return &domain.ASN{ID: id, ASN: in.ASN}, nil
+}
+
+// DeleteASN always succeeds.
+func (r *NilRepo) DeleteASN(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListASNRanges returns an empty ASN range page.
+func (r *NilRepo) ListASNRanges(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ASNRange], error) {
+	return &domain.PaginatedResponse[domain.ASNRange]{Count: 0, Results: []domain.ASNRange{}}, nil
+}
+
+// CreateASNRange returns an ASN range with id 1.
+func (r *NilRepo) CreateASNRange(
+	_ context.Context, _ string, in domain.ASNRangeWrite,
+) (*domain.ASNRange, error) {
+	return &domain.ASNRange{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateASNRange returns the ASN range with the given id.
+func (r *NilRepo) UpdateASNRange(
+	_ context.Context, _ string, id int, in domain.ASNRangeWrite,
+) (*domain.ASNRange, error) {
+	return &domain.ASNRange{ID: id, Name: in.Name}, nil
+}
+
+// DeleteASNRange always succeeds.
+func (r *NilRepo) DeleteASNRange(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListRouteTargets returns an empty route target page.
+func (r *NilRepo) ListRouteTargets(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RouteTarget], error) {
+	return &domain.PaginatedResponse[domain.RouteTarget]{Count: 0, Results: []domain.RouteTarget{}}, nil
+}
+
+// CreateRouteTarget returns a route target with id 1.
+func (r *NilRepo) CreateRouteTarget(
+	_ context.Context, _ string, in domain.RouteTargetWrite,
+) (*domain.RouteTarget, error) {
+	return &domain.RouteTarget{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateRouteTarget returns the route target with the given id.
+func (r *NilRepo) UpdateRouteTarget(
+	_ context.Context, _ string, id int, in domain.RouteTargetWrite,
+) (*domain.RouteTarget, error) {
+	return &domain.RouteTarget{ID: id, Name: in.Name}, nil
+}
+
+// DeleteRouteTarget always succeeds.
+func (r *NilRepo) DeleteRouteTarget(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListServices returns an empty service page.
+func (r *NilRepo) ListServices(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Service], error) {
+	return &domain.PaginatedResponse[domain.Service]{Count: 0, Results: []domain.Service{}}, nil
+}
+
+// CreateService returns a service with id 1.
+func (r *NilRepo) CreateService(
+	_ context.Context, _ string, in domain.ServiceWrite,
+) (*domain.Service, error) {
+	return &domain.Service{ID: 1, Name: in.Name, Ports: in.Ports}, nil
+}
+
+// UpdateService returns the service with the given id.
+func (r *NilRepo) UpdateService(
+	_ context.Context, _ string, id int, in domain.ServiceWrite,
+) (*domain.Service, error) {
+	return &domain.Service{ID: id, Name: in.Name, Ports: in.Ports}, nil
+}
+
+// DeleteService always succeeds.
+func (r *NilRepo) DeleteService(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListServiceTemplates returns an empty service template page.
+func (r *NilRepo) ListServiceTemplates(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ServiceTemplate], error) {
+	return &domain.PaginatedResponse[domain.ServiceTemplate]{Count: 0, Results: []domain.ServiceTemplate{}}, nil
+}
+
+// CreateServiceTemplate returns a service template with id 1.
+func (r *NilRepo) CreateServiceTemplate(
+	_ context.Context, _ string, in domain.ServiceTemplateWrite,
+) (*domain.ServiceTemplate, error) {
+	return &domain.ServiceTemplate{ID: 1, Name: in.Name, Ports: in.Ports}, nil
+}
+
+// UpdateServiceTemplate returns the service template with the given id.
+func (r *NilRepo) UpdateServiceTemplate(
+	_ context.Context, _ string, id int, in domain.ServiceTemplateWrite,
+) (*domain.ServiceTemplate, error) {
+	return &domain.ServiceTemplate{ID: id, Name: in.Name, Ports: in.Ports}, nil
+}
+
+// DeleteServiceTemplate always succeeds.
+func (r *NilRepo) DeleteServiceTemplate(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListFHRPGroups returns an empty FHRP group page.
+func (r *NilRepo) ListFHRPGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.FHRPGroup], error) {
+	return &domain.PaginatedResponse[domain.FHRPGroup]{Count: 0, Results: []domain.FHRPGroup{}}, nil
+}
+
+// CreateFHRPGroup returns an FHRP group with id 1.
+func (r *NilRepo) CreateFHRPGroup(
+	_ context.Context, _ string, in domain.FHRPGroupWrite,
+) (*domain.FHRPGroup, error) {
+	return &domain.FHRPGroup{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateFHRPGroup returns the FHRP group with the given id.
+func (r *NilRepo) UpdateFHRPGroup(
+	_ context.Context, _ string, id int, in domain.FHRPGroupWrite,
+) (*domain.FHRPGroup, error) {
+	return &domain.FHRPGroup{ID: id, Name: in.Name}, nil
+}
+
+// DeleteFHRPGroup always succeeds.
+func (r *NilRepo) DeleteFHRPGroup(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListFHRPGroupAssignments returns an empty FHRP group assignment page.
+func (r *NilRepo) ListFHRPGroupAssignments(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.FHRPGroupAssignment], error) {
+	return &domain.PaginatedResponse[domain.FHRPGroupAssignment]{Count: 0, Results: []domain.FHRPGroupAssignment{}}, nil
+}
+
+// CreateFHRPGroupAssignment returns an FHRP group assignment with id 1.
+func (r *NilRepo) CreateFHRPGroupAssignment(
+	_ context.Context, _ string, in domain.FHRPGroupAssignmentWrite,
+) (*domain.FHRPGroupAssignment, error) {
+	return &domain.FHRPGroupAssignment{ID: 1, Group: &domain.Nested{ID: in.Group}}, nil
+}
+
+// UpdateFHRPGroupAssignment returns the FHRP group assignment with the given id.
+func (r *NilRepo) UpdateFHRPGroupAssignment(
+	_ context.Context, _ string, id int, in domain.FHRPGroupAssignmentWrite,
+) (*domain.FHRPGroupAssignment, error) {
+	return &domain.FHRPGroupAssignment{ID: id, Group: &domain.Nested{ID: in.Group}}, nil
+}
+
+// DeleteFHRPGroupAssignment always succeeds.
+func (r *NilRepo) DeleteFHRPGroupAssignment(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListVLANTranslationPolicies returns an empty VLAN translation policy page.
+func (r *NilRepo) ListVLANTranslationPolicies(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VLANTranslationPolicy], error) {
+	return &domain.PaginatedResponse[domain.VLANTranslationPolicy]{
+		Count: 0, Results: []domain.VLANTranslationPolicy{},
+	}, nil
+}
+
+// CreateVLANTranslationPolicy returns a VLAN translation policy with id 1.
+func (r *NilRepo) CreateVLANTranslationPolicy(
+	_ context.Context, _ string, in domain.VLANTranslationPolicyWrite,
+) (*domain.VLANTranslationPolicy, error) {
+	return &domain.VLANTranslationPolicy{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateVLANTranslationPolicy returns the VLAN translation policy with the
+// given id.
+func (r *NilRepo) UpdateVLANTranslationPolicy(
+	_ context.Context, _ string, id int, in domain.VLANTranslationPolicyWrite,
+) (*domain.VLANTranslationPolicy, error) {
+	return &domain.VLANTranslationPolicy{ID: id, Name: in.Name}, nil
+}
+
+// DeleteVLANTranslationPolicy always succeeds.
+func (r *NilRepo) DeleteVLANTranslationPolicy(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListVLANTranslationRules returns an empty VLAN translation rule page.
+func (r *NilRepo) ListVLANTranslationRules(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VLANTranslationRule], error) {
+	return &domain.PaginatedResponse[domain.VLANTranslationRule]{Count: 0, Results: []domain.VLANTranslationRule{}}, nil
+}
+
+// defaultLocalVID and defaultRemoteVID are stable sample VIDs returned by the
+// NilRepo's VLAN translation rule stubs.
+const (
+	defaultLocalVID  = 100
+	defaultRemoteVID = 200
+)
+
+// CreateVLANTranslationRule returns a VLAN translation rule with id 1.
+func (r *NilRepo) CreateVLANTranslationRule(
+	_ context.Context, _ string, in domain.VLANTranslationRuleWrite,
+) (*domain.VLANTranslationRule, error) {
+	return &domain.VLANTranslationRule{
+		ID: 1, Policy: in.Policy, LocalVID: defaultLocalVID, RemoteVID: defaultRemoteVID,
+	}, nil
+}
+
+// UpdateVLANTranslationRule returns the VLAN translation rule with the given id.
+func (r *NilRepo) UpdateVLANTranslationRule(
+	_ context.Context, _ string, id int, in domain.VLANTranslationRuleWrite,
+) (*domain.VLANTranslationRule, error) {
+	return &domain.VLANTranslationRule{
+		ID: id, Policy: in.Policy, LocalVID: defaultLocalVID, RemoteVID: defaultRemoteVID,
+	}, nil
+}
+
+// DeleteVLANTranslationRule always succeeds.
+func (r *NilRepo) DeleteVLANTranslationRule(_ context.Context, _ string, _ int) error {
 	return nil
 }

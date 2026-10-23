@@ -2138,6 +2138,572 @@ func TestMockRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,ma
 			t.Errorf("DeleteMACAddress = %v", err)
 		}
 	})
+	t.Run("ListRIRs", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListRIRsFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.RIR], error) {
+				return &domain.PaginatedResponse[domain.RIR]{Count: 1}, nil
+			},
+		}).ListRIRs(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListRIRs = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateRIR", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateRIRFunc: func(_ context.Context, _ string, in domain.RIRWrite) (*domain.RIR, error) {
+				return &domain.RIR{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateRIR(context.Background(), "t", domain.RIRWrite{Name: "RIPE"})
+		if err != nil || got == nil || got.Name != "RIPE" {
+			t.Errorf("CreateRIR = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRIR", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateRIRFunc: func(_ context.Context, _ string, id int, _ domain.RIRWrite) (*domain.RIR, error) {
+				return &domain.RIR{ID: id}, nil
+			},
+		}).UpdateRIR(context.Background(), "t", 7, domain.RIRWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRIR = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRIR", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteRIRFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRIR(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRIR = %v", err)
+		}
+	})
+	t.Run("ListAggregates", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListAggregatesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Aggregate], error) {
+				return &domain.PaginatedResponse[domain.Aggregate]{Count: 1}, nil
+			},
+		}).ListAggregates(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListAggregates = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateAggregate", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateAggregateFunc: func(_ context.Context, _ string, in domain.AggregateWrite) (*domain.Aggregate, error) {
+				return &domain.Aggregate{ID: 1, Prefix: in.Prefix}, nil
+			},
+		}).CreateAggregate(context.Background(), "t", domain.AggregateWrite{Prefix: "10.0.0.0/8"})
+		if err != nil || got == nil || got.Prefix != "10.0.0.0/8" {
+			t.Errorf("CreateAggregate = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateAggregate", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateAggregateFunc: func(_ context.Context, _ string, id int, _ domain.AggregateWrite) (*domain.Aggregate, error) {
+				return &domain.Aggregate{ID: id}, nil
+			},
+		}).UpdateAggregate(context.Background(), "t", 7, domain.AggregateWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateAggregate = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteAggregate", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteAggregateFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteAggregate(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteAggregate = %v", err)
+		}
+	})
+	t.Run("ListIPRanges", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListIPRangesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.IPRange], error) {
+				return &domain.PaginatedResponse[domain.IPRange]{Count: 1}, nil
+			},
+		}).ListIPRanges(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListIPRanges = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateIPRange", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateIPRangeFunc: func(_ context.Context, _ string, in domain.IPRangeWrite) (*domain.IPRange, error) {
+				return &domain.IPRange{ID: 1, StartAddress: in.StartAddress}, nil
+			},
+		}).CreateIPRange(context.Background(), "t", domain.IPRangeWrite{StartAddress: "10.0.0.1"})
+		if err != nil || got == nil || got.StartAddress != "10.0.0.1" {
+			t.Errorf("CreateIPRange = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateIPRange", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateIPRangeFunc: func(_ context.Context, _ string, id int, _ domain.IPRangeWrite) (*domain.IPRange, error) {
+				return &domain.IPRange{ID: id}, nil
+			},
+		}).UpdateIPRange(context.Background(), "t", 7, domain.IPRangeWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateIPRange = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteIPRange", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteIPRangeFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteIPRange(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteIPRange = %v", err)
+		}
+	})
+	t.Run("ListASNs", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListASNsFunc: func(context.Context, string, map[string]string) (*domain.PaginatedResponse[domain.ASN], error) {
+				return &domain.PaginatedResponse[domain.ASN]{Count: 1}, nil
+			},
+		}).ListASNs(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListASNs = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateASN", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateASNFunc: func(_ context.Context, _ string, in domain.ASNWrite) (*domain.ASN, error) {
+				return &domain.ASN{ID: 1, ASN: in.ASN}, nil
+			},
+		}).CreateASN(context.Background(), "t", domain.ASNWrite{ASN: 64512})
+		if err != nil || got == nil || got.ASN != 64512 {
+			t.Errorf("CreateASN = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateASN", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateASNFunc: func(_ context.Context, _ string, id int, _ domain.ASNWrite) (*domain.ASN, error) {
+				return &domain.ASN{ID: id}, nil
+			},
+		}).UpdateASN(context.Background(), "t", 7, domain.ASNWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateASN = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteASN", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteASNFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteASN(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteASN = %v", err)
+		}
+	})
+	t.Run("ListASNRanges", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListASNRangesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.ASNRange], error) {
+				return &domain.PaginatedResponse[domain.ASNRange]{Count: 1}, nil
+			},
+		}).ListASNRanges(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListASNRanges = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateASNRange", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateASNRangeFunc: func(_ context.Context, _ string, in domain.ASNRangeWrite) (*domain.ASNRange, error) {
+				return &domain.ASNRange{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateASNRange(context.Background(), "t", domain.ASNRangeWrite{Name: "PRIVATE"})
+		if err != nil || got == nil || got.Name != "PRIVATE" {
+			t.Errorf("CreateASNRange = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateASNRange", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateASNRangeFunc: func(_ context.Context, _ string, id int, _ domain.ASNRangeWrite) (*domain.ASNRange, error) {
+				return &domain.ASNRange{ID: id}, nil
+			},
+		}).UpdateASNRange(context.Background(), "t", 7, domain.ASNRangeWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateASNRange = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteASNRange", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteASNRangeFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteASNRange(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteASNRange = %v", err)
+		}
+	})
+	t.Run("ListRouteTargets", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListRouteTargetsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.RouteTarget], error) {
+				return &domain.PaginatedResponse[domain.RouteTarget]{Count: 1}, nil
+			},
+		}).ListRouteTargets(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListRouteTargets = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateRouteTarget", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateRouteTargetFunc: func(_ context.Context, _ string, in domain.RouteTargetWrite) (*domain.RouteTarget, error) {
+				return &domain.RouteTarget{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateRouteTarget(context.Background(), "t", domain.RouteTargetWrite{Name: "65000:100"})
+		if err != nil || got == nil || got.Name != "65000:100" {
+			t.Errorf("CreateRouteTarget = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRouteTarget", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateRouteTargetFunc: func(
+				_ context.Context, _ string, id int, _ domain.RouteTargetWrite,
+			) (*domain.RouteTarget, error) {
+				return &domain.RouteTarget{ID: id}, nil
+			},
+		}).UpdateRouteTarget(context.Background(), "t", 7, domain.RouteTargetWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRouteTarget = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRouteTarget", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteRouteTargetFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRouteTarget(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRouteTarget = %v", err)
+		}
+	})
+	t.Run("ListServices", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListServicesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Service], error) {
+				return &domain.PaginatedResponse[domain.Service]{Count: 1}, nil
+			},
+		}).ListServices(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListServices = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateService", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateServiceFunc: func(_ context.Context, _ string, in domain.ServiceWrite) (*domain.Service, error) {
+				return &domain.Service{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateService(context.Background(), "t", domain.ServiceWrite{Name: "web"})
+		if err != nil || got == nil || got.Name != "web" {
+			t.Errorf("CreateService = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateService", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateServiceFunc: func(_ context.Context, _ string, id int, _ domain.ServiceWrite) (*domain.Service, error) {
+				return &domain.Service{ID: id}, nil
+			},
+		}).UpdateService(context.Background(), "t", 7, domain.ServiceWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateService = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteService", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteServiceFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteService(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteService = %v", err)
+		}
+	})
+	t.Run("ListServiceTemplates", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListServiceTemplatesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.ServiceTemplate], error) {
+				return &domain.PaginatedResponse[domain.ServiceTemplate]{Count: 1}, nil
+			},
+		}).ListServiceTemplates(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListServiceTemplates = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateServiceTemplate", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateServiceTemplateFunc: func(
+				_ context.Context, _ string, in domain.ServiceTemplateWrite,
+			) (*domain.ServiceTemplate, error) {
+				return &domain.ServiceTemplate{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateServiceTemplate(context.Background(), "t", domain.ServiceTemplateWrite{Name: "http"})
+		if err != nil || got == nil || got.Name != "http" {
+			t.Errorf("CreateServiceTemplate = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateServiceTemplate", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateServiceTemplateFunc: func(
+				_ context.Context, _ string, id int, _ domain.ServiceTemplateWrite,
+			) (*domain.ServiceTemplate, error) {
+				return &domain.ServiceTemplate{ID: id}, nil
+			},
+		}).UpdateServiceTemplate(context.Background(), "t", 7, domain.ServiceTemplateWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateServiceTemplate = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteServiceTemplate", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteServiceTemplateFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteServiceTemplate(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteServiceTemplate = %v", err)
+		}
+	})
+	t.Run("ListFHRPGroups", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListFHRPGroupsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.FHRPGroup], error) {
+				return &domain.PaginatedResponse[domain.FHRPGroup]{Count: 1}, nil
+			},
+		}).ListFHRPGroups(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListFHRPGroups = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateFHRPGroup", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateFHRPGroupFunc: func(_ context.Context, _ string, in domain.FHRPGroupWrite) (*domain.FHRPGroup, error) {
+				return &domain.FHRPGroup{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateFHRPGroup(context.Background(), "t", domain.FHRPGroupWrite{Name: "gw"})
+		if err != nil || got == nil || got.Name != "gw" {
+			t.Errorf("CreateFHRPGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateFHRPGroup", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateFHRPGroupFunc: func(_ context.Context, _ string, id int, _ domain.FHRPGroupWrite) (*domain.FHRPGroup, error) {
+				return &domain.FHRPGroup{ID: id}, nil
+			},
+		}).UpdateFHRPGroup(context.Background(), "t", 7, domain.FHRPGroupWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateFHRPGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteFHRPGroup", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteFHRPGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteFHRPGroup(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteFHRPGroup = %v", err)
+		}
+	})
+	t.Run("ListFHRPGroupAssignments", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListFHRPGroupAssignmentsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.FHRPGroupAssignment], error) {
+				return &domain.PaginatedResponse[domain.FHRPGroupAssignment]{Count: 1}, nil
+			},
+		}).ListFHRPGroupAssignments(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListFHRPGroupAssignments = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateFHRPGroupAssignment", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateFHRPGroupAssignmentFunc: func(
+				_ context.Context, _ string, _ domain.FHRPGroupAssignmentWrite,
+			) (*domain.FHRPGroupAssignment, error) {
+				return &domain.FHRPGroupAssignment{ID: 1}, nil
+			},
+		}).CreateFHRPGroupAssignment(context.Background(), "t", domain.FHRPGroupAssignmentWrite{Group: 5, InterfaceID: 6})
+		if err != nil || got == nil || got.ID != 1 {
+			t.Errorf("CreateFHRPGroupAssignment = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateFHRPGroupAssignment", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateFHRPGroupAssignmentFunc: func(
+				_ context.Context, _ string, id int, _ domain.FHRPGroupAssignmentWrite,
+			) (*domain.FHRPGroupAssignment, error) {
+				return &domain.FHRPGroupAssignment{ID: id}, nil
+			},
+		}).UpdateFHRPGroupAssignment(context.Background(), "t", 7, domain.FHRPGroupAssignmentWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateFHRPGroupAssignment = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteFHRPGroupAssignment", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteFHRPGroupAssignmentFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteFHRPGroupAssignment(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteFHRPGroupAssignment = %v", err)
+		}
+	})
+	t.Run("ListVLANTranslationPolicies", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListVLANTranslationPoliciesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.VLANTranslationPolicy], error) {
+				return &domain.PaginatedResponse[domain.VLANTranslationPolicy]{Count: 1}, nil
+			},
+		}).ListVLANTranslationPolicies(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListVLANTranslationPolicies = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateVLANTranslationPolicy", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateVLANTranslationPolicyFunc: func(
+				_ context.Context, _ string, in domain.VLANTranslationPolicyWrite,
+			) (*domain.VLANTranslationPolicy, error) {
+				return &domain.VLANTranslationPolicy{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateVLANTranslationPolicy(context.Background(), "t", domain.VLANTranslationPolicyWrite{Name: "core"})
+		if err != nil || got == nil || got.Name != "core" {
+			t.Errorf("CreateVLANTranslationPolicy = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateVLANTranslationPolicy", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateVLANTranslationPolicyFunc: func(
+				_ context.Context, _ string, id int, _ domain.VLANTranslationPolicyWrite,
+			) (*domain.VLANTranslationPolicy, error) {
+				return &domain.VLANTranslationPolicy{ID: id}, nil
+			},
+		}).UpdateVLANTranslationPolicy(context.Background(), "t", 7, domain.VLANTranslationPolicyWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateVLANTranslationPolicy = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteVLANTranslationPolicy", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteVLANTranslationPolicyFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteVLANTranslationPolicy(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteVLANTranslationPolicy = %v", err)
+		}
+	})
+	t.Run("ListVLANTranslationRules", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListVLANTranslationRulesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.VLANTranslationRule], error) {
+				return &domain.PaginatedResponse[domain.VLANTranslationRule]{Count: 1}, nil
+			},
+		}).ListVLANTranslationRules(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListVLANTranslationRules = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateVLANTranslationRule", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateVLANTranslationRuleFunc: func(
+				_ context.Context, _ string, _ domain.VLANTranslationRuleWrite,
+			) (*domain.VLANTranslationRule, error) {
+				return &domain.VLANTranslationRule{ID: 1}, nil
+			},
+		}).CreateVLANTranslationRule(context.Background(), "t", domain.VLANTranslationRuleWrite{Policy: 5})
+		if err != nil || got == nil || got.ID != 1 {
+			t.Errorf("CreateVLANTranslationRule = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateVLANTranslationRule", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateVLANTranslationRuleFunc: func(
+				_ context.Context, _ string, id int, _ domain.VLANTranslationRuleWrite,
+			) (*domain.VLANTranslationRule, error) {
+				return &domain.VLANTranslationRule{ID: id}, nil
+			},
+		}).UpdateVLANTranslationRule(context.Background(), "t", 7, domain.VLANTranslationRuleWrite{})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateVLANTranslationRule = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteVLANTranslationRule", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteVLANTranslationRuleFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteVLANTranslationRule(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteVLANTranslationRule = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -2713,5 +3279,167 @@ func TestNilRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,mai
 	}
 	if err := repo.DeleteMACAddress(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteMACAddress = %v", err)
+	}
+	if r, err := repo.ListRIRs(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListRIRs", r.Count, err)
+	}
+	if v, err := repo.CreateRIR(ctx, "t", domain.RIRWrite{Name: "RIPE"}); err != nil || v.Name != "RIPE" {
+		t.Errorf("CreateRIR = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateRIR(ctx, "t", 7, domain.RIRWrite{Name: "RIPE"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateRIR = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteRIR(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRIR = %v", err)
+	}
+	if r, err := repo.ListAggregates(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListAggregates", r.Count, err)
+	}
+	if v, err := repo.CreateAggregate(ctx, "t", domain.AggregateWrite{Prefix: "10.0.0.0/8"}); err != nil ||
+		v.Prefix != "10.0.0.0/8" {
+		t.Errorf("CreateAggregate = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateAggregate(ctx, "t", 7, domain.AggregateWrite{Prefix: "10.0.0.0/8"}); err != nil ||
+		v.ID != 7 {
+		t.Errorf("UpdateAggregate = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteAggregate(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteAggregate = %v", err)
+	}
+	if r, err := repo.ListIPRanges(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListIPRanges", r.Count, err)
+	}
+	if v, err := repo.CreateIPRange(ctx, "t", domain.IPRangeWrite{StartAddress: "10.0.0.1"}); err != nil ||
+		v.StartAddress != "10.0.0.1" {
+		t.Errorf("CreateIPRange = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateIPRange(ctx, "t", 7, domain.IPRangeWrite{StartAddress: "10.0.0.1"}); err != nil ||
+		v.ID != 7 {
+		t.Errorf("UpdateIPRange = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteIPRange(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteIPRange = %v", err)
+	}
+	if r, err := repo.ListASNs(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListASNs", r.Count, err)
+	}
+	if v, err := repo.CreateASN(ctx, "t", domain.ASNWrite{ASN: 64512}); err != nil || v.ASN != 64512 {
+		t.Errorf("CreateASN = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateASN(ctx, "t", 7, domain.ASNWrite{ASN: 64512}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateASN = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteASN(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteASN = %v", err)
+	}
+	if r, err := repo.ListASNRanges(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListASNRanges", r.Count, err)
+	}
+	if v, err := repo.CreateASNRange(ctx, "t", domain.ASNRangeWrite{Name: "PRIVATE"}); err != nil ||
+		v.Name != "PRIVATE" {
+		t.Errorf("CreateASNRange = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateASNRange(ctx, "t", 7, domain.ASNRangeWrite{Name: "PRIVATE"}); err != nil ||
+		v.ID != 7 {
+		t.Errorf("UpdateASNRange = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteASNRange(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteASNRange = %v", err)
+	}
+	if r, err := repo.ListRouteTargets(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListRouteTargets", r.Count, err)
+	}
+	if v, err := repo.CreateRouteTarget(ctx, "t", domain.RouteTargetWrite{Name: "65000:100"}); err != nil ||
+		v.Name != "65000:100" {
+		t.Errorf("CreateRouteTarget = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateRouteTarget(ctx, "t", 7, domain.RouteTargetWrite{Name: "65000:100"}); err != nil ||
+		v.ID != 7 {
+		t.Errorf("UpdateRouteTarget = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteRouteTarget(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRouteTarget = %v", err)
+	}
+	if r, err := repo.ListServices(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListServices", r.Count, err)
+	}
+	if v, err := repo.CreateService(ctx, "t", domain.ServiceWrite{Name: "web"}); err != nil || v.Name != "web" {
+		t.Errorf("CreateService = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateService(ctx, "t", 7, domain.ServiceWrite{Name: "web"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateService = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteService(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteService = %v", err)
+	}
+	if r, err := repo.ListServiceTemplates(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListServiceTemplates", r.Count, err)
+	}
+	if v, err := repo.CreateServiceTemplate(ctx, "t", domain.ServiceTemplateWrite{Name: "http"}); err != nil ||
+		v.Name != "http" {
+		t.Errorf("CreateServiceTemplate = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateServiceTemplate(ctx, "t", 7, domain.ServiceTemplateWrite{Name: "http"}); err != nil ||
+		v.ID != 7 {
+		t.Errorf("UpdateServiceTemplate = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteServiceTemplate(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteServiceTemplate = %v", err)
+	}
+	if r, err := repo.ListFHRPGroups(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListFHRPGroups", r.Count, err)
+	}
+	if v, err := repo.CreateFHRPGroup(ctx, "t", domain.FHRPGroupWrite{Name: "gw"}); err != nil || v.Name != "gw" {
+		t.Errorf("CreateFHRPGroup = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateFHRPGroup(ctx, "t", 7, domain.FHRPGroupWrite{Name: "gw"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateFHRPGroup = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteFHRPGroup(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteFHRPGroup = %v", err)
+	}
+	if r, err := repo.ListFHRPGroupAssignments(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListFHRPGroupAssignments", r.Count, err)
+	}
+	if v, err := repo.CreateFHRPGroupAssignment(
+		ctx, "t", domain.FHRPGroupAssignmentWrite{Group: 5, InterfaceID: 6},
+	); err != nil || v.ID != 1 {
+		t.Errorf("CreateFHRPGroupAssignment = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateFHRPGroupAssignment(ctx, "t", 7, domain.FHRPGroupAssignmentWrite{Group: 5}); err != nil ||
+		v.ID != 7 {
+		t.Errorf("UpdateFHRPGroupAssignment = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteFHRPGroupAssignment(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteFHRPGroupAssignment = %v", err)
+	}
+	if r, err := repo.ListVLANTranslationPolicies(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListVLANTranslationPolicies", r.Count, err)
+	}
+	if v, err := repo.CreateVLANTranslationPolicy(ctx, "t", domain.VLANTranslationPolicyWrite{Name: "core"}); err != nil ||
+		v.Name != "core" {
+		t.Errorf("CreateVLANTranslationPolicy = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateVLANTranslationPolicy(
+		ctx, "t", 7, domain.VLANTranslationPolicyWrite{Name: "core"},
+	); err != nil || v.ID != 7 {
+		t.Errorf("UpdateVLANTranslationPolicy = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteVLANTranslationPolicy(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteVLANTranslationPolicy = %v", err)
+	}
+	if r, err := repo.ListVLANTranslationRules(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListVLANTranslationRules", r.Count, err)
+	}
+	if v, err := repo.CreateVLANTranslationRule(ctx, "t", domain.VLANTranslationRuleWrite{Policy: 5}); err != nil ||
+		v.ID != 1 {
+		t.Errorf("CreateVLANTranslationRule = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateVLANTranslationRule(ctx, "t", 7, domain.VLANTranslationRuleWrite{Policy: 5}); err != nil ||
+		v.ID != 7 {
+		t.Errorf("UpdateVLANTranslationRule = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteVLANTranslationRule(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteVLANTranslationRule = %v", err)
 	}
 }
