@@ -45,7 +45,7 @@ lint-golangci:
 
 ## lint-vuln runs the Go vulnerability scanner (govulncheck).
 lint-vuln:
-	$(GO) run golang.org/x/vuln/cmd/govulncheck@latest ./...
+	$(GO) run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
 
 ## arch runs the architecture dependency check.
 arch:

@@ -26,7 +26,7 @@ jobs:
           cache: true
 
       - name: Setup GoReleaser
-        run: go install github.com/goreleaser/goreleaser/v2@latest
+        run: go install github.com/goreleaser/goreleaser/v2@v2.19.0
 
       # `make build SNAPSHOT=false` produces the unified dist/ artifact via a
       # real goreleaser release (which also publishes the GitHub release) (R07).
