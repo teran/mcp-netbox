@@ -528,6 +528,126 @@ type (
 		Created      string         `json:"created"`
 		LastUpdated  string         `json:"last_updated"`
 	}
+
+	// SiteGroup is a NetBox DCIM site group (a grouping of sites).
+	SiteGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Parent       *Nested        `json:"parent"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// RackGroup is a NetBox DCIM rack group (a grouping of racks).
+	RackGroup struct {
+		ID          int     `json:"id"`
+		URL         string  `json:"url,omitempty"`
+		Name        string  `json:"name"`
+		Slug        string  `json:"slug"`
+		Display     string  `json:"display,omitempty"`
+		Site        *Nested `json:"site"`
+		Parent      *Nested `json:"parent"`
+		Description string  `json:"description,omitempty"`
+		Tags        []Tag   `json:"tags,omitempty"`
+		Created     string  `json:"created"`
+		LastUpdated string  `json:"last_updated"`
+	}
+
+	// RackRole is a NetBox DCIM rack role (a functional role for racks).
+	RackRole struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Color        string         `json:"color,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// DeviceRole is a NetBox DCIM device role (a functional role for devices).
+	DeviceRole struct {
+		ID             int            `json:"id"`
+		URL            string         `json:"url,omitempty"`
+		Name           string         `json:"name"`
+		Slug           string         `json:"slug"`
+		Color          string         `json:"color,omitempty"`
+		VMRole         bool           `json:"vm_role"`
+		ConfigTemplate *Nested        `json:"config_template"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []Tag          `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
+		Weight         int            `json:"weight"`
+	}
+
+	// Platform is a NetBox DCIM platform (a software/firmware platform).
+	Platform struct {
+		ID             int            `json:"id"`
+		URL            string         `json:"url,omitempty"`
+		Name           string         `json:"name"`
+		Slug           string         `json:"slug"`
+		Manufacturer   *Nested        `json:"manufacturer"`
+		ConfigTemplate *Nested        `json:"config_template"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []Tag          `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
+	}
+
+	// VirtualChassis is a NetBox DCIM virtual chassis (a grouping of devices).
+	VirtualChassis struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Domain       string         `json:"domain,omitempty"`
+		Master       *Nested        `json:"master"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+		MemberCount  int            `json:"member_count"`
+	}
+
+	// PowerPanel is a NetBox DCIM power panel.
+	PowerPanel struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Site         *Nested        `json:"site"`
+		Location     *Nested        `json:"location"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// InventoryItemRole is a NetBox DCIM inventory item role.
+	InventoryItemRole struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Color        string         `json:"color,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
 )
 
 type (
@@ -1117,6 +1237,145 @@ type ContactWrite struct {
 	Link         *string        `json:"link,omitempty"`
 	Description  *string        `json:"description,omitempty"`
 	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// SiteGroupWrite is the domain DTO for creating or updating a NetBox DCIM site
+// group. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Parent references the numeric NetBox ID
+// of the parent site group.
+type SiteGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// RackGroupWrite is the domain DTO for creating or updating a NetBox DCIM rack
+// group. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Site and Parent reference the numeric
+// NetBox IDs of the parent site and rack group.
+type RackGroupWrite struct {
+	Name        string   `json:"name,omitempty"`
+	Slug        *string  `json:"slug,omitempty"`
+	Site        *int     `json:"site,omitempty"`
+	Parent      *int     `json:"parent,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+}
+
+// RackRoleWrite is the domain DTO for creating or updating a NetBox DCIM rack
+// role. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty".
+type RackRoleWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Color        *string        `json:"color,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// DeviceRoleWrite is the domain DTO for creating or updating a NetBox DCIM
+// device role. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". VMRole and Weight are pointers so an
+// update can set them to zero/false explicitly. ConfigTemplate is the numeric
+// NetBox ID of the config template.
+type DeviceRoleWrite struct {
+	Name           string         `json:"name,omitempty"`
+	Slug           *string        `json:"slug,omitempty"`
+	Color          *string        `json:"color,omitempty"`
+	VMRole         *bool          `json:"vm_role,omitempty"`
+	ConfigTemplate *int           `json:"config_template,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+	Weight         *int           `json:"weight,omitempty"`
+}
+
+// PlatformWrite is the domain DTO for creating or updating a NetBox DCIM
+// platform. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Manufacturer and ConfigTemplate are the
+// numeric NetBox IDs of the related objects.
+type PlatformWrite struct {
+	Name           string         `json:"name,omitempty"`
+	Slug           *string        `json:"slug,omitempty"`
+	Manufacturer   *int           `json:"manufacturer,omitempty"`
+	ConfigTemplate *int           `json:"config_template,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
+// VirtualChassisWrite is the domain DTO for creating or updating a NetBox DCIM
+// virtual chassis. It carries only the writable fields.
+//
+// Name is a plain string; it is optional on create (unlike most entities), so
+// the create handler does not require it. Optional scalar fields are pointers
+// so that a partial-update (PATCH) can distinguish "not provided" (nil) from
+// "explicitly set to empty". Master is the numeric NetBox ID of the master
+// device.
+type VirtualChassisWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Domain       *string        `json:"domain,omitempty"`
+	Master       *int           `json:"master,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// PowerPanelWrite is the domain DTO for creating or updating a NetBox DCIM
+// power panel. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Site and Location are the numeric
+// NetBox IDs of the related objects.
+type PowerPanelWrite struct {
+	Site         *int           `json:"site,omitempty"`
+	Location     *int           `json:"location,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// InventoryItemRoleWrite is the domain DTO for creating or updating a NetBox
+// DCIM inventory item role. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty".
+type InventoryItemRoleWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Color        *string        `json:"color,omitempty"`
+	Description  *string        `json:"description,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }

@@ -1188,6 +1188,406 @@ func TestMockRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,ma
 			t.Errorf("DeleteCircuit = %v", err)
 		}
 	})
+	t.Run("ListSiteGroups", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListSiteGroupsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+				return &domain.PaginatedResponse[domain.SiteGroup]{Count: 1}, nil
+			},
+		}).ListSiteGroups(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListSiteGroups = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateSiteGroup", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateSiteGroupFunc: func(
+				_ context.Context, _ string, in domain.SiteGroupWrite,
+			) (*domain.SiteGroup, error) {
+				return &domain.SiteGroup{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateSiteGroup(context.Background(), "t", domain.SiteGroupWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateSiteGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateSiteGroup", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateSiteGroupFunc: func(
+				_ context.Context, _ string, id int, in domain.SiteGroupWrite,
+			) (*domain.SiteGroup, error) {
+				return &domain.SiteGroup{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateSiteGroup(context.Background(), "t", 7, domain.SiteGroupWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateSiteGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteSiteGroup", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteSiteGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteSiteGroup(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteSiteGroup = %v", err)
+		}
+	})
+	t.Run("ListRackGroups", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListRackGroupsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.RackGroup], error) {
+				return &domain.PaginatedResponse[domain.RackGroup]{Count: 1}, nil
+			},
+		}).ListRackGroups(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListRackGroups = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateRackGroup", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateRackGroupFunc: func(
+				_ context.Context, _ string, in domain.RackGroupWrite,
+			) (*domain.RackGroup, error) {
+				return &domain.RackGroup{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateRackGroup(context.Background(), "t", domain.RackGroupWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateRackGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRackGroup", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateRackGroupFunc: func(
+				_ context.Context, _ string, id int, in domain.RackGroupWrite,
+			) (*domain.RackGroup, error) {
+				return &domain.RackGroup{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateRackGroup(context.Background(), "t", 7, domain.RackGroupWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRackGroup = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRackGroup", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteRackGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRackGroup(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRackGroup = %v", err)
+		}
+	})
+	t.Run("ListRackRoles", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListRackRolesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.RackRole], error) {
+				return &domain.PaginatedResponse[domain.RackRole]{Count: 1}, nil
+			},
+		}).ListRackRoles(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListRackRoles = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateRackRole", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateRackRoleFunc: func(
+				_ context.Context, _ string, in domain.RackRoleWrite,
+			) (*domain.RackRole, error) {
+				return &domain.RackRole{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateRackRole(context.Background(), "t", domain.RackRoleWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateRackRole = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRackRole", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateRackRoleFunc: func(
+				_ context.Context, _ string, id int, in domain.RackRoleWrite,
+			) (*domain.RackRole, error) {
+				return &domain.RackRole{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateRackRole(context.Background(), "t", 7, domain.RackRoleWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRackRole = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRackRole", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteRackRoleFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRackRole(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRackRole = %v", err)
+		}
+	})
+	t.Run("ListDeviceRoles", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListDeviceRolesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+				return &domain.PaginatedResponse[domain.DeviceRole]{Count: 1}, nil
+			},
+		}).ListDeviceRoles(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListDeviceRoles = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateDeviceRole", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateDeviceRoleFunc: func(
+				_ context.Context, _ string, in domain.DeviceRoleWrite,
+			) (*domain.DeviceRole, error) {
+				return &domain.DeviceRole{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateDeviceRole(context.Background(), "t", domain.DeviceRoleWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateDeviceRole = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateDeviceRole", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateDeviceRoleFunc: func(
+				_ context.Context, _ string, id int, in domain.DeviceRoleWrite,
+			) (*domain.DeviceRole, error) {
+				return &domain.DeviceRole{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateDeviceRole(context.Background(), "t", 7, domain.DeviceRoleWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateDeviceRole = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteDeviceRole", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteDeviceRoleFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteDeviceRole(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteDeviceRole = %v", err)
+		}
+	})
+	t.Run("ListPlatforms", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListPlatformsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.Platform], error) {
+				return &domain.PaginatedResponse[domain.Platform]{Count: 1}, nil
+			},
+		}).ListPlatforms(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListPlatforms = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreatePlatform", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreatePlatformFunc: func(
+				_ context.Context, _ string, in domain.PlatformWrite,
+			) (*domain.Platform, error) {
+				return &domain.Platform{ID: 1, Name: in.Name}, nil
+			},
+		}).CreatePlatform(context.Background(), "t", domain.PlatformWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreatePlatform = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdatePlatform", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdatePlatformFunc: func(
+				_ context.Context, _ string, id int, in domain.PlatformWrite,
+			) (*domain.Platform, error) {
+				return &domain.Platform{ID: id, Name: in.Name}, nil
+			},
+		}).UpdatePlatform(context.Background(), "t", 7, domain.PlatformWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdatePlatform = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeletePlatform", func(t *testing.T) {
+		err := (&MockRepo{
+			DeletePlatformFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeletePlatform(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeletePlatform = %v", err)
+		}
+	})
+	t.Run("ListVirtualChassis", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListVirtualChassisFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+				return &domain.PaginatedResponse[domain.VirtualChassis]{Count: 1}, nil
+			},
+		}).ListVirtualChassis(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListVirtualChassis = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateVirtualChassis", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateVirtualChassisFunc: func(
+				_ context.Context, _ string, in domain.VirtualChassisWrite,
+			) (*domain.VirtualChassis, error) {
+				return &domain.VirtualChassis{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateVirtualChassis(context.Background(), "t", domain.VirtualChassisWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateVirtualChassis = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateVirtualChassis", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateVirtualChassisFunc: func(
+				_ context.Context, _ string, id int, in domain.VirtualChassisWrite,
+			) (*domain.VirtualChassis, error) {
+				return &domain.VirtualChassis{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateVirtualChassis(context.Background(), "t", 7, domain.VirtualChassisWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateVirtualChassis = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteVirtualChassis", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteVirtualChassisFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteVirtualChassis(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteVirtualChassis = %v", err)
+		}
+	})
+	t.Run("ListPowerPanels", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListPowerPanelsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+				return &domain.PaginatedResponse[domain.PowerPanel]{Count: 1}, nil
+			},
+		}).ListPowerPanels(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListPowerPanels = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreatePowerPanel", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreatePowerPanelFunc: func(
+				_ context.Context, _ string, in domain.PowerPanelWrite,
+			) (*domain.PowerPanel, error) {
+				return &domain.PowerPanel{ID: 1, Name: in.Name}, nil
+			},
+		}).CreatePowerPanel(context.Background(), "t", domain.PowerPanelWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreatePowerPanel = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdatePowerPanel", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdatePowerPanelFunc: func(
+				_ context.Context, _ string, id int, in domain.PowerPanelWrite,
+			) (*domain.PowerPanel, error) {
+				return &domain.PowerPanel{ID: id, Name: in.Name}, nil
+			},
+		}).UpdatePowerPanel(context.Background(), "t", 7, domain.PowerPanelWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdatePowerPanel = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeletePowerPanel", func(t *testing.T) {
+		err := (&MockRepo{
+			DeletePowerPanelFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeletePowerPanel(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeletePowerPanel = %v", err)
+		}
+	})
+	t.Run("ListInventoryItemRoles", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListInventoryItemRolesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+				return &domain.PaginatedResponse[domain.InventoryItemRole]{Count: 1}, nil
+			},
+		}).ListInventoryItemRoles(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListInventoryItemRoles = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateInventoryItemRole", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateInventoryItemRoleFunc: func(
+				_ context.Context, _ string, in domain.InventoryItemRoleWrite,
+			) (*domain.InventoryItemRole, error) {
+				return &domain.InventoryItemRole{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateInventoryItemRole(context.Background(), "t", domain.InventoryItemRoleWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateInventoryItemRole = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateInventoryItemRole", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateInventoryItemRoleFunc: func(
+				_ context.Context, _ string, id int, in domain.InventoryItemRoleWrite,
+			) (*domain.InventoryItemRole, error) {
+				return &domain.InventoryItemRole{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateInventoryItemRole(context.Background(), "t", 7, domain.InventoryItemRoleWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateInventoryItemRole = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteInventoryItemRole", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteInventoryItemRoleFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteInventoryItemRole(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteInventoryItemRole = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -1527,5 +1927,103 @@ func TestNilRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,mai
 	}
 	if err := repo.DeleteContact(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteContact = %v", err)
+	}
+	if r, err := repo.ListSiteGroups(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListSiteGroups", r.Count, err)
+	}
+	if v, err := repo.CreateSiteGroup(ctx, "t", domain.SiteGroupWrite{Name: "A"}); err != nil || v.Name != "A" {
+		t.Errorf("CreateSiteGroup = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateSiteGroup(ctx, "t", 7, domain.SiteGroupWrite{Name: "A"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateSiteGroup = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteSiteGroup(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteSiteGroup = %v", err)
+	}
+	if r, err := repo.ListRackGroups(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListRackGroups", r.Count, err)
+	}
+	if v, err := repo.CreateRackGroup(ctx, "t", domain.RackGroupWrite{Name: "A"}); err != nil || v.Name != "A" {
+		t.Errorf("CreateRackGroup = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateRackGroup(ctx, "t", 7, domain.RackGroupWrite{Name: "A"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateRackGroup = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteRackGroup(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRackGroup = %v", err)
+	}
+	if r, err := repo.ListRackRoles(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListRackRoles", r.Count, err)
+	}
+	if v, err := repo.CreateRackRole(ctx, "t", domain.RackRoleWrite{Name: "A"}); err != nil || v.Name != "A" {
+		t.Errorf("CreateRackRole = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateRackRole(ctx, "t", 7, domain.RackRoleWrite{Name: "A"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateRackRole = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteRackRole(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRackRole = %v", err)
+	}
+	if r, err := repo.ListDeviceRoles(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListDeviceRoles", r.Count, err)
+	}
+	if v, err := repo.CreateDeviceRole(ctx, "t", domain.DeviceRoleWrite{Name: "A"}); err != nil || v.Name != "A" {
+		t.Errorf("CreateDeviceRole = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateDeviceRole(ctx, "t", 7, domain.DeviceRoleWrite{Name: "A"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateDeviceRole = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteDeviceRole(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteDeviceRole = %v", err)
+	}
+	if r, err := repo.ListPlatforms(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListPlatforms", r.Count, err)
+	}
+	if v, err := repo.CreatePlatform(ctx, "t", domain.PlatformWrite{Name: "A"}); err != nil || v.Name != "A" {
+		t.Errorf("CreatePlatform = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdatePlatform(ctx, "t", 7, domain.PlatformWrite{Name: "A"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdatePlatform = (%v, %v)", v, err)
+	}
+	if err := repo.DeletePlatform(ctx, "t", 3); err != nil {
+		t.Errorf("DeletePlatform = %v", err)
+	}
+	if r, err := repo.ListVirtualChassis(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListVirtualChassis", r.Count, err)
+	}
+	if v, err := repo.CreateVirtualChassis(ctx, "t", domain.VirtualChassisWrite{Name: "A"}); err != nil || v.Name != "A" {
+		t.Errorf("CreateVirtualChassis = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdateVirtualChassis(ctx, "t", 7, domain.VirtualChassisWrite{Name: "A"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdateVirtualChassis = (%v, %v)", v, err)
+	}
+	if err := repo.DeleteVirtualChassis(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteVirtualChassis = %v", err)
+	}
+	if r, err := repo.ListPowerPanels(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListPowerPanels", r.Count, err)
+	}
+	if v, err := repo.CreatePowerPanel(ctx, "t", domain.PowerPanelWrite{Name: "A"}); err != nil || v.Name != "A" {
+		t.Errorf("CreatePowerPanel = (%v, %v)", v, err)
+	}
+	if v, err := repo.UpdatePowerPanel(ctx, "t", 7, domain.PowerPanelWrite{Name: "A"}); err != nil || v.ID != 7 {
+		t.Errorf("UpdatePowerPanel = (%v, %v)", v, err)
+	}
+	if err := repo.DeletePowerPanel(ctx, "t", 3); err != nil {
+		t.Errorf("DeletePowerPanel = %v", err)
+	}
+	if r, err := repo.ListInventoryItemRoles(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListInventoryItemRoles", r.Count, err)
+	}
+	inv, err := repo.CreateInventoryItemRole(ctx, "t", domain.InventoryItemRoleWrite{Name: "A"})
+	if err != nil || inv.Name != "A" {
+		t.Errorf("CreateInventoryItemRole = (%v, %v)", inv, err)
+	}
+	inv, err = repo.UpdateInventoryItemRole(ctx, "t", 7, domain.InventoryItemRoleWrite{Name: "A"})
+	if err != nil || inv.ID != 7 {
+		t.Errorf("UpdateInventoryItemRole = (%v, %v)", inv, err)
+	}
+	if err := repo.DeleteInventoryItemRole(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteInventoryItemRole = %v", err)
 	}
 }

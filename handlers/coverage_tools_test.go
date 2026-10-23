@@ -154,6 +154,134 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 				return res, err
 			},
 		},
+		{
+			name: "update_site_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateSiteGroupHandler(nil)(ctx, nil, SiteGroupUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_site_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteSiteGroupHandler(nil)(ctx, nil, SiteGroupDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_rack_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateRackGroupHandler(nil)(ctx, nil, RackGroupUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_rack_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteRackGroupHandler(nil)(ctx, nil, RackGroupDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_rack_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateRackRoleHandler(nil)(ctx, nil, RackRoleUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_rack_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteRackRoleHandler(nil)(ctx, nil, RackRoleDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_device_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateDeviceRoleHandler(nil)(ctx, nil, DeviceRoleUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_device_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteDeviceRoleHandler(nil)(ctx, nil, DeviceRoleDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_platform",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdatePlatformHandler(nil)(ctx, nil, PlatformUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_platform",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeletePlatformHandler(nil)(ctx, nil, PlatformDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_virtual_chassis",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateVirtualChassisHandler(nil)(ctx, nil, VirtualChassisUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_virtual_chassis",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteVirtualChassisHandler(nil)(ctx, nil, VirtualChassisDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_power_panel",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdatePowerPanelHandler(nil)(ctx, nil, PowerPanelUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_power_panel",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeletePowerPanelHandler(nil)(ctx, nil, PowerPanelDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_inventory_item_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateInventoryItemRoleHandler(nil)(ctx, nil, InventoryItemRoleUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_inventory_item_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteInventoryItemRoleHandler(nil)(ctx, nil, InventoryItemRoleDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
 	}
 
 	for _, tc := range cases {

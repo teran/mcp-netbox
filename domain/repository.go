@@ -160,4 +160,52 @@ type NetworkRepository interface {
 	CreateContact(ctx context.Context, token string, in ContactWrite) (*Contact, error)
 	UpdateContact(ctx context.Context, token string, id int, in ContactWrite) (*Contact, error)
 	DeleteContact(ctx context.Context, token string, id int) error
+
+	ListSiteGroups(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[SiteGroup], error)
+	CreateSiteGroup(ctx context.Context, token string, in SiteGroupWrite) (*SiteGroup, error)
+	UpdateSiteGroup(ctx context.Context, token string, id int, in SiteGroupWrite) (*SiteGroup, error)
+	DeleteSiteGroup(ctx context.Context, token string, id int) error
+
+	ListRackGroups(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[RackGroup], error)
+	CreateRackGroup(ctx context.Context, token string, in RackGroupWrite) (*RackGroup, error)
+	UpdateRackGroup(ctx context.Context, token string, id int, in RackGroupWrite) (*RackGroup, error)
+	DeleteRackGroup(ctx context.Context, token string, id int) error
+
+	ListRackRoles(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[RackRole], error)
+	CreateRackRole(ctx context.Context, token string, in RackRoleWrite) (*RackRole, error)
+	UpdateRackRole(ctx context.Context, token string, id int, in RackRoleWrite) (*RackRole, error)
+	DeleteRackRole(ctx context.Context, token string, id int) error
+
+	ListDeviceRoles(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[DeviceRole], error)
+	CreateDeviceRole(ctx context.Context, token string, in DeviceRoleWrite) (*DeviceRole, error)
+	UpdateDeviceRole(ctx context.Context, token string, id int, in DeviceRoleWrite) (*DeviceRole, error)
+	DeleteDeviceRole(ctx context.Context, token string, id int) error
+
+	ListPlatforms(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[Platform], error)
+	CreatePlatform(ctx context.Context, token string, in PlatformWrite) (*Platform, error)
+	UpdatePlatform(ctx context.Context, token string, id int, in PlatformWrite) (*Platform, error)
+	DeletePlatform(ctx context.Context, token string, id int) error
+
+	ListVirtualChassis(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[VirtualChassis], error)
+	CreateVirtualChassis(ctx context.Context, token string, in VirtualChassisWrite) (*VirtualChassis, error)
+	UpdateVirtualChassis(ctx context.Context, token string, id int, in VirtualChassisWrite) (*VirtualChassis, error)
+	DeleteVirtualChassis(ctx context.Context, token string, id int) error
+
+	ListPowerPanels(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[PowerPanel], error)
+	CreatePowerPanel(ctx context.Context, token string, in PowerPanelWrite) (*PowerPanel, error)
+	UpdatePowerPanel(ctx context.Context, token string, id int, in PowerPanelWrite) (*PowerPanel, error)
+	DeletePowerPanel(ctx context.Context, token string, id int) error
+
+	ListInventoryItemRoles(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[InventoryItemRole], error)
+	CreateInventoryItemRole(
+		ctx context.Context, token string, in InventoryItemRoleWrite,
+	) (*InventoryItemRole, error)
+	UpdateInventoryItemRole(
+		ctx context.Context, token string, id int, in InventoryItemRoleWrite,
+	) (*InventoryItemRole, error)
+	DeleteInventoryItemRole(ctx context.Context, token string, id int) error
 }

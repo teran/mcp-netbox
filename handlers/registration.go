@@ -422,6 +422,150 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 		),
 	)
 
+	registerTool(
+		server,
+		toolDefIndex()["get_site_groups"],
+		metrics,
+		"get_site_groups",
+		WrapToolHandler[SiteGroupsInput, PaginatedOutput[domain.SiteGroup]](
+			metrics,
+			"get_site_groups",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in SiteGroupsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.SiteGroup], error) {
+				return NewGetSiteGroupsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_rack_groups"],
+		metrics,
+		"get_rack_groups",
+		WrapToolHandler[RackGroupsInput, PaginatedOutput[domain.RackGroup]](
+			metrics,
+			"get_rack_groups",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackGroupsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.RackGroup], error) {
+				return NewGetRackGroupsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_rack_roles"],
+		metrics,
+		"get_rack_roles",
+		WrapToolHandler[RackRolesInput, PaginatedOutput[domain.RackRole]](
+			metrics,
+			"get_rack_roles",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackRolesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.RackRole], error) {
+				return NewGetRackRolesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_device_roles"],
+		metrics,
+		"get_device_roles",
+		WrapToolHandler[DeviceRolesInput, PaginatedOutput[domain.DeviceRole]](
+			metrics,
+			"get_device_roles",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in DeviceRolesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.DeviceRole], error) {
+				return NewGetDeviceRolesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_platforms"],
+		metrics,
+		"get_platforms",
+		WrapToolHandler[PlatformsInput, PaginatedOutput[domain.Platform]](
+			metrics,
+			"get_platforms",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PlatformsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.Platform], error) {
+				return NewGetPlatformsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_virtual_chassis"],
+		metrics,
+		"get_virtual_chassis",
+		WrapToolHandler[VirtualChassisInput, PaginatedOutput[domain.VirtualChassis]](
+			metrics,
+			"get_virtual_chassis",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualChassisInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.VirtualChassis], error) {
+				return NewGetVirtualChassisHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_power_panels"],
+		metrics,
+		"get_power_panels",
+		WrapToolHandler[PowerPanelsInput, PaginatedOutput[domain.PowerPanel]](
+			metrics,
+			"get_power_panels",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerPanelsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.PowerPanel], error) {
+				return NewGetPowerPanelsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_inventory_item_roles"],
+		metrics,
+		"get_inventory_item_roles",
+		WrapToolHandler[InventoryItemRolesInput, PaginatedOutput[domain.InventoryItemRole]](
+			metrics,
+			"get_inventory_item_roles",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in InventoryItemRolesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.InventoryItemRole], error) {
+				return NewGetInventoryItemRolesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
 	registerWriteTool(
 		server,
 		toolDefIndex()["create_site"],
@@ -1876,6 +2020,438 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 				in ContactDeleteInput,
 			) (*mcp.CallToolResult, struct{}, error) {
 				return NewDeleteContactHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_site_group"],
+		metrics,
+		"create_site_group",
+		WrapToolHandler[SiteGroupCreateInput, SiteGroupOutput](
+			metrics,
+			"create_site_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in SiteGroupCreateInput,
+			) (*mcp.CallToolResult, SiteGroupOutput, error) {
+				return NewCreateSiteGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_site_group"],
+		metrics,
+		"update_site_group",
+		WrapToolHandler[SiteGroupUpdateInput, SiteGroupOutput](
+			metrics,
+			"update_site_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in SiteGroupUpdateInput,
+			) (*mcp.CallToolResult, SiteGroupOutput, error) {
+				return NewUpdateSiteGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_site_group"],
+		metrics,
+		"delete_site_group",
+		WrapToolHandler[SiteGroupDeleteInput, struct{}](
+			metrics,
+			"delete_site_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in SiteGroupDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteSiteGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_rack_group"],
+		metrics,
+		"create_rack_group",
+		WrapToolHandler[RackGroupCreateInput, RackGroupOutput](
+			metrics,
+			"create_rack_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackGroupCreateInput,
+			) (*mcp.CallToolResult, RackGroupOutput, error) {
+				return NewCreateRackGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_rack_group"],
+		metrics,
+		"update_rack_group",
+		WrapToolHandler[RackGroupUpdateInput, RackGroupOutput](
+			metrics,
+			"update_rack_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackGroupUpdateInput,
+			) (*mcp.CallToolResult, RackGroupOutput, error) {
+				return NewUpdateRackGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_rack_group"],
+		metrics,
+		"delete_rack_group",
+		WrapToolHandler[RackGroupDeleteInput, struct{}](
+			metrics,
+			"delete_rack_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackGroupDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteRackGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_rack_role"],
+		metrics,
+		"create_rack_role",
+		WrapToolHandler[RackRoleCreateInput, RackRoleOutput](
+			metrics,
+			"create_rack_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackRoleCreateInput,
+			) (*mcp.CallToolResult, RackRoleOutput, error) {
+				return NewCreateRackRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_rack_role"],
+		metrics,
+		"update_rack_role",
+		WrapToolHandler[RackRoleUpdateInput, RackRoleOutput](
+			metrics,
+			"update_rack_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackRoleUpdateInput,
+			) (*mcp.CallToolResult, RackRoleOutput, error) {
+				return NewUpdateRackRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_rack_role"],
+		metrics,
+		"delete_rack_role",
+		WrapToolHandler[RackRoleDeleteInput, struct{}](
+			metrics,
+			"delete_rack_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackRoleDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteRackRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_device_role"],
+		metrics,
+		"create_device_role",
+		WrapToolHandler[DeviceRoleCreateInput, DeviceRoleOutput](
+			metrics,
+			"create_device_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in DeviceRoleCreateInput,
+			) (*mcp.CallToolResult, DeviceRoleOutput, error) {
+				return NewCreateDeviceRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_device_role"],
+		metrics,
+		"update_device_role",
+		WrapToolHandler[DeviceRoleUpdateInput, DeviceRoleOutput](
+			metrics,
+			"update_device_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in DeviceRoleUpdateInput,
+			) (*mcp.CallToolResult, DeviceRoleOutput, error) {
+				return NewUpdateDeviceRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_device_role"],
+		metrics,
+		"delete_device_role",
+		WrapToolHandler[DeviceRoleDeleteInput, struct{}](
+			metrics,
+			"delete_device_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in DeviceRoleDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteDeviceRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_platform"],
+		metrics,
+		"create_platform",
+		WrapToolHandler[PlatformCreateInput, PlatformOutput](
+			metrics,
+			"create_platform",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PlatformCreateInput,
+			) (*mcp.CallToolResult, PlatformOutput, error) {
+				return NewCreatePlatformHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_platform"],
+		metrics,
+		"update_platform",
+		WrapToolHandler[PlatformUpdateInput, PlatformOutput](
+			metrics,
+			"update_platform",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PlatformUpdateInput,
+			) (*mcp.CallToolResult, PlatformOutput, error) {
+				return NewUpdatePlatformHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_platform"],
+		metrics,
+		"delete_platform",
+		WrapToolHandler[PlatformDeleteInput, struct{}](
+			metrics,
+			"delete_platform",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PlatformDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeletePlatformHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_virtual_chassis"],
+		metrics,
+		"create_virtual_chassis",
+		WrapToolHandler[VirtualChassisCreateInput, VirtualChassisOutput](
+			metrics,
+			"create_virtual_chassis",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualChassisCreateInput,
+			) (*mcp.CallToolResult, VirtualChassisOutput, error) {
+				return NewCreateVirtualChassisHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_virtual_chassis"],
+		metrics,
+		"update_virtual_chassis",
+		WrapToolHandler[VirtualChassisUpdateInput, VirtualChassisOutput](
+			metrics,
+			"update_virtual_chassis",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualChassisUpdateInput,
+			) (*mcp.CallToolResult, VirtualChassisOutput, error) {
+				return NewUpdateVirtualChassisHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_virtual_chassis"],
+		metrics,
+		"delete_virtual_chassis",
+		WrapToolHandler[VirtualChassisDeleteInput, struct{}](
+			metrics,
+			"delete_virtual_chassis",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualChassisDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteVirtualChassisHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_power_panel"],
+		metrics,
+		"create_power_panel",
+		WrapToolHandler[PowerPanelCreateInput, PowerPanelOutput](
+			metrics,
+			"create_power_panel",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerPanelCreateInput,
+			) (*mcp.CallToolResult, PowerPanelOutput, error) {
+				return NewCreatePowerPanelHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_power_panel"],
+		metrics,
+		"update_power_panel",
+		WrapToolHandler[PowerPanelUpdateInput, PowerPanelOutput](
+			metrics,
+			"update_power_panel",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerPanelUpdateInput,
+			) (*mcp.CallToolResult, PowerPanelOutput, error) {
+				return NewUpdatePowerPanelHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_power_panel"],
+		metrics,
+		"delete_power_panel",
+		WrapToolHandler[PowerPanelDeleteInput, struct{}](
+			metrics,
+			"delete_power_panel",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerPanelDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeletePowerPanelHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_inventory_item_role"],
+		metrics,
+		"create_inventory_item_role",
+		WrapToolHandler[InventoryItemRoleCreateInput, InventoryItemRoleOutput](
+			metrics,
+			"create_inventory_item_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in InventoryItemRoleCreateInput,
+			) (*mcp.CallToolResult, InventoryItemRoleOutput, error) {
+				return NewCreateInventoryItemRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_inventory_item_role"],
+		metrics,
+		"update_inventory_item_role",
+		WrapToolHandler[InventoryItemRoleUpdateInput, InventoryItemRoleOutput](
+			metrics,
+			"update_inventory_item_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in InventoryItemRoleUpdateInput,
+			) (*mcp.CallToolResult, InventoryItemRoleOutput, error) {
+				return NewUpdateInventoryItemRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_inventory_item_role"],
+		metrics,
+		"delete_inventory_item_role",
+		WrapToolHandler[InventoryItemRoleDeleteInput, struct{}](
+			metrics,
+			"delete_inventory_item_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in InventoryItemRoleDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteInventoryItemRoleHandler(svc)(ctx, req, in)
 			},
 		),
 	)

@@ -57,6 +57,14 @@ var objectTypeToEndpoint = map[string]string{
 	"interface":           "/api/dcim/interfaces/",
 	"vm_interface":        "/api/virtualization/interfaces/",
 	"circuit_termination": "/api/circuits/circuit-terminations/",
+	"site_group":          "/api/dcim/site-groups/",
+	"rack_group":          "/api/dcim/rack-groups/",
+	"rack_role":           "/api/dcim/rack-roles/",
+	"device_role":         "/api/dcim/device-roles/",
+	"platform":            "/api/dcim/platforms/",
+	"virtual_chassis":     "/api/dcim/virtual-chassis/",
+	"power_panel":         "/api/dcim/power-panels/",
+	"inventory_item_role": "/api/dcim/inventory-item-roles/",
 }
 
 // maxBodySize is the maximum response body size accepted from NetBox. Larger
@@ -533,6 +541,134 @@ func (c *Client) ListVMInterfaces(ctx context.Context, token string, params map[
 	}
 
 	return convertPaginated(&wireResp, wireVMInterfaceToDomain), nil
+}
+
+// ListSiteGroups returns a paginated list of site groups.
+func (c *Client) ListSiteGroups(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.SiteGroup], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/site-groups/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireSiteGroup]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal site groups: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireSiteGroupToDomain), nil
+}
+
+// ListRackGroups returns a paginated list of rack groups.
+func (c *Client) ListRackGroups(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.RackGroup], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/rack-groups/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireRackGroup]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rack groups: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireRackGroupToDomain), nil
+}
+
+// ListRackRoles returns a paginated list of rack roles.
+func (c *Client) ListRackRoles(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.RackRole], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/rack-roles/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireRackRole]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rack roles: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireRackRoleToDomain), nil
+}
+
+// ListDeviceRoles returns a paginated list of device roles.
+func (c *Client) ListDeviceRoles(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.DeviceRole], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/device-roles/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireDeviceRole]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal device roles: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireDeviceRoleToDomain), nil
+}
+
+// ListPlatforms returns a paginated list of platforms.
+func (c *Client) ListPlatforms(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.Platform], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/platforms/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WirePlatform]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal platforms: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wirePlatformToDomain), nil
+}
+
+// ListVirtualChassis returns a paginated list of virtual chassis.
+func (c *Client) ListVirtualChassis(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.VirtualChassis], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/virtual-chassis/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireVirtualChassis]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual chassis: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireVirtualChassisToDomain), nil
+}
+
+// ListPowerPanels returns a paginated list of power panels.
+func (c *Client) ListPowerPanels(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.PowerPanel], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/power-panels/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WirePowerPanel]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power panels: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wirePowerPanelToDomain), nil
+}
+
+// ListInventoryItemRoles returns a paginated list of inventory item roles.
+func (c *Client) ListInventoryItemRoles(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.InventoryItemRole], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/inventory-item-roles/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireInventoryItemRole]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal inventory item roles: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireInventoryItemRoleToDomain), nil
 }
 
 // GetObject retrieves a single object by its type and ID.
@@ -1733,6 +1869,365 @@ func (c *Client) UpdateContact(ctx context.Context, token string, objectID int, 
 // DeleteContact deletes a tenancy contact via DELETE /api/tenancy/contacts/<id>/.
 func (c *Client) DeleteContact(ctx context.Context, token string, objectID int) error {
 	path := fmt.Sprintf("/api/tenancy/contacts/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateSiteGroup creates a new site group via POST /api/dcim/site-groups/.
+func (c *Client) CreateSiteGroup(ctx context.Context, token string, in domain.SiteGroupWrite) (
+	*domain.SiteGroup, error,
+) {
+	payload, err := json.Marshal(siteGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal site group create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/site-groups/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalSiteGroup(raw)
+}
+
+// UpdateSiteGroup partially updates a site group via PATCH
+// /api/dcim/site-groups/<id>/.
+func (c *Client) UpdateSiteGroup(ctx context.Context, token string, objectID int, in domain.SiteGroupWrite) (
+	*domain.SiteGroup, error,
+) {
+	payload, err := json.Marshal(siteGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal site group update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/site-groups/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalSiteGroup(raw)
+}
+
+// DeleteSiteGroup deletes a site group via DELETE /api/dcim/site-groups/<id>/.
+func (c *Client) DeleteSiteGroup(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/site-groups/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateRackGroup creates a new rack group via POST /api/dcim/rack-groups/.
+func (c *Client) CreateRackGroup(ctx context.Context, token string, in domain.RackGroupWrite) (
+	*domain.RackGroup, error,
+) {
+	payload, err := json.Marshal(rackGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rack group create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/rack-groups/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRackGroup(raw)
+}
+
+// UpdateRackGroup partially updates a rack group via PATCH
+// /api/dcim/rack-groups/<id>/.
+func (c *Client) UpdateRackGroup(ctx context.Context, token string, objectID int, in domain.RackGroupWrite) (
+	*domain.RackGroup, error,
+) {
+	payload, err := json.Marshal(rackGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rack group update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/rack-groups/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRackGroup(raw)
+}
+
+// DeleteRackGroup deletes a rack group via DELETE /api/dcim/rack-groups/<id>/.
+func (c *Client) DeleteRackGroup(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/rack-groups/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateRackRole creates a new rack role via POST /api/dcim/rack-roles/.
+func (c *Client) CreateRackRole(ctx context.Context, token string, in domain.RackRoleWrite) (*domain.RackRole, error) {
+	payload, err := json.Marshal(rackRoleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rack role create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/rack-roles/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRackRole(raw)
+}
+
+// UpdateRackRole partially updates a rack role via PATCH
+// /api/dcim/rack-roles/<id>/.
+func (c *Client) UpdateRackRole(ctx context.Context, token string, objectID int, in domain.RackRoleWrite) (
+	*domain.RackRole, error,
+) {
+	payload, err := json.Marshal(rackRoleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rack role update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/rack-roles/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRackRole(raw)
+}
+
+// DeleteRackRole deletes a rack role via DELETE /api/dcim/rack-roles/<id>/.
+func (c *Client) DeleteRackRole(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/rack-roles/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateDeviceRole creates a new device role via POST /api/dcim/device-roles/.
+func (c *Client) CreateDeviceRole(ctx context.Context, token string, in domain.DeviceRoleWrite) (
+	*domain.DeviceRole, error,
+) {
+	payload, err := json.Marshal(deviceRoleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal device role create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/device-roles/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalDeviceRole(raw)
+}
+
+// UpdateDeviceRole partially updates a device role via PATCH
+// /api/dcim/device-roles/<id>/.
+func (c *Client) UpdateDeviceRole(ctx context.Context, token string, objectID int, in domain.DeviceRoleWrite) (
+	*domain.DeviceRole, error,
+) {
+	payload, err := json.Marshal(deviceRoleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal device role update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/device-roles/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalDeviceRole(raw)
+}
+
+// DeleteDeviceRole deletes a device role via DELETE /api/dcim/device-roles/<id>/.
+func (c *Client) DeleteDeviceRole(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/device-roles/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreatePlatform creates a new platform via POST /api/dcim/platforms/.
+func (c *Client) CreatePlatform(ctx context.Context, token string, in domain.PlatformWrite) (*domain.Platform, error) {
+	payload, err := json.Marshal(platformWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal platform create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/platforms/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPlatform(raw)
+}
+
+// UpdatePlatform partially updates a platform via PATCH /api/dcim/platforms/<id>/.
+func (c *Client) UpdatePlatform(ctx context.Context, token string, objectID int, in domain.PlatformWrite) (
+	*domain.Platform, error,
+) {
+	payload, err := json.Marshal(platformWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal platform update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/platforms/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPlatform(raw)
+}
+
+// DeletePlatform deletes a platform via DELETE /api/dcim/platforms/<id>/.
+func (c *Client) DeletePlatform(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/platforms/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateVirtualChassis creates a new virtual chassis via POST
+// /api/dcim/virtual-chassis/.
+func (c *Client) CreateVirtualChassis(
+	ctx context.Context, token string, in domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	payload, err := json.Marshal(virtualChassisWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual chassis create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/virtual-chassis/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualChassis(raw)
+}
+
+// UpdateVirtualChassis partially updates a virtual chassis via PATCH
+// /api/dcim/virtual-chassis/<id>/.
+func (c *Client) UpdateVirtualChassis(
+	ctx context.Context, token string, objectID int, in domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	payload, err := json.Marshal(virtualChassisWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual chassis update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/virtual-chassis/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualChassis(raw)
+}
+
+// DeleteVirtualChassis deletes a virtual chassis via DELETE
+// /api/dcim/virtual-chassis/<id>/.
+func (c *Client) DeleteVirtualChassis(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/virtual-chassis/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreatePowerPanel creates a new power panel via POST /api/dcim/power-panels/.
+func (c *Client) CreatePowerPanel(ctx context.Context, token string, in domain.PowerPanelWrite) (
+	*domain.PowerPanel, error,
+) {
+	payload, err := json.Marshal(powerPanelWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal power panel create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/power-panels/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPowerPanel(raw)
+}
+
+// UpdatePowerPanel partially updates a power panel via PATCH
+// /api/dcim/power-panels/<id>/.
+func (c *Client) UpdatePowerPanel(ctx context.Context, token string, objectID int, in domain.PowerPanelWrite) (
+	*domain.PowerPanel, error,
+) {
+	payload, err := json.Marshal(powerPanelWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal power panel update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/power-panels/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPowerPanel(raw)
+}
+
+// DeletePowerPanel deletes a power panel via DELETE /api/dcim/power-panels/<id>/.
+func (c *Client) DeletePowerPanel(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/power-panels/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateInventoryItemRole creates a new inventory item role via POST
+// /api/dcim/inventory-item-roles/.
+func (c *Client) CreateInventoryItemRole(
+	ctx context.Context, token string, in domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	payload, err := json.Marshal(inventoryItemRoleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal inventory item role create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/inventory-item-roles/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalInventoryItemRole(raw)
+}
+
+// UpdateInventoryItemRole partially updates an inventory item role via PATCH
+// /api/dcim/inventory-item-roles/<id>/.
+func (c *Client) UpdateInventoryItemRole(
+	ctx context.Context, token string, objectID int, in domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	payload, err := json.Marshal(inventoryItemRoleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal inventory item role update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/inventory-item-roles/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalInventoryItemRole(raw)
+}
+
+// DeleteInventoryItemRole deletes an inventory item role via DELETE
+// /api/dcim/inventory-item-roles/<id>/.
+func (c *Client) DeleteInventoryItemRole(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/inventory-item-roles/%d/", objectID)
 	body, err := c.delete(ctx, token, path)
 	_, mErr := writeResult(http.StatusNoContent, body, err)
 
@@ -3158,6 +3653,362 @@ func wireContactToDomain(wire WireContact) domain.Contact {
 		Link:         wire.Link,
 		Description:  wire.Description,
 		Comments:     wire.Comments,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// siteGroupWriteToWire converts a domain site group write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func siteGroupWriteToWire(input domain.SiteGroupWrite) WireSiteGroupWrite {
+	return WireSiteGroupWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalSiteGroup decodes a site group response body into a
+// domain.SiteGroup.
+func unmarshalSiteGroup(raw domain.RawObject) (*domain.SiteGroup, error) {
+	var w WireSiteGroup
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal site group: %w", err)
+	}
+	d := wireSiteGroupToDomain(w)
+
+	return &d, nil
+}
+
+// wireSiteGroupToDomain converts a wire site group to the domain model.
+func wireSiteGroupToDomain(wire WireSiteGroup) domain.SiteGroup {
+	return domain.SiteGroup{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Display:      wire.Display,
+		Parent:       wireNestedToDomain(wire.Parent),
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// rackGroupWriteToWire converts a domain rack group write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func rackGroupWriteToWire(input domain.RackGroupWrite) WireRackGroupWrite {
+	return WireRackGroupWrite{
+		Name:        input.Name,
+		Slug:        input.Slug,
+		Site:        input.Site,
+		Parent:      input.Parent,
+		Description: input.Description,
+		Tags:        input.Tags,
+	}
+}
+
+// unmarshalRackGroup decodes a rack group response body into a
+// domain.RackGroup.
+func unmarshalRackGroup(raw domain.RawObject) (*domain.RackGroup, error) {
+	var w WireRackGroup
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rack group: %w", err)
+	}
+	d := wireRackGroupToDomain(w)
+
+	return &d, nil
+}
+
+// wireRackGroupToDomain converts a wire rack group to the domain model.
+func wireRackGroupToDomain(wire WireRackGroup) domain.RackGroup {
+	return domain.RackGroup{
+		ID:          wire.ID,
+		URL:         wire.URL,
+		Name:        wire.Name,
+		Slug:        wire.Slug,
+		Display:     wire.Display,
+		Site:        wireNestedToDomain(wire.Site),
+		Parent:      wireNestedToDomain(wire.Parent),
+		Description: wire.Description,
+		Tags:        wireTagsToDomain(wire.Tags),
+		Created:     wire.Created,
+		LastUpdated: wire.LastUpdated,
+	}
+}
+
+// rackRoleWriteToWire converts a domain rack role write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func rackRoleWriteToWire(input domain.RackRoleWrite) WireRackRoleWrite {
+	return WireRackRoleWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Color:        input.Color,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalRackRole decodes a rack role response body into a domain.RackRole.
+func unmarshalRackRole(raw domain.RawObject) (*domain.RackRole, error) {
+	var w WireRackRole
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rack role: %w", err)
+	}
+	d := wireRackRoleToDomain(w)
+
+	return &d, nil
+}
+
+// wireRackRoleToDomain converts a wire rack role to the domain model.
+func wireRackRoleToDomain(wire WireRackRole) domain.RackRole {
+	return domain.RackRole{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Color:        wire.Color,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// deviceRoleWriteToWire converts a domain device role write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func deviceRoleWriteToWire(input domain.DeviceRoleWrite) WireDeviceRoleWrite {
+	return WireDeviceRoleWrite{
+		Name:           input.Name,
+		Slug:           input.Slug,
+		Color:          input.Color,
+		VMRole:         input.VMRole,
+		ConfigTemplate: input.ConfigTemplate,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+		Weight:         input.Weight,
+	}
+}
+
+// unmarshalDeviceRole decodes a device role response body into a
+// domain.DeviceRole.
+func unmarshalDeviceRole(raw domain.RawObject) (*domain.DeviceRole, error) {
+	var w WireDeviceRole
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal device role: %w", err)
+	}
+	d := wireDeviceRoleToDomain(w)
+
+	return &d, nil
+}
+
+// wireDeviceRoleToDomain converts a wire device role to the domain model.
+func wireDeviceRoleToDomain(wire WireDeviceRole) domain.DeviceRole {
+	return domain.DeviceRole{
+		ID:             wire.ID,
+		URL:            wire.URL,
+		Name:           wire.Name,
+		Slug:           wire.Slug,
+		Color:          wire.Color,
+		VMRole:         wire.VMRole,
+		ConfigTemplate: wireNestedToDomain(wire.ConfigTemplate),
+		Description:    wire.Description,
+		Tags:           wireTagsToDomain(wire.Tags),
+		CustomFields:   wire.CustomFields,
+		Created:        wire.Created,
+		LastUpdated:    wire.LastUpdated,
+		Weight:         wire.Weight,
+	}
+}
+
+// platformWriteToWire converts a domain platform write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func platformWriteToWire(input domain.PlatformWrite) WirePlatformWrite {
+	return WirePlatformWrite{
+		Name:           input.Name,
+		Slug:           input.Slug,
+		Manufacturer:   input.Manufacturer,
+		ConfigTemplate: input.ConfigTemplate,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+	}
+}
+
+// unmarshalPlatform decodes a platform response body into a domain.Platform.
+func unmarshalPlatform(raw domain.RawObject) (*domain.Platform, error) {
+	var w WirePlatform
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal platform: %w", err)
+	}
+	d := wirePlatformToDomain(w)
+
+	return &d, nil
+}
+
+// wirePlatformToDomain converts a wire platform to the domain model.
+func wirePlatformToDomain(wire WirePlatform) domain.Platform {
+	return domain.Platform{
+		ID:             wire.ID,
+		URL:            wire.URL,
+		Name:           wire.Name,
+		Slug:           wire.Slug,
+		Manufacturer:   wireNestedToDomain(wire.Manufacturer),
+		ConfigTemplate: wireNestedToDomain(wire.ConfigTemplate),
+		Description:    wire.Description,
+		Tags:           wireTagsToDomain(wire.Tags),
+		CustomFields:   wire.CustomFields,
+		Created:        wire.Created,
+		LastUpdated:    wire.LastUpdated,
+	}
+}
+
+// virtualChassisWriteToWire converts a domain virtual chassis write DTO to the
+// wire request model. The fields map one-to-one; nil pointers on the domain
+// side remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func virtualChassisWriteToWire(input domain.VirtualChassisWrite) WireVirtualChassisWrite {
+	return WireVirtualChassisWrite{
+		Name:         input.Name,
+		Domain:       input.Domain,
+		Master:       input.Master,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalVirtualChassis decodes a virtual chassis response body into a
+// domain.VirtualChassis.
+func unmarshalVirtualChassis(raw domain.RawObject) (*domain.VirtualChassis, error) {
+	var w WireVirtualChassis
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual chassis: %w", err)
+	}
+	d := wireVirtualChassisToDomain(w)
+
+	return &d, nil
+}
+
+// wireVirtualChassisToDomain converts a wire virtual chassis to the domain
+// model.
+func wireVirtualChassisToDomain(wire WireVirtualChassis) domain.VirtualChassis {
+	return domain.VirtualChassis{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Domain:       wire.Domain,
+		Master:       wireNestedToDomain(wire.Master),
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+		MemberCount:  wire.MemberCount,
+	}
+}
+
+// powerPanelWriteToWire converts a domain power panel write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func powerPanelWriteToWire(input domain.PowerPanelWrite) WirePowerPanelWrite {
+	return WirePowerPanelWrite{
+		Site:         input.Site,
+		Location:     input.Location,
+		Name:         input.Name,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalPowerPanel decodes a power panel response body into a
+// domain.PowerPanel.
+func unmarshalPowerPanel(raw domain.RawObject) (*domain.PowerPanel, error) {
+	var w WirePowerPanel
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power panel: %w", err)
+	}
+	d := wirePowerPanelToDomain(w)
+
+	return &d, nil
+}
+
+// wirePowerPanelToDomain converts a wire power panel to the domain model.
+func wirePowerPanelToDomain(wire WirePowerPanel) domain.PowerPanel {
+	return domain.PowerPanel{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Display:      wire.Display,
+		Site:         wireNestedToDomain(wire.Site),
+		Location:     wireNestedToDomain(wire.Location),
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// inventoryItemRoleWriteToWire converts a domain inventory item role write DTO
+// to the wire request model. The fields map one-to-one; nil pointers on the
+// domain side remain nil on the wire side so json.Marshal omits them (required
+// for a partial PATCH body).
+func inventoryItemRoleWriteToWire(input domain.InventoryItemRoleWrite) WireInventoryItemRoleWrite {
+	return WireInventoryItemRoleWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Color:        input.Color,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalInventoryItemRole decodes an inventory item role response body into
+// a domain.InventoryItemRole.
+func unmarshalInventoryItemRole(raw domain.RawObject) (*domain.InventoryItemRole, error) {
+	var w WireInventoryItemRole
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal inventory item role: %w", err)
+	}
+	d := wireInventoryItemRoleToDomain(w)
+
+	return &d, nil
+}
+
+// wireInventoryItemRoleToDomain converts a wire inventory item role to the
+// domain model.
+func wireInventoryItemRoleToDomain(wire WireInventoryItemRole) domain.InventoryItemRole {
+	return domain.InventoryItemRole{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Color:        wire.Color,
+		Description:  wire.Description,
 		Tags:         wireTagsToDomain(wire.Tags),
 		CustomFields: wire.CustomFields,
 		Created:      wire.Created,

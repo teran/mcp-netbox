@@ -248,6 +248,94 @@ type MockRepo struct {
 		ctx context.Context, token string, id int, in domain.ContactWrite,
 	) (*domain.Contact, error)
 	DeleteContactFunc func(ctx context.Context, token string, id int) error
+
+	ListSiteGroupsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.SiteGroup], error)
+	CreateSiteGroupFunc func(
+		ctx context.Context, token string, in domain.SiteGroupWrite,
+	) (*domain.SiteGroup, error)
+	UpdateSiteGroupFunc func(
+		ctx context.Context, token string, id int, in domain.SiteGroupWrite,
+	) (*domain.SiteGroup, error)
+	DeleteSiteGroupFunc func(ctx context.Context, token string, id int) error
+
+	ListRackGroupsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.RackGroup], error)
+	CreateRackGroupFunc func(
+		ctx context.Context, token string, in domain.RackGroupWrite,
+	) (*domain.RackGroup, error)
+	UpdateRackGroupFunc func(
+		ctx context.Context, token string, id int, in domain.RackGroupWrite,
+	) (*domain.RackGroup, error)
+	DeleteRackGroupFunc func(ctx context.Context, token string, id int) error
+
+	ListRackRolesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.RackRole], error)
+	CreateRackRoleFunc func(
+		ctx context.Context, token string, in domain.RackRoleWrite,
+	) (*domain.RackRole, error)
+	UpdateRackRoleFunc func(
+		ctx context.Context, token string, id int, in domain.RackRoleWrite,
+	) (*domain.RackRole, error)
+	DeleteRackRoleFunc func(ctx context.Context, token string, id int) error
+
+	ListDeviceRolesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.DeviceRole], error)
+	CreateDeviceRoleFunc func(
+		ctx context.Context, token string, in domain.DeviceRoleWrite,
+	) (*domain.DeviceRole, error)
+	UpdateDeviceRoleFunc func(
+		ctx context.Context, token string, id int, in domain.DeviceRoleWrite,
+	) (*domain.DeviceRole, error)
+	DeleteDeviceRoleFunc func(ctx context.Context, token string, id int) error
+
+	ListPlatformsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.Platform], error)
+	CreatePlatformFunc func(
+		ctx context.Context, token string, in domain.PlatformWrite,
+	) (*domain.Platform, error)
+	UpdatePlatformFunc func(
+		ctx context.Context, token string, id int, in domain.PlatformWrite,
+	) (*domain.Platform, error)
+	DeletePlatformFunc func(ctx context.Context, token string, id int) error
+
+	ListVirtualChassisFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.VirtualChassis], error)
+	CreateVirtualChassisFunc func(
+		ctx context.Context, token string, in domain.VirtualChassisWrite,
+	) (*domain.VirtualChassis, error)
+	UpdateVirtualChassisFunc func(
+		ctx context.Context, token string, id int, in domain.VirtualChassisWrite,
+	) (*domain.VirtualChassis, error)
+	DeleteVirtualChassisFunc func(ctx context.Context, token string, id int) error
+
+	ListPowerPanelsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.PowerPanel], error)
+	CreatePowerPanelFunc func(
+		ctx context.Context, token string, in domain.PowerPanelWrite,
+	) (*domain.PowerPanel, error)
+	UpdatePowerPanelFunc func(
+		ctx context.Context, token string, id int, in domain.PowerPanelWrite,
+	) (*domain.PowerPanel, error)
+	DeletePowerPanelFunc func(ctx context.Context, token string, id int) error
+
+	ListInventoryItemRolesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.InventoryItemRole], error)
+	CreateInventoryItemRoleFunc func(
+		ctx context.Context, token string, in domain.InventoryItemRoleWrite,
+	) (*domain.InventoryItemRole, error)
+	UpdateInventoryItemRoleFunc func(
+		ctx context.Context, token string, id int, in domain.InventoryItemRoleWrite,
+	) (*domain.InventoryItemRole, error)
+	DeleteInventoryItemRoleFunc func(ctx context.Context, token string, id int) error
 }
 
 // ListSites delegates to ListSitesFunc.
@@ -873,6 +961,214 @@ func (m *MockRepo) UpdateContact(
 // DeleteContact delegates to DeleteContactFunc.
 func (m *MockRepo) DeleteContact(ctx context.Context, token string, id int) error {
 	return m.DeleteContactFunc(ctx, token, id)
+}
+
+// ListSiteGroups delegates to ListSiteGroupsFunc.
+func (m *MockRepo) ListSiteGroups(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+	return m.ListSiteGroupsFunc(ctx, token, params)
+}
+
+// CreateSiteGroup delegates to CreateSiteGroupFunc.
+func (m *MockRepo) CreateSiteGroup(
+	ctx context.Context, token string, in domain.SiteGroupWrite,
+) (*domain.SiteGroup, error) {
+	return m.CreateSiteGroupFunc(ctx, token, in)
+}
+
+// UpdateSiteGroup delegates to UpdateSiteGroupFunc.
+func (m *MockRepo) UpdateSiteGroup(
+	ctx context.Context, token string, id int, in domain.SiteGroupWrite,
+) (*domain.SiteGroup, error) {
+	return m.UpdateSiteGroupFunc(ctx, token, id, in)
+}
+
+// DeleteSiteGroup delegates to DeleteSiteGroupFunc.
+func (m *MockRepo) DeleteSiteGroup(ctx context.Context, token string, id int) error {
+	return m.DeleteSiteGroupFunc(ctx, token, id)
+}
+
+// ListRackGroups delegates to ListRackGroupsFunc.
+func (m *MockRepo) ListRackGroups(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.RackGroup], error) {
+	return m.ListRackGroupsFunc(ctx, token, params)
+}
+
+// CreateRackGroup delegates to CreateRackGroupFunc.
+func (m *MockRepo) CreateRackGroup(
+	ctx context.Context, token string, in domain.RackGroupWrite,
+) (*domain.RackGroup, error) {
+	return m.CreateRackGroupFunc(ctx, token, in)
+}
+
+// UpdateRackGroup delegates to UpdateRackGroupFunc.
+func (m *MockRepo) UpdateRackGroup(
+	ctx context.Context, token string, id int, in domain.RackGroupWrite,
+) (*domain.RackGroup, error) {
+	return m.UpdateRackGroupFunc(ctx, token, id, in)
+}
+
+// DeleteRackGroup delegates to DeleteRackGroupFunc.
+func (m *MockRepo) DeleteRackGroup(ctx context.Context, token string, id int) error {
+	return m.DeleteRackGroupFunc(ctx, token, id)
+}
+
+// ListRackRoles delegates to ListRackRolesFunc.
+func (m *MockRepo) ListRackRoles(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.RackRole], error) {
+	return m.ListRackRolesFunc(ctx, token, params)
+}
+
+// CreateRackRole delegates to CreateRackRoleFunc.
+func (m *MockRepo) CreateRackRole(
+	ctx context.Context, token string, in domain.RackRoleWrite,
+) (*domain.RackRole, error) {
+	return m.CreateRackRoleFunc(ctx, token, in)
+}
+
+// UpdateRackRole delegates to UpdateRackRoleFunc.
+func (m *MockRepo) UpdateRackRole(
+	ctx context.Context, token string, id int, in domain.RackRoleWrite,
+) (*domain.RackRole, error) {
+	return m.UpdateRackRoleFunc(ctx, token, id, in)
+}
+
+// DeleteRackRole delegates to DeleteRackRoleFunc.
+func (m *MockRepo) DeleteRackRole(ctx context.Context, token string, id int) error {
+	return m.DeleteRackRoleFunc(ctx, token, id)
+}
+
+// ListDeviceRoles delegates to ListDeviceRolesFunc.
+func (m *MockRepo) ListDeviceRoles(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+	return m.ListDeviceRolesFunc(ctx, token, params)
+}
+
+// CreateDeviceRole delegates to CreateDeviceRoleFunc.
+func (m *MockRepo) CreateDeviceRole(
+	ctx context.Context, token string, in domain.DeviceRoleWrite,
+) (*domain.DeviceRole, error) {
+	return m.CreateDeviceRoleFunc(ctx, token, in)
+}
+
+// UpdateDeviceRole delegates to UpdateDeviceRoleFunc.
+func (m *MockRepo) UpdateDeviceRole(
+	ctx context.Context, token string, id int, in domain.DeviceRoleWrite,
+) (*domain.DeviceRole, error) {
+	return m.UpdateDeviceRoleFunc(ctx, token, id, in)
+}
+
+// DeleteDeviceRole delegates to DeleteDeviceRoleFunc.
+func (m *MockRepo) DeleteDeviceRole(ctx context.Context, token string, id int) error {
+	return m.DeleteDeviceRoleFunc(ctx, token, id)
+}
+
+// ListPlatforms delegates to ListPlatformsFunc.
+func (m *MockRepo) ListPlatforms(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.Platform], error) {
+	return m.ListPlatformsFunc(ctx, token, params)
+}
+
+// CreatePlatform delegates to CreatePlatformFunc.
+func (m *MockRepo) CreatePlatform(
+	ctx context.Context, token string, in domain.PlatformWrite,
+) (*domain.Platform, error) {
+	return m.CreatePlatformFunc(ctx, token, in)
+}
+
+// UpdatePlatform delegates to UpdatePlatformFunc.
+func (m *MockRepo) UpdatePlatform(
+	ctx context.Context, token string, id int, in domain.PlatformWrite,
+) (*domain.Platform, error) {
+	return m.UpdatePlatformFunc(ctx, token, id, in)
+}
+
+// DeletePlatform delegates to DeletePlatformFunc.
+func (m *MockRepo) DeletePlatform(ctx context.Context, token string, id int) error {
+	return m.DeletePlatformFunc(ctx, token, id)
+}
+
+// ListVirtualChassis delegates to ListVirtualChassisFunc.
+func (m *MockRepo) ListVirtualChassis(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+	return m.ListVirtualChassisFunc(ctx, token, params)
+}
+
+// CreateVirtualChassis delegates to CreateVirtualChassisFunc.
+func (m *MockRepo) CreateVirtualChassis(
+	ctx context.Context, token string, in domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	return m.CreateVirtualChassisFunc(ctx, token, in)
+}
+
+// UpdateVirtualChassis delegates to UpdateVirtualChassisFunc.
+func (m *MockRepo) UpdateVirtualChassis(
+	ctx context.Context, token string, id int, in domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	return m.UpdateVirtualChassisFunc(ctx, token, id, in)
+}
+
+// DeleteVirtualChassis delegates to DeleteVirtualChassisFunc.
+func (m *MockRepo) DeleteVirtualChassis(ctx context.Context, token string, id int) error {
+	return m.DeleteVirtualChassisFunc(ctx, token, id)
+}
+
+// ListPowerPanels delegates to ListPowerPanelsFunc.
+func (m *MockRepo) ListPowerPanels(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+	return m.ListPowerPanelsFunc(ctx, token, params)
+}
+
+// CreatePowerPanel delegates to CreatePowerPanelFunc.
+func (m *MockRepo) CreatePowerPanel(
+	ctx context.Context, token string, in domain.PowerPanelWrite,
+) (*domain.PowerPanel, error) {
+	return m.CreatePowerPanelFunc(ctx, token, in)
+}
+
+// UpdatePowerPanel delegates to UpdatePowerPanelFunc.
+func (m *MockRepo) UpdatePowerPanel(
+	ctx context.Context, token string, id int, in domain.PowerPanelWrite,
+) (*domain.PowerPanel, error) {
+	return m.UpdatePowerPanelFunc(ctx, token, id, in)
+}
+
+// DeletePowerPanel delegates to DeletePowerPanelFunc.
+func (m *MockRepo) DeletePowerPanel(ctx context.Context, token string, id int) error {
+	return m.DeletePowerPanelFunc(ctx, token, id)
+}
+
+// ListInventoryItemRoles delegates to ListInventoryItemRolesFunc.
+func (m *MockRepo) ListInventoryItemRoles(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+	return m.ListInventoryItemRolesFunc(ctx, token, params)
+}
+
+// CreateInventoryItemRole delegates to CreateInventoryItemRoleFunc.
+func (m *MockRepo) CreateInventoryItemRole(
+	ctx context.Context, token string, in domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	return m.CreateInventoryItemRoleFunc(ctx, token, in)
+}
+
+// UpdateInventoryItemRole delegates to UpdateInventoryItemRoleFunc.
+func (m *MockRepo) UpdateInventoryItemRole(
+	ctx context.Context, token string, id int, in domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	return m.UpdateInventoryItemRoleFunc(ctx, token, id, in)
+}
+
+// DeleteInventoryItemRole delegates to DeleteInventoryItemRoleFunc.
+func (m *MockRepo) DeleteInventoryItemRole(ctx context.Context, token string, id int) error {
+	return m.DeleteInventoryItemRoleFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -1511,5 +1807,213 @@ func (r *NilRepo) UpdateContact(
 
 // DeleteContact always succeeds.
 func (r *NilRepo) DeleteContact(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListSiteGroups returns an empty site group page.
+func (r *NilRepo) ListSiteGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+	return &domain.PaginatedResponse[domain.SiteGroup]{Count: 0, Results: []domain.SiteGroup{}}, nil
+}
+
+// CreateSiteGroup returns a site group with id 1.
+func (r *NilRepo) CreateSiteGroup(
+	_ context.Context, _ string, in domain.SiteGroupWrite,
+) (*domain.SiteGroup, error) {
+	return &domain.SiteGroup{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateSiteGroup returns the site group with the given id.
+func (r *NilRepo) UpdateSiteGroup(
+	_ context.Context, _ string, id int, in domain.SiteGroupWrite,
+) (*domain.SiteGroup, error) {
+	return &domain.SiteGroup{ID: id, Name: in.Name}, nil
+}
+
+// DeleteSiteGroup always succeeds.
+func (r *NilRepo) DeleteSiteGroup(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListRackGroups returns an empty rack group page.
+func (r *NilRepo) ListRackGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RackGroup], error) {
+	return &domain.PaginatedResponse[domain.RackGroup]{Count: 0, Results: []domain.RackGroup{}}, nil
+}
+
+// CreateRackGroup returns a rack group with id 1.
+func (r *NilRepo) CreateRackGroup(
+	_ context.Context, _ string, in domain.RackGroupWrite,
+) (*domain.RackGroup, error) {
+	return &domain.RackGroup{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateRackGroup returns the rack group with the given id.
+func (r *NilRepo) UpdateRackGroup(
+	_ context.Context, _ string, id int, in domain.RackGroupWrite,
+) (*domain.RackGroup, error) {
+	return &domain.RackGroup{ID: id, Name: in.Name}, nil
+}
+
+// DeleteRackGroup always succeeds.
+func (r *NilRepo) DeleteRackGroup(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListRackRoles returns an empty rack role page.
+func (r *NilRepo) ListRackRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RackRole], error) {
+	return &domain.PaginatedResponse[domain.RackRole]{Count: 0, Results: []domain.RackRole{}}, nil
+}
+
+// CreateRackRole returns a rack role with id 1.
+func (r *NilRepo) CreateRackRole(
+	_ context.Context, _ string, in domain.RackRoleWrite,
+) (*domain.RackRole, error) {
+	return &domain.RackRole{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateRackRole returns the rack role with the given id.
+func (r *NilRepo) UpdateRackRole(
+	_ context.Context, _ string, id int, in domain.RackRoleWrite,
+) (*domain.RackRole, error) {
+	return &domain.RackRole{ID: id, Name: in.Name}, nil
+}
+
+// DeleteRackRole always succeeds.
+func (r *NilRepo) DeleteRackRole(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListDeviceRoles returns an empty device role page.
+func (r *NilRepo) ListDeviceRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+	return &domain.PaginatedResponse[domain.DeviceRole]{Count: 0, Results: []domain.DeviceRole{}}, nil
+}
+
+// CreateDeviceRole returns a device role with id 1.
+func (r *NilRepo) CreateDeviceRole(
+	_ context.Context, _ string, in domain.DeviceRoleWrite,
+) (*domain.DeviceRole, error) {
+	return &domain.DeviceRole{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateDeviceRole returns the device role with the given id.
+func (r *NilRepo) UpdateDeviceRole(
+	_ context.Context, _ string, id int, in domain.DeviceRoleWrite,
+) (*domain.DeviceRole, error) {
+	return &domain.DeviceRole{ID: id, Name: in.Name}, nil
+}
+
+// DeleteDeviceRole always succeeds.
+func (r *NilRepo) DeleteDeviceRole(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListPlatforms returns an empty platform page.
+func (r *NilRepo) ListPlatforms(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Platform], error) {
+	return &domain.PaginatedResponse[domain.Platform]{Count: 0, Results: []domain.Platform{}}, nil
+}
+
+// CreatePlatform returns a platform with id 1.
+func (r *NilRepo) CreatePlatform(
+	_ context.Context, _ string, in domain.PlatformWrite,
+) (*domain.Platform, error) {
+	return &domain.Platform{ID: 1, Name: in.Name}, nil
+}
+
+// UpdatePlatform returns the platform with the given id.
+func (r *NilRepo) UpdatePlatform(
+	_ context.Context, _ string, id int, in domain.PlatformWrite,
+) (*domain.Platform, error) {
+	return &domain.Platform{ID: id, Name: in.Name}, nil
+}
+
+// DeletePlatform always succeeds.
+func (r *NilRepo) DeletePlatform(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListVirtualChassis returns an empty virtual chassis page.
+func (r *NilRepo) ListVirtualChassis(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+	return &domain.PaginatedResponse[domain.VirtualChassis]{Count: 0, Results: []domain.VirtualChassis{}}, nil
+}
+
+// CreateVirtualChassis returns a virtual chassis with id 1.
+func (r *NilRepo) CreateVirtualChassis(
+	_ context.Context, _ string, in domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	return &domain.VirtualChassis{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateVirtualChassis returns the virtual chassis with the given id.
+func (r *NilRepo) UpdateVirtualChassis(
+	_ context.Context, _ string, id int, in domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	return &domain.VirtualChassis{ID: id, Name: in.Name}, nil
+}
+
+// DeleteVirtualChassis always succeeds.
+func (r *NilRepo) DeleteVirtualChassis(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListPowerPanels returns an empty power panel page.
+func (r *NilRepo) ListPowerPanels(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+	return &domain.PaginatedResponse[domain.PowerPanel]{Count: 0, Results: []domain.PowerPanel{}}, nil
+}
+
+// CreatePowerPanel returns a power panel with id 1.
+func (r *NilRepo) CreatePowerPanel(
+	_ context.Context, _ string, in domain.PowerPanelWrite,
+) (*domain.PowerPanel, error) {
+	return &domain.PowerPanel{ID: 1, Name: in.Name}, nil
+}
+
+// UpdatePowerPanel returns the power panel with the given id.
+func (r *NilRepo) UpdatePowerPanel(
+	_ context.Context, _ string, id int, in domain.PowerPanelWrite,
+) (*domain.PowerPanel, error) {
+	return &domain.PowerPanel{ID: id, Name: in.Name}, nil
+}
+
+// DeletePowerPanel always succeeds.
+func (r *NilRepo) DeletePowerPanel(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListInventoryItemRoles returns an empty inventory item role page.
+func (r *NilRepo) ListInventoryItemRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+	return &domain.PaginatedResponse[domain.InventoryItemRole]{Count: 0, Results: []domain.InventoryItemRole{}}, nil
+}
+
+// CreateInventoryItemRole returns an inventory item role with id 1.
+func (r *NilRepo) CreateInventoryItemRole(
+	_ context.Context, _ string, in domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	return &domain.InventoryItemRole{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateInventoryItemRole returns the inventory item role with the given id.
+func (r *NilRepo) UpdateInventoryItemRole(
+	_ context.Context, _ string, id int, in domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	return &domain.InventoryItemRole{ID: id, Name: in.Name}, nil
+}
+
+// DeleteInventoryItemRole always succeeds.
+func (r *NilRepo) DeleteInventoryItemRole(_ context.Context, _ string, _ int) error {
 	return nil
 }

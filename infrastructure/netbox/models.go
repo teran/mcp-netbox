@@ -423,6 +423,106 @@ type WireContactWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireSiteGroupWrite is the wire request model for DCIM site group
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireSiteGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireRackGroupWrite is the wire request model for DCIM rack group
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireRackGroupWrite struct {
+	Name        string   `json:"name,omitempty"`
+	Slug        *string  `json:"slug,omitempty"`
+	Site        *int     `json:"site,omitempty"`
+	Parent      *int     `json:"parent,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+}
+
+// WireRackRoleWrite is the wire request model for DCIM rack role create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields.
+type WireRackRoleWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Color        *string        `json:"color,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireDeviceRoleWrite is the wire request model for DCIM device role
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireDeviceRoleWrite struct {
+	Name           string         `json:"name,omitempty"`
+	Slug           *string        `json:"slug,omitempty"`
+	Color          *string        `json:"color,omitempty"`
+	VMRole         *bool          `json:"vm_role,omitempty"`
+	ConfigTemplate *int           `json:"config_template,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+	Weight         *int           `json:"weight,omitempty"`
+}
+
+// WirePlatformWrite is the wire request model for DCIM platform create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields.
+type WirePlatformWrite struct {
+	Name           string         `json:"name,omitempty"`
+	Slug           *string        `json:"slug,omitempty"`
+	Manufacturer   *int           `json:"manufacturer,omitempty"`
+	ConfigTemplate *int           `json:"config_template,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireVirtualChassisWrite is the wire request model for DCIM virtual chassis
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireVirtualChassisWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Domain       *string        `json:"domain,omitempty"`
+	Master       *int           `json:"master,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WirePowerPanelWrite is the wire request model for DCIM power panel
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WirePowerPanelWrite struct {
+	Site         *int           `json:"site,omitempty"`
+	Location     *int           `json:"location,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireInventoryItemRoleWrite is the wire request model for DCIM inventory item
+// role create/update (POST/PATCH body). Its json tags intentionally mirror
+// NetBox's writable fields.
+type WireInventoryItemRoleWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Color        *string        `json:"color,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // Wire types mirror the NetBox JSON API response objects.
 type (
 	// WireSite mirrors the corresponding NetBox JSON API response object.
@@ -926,6 +1026,128 @@ type (
 		Link         string         `json:"link,omitempty"`
 		Description  string         `json:"description,omitempty"`
 		Comments     string         `json:"comments,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireSiteGroup mirrors the corresponding NetBox JSON API response object.
+	WireSiteGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Parent       *WireNested    `json:"parent"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireRackGroup mirrors the corresponding NetBox JSON API response object.
+	WireRackGroup struct {
+		ID          int         `json:"id"`
+		URL         string      `json:"url"`
+		Name        string      `json:"name"`
+		Slug        string      `json:"slug"`
+		Display     string      `json:"display,omitempty"`
+		Site        *WireNested `json:"site"`
+		Parent      *WireNested `json:"parent"`
+		Description string      `json:"description,omitempty"`
+		Tags        []WireTag   `json:"tags,omitempty"`
+		Created     string      `json:"created"`
+		LastUpdated string      `json:"last_updated"`
+	}
+
+	// WireRackRole mirrors the corresponding NetBox JSON API response object.
+	WireRackRole struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Color        string         `json:"color,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireDeviceRole mirrors the corresponding NetBox JSON API response object.
+	WireDeviceRole struct {
+		ID             int            `json:"id"`
+		URL            string         `json:"url"`
+		Name           string         `json:"name"`
+		Slug           string         `json:"slug"`
+		Color          string         `json:"color,omitempty"`
+		VMRole         bool           `json:"vm_role"`
+		ConfigTemplate *WireNested    `json:"config_template"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []WireTag      `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
+		Weight         int            `json:"weight"`
+	}
+
+	// WirePlatform mirrors the corresponding NetBox JSON API response object.
+	WirePlatform struct {
+		ID             int            `json:"id"`
+		URL            string         `json:"url"`
+		Name           string         `json:"name"`
+		Slug           string         `json:"slug"`
+		Manufacturer   *WireNested    `json:"manufacturer"`
+		ConfigTemplate *WireNested    `json:"config_template"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []WireTag      `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
+	}
+
+	// WireVirtualChassis mirrors the corresponding NetBox JSON API response
+	// object.
+	WireVirtualChassis struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Domain       string         `json:"domain,omitempty"`
+		Master       *WireNested    `json:"master"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+		MemberCount  int            `json:"member_count"`
+	}
+
+	// WirePowerPanel mirrors the corresponding NetBox JSON API response object.
+	WirePowerPanel struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Site         *WireNested    `json:"site"`
+		Location     *WireNested    `json:"location"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireInventoryItemRole mirrors the corresponding NetBox JSON API response
+	// object.
+	WireInventoryItemRole struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Color        string         `json:"color,omitempty"`
+		Description  string         `json:"description,omitempty"`
 		Tags         []WireTag      `json:"tags,omitempty"`
 		CustomFields map[string]any `json:"custom_fields,omitempty"`
 		Created      string         `json:"created"`

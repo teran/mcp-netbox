@@ -119,6 +119,46 @@ func TestUnmarshalFunctions_InvalidJSON(t *testing.T) {
 
 			return err
 		}},
+		{"site_group", func() error {
+			_, err := unmarshalSiteGroup(bad)
+
+			return err
+		}},
+		{"rack_group", func() error {
+			_, err := unmarshalRackGroup(bad)
+
+			return err
+		}},
+		{"rack_role", func() error {
+			_, err := unmarshalRackRole(bad)
+
+			return err
+		}},
+		{"device_role", func() error {
+			_, err := unmarshalDeviceRole(bad)
+
+			return err
+		}},
+		{"platform", func() error {
+			_, err := unmarshalPlatform(bad)
+
+			return err
+		}},
+		{"virtual_chassis", func() error {
+			_, err := unmarshalVirtualChassis(bad)
+
+			return err
+		}},
+		{"power_panel", func() error {
+			_, err := unmarshalPowerPanel(bad)
+
+			return err
+		}},
+		{"inventory_item_role", func() error {
+			_, err := unmarshalInventoryItemRole(bad)
+
+			return err
+		}},
 	}
 
 	for _, testCase := range cases {

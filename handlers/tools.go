@@ -46,6 +46,82 @@ type TenantGroupsInput struct {
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
+// SiteGroupsInput represents the input fields for the get_site_groups tool.
+type SiteGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent site group ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RackGroupsInput represents the input fields for the get_rack_groups tool.
+type RackGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent rack group ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RackRolesInput represents the input fields for the get_rack_roles tool.
+type RackRolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Color    string `json:"color,omitempty" jsonschema:"filter by color (hex value)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// DeviceRolesInput represents the input fields for the get_device_roles tool.
+type DeviceRolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Color    string `json:"color,omitempty" jsonschema:"filter by color (hex value)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// PlatformsInput represents the input fields for the get_platforms tool.
+type PlatformsInput struct {
+	Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Manufacturer string `json:"manufacturer,omitempty" jsonschema:"filter by manufacturer (slug)"`
+	Tag          string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualChassisInput represents the input fields for the get_virtual_chassis
+// tool.
+type VirtualChassisInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Name     string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// PowerPanelsInput represents the input fields for the get_power_panels tool.
+type PowerPanelsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Location string `json:"location,omitempty" jsonschema:"filter by location (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// InventoryItemRolesInput represents the input fields for the
+// get_inventory_item_roles tool.
+type InventoryItemRolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Color    string `json:"color,omitempty" jsonschema:"filter by color (hex value)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
 // DevicesInput represents the input fields for the get_devices tool.
 type DevicesInput struct {
 	Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
@@ -149,7 +225,7 @@ type CircuitsInput struct {
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
 type GetObjectInput struct {
-	ObjectType string            `json:"object_type" jsonschema:"object type: site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination,required"` //nolint:lll // struct tag cannot be split across lines
+	ObjectType string            `json:"object_type" jsonschema:"object type: site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination, site_group, rack_group, rack_role, device_role, platform, virtual_chassis, power_panel, inventory_item_role,required"` //nolint:lll // struct tag cannot be split across lines
 	ID         int               `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
 	Params     map[string]string `json:"params,omitempty" jsonschema:"additional query parameters to pass to NetBox (optional)"` //nolint:lll // struct tag cannot be split across lines
 }
@@ -308,6 +384,246 @@ type TenantGroupUpdateInput struct {
 // group.
 type TenantGroupDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the tenant group to delete,required"`
+}
+
+// SiteGroupCreateInput represents the writable fields for creating a site
+// group.
+type SiteGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"site group name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent site group ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// SiteGroupUpdateInput represents the writable fields for updating a site
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type SiteGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the site group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"site group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent site group ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// SiteGroupDeleteInput represents the input fields for deleting a site group.
+type SiteGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the site group to delete,required"`
+}
+
+// RackGroupCreateInput represents the writable fields for creating a rack
+// group.
+type RackGroupCreateInput struct {
+	Name        string   `json:"name" jsonschema:"rack group name (required)"`
+	Slug        string   `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Site        *int     `json:"site,omitempty" jsonschema:"site ID"`
+	Parent      *int     `json:"parent,omitempty" jsonschema:"parent rack group ID"`
+	Description *string  `json:"description,omitempty" jsonschema:"short description"`
+	Tags        []string `json:"tags,omitempty" jsonschema:"list of tag names"`
+}
+
+// RackGroupUpdateInput represents the writable fields for updating a rack
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type RackGroupUpdateInput struct {
+	ID          int      `json:"id" jsonschema:"numeric ID of the rack group to update,required"`
+	Name        *string  `json:"name,omitempty" jsonschema:"rack group name"`
+	Slug        *string  `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Site        *int     `json:"site,omitempty" jsonschema:"site ID"`
+	Parent      *int     `json:"parent,omitempty" jsonschema:"parent rack group ID"`
+	Description *string  `json:"description,omitempty" jsonschema:"short description"`
+	Tags        []string `json:"tags,omitempty" jsonschema:"list of tag names"`
+}
+
+// RackGroupDeleteInput represents the input fields for deleting a rack group.
+type RackGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the rack group to delete,required"`
+}
+
+// RackRoleCreateInput represents the writable fields for creating a rack role.
+type RackRoleCreateInput struct {
+	Name         string         `json:"name" jsonschema:"rack role name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Color        *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RackRoleUpdateInput represents the writable fields for updating a rack role.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type RackRoleUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the rack role to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"rack role name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Color        *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RackRoleDeleteInput represents the input fields for deleting a rack role.
+type RackRoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the rack role to delete,required"`
+}
+
+// DeviceRoleCreateInput represents the writable fields for creating a device
+// role.
+type DeviceRoleCreateInput struct {
+	Name           string         `json:"name" jsonschema:"device role name (required)"`
+	Slug           string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Color          *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	VMRole         *bool          `json:"vm_role,omitempty" jsonschema:"whether this role is a VM role"`
+	ConfigTemplate *int           `json:"config_template,omitempty" jsonschema:"config template ID"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+	Weight         *int           `json:"weight,omitempty" jsonschema:"sorting weight"`
+}
+
+// DeviceRoleUpdateInput represents the writable fields for updating a device
+// role. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type DeviceRoleUpdateInput struct {
+	ID             int            `json:"id" jsonschema:"numeric ID of the device role to update,required"`
+	Name           *string        `json:"name,omitempty" jsonschema:"device role name"`
+	Slug           *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Color          *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	VMRole         *bool          `json:"vm_role,omitempty" jsonschema:"whether this role is a VM role"`
+	ConfigTemplate *int           `json:"config_template,omitempty" jsonschema:"config template ID"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+	Weight         *int           `json:"weight,omitempty" jsonschema:"sorting weight"`
+}
+
+// DeviceRoleDeleteInput represents the input fields for deleting a device role.
+type DeviceRoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the device role to delete,required"`
+}
+
+// PlatformCreateInput represents the writable fields for creating a platform.
+type PlatformCreateInput struct {
+	Name           string         `json:"name" jsonschema:"platform name (required)"`
+	Slug           string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Manufacturer   *int           `json:"manufacturer,omitempty" jsonschema:"manufacturer ID (look up first)"`
+	ConfigTemplate *int           `json:"config_template,omitempty" jsonschema:"config template ID"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PlatformUpdateInput represents the writable fields for updating a platform.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type PlatformUpdateInput struct {
+	ID             int            `json:"id" jsonschema:"numeric ID of the platform to update,required"`
+	Name           *string        `json:"name,omitempty" jsonschema:"platform name"`
+	Slug           *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Manufacturer   *int           `json:"manufacturer,omitempty" jsonschema:"manufacturer ID (look up first)"`
+	ConfigTemplate *int           `json:"config_template,omitempty" jsonschema:"config template ID"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PlatformDeleteInput represents the input fields for deleting a platform.
+type PlatformDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the platform to delete,required"`
+}
+
+// VirtualChassisCreateInput represents the writable fields for creating a
+// virtual chassis. Name is optional on create for this entity.
+type VirtualChassisCreateInput struct {
+	Name         string         `json:"name,omitempty" jsonschema:"virtual chassis name (optional)"`
+	Domain       *string        `json:"domain,omitempty" jsonschema:"domain name"`
+	Master       *int           `json:"master,omitempty" jsonschema:"master device ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualChassisUpdateInput represents the writable fields for updating a
+// virtual chassis. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type VirtualChassisUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the virtual chassis to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"virtual chassis name"`
+	Domain       *string        `json:"domain,omitempty" jsonschema:"domain name"`
+	Master       *int           `json:"master,omitempty" jsonschema:"master device ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualChassisDeleteInput represents the input fields for deleting a virtual
+// chassis.
+type VirtualChassisDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual chassis to delete,required"`
+}
+
+// PowerPanelCreateInput represents the writable fields for creating a power
+// panel.
+type PowerPanelCreateInput struct {
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Location     *int           `json:"location,omitempty" jsonschema:"location ID"`
+	Name         string         `json:"name" jsonschema:"power panel name (required)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerPanelUpdateInput represents the writable fields for updating a power
+// panel. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type PowerPanelUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the power panel to update,required"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Location     *int           `json:"location,omitempty" jsonschema:"location ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"power panel name"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerPanelDeleteInput represents the input fields for deleting a power panel.
+type PowerPanelDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the power panel to delete,required"`
+}
+
+// InventoryItemRoleCreateInput represents the writable fields for creating an
+// inventory item role.
+type InventoryItemRoleCreateInput struct {
+	Name         string         `json:"name" jsonschema:"inventory item role name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Color        *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// InventoryItemRoleUpdateInput represents the writable fields for updating an
+// inventory item role. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type InventoryItemRoleUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the inventory item role to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"inventory item role name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Color        *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// InventoryItemRoleDeleteInput represents the input fields for deleting an
+// inventory item role.
+type InventoryItemRoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the inventory item role to delete,required"`
 }
 
 // DeviceCreateInput represents the writable fields for creating a device.
@@ -1203,6 +1519,50 @@ type TenantGroupOutput struct {
 	Data domain.TenantGroup `json:"data"`
 }
 
+// SiteGroupOutput represents the output for the create/update site group tools.
+type SiteGroupOutput struct {
+	Data domain.SiteGroup `json:"data"`
+}
+
+// RackGroupOutput represents the output for the create/update rack group tools.
+type RackGroupOutput struct {
+	Data domain.RackGroup `json:"data"`
+}
+
+// RackRoleOutput represents the output for the create/update rack role tools.
+type RackRoleOutput struct {
+	Data domain.RackRole `json:"data"`
+}
+
+// DeviceRoleOutput represents the output for the create/update device role
+// tools.
+type DeviceRoleOutput struct {
+	Data domain.DeviceRole `json:"data"`
+}
+
+// PlatformOutput represents the output for the create/update platform tools.
+type PlatformOutput struct {
+	Data domain.Platform `json:"data"`
+}
+
+// VirtualChassisOutput represents the output for the create/update virtual
+// chassis tools.
+type VirtualChassisOutput struct {
+	Data domain.VirtualChassis `json:"data"`
+}
+
+// PowerPanelOutput represents the output for the create/update power panel
+// tools.
+type PowerPanelOutput struct {
+	Data domain.PowerPanel `json:"data"`
+}
+
+// InventoryItemRoleOutput represents the output for the create/update inventory
+// item role tools.
+type InventoryItemRoleOutput struct {
+	Data domain.InventoryItemRole `json:"data"`
+}
+
 // DeviceOutput represents the output for the create/update device tools.
 type DeviceOutput struct {
 	Data domain.Device `json:"data"`
@@ -1457,6 +1817,250 @@ func strPtr(s string) *string {
 	}
 
 	return &s
+}
+
+// siteGroupWriteFromCreate builds a domain.SiteGroupWrite from a create input.
+func siteGroupWriteFromCreate(input SiteGroupCreateInput) domain.SiteGroupWrite {
+	return domain.SiteGroupWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// siteGroupWriteFromUpdate builds a domain.SiteGroupWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func siteGroupWriteFromUpdate(input SiteGroupUpdateInput) domain.SiteGroupWrite {
+	write := domain.SiteGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// rackGroupWriteFromCreate builds a domain.RackGroupWrite from a create input.
+func rackGroupWriteFromCreate(input RackGroupCreateInput) domain.RackGroupWrite {
+	return domain.RackGroupWrite{
+		Name:        input.Name,
+		Slug:        strPtr(input.Slug),
+		Site:        input.Site,
+		Parent:      input.Parent,
+		Description: input.Description,
+		Tags:        input.Tags,
+	}
+}
+
+// rackGroupWriteFromUpdate builds a domain.RackGroupWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func rackGroupWriteFromUpdate(input RackGroupUpdateInput) domain.RackGroupWrite {
+	write := domain.RackGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Site = input.Site
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+
+	return write
+}
+
+// rackRoleWriteFromCreate builds a domain.RackRoleWrite from a create input.
+func rackRoleWriteFromCreate(input RackRoleCreateInput) domain.RackRoleWrite {
+	return domain.RackRoleWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Color:        input.Color,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// rackRoleWriteFromUpdate builds a domain.RackRoleWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func rackRoleWriteFromUpdate(input RackRoleUpdateInput) domain.RackRoleWrite {
+	write := domain.RackRoleWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Color = input.Color
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// deviceRoleWriteFromCreate builds a domain.DeviceRoleWrite from a create
+// input.
+func deviceRoleWriteFromCreate(input DeviceRoleCreateInput) domain.DeviceRoleWrite {
+	return domain.DeviceRoleWrite{
+		Name:           input.Name,
+		Slug:           strPtr(input.Slug),
+		Color:          input.Color,
+		VMRole:         input.VMRole,
+		ConfigTemplate: input.ConfigTemplate,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+		Weight:         input.Weight,
+	}
+}
+
+// deviceRoleWriteFromUpdate builds a domain.DeviceRoleWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func deviceRoleWriteFromUpdate(input DeviceRoleUpdateInput) domain.DeviceRoleWrite {
+	write := domain.DeviceRoleWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Color = input.Color
+	write.VMRole = input.VMRole
+	write.ConfigTemplate = input.ConfigTemplate
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+	write.Weight = input.Weight
+
+	return write
+}
+
+// platformWriteFromCreate builds a domain.PlatformWrite from a create input.
+func platformWriteFromCreate(input PlatformCreateInput) domain.PlatformWrite {
+	return domain.PlatformWrite{
+		Name:           input.Name,
+		Slug:           strPtr(input.Slug),
+		Manufacturer:   input.Manufacturer,
+		ConfigTemplate: input.ConfigTemplate,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+	}
+}
+
+// platformWriteFromUpdate builds a domain.PlatformWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func platformWriteFromUpdate(input PlatformUpdateInput) domain.PlatformWrite {
+	write := domain.PlatformWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Manufacturer = input.Manufacturer
+	write.ConfigTemplate = input.ConfigTemplate
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualChassisWriteFromCreate builds a domain.VirtualChassisWrite from a
+// create input. Name is optional for this entity.
+func virtualChassisWriteFromCreate(input VirtualChassisCreateInput) domain.VirtualChassisWrite {
+	return domain.VirtualChassisWrite{
+		Name:         input.Name,
+		Domain:       input.Domain,
+		Master:       input.Master,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// virtualChassisWriteFromUpdate builds a domain.VirtualChassisWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func virtualChassisWriteFromUpdate(input VirtualChassisUpdateInput) domain.VirtualChassisWrite {
+	write := domain.VirtualChassisWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Domain = input.Domain
+	write.Master = input.Master
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// powerPanelWriteFromCreate builds a domain.PowerPanelWrite from a create
+// input.
+func powerPanelWriteFromCreate(input PowerPanelCreateInput) domain.PowerPanelWrite {
+	return domain.PowerPanelWrite{
+		Site:         input.Site,
+		Location:     input.Location,
+		Name:         input.Name,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// powerPanelWriteFromUpdate builds a domain.PowerPanelWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func powerPanelWriteFromUpdate(input PowerPanelUpdateInput) domain.PowerPanelWrite {
+	write := domain.PowerPanelWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Site = input.Site
+	write.Location = input.Location
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// inventoryItemRoleWriteFromCreate builds a domain.InventoryItemRoleWrite from
+// a create input.
+func inventoryItemRoleWriteFromCreate(input InventoryItemRoleCreateInput) domain.InventoryItemRoleWrite {
+	return domain.InventoryItemRoleWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Color:        input.Color,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// inventoryItemRoleWriteFromUpdate builds a domain.InventoryItemRoleWrite from
+// an update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func inventoryItemRoleWriteFromUpdate(input InventoryItemRoleUpdateInput) domain.InventoryItemRoleWrite {
+	write := domain.InventoryItemRoleWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Color = input.Color
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
 }
 
 // deviceWriteFromCreate builds a domain.DeviceWrite from a create input.
@@ -2471,6 +3075,182 @@ func NewGetTenantGroupsHandler(
 			return params
 		},
 		errorLabel: "list tenant groups",
+	})
+}
+
+// NewGetSiteGroupsHandler creates a handler for the get_site_groups tool.
+func NewGetSiteGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[SiteGroupsInput, PaginatedOutput[domain.SiteGroup]] {
+	return newListHandler(listHandlerConfig[SiteGroupsInput, domain.SiteGroup]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+			return resolveService(ctx, svc).ListSiteGroups(ctx, params)
+		},
+		buildParams: func(input SiteGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list site groups",
+	})
+}
+
+// NewGetRackGroupsHandler creates a handler for the get_rack_groups tool.
+func NewGetRackGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackGroupsInput, PaginatedOutput[domain.RackGroup]] {
+	return newListHandler(listHandlerConfig[RackGroupsInput, domain.RackGroup]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.RackGroup], error) {
+			return resolveService(ctx, svc).ListRackGroups(ctx, params)
+		},
+		buildParams: func(input RackGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "site", input.Site)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list rack groups",
+	})
+}
+
+// NewGetRackRolesHandler creates a handler for the get_rack_roles tool.
+func NewGetRackRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackRolesInput, PaginatedOutput[domain.RackRole]] {
+	return newListHandler(listHandlerConfig[RackRolesInput, domain.RackRole]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.RackRole], error) {
+			return resolveService(ctx, svc).ListRackRoles(ctx, params)
+		},
+		buildParams: func(input RackRolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "color", input.Color)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list rack roles",
+	})
+}
+
+// NewGetDeviceRolesHandler creates a handler for the get_device_roles tool.
+func NewGetDeviceRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceRolesInput, PaginatedOutput[domain.DeviceRole]] {
+	return newListHandler(listHandlerConfig[DeviceRolesInput, domain.DeviceRole]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+			return resolveService(ctx, svc).ListDeviceRoles(ctx, params)
+		},
+		buildParams: func(input DeviceRolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "color", input.Color)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list device roles",
+	})
+}
+
+// NewGetPlatformsHandler creates a handler for the get_platforms tool.
+func NewGetPlatformsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PlatformsInput, PaginatedOutput[domain.Platform]] {
+	return newListHandler(listHandlerConfig[PlatformsInput, domain.Platform]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Platform], error) {
+			return resolveService(ctx, svc).ListPlatforms(ctx, params)
+		},
+		buildParams: func(input PlatformsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "manufacturer", input.Manufacturer)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list platforms",
+	})
+}
+
+// NewGetVirtualChassisHandler creates a handler for the get_virtual_chassis
+// tool.
+func NewGetVirtualChassisHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualChassisInput, PaginatedOutput[domain.VirtualChassis]] {
+	return newListHandler(listHandlerConfig[VirtualChassisInput, domain.VirtualChassis]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+			return resolveService(ctx, svc).ListVirtualChassis(ctx, params)
+		},
+		buildParams: func(input VirtualChassisInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "name", input.Name)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual chassis",
+	})
+}
+
+// NewGetPowerPanelsHandler creates a handler for the get_power_panels tool.
+func NewGetPowerPanelsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPanelsInput, PaginatedOutput[domain.PowerPanel]] {
+	return newListHandler(listHandlerConfig[PowerPanelsInput, domain.PowerPanel]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+			return resolveService(ctx, svc).ListPowerPanels(ctx, params)
+		},
+		buildParams: func(input PowerPanelsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "site", input.Site)
+			addParam(params, "location", input.Location)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list power panels",
+	})
+}
+
+// NewGetInventoryItemRolesHandler creates a handler for the
+// get_inventory_item_roles tool.
+func NewGetInventoryItemRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemRolesInput, PaginatedOutput[domain.InventoryItemRole]] {
+	return newListHandler(listHandlerConfig[InventoryItemRolesInput, domain.InventoryItemRole]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+			return resolveService(ctx, svc).ListInventoryItemRoles(ctx, params)
+		},
+		buildParams: func(input InventoryItemRolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "color", input.Color)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list inventory item roles",
 	})
 }
 
@@ -4921,6 +5701,631 @@ func NewDeleteContactHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 		}
 
 		if err := service.DeleteContact(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateSiteGroupHandler creates a handler for the create_site_group tool.
+func NewCreateSiteGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[SiteGroupCreateInput, SiteGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input SiteGroupCreateInput,
+	) (*mcp.CallToolResult, SiteGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, SiteGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, SiteGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		siteGroup, err := service.CreateSiteGroup(ctx, siteGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, SiteGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, SiteGroupOutput{Data: *siteGroup}, nil
+	}
+}
+
+// NewUpdateSiteGroupHandler creates a handler for the update_site_group tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateSiteGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[SiteGroupUpdateInput, SiteGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input SiteGroupUpdateInput,
+	) (*mcp.CallToolResult, SiteGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, SiteGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, SiteGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		siteGroup, err := service.UpdateSiteGroup(ctx, input.ID, siteGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, SiteGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, SiteGroupOutput{Data: *siteGroup}, nil
+	}
+}
+
+// NewDeleteSiteGroupHandler creates a handler for the delete_site_group tool.
+func NewDeleteSiteGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SiteGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input SiteGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteSiteGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateRackGroupHandler creates a handler for the create_rack_group tool.
+func NewCreateRackGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackGroupCreateInput, RackGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackGroupCreateInput,
+	) (*mcp.CallToolResult, RackGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RackGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackGroup, err := service.CreateRackGroup(ctx, rackGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackGroupOutput{Data: *rackGroup}, nil
+	}
+}
+
+// NewUpdateRackGroupHandler creates a handler for the update_rack_group tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRackGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackGroupUpdateInput, RackGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackGroupUpdateInput,
+	) (*mcp.CallToolResult, RackGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RackGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackGroup, err := service.UpdateRackGroup(ctx, input.ID, rackGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackGroupOutput{Data: *rackGroup}, nil
+	}
+}
+
+// NewDeleteRackGroupHandler creates a handler for the delete_rack_group tool.
+func NewDeleteRackGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRackGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateRackRoleHandler creates a handler for the create_rack_role tool.
+func NewCreateRackRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackRoleCreateInput, RackRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackRoleCreateInput,
+	) (*mcp.CallToolResult, RackRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackRoleOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RackRoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackRole, err := service.CreateRackRole(ctx, rackRoleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackRoleOutput{Data: *rackRole}, nil
+	}
+}
+
+// NewUpdateRackRoleHandler creates a handler for the update_rack_role tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRackRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackRoleUpdateInput, RackRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackRoleUpdateInput,
+	) (*mcp.CallToolResult, RackRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackRoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RackRoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackRole, err := service.UpdateRackRole(ctx, input.ID, rackRoleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackRoleOutput{Data: *rackRole}, nil
+	}
+}
+
+// NewDeleteRackRoleHandler creates a handler for the delete_rack_role tool.
+func NewDeleteRackRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackRoleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackRoleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRackRole(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateDeviceRoleHandler creates a handler for the create_device_role tool.
+func NewCreateDeviceRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceRoleCreateInput, DeviceRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceRoleCreateInput,
+	) (*mcp.CallToolResult, DeviceRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceRoleOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, DeviceRoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		deviceRole, err := service.CreateDeviceRole(ctx, deviceRoleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, DeviceRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceRoleOutput{Data: *deviceRole}, nil
+	}
+}
+
+// NewUpdateDeviceRoleHandler creates a handler for the update_device_role tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateDeviceRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceRoleUpdateInput, DeviceRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceRoleUpdateInput,
+	) (*mcp.CallToolResult, DeviceRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceRoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceRoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		deviceRole, err := service.UpdateDeviceRole(ctx, input.ID, deviceRoleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, DeviceRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceRoleOutput{Data: *deviceRole}, nil
+	}
+}
+
+// NewDeleteDeviceRoleHandler creates a handler for the delete_device_role tool.
+func NewDeleteDeviceRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceRoleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceRoleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteDeviceRole(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreatePlatformHandler creates a handler for the create_platform tool.
+func NewCreatePlatformHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PlatformCreateInput, PlatformOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PlatformCreateInput,
+	) (*mcp.CallToolResult, PlatformOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PlatformOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, PlatformOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		platform, err := service.CreatePlatform(ctx, platformWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PlatformOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PlatformOutput{Data: *platform}, nil
+	}
+}
+
+// NewUpdatePlatformHandler creates a handler for the update_platform tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdatePlatformHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PlatformUpdateInput, PlatformOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PlatformUpdateInput,
+	) (*mcp.CallToolResult, PlatformOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PlatformOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, PlatformOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		platform, err := service.UpdatePlatform(ctx, input.ID, platformWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PlatformOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PlatformOutput{Data: *platform}, nil
+	}
+}
+
+// NewDeletePlatformHandler creates a handler for the delete_platform tool.
+func NewDeletePlatformHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PlatformDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PlatformDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeletePlatform(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateVirtualChassisHandler creates a handler for the create_virtual_chassis
+// tool.
+func NewCreateVirtualChassisHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualChassisCreateInput, VirtualChassisOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualChassisCreateInput,
+	) (*mcp.CallToolResult, VirtualChassisOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualChassisOutput{}, errServiceNotAvailable
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		virtualChassis, err := service.CreateVirtualChassis(ctx, virtualChassisWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualChassisOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualChassisOutput{Data: *virtualChassis}, nil
+	}
+}
+
+// NewUpdateVirtualChassisHandler creates a handler for the
+// update_virtual_chassis tool. It performs a partial-merge PATCH using only the
+// explicitly provided fields.
+func NewUpdateVirtualChassisHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualChassisUpdateInput, VirtualChassisOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualChassisUpdateInput,
+	) (*mcp.CallToolResult, VirtualChassisOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualChassisOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualChassisOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		virtualChassis, err := service.UpdateVirtualChassis(ctx, input.ID, virtualChassisWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualChassisOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualChassisOutput{Data: *virtualChassis}, nil
+	}
+}
+
+// NewDeleteVirtualChassisHandler creates a handler for the
+// delete_virtual_chassis tool.
+func NewDeleteVirtualChassisHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualChassisDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualChassisDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualChassis(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreatePowerPanelHandler creates a handler for the create_power_panel tool.
+func NewCreatePowerPanelHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPanelCreateInput, PowerPanelOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPanelCreateInput,
+	) (*mcp.CallToolResult, PowerPanelOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPanelOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, PowerPanelOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerPanel, err := service.CreatePowerPanel(ctx, powerPanelWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerPanelOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerPanelOutput{Data: *powerPanel}, nil
+	}
+}
+
+// NewUpdatePowerPanelHandler creates a handler for the update_power_panel tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdatePowerPanelHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPanelUpdateInput, PowerPanelOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPanelUpdateInput,
+	) (*mcp.CallToolResult, PowerPanelOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPanelOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPanelOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerPanel, err := service.UpdatePowerPanel(ctx, input.ID, powerPanelWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerPanelOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerPanelOutput{Data: *powerPanel}, nil
+	}
+}
+
+// NewDeletePowerPanelHandler creates a handler for the delete_power_panel tool.
+func NewDeletePowerPanelHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPanelDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPanelDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeletePowerPanel(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateInventoryItemRoleHandler creates a handler for the
+// create_inventory_item_role tool.
+func NewCreateInventoryItemRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemRoleCreateInput, InventoryItemRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemRoleCreateInput,
+	) (*mcp.CallToolResult, InventoryItemRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemRoleOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemRoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		invItemRole, err := service.CreateInventoryItemRole(ctx, inventoryItemRoleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, InventoryItemRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, InventoryItemRoleOutput{Data: *invItemRole}, nil
+	}
+}
+
+// NewUpdateInventoryItemRoleHandler creates a handler for the
+// update_inventory_item_role tool. It performs a partial-merge PATCH using only
+// the explicitly provided fields.
+func NewUpdateInventoryItemRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemRoleUpdateInput, InventoryItemRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemRoleUpdateInput,
+	) (*mcp.CallToolResult, InventoryItemRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemRoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemRoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		invItemRole, err := service.UpdateInventoryItemRole(ctx, input.ID, inventoryItemRoleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, InventoryItemRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, InventoryItemRoleOutput{Data: *invItemRole}, nil
+	}
+}
+
+// NewDeleteInventoryItemRoleHandler creates a handler for the
+// delete_inventory_item_role tool.
+func NewDeleteInventoryItemRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemRoleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemRoleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteInventoryItemRole(ctx, input.ID); err != nil {
 			res, e := writeErrorResult(err)
 
 			return res, struct{}{}, e

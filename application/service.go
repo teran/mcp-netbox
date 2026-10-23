@@ -1084,3 +1084,370 @@ func (s *NetworkService) DeleteContact(ctx context.Context, id int) error {
 
 	return nil
 }
+
+// ListSiteGroups returns the page of site groups matching params.
+func (s *NetworkService) ListSiteGroups(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+	resp, err := s.repo.ListSiteGroups(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list site groups: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateSiteGroup relays a site group create to the repository. ValidationError
+// is wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateSiteGroup(ctx context.Context, in domain.SiteGroupWrite) (*domain.SiteGroup, error) {
+	resp, err := s.repo.CreateSiteGroup(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create site group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateSiteGroup relays a site group update to the repository.
+func (s *NetworkService) UpdateSiteGroup(
+	ctx context.Context, id int, in domain.SiteGroupWrite,
+) (*domain.SiteGroup, error) {
+	resp, err := s.repo.UpdateSiteGroup(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update site group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteSiteGroup relays a site group delete to the repository.
+func (s *NetworkService) DeleteSiteGroup(ctx context.Context, id int) error {
+	if err := s.repo.DeleteSiteGroup(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete site group: %w", err)
+	}
+
+	return nil
+}
+
+// ListRackGroups returns the page of rack groups matching params.
+func (s *NetworkService) ListRackGroups(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.RackGroup], error) {
+	resp, err := s.repo.ListRackGroups(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list rack groups: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateRackGroup relays a rack group create to the repository. ValidationError
+// is wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateRackGroup(ctx context.Context, in domain.RackGroupWrite) (*domain.RackGroup, error) {
+	resp, err := s.repo.CreateRackGroup(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create rack group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateRackGroup relays a rack group update to the repository.
+func (s *NetworkService) UpdateRackGroup(
+	ctx context.Context, id int, in domain.RackGroupWrite,
+) (*domain.RackGroup, error) {
+	resp, err := s.repo.UpdateRackGroup(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update rack group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteRackGroup relays a rack group delete to the repository.
+func (s *NetworkService) DeleteRackGroup(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRackGroup(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete rack group: %w", err)
+	}
+
+	return nil
+}
+
+// ListRackRoles returns the page of rack roles matching params.
+func (s *NetworkService) ListRackRoles(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.RackRole], error) {
+	resp, err := s.repo.ListRackRoles(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list rack roles: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateRackRole relays a rack role create to the repository. ValidationError
+// is wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreateRackRole(ctx context.Context, in domain.RackRoleWrite) (*domain.RackRole, error) {
+	resp, err := s.repo.CreateRackRole(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create rack role: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateRackRole relays a rack role update to the repository.
+func (s *NetworkService) UpdateRackRole(
+	ctx context.Context, id int, in domain.RackRoleWrite,
+) (*domain.RackRole, error) {
+	resp, err := s.repo.UpdateRackRole(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update rack role: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteRackRole relays a rack role delete to the repository.
+func (s *NetworkService) DeleteRackRole(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRackRole(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete rack role: %w", err)
+	}
+
+	return nil
+}
+
+// ListDeviceRoles returns the page of device roles matching params.
+func (s *NetworkService) ListDeviceRoles(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+	resp, err := s.repo.ListDeviceRoles(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list device roles: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateDeviceRole relays a device role create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateDeviceRole(
+	ctx context.Context, in domain.DeviceRoleWrite,
+) (*domain.DeviceRole, error) {
+	resp, err := s.repo.CreateDeviceRole(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create device role: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateDeviceRole relays a device role update to the repository.
+func (s *NetworkService) UpdateDeviceRole(
+	ctx context.Context, id int, in domain.DeviceRoleWrite,
+) (*domain.DeviceRole, error) {
+	resp, err := s.repo.UpdateDeviceRole(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update device role: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteDeviceRole relays a device role delete to the repository.
+func (s *NetworkService) DeleteDeviceRole(ctx context.Context, id int) error {
+	if err := s.repo.DeleteDeviceRole(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete device role: %w", err)
+	}
+
+	return nil
+}
+
+// ListPlatforms returns the page of platforms matching params.
+func (s *NetworkService) ListPlatforms(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.Platform], error) {
+	resp, err := s.repo.ListPlatforms(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list platforms: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreatePlatform relays a platform create to the repository. ValidationError is
+// wrapped (via %w) and left intact so callers can recover it with errors.As.
+func (s *NetworkService) CreatePlatform(ctx context.Context, in domain.PlatformWrite) (*domain.Platform, error) {
+	resp, err := s.repo.CreatePlatform(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create platform: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdatePlatform relays a platform update to the repository.
+func (s *NetworkService) UpdatePlatform(
+	ctx context.Context, id int, in domain.PlatformWrite,
+) (*domain.Platform, error) {
+	resp, err := s.repo.UpdatePlatform(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update platform: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeletePlatform relays a platform delete to the repository.
+func (s *NetworkService) DeletePlatform(ctx context.Context, id int) error {
+	if err := s.repo.DeletePlatform(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete platform: %w", err)
+	}
+
+	return nil
+}
+
+// ListVirtualChassis returns the page of virtual chassis matching params.
+func (s *NetworkService) ListVirtualChassis(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+	resp, err := s.repo.ListVirtualChassis(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list virtual chassis: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateVirtualChassis relays a virtual chassis create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreateVirtualChassis(
+	ctx context.Context, in domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	resp, err := s.repo.CreateVirtualChassis(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create virtual chassis: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateVirtualChassis relays a virtual chassis update to the repository.
+func (s *NetworkService) UpdateVirtualChassis(
+	ctx context.Context, id int, in domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	resp, err := s.repo.UpdateVirtualChassis(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update virtual chassis: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteVirtualChassis relays a virtual chassis delete to the repository.
+func (s *NetworkService) DeleteVirtualChassis(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVirtualChassis(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete virtual chassis: %w", err)
+	}
+
+	return nil
+}
+
+// ListPowerPanels returns the page of power panels matching params.
+func (s *NetworkService) ListPowerPanels(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+	resp, err := s.repo.ListPowerPanels(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list power panels: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreatePowerPanel relays a power panel create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover it
+// with errors.As.
+func (s *NetworkService) CreatePowerPanel(
+	ctx context.Context, in domain.PowerPanelWrite,
+) (*domain.PowerPanel, error) {
+	resp, err := s.repo.CreatePowerPanel(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create power panel: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdatePowerPanel relays a power panel update to the repository.
+func (s *NetworkService) UpdatePowerPanel(
+	ctx context.Context, id int, in domain.PowerPanelWrite,
+) (*domain.PowerPanel, error) {
+	resp, err := s.repo.UpdatePowerPanel(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update power panel: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeletePowerPanel relays a power panel delete to the repository.
+func (s *NetworkService) DeletePowerPanel(ctx context.Context, id int) error {
+	if err := s.repo.DeletePowerPanel(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete power panel: %w", err)
+	}
+
+	return nil
+}
+
+// ListInventoryItemRoles returns the page of inventory item roles matching
+// params.
+func (s *NetworkService) ListInventoryItemRoles(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+	resp, err := s.repo.ListInventoryItemRoles(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list inventory item roles: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateInventoryItemRole relays an inventory item role create to the
+// repository. ValidationError is wrapped (via %w) and left intact so callers
+// can recover it with errors.As.
+func (s *NetworkService) CreateInventoryItemRole(
+	ctx context.Context, in domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	resp, err := s.repo.CreateInventoryItemRole(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create inventory item role: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateInventoryItemRole relays an inventory item role update to the
+// repository.
+func (s *NetworkService) UpdateInventoryItemRole(
+	ctx context.Context, id int, in domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	resp, err := s.repo.UpdateInventoryItemRole(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update inventory item role: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteInventoryItemRole relays an inventory item role delete to the
+// repository.
+func (s *NetworkService) DeleteInventoryItemRole(ctx context.Context, id int) error {
+	if err := s.repo.DeleteInventoryItemRole(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete inventory item role: %w", err)
+	}
+
+	return nil
+}

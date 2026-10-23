@@ -109,7 +109,8 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 			Title: "Get Object by ID",
 			Description: "Retrieve any single NetBox object by its type and numeric ID. object_type is " +
 				"required (e.g. site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, " +
-				"provider, tenant, rack, cable, interface). Returns a 404-style error if the object does " +
+				"provider, tenant, rack, cable, interface, site_group, rack_group, rack_role, device_role, platform, " +
+				"virtual_chassis, power_panel, inventory_item_role). Returns a 404-style error if the object does " +
 				"not exist or the token lacks permission.",
 			Instructions: "Use when you already know the object type and numeric ID. For searching without " +
 				"an ID, prefer the dedicated list tools.",
@@ -153,6 +154,79 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
 				"results array means no VM interfaces match.",
 			Instructions: "Use to look up virtual machine interfaces.",
+		},
+		{
+			Name:  "get_site_groups",
+			Title: "List Site Groups",
+			Description: "List site groups in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by parent (site group ID) or tag. Results are paginated: set page and page_size " +
+				"(max 1000). An empty results array means no site groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox site groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple site groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_rack_groups",
+			Title: "List Rack Groups",
+			Description: "List rack groups in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by site, parent (rack group ID) or tag. Results are paginated: set page and " +
+				"page_size (max 1000). An empty results array means no rack groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox rack groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple rack groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_rack_roles",
+			Title: "List Rack Roles",
+			Description: "List rack roles in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by color or tag. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no rack roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox rack roles. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple rack roles or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_device_roles",
+			Title: "List Device Roles",
+			Description: "List device roles in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by color or tag. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no device roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox device roles. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple device roles or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_platforms",
+			Title: "List Platforms",
+			Description: "List platforms in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by manufacturer or tag. Results are paginated: set page and page_size (max 1000). " +
+				"An empty results array means no platforms match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox platforms. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple platforms or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_virtual_chassis",
+			Title: "List Virtual Chassis",
+			Description: "List virtual chassis in NetBox with optional filters. Use q for free-text search, " +
+				"or filter by name or tag. Results are paginated: set page and page_size (max 1000). An " +
+				"empty results array means no virtual chassis match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual chassis. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple virtual chassis or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_power_panels",
+			Title: "List Power Panels",
+			Description: "List power panels in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by site, location or tag. Results are paginated: set page and page_size (max 1000). " +
+				"An empty results array means no power panels match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox power panels. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple power panels or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_inventory_item_roles",
+			Title: "List Inventory Item Roles",
+			Description: "List inventory item roles in NetBox with optional filters. Use q for free-text " +
+				"search, or filter by color or tag. Results are paginated: set page and page_size (max " +
+				"1000). An empty results array means no inventory item roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox inventory item roles. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple inventory item roles or don't yet know " +
+				"the exact ID.",
 		},
 		{
 			Name:  "create_site",
@@ -937,6 +1011,234 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"want to delete the contact, ideally by ID, and understands it is permanent and cannot be " +
 				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
 				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_site_group",
+			Title: "Create Site Group",
+			Description: "Create a new site group in NetBox. name is required; all other fields are " +
+				"optional. Provide parent as a numeric site group ID (look it up first), and tags as a " +
+				"list of tag names. Returns the created site group.",
+			Instructions: "Use only when the caller explicitly wants to create a site group and provides " +
+				"a name. This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:  "update_site_group",
+			Title: "Update Site Group",
+			Description: "Partially update a site group in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated site group.",
+			Instructions: "Use to modify one or more fields of an existing site group. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_site_group",
+			Title: "Delete Site Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a site group (and " +
+				"its dependent objects) from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the site group, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_rack_group",
+			Title: "Create Rack Group",
+			Description: "Create a new rack group in NetBox. name is required; all other fields are " +
+				"optional. Provide site and parent as numeric IDs (look them up first), and tags as a " +
+				"list of tag names. Returns the created rack group.",
+			Instructions: "Use only when the caller explicitly wants to create a rack group and provides " +
+				"a name. This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:  "update_rack_group",
+			Title: "Update Rack Group",
+			Description: "Partially update a rack group in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated rack group.",
+			Instructions: "Use to modify one or more fields of an existing rack group. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_rack_group",
+			Title: "Delete Rack Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a rack group (and " +
+				"its dependent objects) from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the rack group, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_rack_role",
+			Title: "Create Rack Role",
+			Description: "Create a new rack role in NetBox. name is required; all other fields are " +
+				"optional. Provide slug/color/description as strings, and tags as a list of tag names. " +
+				"Returns the created rack role.",
+			Instructions: "Use only when the caller explicitly wants to create a rack role and provides a " +
+				"name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_rack_role",
+			Title: "Update Rack Role",
+			Description: "Partially update a rack role in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated rack role.",
+			Instructions: "Use to modify one or more fields of an existing rack role. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_rack_role",
+			Title: "Delete Rack Role",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a rack role from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the rack role, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_device_role",
+			Title: "Create Device Role",
+			Description: "Create a new device role in NetBox. name is required; all other fields are " +
+				"optional. Provide slug/color/description as strings, vm_role as a boolean, weight as an " +
+				"integer, config_template as a numeric ID, and tags as a list of tag names. Returns the " +
+				"created device role.",
+			Instructions: "Use only when the caller explicitly wants to create a device role and provides " +
+				"a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_device_role",
+			Title: "Update Device Role",
+			Description: "Partially update a device role in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated device role.",
+			Instructions: "Use to modify one or more fields of an existing device role. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_device_role",
+			Title: "Delete Device Role",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a device role from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the device role, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_platform",
+			Title: "Create Platform",
+			Description: "Create a new platform in NetBox. name is required; all other fields are " +
+				"optional. Provide manufacturer and config_template as numeric IDs (look them up first), " +
+				"slug/description as strings, and tags as a list of tag names. Returns the created platform.",
+			Instructions: "Use only when the caller explicitly wants to create a platform and provides a " +
+				"name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_platform",
+			Title: "Update Platform",
+			Description: "Partially update a platform in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated platform.",
+			Instructions: "Use to modify one or more fields of an existing platform. Provide id plus only " +
+				"the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_platform",
+			Title: "Delete Platform",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a platform from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the platform, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_virtual_chassis",
+			Title: "Create Virtual Chassis",
+			Description: "Create a new virtual chassis in NetBox. name is optional here (unlike most " +
+				"entities); all other fields are optional. Provide master as a numeric device ID (look it " +
+				"up first), domain/description as strings, and tags as a list of tag names. Returns the " +
+				"created virtual chassis.",
+			Instructions: "Use only when the caller explicitly wants to create a virtual chassis. This " +
+				"tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_virtual_chassis",
+			Title: "Update Virtual Chassis",
+			Description: "Partially update a virtual chassis in NetBox by its numeric ID. Only the fields " +
+				"you explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, member_count) are ignored. Returns the " +
+				"updated virtual chassis.",
+			Instructions: "Use to modify one or more fields of an existing virtual chassis. Provide id " +
+				"plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_virtual_chassis",
+			Title: "Delete Virtual Chassis",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual chassis " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual chassis, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_power_panel",
+			Title: "Create Power Panel",
+			Description: "Create a new power panel in NetBox. name is required; all other fields are " +
+				"optional. Provide site and location as numeric IDs (look them up first), description as " +
+				"a string, and tags as a list of tag names. Returns the created power panel.",
+			Instructions: "Use only when the caller explicitly wants to create a power panel and provides " +
+				"a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_power_panel",
+			Title: "Update Power Panel",
+			Description: "Partially update a power panel in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated power panel.",
+			Instructions: "Use to modify one or more fields of an existing power panel. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_power_panel",
+			Title: "Delete Power Panel",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a power panel from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the power panel, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_inventory_item_role",
+			Title: "Create Inventory Item Role",
+			Description: "Create a new inventory item role in NetBox. name is required; all other fields " +
+				"are optional. Provide slug/color/description as strings, and tags as a list of tag names. " +
+				"Returns the created inventory item role.",
+			Instructions: "Use only when the caller explicitly wants to create an inventory item role and " +
+				"provides a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_inventory_item_role",
+			Title: "Update Inventory Item Role",
+			Description: "Partially update an inventory item role in NetBox by its numeric ID. Only the " +
+				"fields you explicitly provide are changed (PATCH merge); omitted fields are left " +
+				"untouched. Read-only fields (id, url, created, last_updated) are ignored. Returns the " +
+				"updated inventory item role.",
+			Instructions: "Use to modify one or more fields of an existing inventory item role. Provide id " +
+				"plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_inventory_item_role",
+			Title: "Delete Inventory Item Role",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an inventory item " +
+				"role from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the inventory item role, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without " +
+				"confirming deletion, ask for explicit confirmation first.",
 		},
 	}
 }

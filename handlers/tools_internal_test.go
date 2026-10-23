@@ -477,6 +477,170 @@ func (s *stubRepo) DeleteContact(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) ListSiteGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateSiteGroup(_ context.Context, _ string, _ domain.SiteGroupWrite) (*domain.SiteGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateSiteGroup(
+	_ context.Context, _ string, _ int, _ domain.SiteGroupWrite,
+) (*domain.SiteGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteSiteGroup(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListRackGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RackGroup], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateRackGroup(_ context.Context, _ string, _ domain.RackGroupWrite) (*domain.RackGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateRackGroup(
+	_ context.Context, _ string, _ int, _ domain.RackGroupWrite,
+) (*domain.RackGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteRackGroup(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListRackRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RackRole], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateRackRole(_ context.Context, _ string, _ domain.RackRoleWrite) (*domain.RackRole, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateRackRole(
+	_ context.Context, _ string, _ int, _ domain.RackRoleWrite,
+) (*domain.RackRole, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteRackRole(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListDeviceRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateDeviceRole(_ context.Context, _ string, _ domain.DeviceRoleWrite) (*domain.DeviceRole, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateDeviceRole(
+	_ context.Context, _ string, _ int, _ domain.DeviceRoleWrite,
+) (*domain.DeviceRole, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteDeviceRole(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListPlatforms(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.Platform], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreatePlatform(_ context.Context, _ string, _ domain.PlatformWrite) (*domain.Platform, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdatePlatform(
+	_ context.Context, _ string, _ int, _ domain.PlatformWrite,
+) (*domain.Platform, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeletePlatform(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListVirtualChassis(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateVirtualChassis(
+	_ context.Context, _ string, _ domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVirtualChassis(
+	_ context.Context, _ string, _ int, _ domain.VirtualChassisWrite,
+) (*domain.VirtualChassis, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVirtualChassis(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListPowerPanels(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreatePowerPanel(_ context.Context, _ string, _ domain.PowerPanelWrite) (*domain.PowerPanel, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdatePowerPanel(
+	_ context.Context, _ string, _ int, _ domain.PowerPanelWrite,
+) (*domain.PowerPanel, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeletePowerPanel(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListInventoryItemRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateInventoryItemRole(
+	_ context.Context, _ string, _ domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateInventoryItemRole(
+	_ context.Context, _ string, _ int, _ domain.InventoryItemRoleWrite,
+) (*domain.InventoryItemRole, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteInventoryItemRole(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 
