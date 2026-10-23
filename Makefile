@@ -1,7 +1,7 @@
 # mcp-netbox Makefile
 #
 # Standard R07 make interface: CI and local dev call `make <target>` rather than
-# raw language commands. Go version is pinned to match go.mod (go 1.27.0).
+# raw language commands. Go version is pinned to match go.mod (go 1.27.3).
 # All recipes use tabs.
 
 GO ?= go
