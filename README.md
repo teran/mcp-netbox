@@ -19,7 +19,7 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 
 ## Features
 
-- **Full CRUD** — 16 read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for all **27 entities** (97 tools total). `create_*` (POST) and `update_*` (partial PATCH) modify NetBox; `delete_*` is **irreversible** and each delete tool is flagged with `DestructiveHint: true`.
+- **Full CRUD** — read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for **71 NetBox entities** (275 tools total) across DCIM, IPAM, tenancy, virtualization, circuits, wireless-adjacent and extras (tags, custom fields). `create_*` (POST) and `update_*` (partial PATCH) modify NetBox; `delete_*` is **irreversible** and each delete tool is flagged with `DestructiveHint: true`.
 - **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected at startup via `-mode http|stdio` (default `stdio`); the `TRANSPORT` env var remains a backward-compatible override.
 - **Per-request token authentication (HTTP)** — the NetBox API token is passed in the `Authorization` header of each MCP request. No server-side token storage.
 - **Env-token authentication (STDIO)** — in STDIO mode the NetBox token is provided once via the `NETBOX_TOKEN` environment variable.
@@ -32,7 +32,7 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 
 ## Tools
 
-The server exposes **97 MCP tools**: **16 read-only** queries and **81 typed write tools** — `create_*`, `update_*` and `delete_*` for every one of the **27 entities**.
+The server exposes **275 MCP tools** across **71 entities** — read-only `get_*` queries plus typed `create_*`, `update_*` and `delete_*` write tools, plus the generic `get_object_by_id`. See `FEEDBACK.md` for the full feature history.
 
 ### Read tools
 
