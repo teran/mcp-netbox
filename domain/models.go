@@ -173,6 +173,37 @@ type (
 		LastUpdated  string         `json:"last_updated"`
 	}
 
+	// VirtualDisk is a NetBox virtualization virtual disk attached to a virtual
+	// machine.
+	VirtualDisk struct {
+		ID             int            `json:"id"`
+		URL            string         `json:"url,omitempty"`
+		Name           string         `json:"name"`
+		Display        string         `json:"display,omitempty"`
+		VirtualMachine *Nested        `json:"virtual_machine"`
+		Size           int            `json:"size"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []Tag          `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
+	}
+
+	// VirtualMachineType is a NetBox virtualization virtual machine type (a
+	// reusable hardware/software profile for virtual machines).
+	VirtualMachineType struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
 	// Cluster is a NetBox virtualization cluster.
 	Cluster struct {
 		ID           int            `json:"id"`
@@ -424,6 +455,36 @@ type (
 		Link         string         `json:"link,omitempty"`
 		Description  string         `json:"description,omitempty"`
 		Comments     string         `json:"comments,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// ContactGroup is a NetBox tenancy contact group (a grouping of contacts).
+	ContactGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Parent       *Nested        `json:"parent"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// ContactRole is a NetBox tenancy contact role (e.g. an administrative or
+	// operational role assigned to contacts).
+	ContactRole struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
 		Tags         []Tag          `json:"tags,omitempty"`
 		CustomFields map[string]any `json:"custom_fields,omitempty"`
 		Created      string         `json:"created"`
@@ -1595,6 +1656,70 @@ type ContactWrite struct {
 	Link         *string        `json:"link,omitempty"`
 	Description  *string        `json:"description,omitempty"`
 	Comments     *string        `json:"comments,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ContactGroupWrite is the domain DTO for creating or updating a NetBox tenancy
+// contact group. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Parent references the numeric NetBox ID
+// of the parent contact group.
+type ContactGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ContactRoleWrite is the domain DTO for creating or updating a NetBox tenancy
+// contact role. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty".
+type ContactRoleWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// VirtualDiskWrite is the domain DTO for creating or updating a NetBox
+// virtualization virtual disk. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". VirtualMachine references the numeric
+// NetBox ID of the parent virtual machine.
+type VirtualDiskWrite struct {
+	Name           string         `json:"name,omitempty"`
+	VirtualMachine *int           `json:"virtual_machine,omitempty"`
+	Size           *int           `json:"size,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
+// VirtualMachineTypeWrite is the domain DTO for creating or updating a NetBox
+// virtualization virtual machine type. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty".
+type VirtualMachineTypeWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }

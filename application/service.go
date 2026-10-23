@@ -2495,3 +2495,187 @@ func (s *NetworkService) DeleteVLANTranslationRule(ctx context.Context, id int) 
 
 	return nil
 }
+
+// ListContactGroups returns the page of contact groups matching params.
+func (s *NetworkService) ListContactGroups(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.ContactGroup], error,
+) {
+	resp, err := s.repo.ListContactGroups(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list contact groups: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateContactGroup relays a contact group create to the repository.
+func (s *NetworkService) CreateContactGroup(
+	ctx context.Context, in domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	resp, err := s.repo.CreateContactGroup(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create contact group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateContactGroup relays a contact group update to the repository.
+func (s *NetworkService) UpdateContactGroup(
+	ctx context.Context, id int, in domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	resp, err := s.repo.UpdateContactGroup(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update contact group: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteContactGroup relays a contact group delete to the repository.
+func (s *NetworkService) DeleteContactGroup(ctx context.Context, id int) error {
+	if err := s.repo.DeleteContactGroup(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete contact group: %w", err)
+	}
+
+	return nil
+}
+
+// ListContactRoles returns the page of contact roles matching params.
+func (s *NetworkService) ListContactRoles(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.ContactRole], error,
+) {
+	resp, err := s.repo.ListContactRoles(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list contact roles: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateContactRole relays a contact role create to the repository.
+func (s *NetworkService) CreateContactRole(
+	ctx context.Context, in domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	resp, err := s.repo.CreateContactRole(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create contact role: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateContactRole relays a contact role update to the repository.
+func (s *NetworkService) UpdateContactRole(
+	ctx context.Context, id int, in domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	resp, err := s.repo.UpdateContactRole(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update contact role: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteContactRole relays a contact role delete to the repository.
+func (s *NetworkService) DeleteContactRole(ctx context.Context, id int) error {
+	if err := s.repo.DeleteContactRole(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete contact role: %w", err)
+	}
+
+	return nil
+}
+
+// ListVirtualDisks returns the page of virtual disks matching params.
+func (s *NetworkService) ListVirtualDisks(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.VirtualDisk], error,
+) {
+	resp, err := s.repo.ListVirtualDisks(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list virtual disks: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateVirtualDisk relays a virtual disk create to the repository.
+func (s *NetworkService) CreateVirtualDisk(
+	ctx context.Context, in domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	resp, err := s.repo.CreateVirtualDisk(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create virtual disk: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateVirtualDisk relays a virtual disk update to the repository.
+func (s *NetworkService) UpdateVirtualDisk(
+	ctx context.Context, id int, in domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	resp, err := s.repo.UpdateVirtualDisk(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update virtual disk: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteVirtualDisk relays a virtual disk delete to the repository.
+func (s *NetworkService) DeleteVirtualDisk(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVirtualDisk(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete virtual disk: %w", err)
+	}
+
+	return nil
+}
+
+// ListVirtualMachineTypes returns the page of virtual machine types matching
+// params.
+func (s *NetworkService) ListVirtualMachineTypes(ctx context.Context, params map[string]string) (
+	*domain.PaginatedResponse[domain.VirtualMachineType], error,
+) {
+	resp, err := s.repo.ListVirtualMachineTypes(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list virtual machine types: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateVirtualMachineType relays a virtual machine type create to the
+// repository.
+func (s *NetworkService) CreateVirtualMachineType(
+	ctx context.Context, in domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	resp, err := s.repo.CreateVirtualMachineType(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create virtual machine type: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateVirtualMachineType relays a virtual machine type update to the
+// repository.
+func (s *NetworkService) UpdateVirtualMachineType(
+	ctx context.Context, id int, in domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	resp, err := s.repo.UpdateVirtualMachineType(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update virtual machine type: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteVirtualMachineType relays a virtual machine type delete to the
+// repository.
+func (s *NetworkService) DeleteVirtualMachineType(ctx context.Context, id int) error {
+	if err := s.repo.DeleteVirtualMachineType(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete virtual machine type: %w", err)
+	}
+
+	return nil
+}

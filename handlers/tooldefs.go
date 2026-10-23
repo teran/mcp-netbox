@@ -114,7 +114,8 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, " +
 				"inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, " +
 				"service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, " +
-				"vlan_translation_rule). Returns a 404-style error if the object does " +
+				"vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type). " +
+				"Returns a 404-style error if the object does " +
 				"not exist or the token lacks permission.",
 			Instructions: "Use when you already know the object type and numeric ID. For searching without " +
 				"an ID, prefer the dedicated list tools.",
@@ -1640,6 +1641,139 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"want to delete the RIR, ideally by ID, and understands it is permanent and cannot be undone. " +
 				"If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for " +
 				"explicit confirmation first.",
+		},
+		{
+			Name:  "get_contact_groups",
+			Title: "List Contact Groups",
+			Description: "List tenancy contact groups in NetBox. Filter by parent or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no contact groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox contact groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple contact groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_contact_group",
+			Title: "Create Contact Group",
+			Description: "Create a tenancy contact group in NetBox. Name is required; provide slug, parent, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new contact group.",
+		},
+		{
+			Name:  "update_contact_group",
+			Title: "Update Contact Group",
+			Description: "Partially update a tenancy contact group in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing contact group.",
+		},
+		{
+			Name:  "delete_contact_group",
+			Title: "Delete Contact Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a contact group from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the contact group, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_contact_roles",
+			Title: "List Contact Roles",
+			Description: "List tenancy contact roles in NetBox. Filter by tag, or use q for free-text search. " +
+				"Results are paginated: set page and page_size (max 1000). An empty results array means no " +
+				"contact roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox contact roles. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple contact roles or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_contact_role",
+			Title: "Create Contact Role",
+			Description: "Create a tenancy contact role in NetBox. Name is required; provide slug, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new contact role.",
+		},
+		{
+			Name:  "update_contact_role",
+			Title: "Update Contact Role",
+			Description: "Partially update a tenancy contact role in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing contact role.",
+		},
+		{
+			Name:  "delete_contact_role",
+			Title: "Delete Contact Role",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a contact role from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the contact role, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_disks",
+			Title: "List Virtual Disks",
+			Description: "List virtualization virtual disks in NetBox. Filter by virtual_machine or tag, or " +
+				"use q for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no virtual disks match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual disks. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple virtual disks or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_virtual_disk",
+			Title: "Create Virtual Disk",
+			Description: "Create a virtualization virtual disk in NetBox. Name is required; provide " +
+				"virtual_machine, size, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new virtual disk.",
+		},
+		{
+			Name:  "update_virtual_disk",
+			Title: "Update Virtual Disk",
+			Description: "Partially update a virtualization virtual disk in NetBox by its numeric ID. Only " +
+				"the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual disk.",
+		},
+		{
+			Name:  "delete_virtual_disk",
+			Title: "Delete Virtual Disk",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual disk from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual disk, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for " +
+				"explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_machine_types",
+			Title: "List Virtual Machine Types",
+			Description: "List virtualization virtual machine types in NetBox. Filter by tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no virtual machine types match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual machine types. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple virtual machine types or don't yet know the " +
+				"exact ID.",
+		},
+		{
+			Name:  "create_virtual_machine_type",
+			Title: "Create Virtual Machine Type",
+			Description: "Create a virtualization virtual machine type in NetBox. Name is required; provide " +
+				"slug, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new virtual machine type.",
+		},
+		{
+			Name:  "update_virtual_machine_type",
+			Title: "Update Virtual Machine Type",
+			Description: "Partially update a virtualization virtual machine type in NetBox by its numeric " +
+				"ID. Only the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual machine type.",
+		},
+		{
+			Name:  "delete_virtual_machine_type",
+			Title: "Delete Virtual Machine Type",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual machine " +
+				"type from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual machine type, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
 		},
 		{
 			Name:  "get_aggregates",

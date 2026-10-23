@@ -88,6 +88,10 @@ var objectTypeToEndpoint = map[string]string{
 	"fhrp_group_assignment":   "/api/ipam/fhrp-group-assignments/",
 	"vlan_translation_policy": "/api/ipam/vlan-translation-policies/",
 	"vlan_translation_rule":   "/api/ipam/vlan-translation-rules/",
+	"contact_group":           "/api/tenancy/contact-groups/",
+	"contact_role":            "/api/tenancy/contact-roles/",
+	"virtual_disk":            "/api/virtualization/virtual-disks/",
+	"virtual_machine_type":    "/api/virtualization/virtual-machine-types/",
 }
 
 // maxBodySize is the maximum response body size accepted from NetBox. Larger
@@ -1061,6 +1065,70 @@ func (c *Client) ListVLANTranslationRules(ctx context.Context, token string, par
 	}
 
 	return convertPaginated(&wireResp, wireVLANTranslationRuleToDomain), nil
+}
+
+// ListContactGroups returns a paginated list of contact groups.
+func (c *Client) ListContactGroups(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.ContactGroup], error,
+) {
+	raw, err := c.get(ctx, token, "/api/tenancy/contact-groups/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireContactGroup]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal contact groups: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireContactGroupToDomain), nil
+}
+
+// ListContactRoles returns a paginated list of contact roles.
+func (c *Client) ListContactRoles(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.ContactRole], error,
+) {
+	raw, err := c.get(ctx, token, "/api/tenancy/contact-roles/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireContactRole]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal contact roles: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireContactRoleToDomain), nil
+}
+
+// ListVirtualDisks returns a paginated list of virtual disks.
+func (c *Client) ListVirtualDisks(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.VirtualDisk], error,
+) {
+	raw, err := c.get(ctx, token, "/api/virtualization/virtual-disks/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireVirtualDisk]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual disks: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireVirtualDiskToDomain), nil
+}
+
+// ListVirtualMachineTypes returns a paginated list of virtual machine types.
+func (c *Client) ListVirtualMachineTypes(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.VirtualMachineType], error,
+) {
+	raw, err := c.get(ctx, token, "/api/virtualization/virtual-machine-types/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireVirtualMachineType]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual machine types: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireVirtualMachineTypeToDomain), nil
 }
 
 // GetObject retrieves a single object by its type and ID.
@@ -3676,6 +3744,194 @@ func (c *Client) DeleteVLANTranslationRule(ctx context.Context, token string, ob
 	return mErr
 }
 
+// CreateContactGroup creates a new contact group via POST
+// /api/tenancy/contact-groups/.
+func (c *Client) CreateContactGroup(
+	ctx context.Context, token string, in domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	payload, err := json.Marshal(contactGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal contact group create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/tenancy/contact-groups/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalContactGroup(raw)
+}
+
+// UpdateContactGroup partially updates a contact group via PATCH
+// /api/tenancy/contact-groups/<id>/.
+func (c *Client) UpdateContactGroup(
+	ctx context.Context, token string, objectID int, in domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	payload, err := json.Marshal(contactGroupWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal contact group update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/tenancy/contact-groups/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalContactGroup(raw)
+}
+
+// DeleteContactGroup deletes a contact group via DELETE
+// /api/tenancy/contact-groups/<id>/.
+func (c *Client) DeleteContactGroup(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/tenancy/contact-groups/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateContactRole creates a new contact role via POST
+// /api/tenancy/contact-roles/.
+func (c *Client) CreateContactRole(
+	ctx context.Context, token string, in domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	payload, err := json.Marshal(contactRoleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal contact role create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/tenancy/contact-roles/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalContactRole(raw)
+}
+
+// UpdateContactRole partially updates a contact role via PATCH
+// /api/tenancy/contact-roles/<id>/.
+func (c *Client) UpdateContactRole(
+	ctx context.Context, token string, objectID int, in domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	payload, err := json.Marshal(contactRoleWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal contact role update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/tenancy/contact-roles/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalContactRole(raw)
+}
+
+// DeleteContactRole deletes a contact role via DELETE
+// /api/tenancy/contact-roles/<id>/.
+func (c *Client) DeleteContactRole(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/tenancy/contact-roles/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateVirtualDisk creates a new virtual disk via POST
+// /api/virtualization/virtual-disks/.
+func (c *Client) CreateVirtualDisk(
+	ctx context.Context, token string, in domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	payload, err := json.Marshal(virtualDiskWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual disk create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/virtualization/virtual-disks/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualDisk(raw)
+}
+
+// UpdateVirtualDisk partially updates a virtual disk via PATCH
+// /api/virtualization/virtual-disks/<id>/.
+func (c *Client) UpdateVirtualDisk(
+	ctx context.Context, token string, objectID int, in domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	payload, err := json.Marshal(virtualDiskWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual disk update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/virtualization/virtual-disks/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualDisk(raw)
+}
+
+// DeleteVirtualDisk deletes a virtual disk via DELETE
+// /api/virtualization/virtual-disks/<id>/.
+func (c *Client) DeleteVirtualDisk(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/virtualization/virtual-disks/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateVirtualMachineType creates a new virtual machine type via POST
+// /api/virtualization/virtual-machine-types/.
+func (c *Client) CreateVirtualMachineType(
+	ctx context.Context, token string, in domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	payload, err := json.Marshal(virtualMachineTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual machine type create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/virtualization/virtual-machine-types/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualMachineType(raw)
+}
+
+// UpdateVirtualMachineType partially updates a virtual machine type via PATCH
+// /api/virtualization/virtual-machine-types/<id>/.
+func (c *Client) UpdateVirtualMachineType(
+	ctx context.Context, token string, objectID int, in domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	payload, err := json.Marshal(virtualMachineTypeWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal virtual machine type update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/virtualization/virtual-machine-types/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalVirtualMachineType(raw)
+}
+
+// DeleteVirtualMachineType deletes a virtual machine type via DELETE
+// /api/virtualization/virtual-machine-types/<id>/.
+func (c *Client) DeleteVirtualMachineType(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/virtualization/virtual-machine-types/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
 // — conversion functions —
 
 // siteWriteToWire converts a domain write DTO to the wire request model. The
@@ -5980,6 +6236,179 @@ func wireRIRToDomain(wire WireRIR) domain.RIR {
 		Slug:         wire.Slug,
 		Display:      wire.Display,
 		IsPrivate:    wire.IsPrivate,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// contactGroupWriteToWire converts a domain contact group write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func contactGroupWriteToWire(input domain.ContactGroupWrite) WireContactGroupWrite {
+	return WireContactGroupWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalContactGroup decodes a contact group response body into a
+// domain.ContactGroup.
+func unmarshalContactGroup(raw domain.RawObject) (*domain.ContactGroup, error) {
+	var w WireContactGroup
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal contact group: %w", err)
+	}
+	d := wireContactGroupToDomain(w)
+
+	return &d, nil
+}
+
+// wireContactGroupToDomain converts a wire contact group to the domain model.
+func wireContactGroupToDomain(wire WireContactGroup) domain.ContactGroup {
+	return domain.ContactGroup{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Display:      wire.Display,
+		Parent:       wireNestedToDomain(wire.Parent),
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// contactRoleWriteToWire converts a domain contact role write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func contactRoleWriteToWire(input domain.ContactRoleWrite) WireContactRoleWrite {
+	return WireContactRoleWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalContactRole decodes a contact role response body into a
+// domain.ContactRole.
+func unmarshalContactRole(raw domain.RawObject) (*domain.ContactRole, error) {
+	var w WireContactRole
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal contact role: %w", err)
+	}
+	d := wireContactRoleToDomain(w)
+
+	return &d, nil
+}
+
+// wireContactRoleToDomain converts a wire contact role to the domain model.
+func wireContactRoleToDomain(wire WireContactRole) domain.ContactRole {
+	return domain.ContactRole{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Display:      wire.Display,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// virtualDiskWriteToWire converts a domain virtual disk write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func virtualDiskWriteToWire(input domain.VirtualDiskWrite) WireVirtualDiskWrite {
+	return WireVirtualDiskWrite{
+		Name:           input.Name,
+		VirtualMachine: input.VirtualMachine,
+		Size:           input.Size,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+	}
+}
+
+// unmarshalVirtualDisk decodes a virtual disk response body into a
+// domain.VirtualDisk.
+func unmarshalVirtualDisk(raw domain.RawObject) (*domain.VirtualDisk, error) {
+	var w WireVirtualDisk
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual disk: %w", err)
+	}
+	d := wireVirtualDiskToDomain(w)
+
+	return &d, nil
+}
+
+// wireVirtualDiskToDomain converts a wire virtual disk to the domain model.
+func wireVirtualDiskToDomain(wire WireVirtualDisk) domain.VirtualDisk {
+	return domain.VirtualDisk{
+		ID:             wire.ID,
+		URL:            wire.URL,
+		Name:           wire.Name,
+		Display:        wire.Display,
+		VirtualMachine: wireNestedToDomain(wire.VirtualMachine),
+		Size:           wire.Size,
+		Description:    wire.Description,
+		Tags:           wireTagsToDomain(wire.Tags),
+		CustomFields:   wire.CustomFields,
+		Created:        wire.Created,
+		LastUpdated:    wire.LastUpdated,
+	}
+}
+
+// virtualMachineTypeWriteToWire converts a domain virtual machine type write
+// DTO to the wire request model. The fields map one-to-one; nil pointers on the
+// domain side remain nil on the wire side so json.Marshal omits them (required
+// for a partial PATCH body).
+func virtualMachineTypeWriteToWire(input domain.VirtualMachineTypeWrite) WireVirtualMachineTypeWrite {
+	return WireVirtualMachineTypeWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalVirtualMachineType decodes a virtual machine type response body into
+// a domain.VirtualMachineType.
+func unmarshalVirtualMachineType(raw domain.RawObject) (*domain.VirtualMachineType, error) {
+	var w WireVirtualMachineType
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal virtual machine type: %w", err)
+	}
+	d := wireVirtualMachineTypeToDomain(w)
+
+	return &d, nil
+}
+
+// wireVirtualMachineTypeToDomain converts a wire virtual machine type to the
+// domain model.
+func wireVirtualMachineTypeToDomain(wire WireVirtualMachineType) domain.VirtualMachineType {
+	return domain.VirtualMachineType{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Slug:         wire.Slug,
+		Display:      wire.Display,
 		Description:  wire.Description,
 		Tags:         wireTagsToDomain(wire.Tags),
 		CustomFields: wire.CustomFields,

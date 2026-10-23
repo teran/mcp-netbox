@@ -225,7 +225,7 @@ type CircuitsInput struct {
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
 type GetObjectInput struct {
-	ObjectType string            `json:"object_type" jsonschema:"object type: site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination, site_group, rack_group, rack_role, device_role, platform, virtual_chassis, power_panel, inventory_item_role, front_port, rear_port, console_port, console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, vlan_translation_rule,required"` //nolint:lll // struct tag cannot be split across lines
+	ObjectType string            `json:"object_type" jsonschema:"object type: site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination, site_group, rack_group, rack_role, device_role, platform, virtual_chassis, power_panel, inventory_item_role, front_port, rear_port, console_port, console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type,required"` //nolint:lll // struct tag cannot be split across lines
 	ID         int               `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
 	Params     map[string]string `json:"params,omitempty" jsonschema:"additional query parameters to pass to NetBox (optional)"` //nolint:lll // struct tag cannot be split across lines
 }
@@ -6444,6 +6444,42 @@ type RIRsInput struct {
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
+// ContactGroupsInput represents the input fields for the get_contact_groups
+// tool.
+type ContactGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent contact group ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ContactRolesInput represents the input fields for the get_contact_roles tool.
+type ContactRolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualDisksInput represents the input fields for the get_virtual_disks tool.
+type VirtualDisksInput struct {
+	Q              string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	VirtualMachine string `json:"virtual_machine,omitempty" jsonschema:"filter by virtual machine ID"`
+	Tag            string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page           int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize       int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualMachineTypesInput represents the input fields for the
+// get_virtual_machine_types tool.
+type VirtualMachineTypesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
 // AggregatesInput represents the input fields for the get_aggregates tool.
 type AggregatesInput struct {
 	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
@@ -6997,6 +7033,146 @@ type RIRDeleteInput struct {
 // RIROutput represents the output for the create/update RIR tools.
 type RIROutput struct {
 	Data domain.RIR `json:"data"`
+}
+
+// ContactGroupCreateInput represents the writable fields for creating a contact
+// group.
+type ContactGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"contact group name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"ID of the parent contact group"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactGroupUpdateInput represents the writable fields for updating a contact
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type ContactGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the contact group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"contact group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"ID of the parent contact group"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactGroupDeleteInput represents the input fields for deleting a contact
+// group.
+type ContactGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the contact group to delete,required"`
+}
+
+// ContactGroupOutput represents the output for the create/update contact group
+// tools.
+type ContactGroupOutput struct {
+	Data domain.ContactGroup `json:"data"`
+}
+
+// ContactRoleCreateInput represents the writable fields for creating a contact
+// role.
+type ContactRoleCreateInput struct {
+	Name         string         `json:"name" jsonschema:"contact role name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactRoleUpdateInput represents the writable fields for updating a contact
+// role. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type ContactRoleUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the contact role to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"contact role name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactRoleDeleteInput represents the input fields for deleting a contact
+// role.
+type ContactRoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the contact role to delete,required"`
+}
+
+// ContactRoleOutput represents the output for the create/update contact role
+// tools.
+type ContactRoleOutput struct {
+	Data domain.ContactRole `json:"data"`
+}
+
+// VirtualDiskCreateInput represents the writable fields for creating a virtual
+// disk.
+type VirtualDiskCreateInput struct {
+	Name           string         `json:"name" jsonschema:"virtual disk name (required)"`
+	VirtualMachine *int           `json:"virtual_machine,omitempty" jsonschema:"ID of the parent virtual machine"`
+	Size           *int           `json:"size,omitempty" jsonschema:"disk size in MB"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualDiskUpdateInput represents the writable fields for updating a virtual
+// disk. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type VirtualDiskUpdateInput struct {
+	ID             int            `json:"id" jsonschema:"numeric ID of the virtual disk to update,required"`
+	Name           *string        `json:"name,omitempty" jsonschema:"virtual disk name"`
+	VirtualMachine *int           `json:"virtual_machine,omitempty" jsonschema:"ID of the parent virtual machine"`
+	Size           *int           `json:"size,omitempty" jsonschema:"disk size in MB"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualDiskDeleteInput represents the input fields for deleting a virtual
+// disk.
+type VirtualDiskDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual disk to delete,required"`
+}
+
+// VirtualDiskOutput represents the output for the create/update virtual disk
+// tools.
+type VirtualDiskOutput struct {
+	Data domain.VirtualDisk `json:"data"`
+}
+
+// VirtualMachineTypeCreateInput represents the writable fields for creating a
+// virtual machine type.
+type VirtualMachineTypeCreateInput struct {
+	Name         string         `json:"name" jsonschema:"virtual machine type name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualMachineTypeUpdateInput represents the writable fields for updating a
+// virtual machine type. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type VirtualMachineTypeUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the virtual machine type to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"virtual machine type name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualMachineTypeDeleteInput represents the input fields for deleting a
+// virtual machine type.
+type VirtualMachineTypeDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual machine type to delete,required"`
+}
+
+// VirtualMachineTypeOutput represents the output for the create/update virtual
+// machine type tools.
+type VirtualMachineTypeOutput struct {
+	Data domain.VirtualMachineType `json:"data"`
 }
 
 // AggregateCreateInput represents the writable fields for creating an aggregate.
@@ -7759,6 +7935,122 @@ func rirWriteFromUpdate(input RIRUpdateInput) domain.RIRWrite {
 	}
 	write.Slug = input.Slug
 	write.IsPrivate = input.IsPrivate
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// contactGroupWriteFromCreate builds a domain.ContactGroupWrite from a create
+// input.
+func contactGroupWriteFromCreate(input ContactGroupCreateInput) domain.ContactGroupWrite {
+	return domain.ContactGroupWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// contactGroupWriteFromUpdate builds a domain.ContactGroupWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func contactGroupWriteFromUpdate(input ContactGroupUpdateInput) domain.ContactGroupWrite {
+	write := domain.ContactGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// contactRoleWriteFromCreate builds a domain.ContactRoleWrite from a create
+// input.
+func contactRoleWriteFromCreate(input ContactRoleCreateInput) domain.ContactRoleWrite {
+	return domain.ContactRoleWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// contactRoleWriteFromUpdate builds a domain.ContactRoleWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func contactRoleWriteFromUpdate(input ContactRoleUpdateInput) domain.ContactRoleWrite {
+	write := domain.ContactRoleWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualDiskWriteFromCreate builds a domain.VirtualDiskWrite from a create
+// input.
+func virtualDiskWriteFromCreate(input VirtualDiskCreateInput) domain.VirtualDiskWrite {
+	return domain.VirtualDiskWrite{
+		Name:           input.Name,
+		VirtualMachine: input.VirtualMachine,
+		Size:           input.Size,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+	}
+}
+
+// virtualDiskWriteFromUpdate builds a domain.VirtualDiskWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func virtualDiskWriteFromUpdate(input VirtualDiskUpdateInput) domain.VirtualDiskWrite {
+	write := domain.VirtualDiskWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.VirtualMachine = input.VirtualMachine
+	write.Size = input.Size
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualMachineTypeWriteFromCreate builds a domain.VirtualMachineTypeWrite from
+// a create input.
+func virtualMachineTypeWriteFromCreate(input VirtualMachineTypeCreateInput) domain.VirtualMachineTypeWrite {
+	return domain.VirtualMachineTypeWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// virtualMachineTypeWriteFromUpdate builds a domain.VirtualMachineTypeWrite from
+// an update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func virtualMachineTypeWriteFromUpdate(input VirtualMachineTypeUpdateInput) domain.VirtualMachineTypeWrite {
+	write := domain.VirtualMachineTypeWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
 	write.Description = input.Description
 	write.Tags = input.Tags
 	write.CustomFields = input.CustomFields
@@ -9333,6 +9625,421 @@ func NewDeleteRIRHandler(
 		}
 
 		if err := service.DeleteRIR(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetContactGroupsHandler creates a handler for the get_contact_groups tool.
+func NewGetContactGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactGroupsInput, PaginatedOutput[domain.ContactGroup]] {
+	return newListHandler(listHandlerConfig[ContactGroupsInput, domain.ContactGroup]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.ContactGroup], error) {
+			return resolveService(ctx, svc).ListContactGroups(ctx, params)
+		},
+		buildParams: func(input ContactGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list contact groups",
+	})
+}
+
+// NewCreateContactGroupHandler creates a handler for the create_contact_group
+// tool.
+func NewCreateContactGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactGroupCreateInput, ContactGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactGroupCreateInput,
+	) (*mcp.CallToolResult, ContactGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ContactGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateContactGroup(ctx, contactGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ContactGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateContactGroupHandler creates a handler for the update_contact_group
+// tool.
+func NewUpdateContactGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactGroupUpdateInput, ContactGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactGroupUpdateInput,
+	) (*mcp.CallToolResult, ContactGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ContactGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateContactGroup(ctx, input.ID, contactGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ContactGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteContactGroupHandler creates a handler for the delete_contact_group
+// tool.
+func NewDeleteContactGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteContactGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetContactRolesHandler creates a handler for the get_contact_roles tool.
+func NewGetContactRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactRolesInput, PaginatedOutput[domain.ContactRole]] {
+	return newListHandler(listHandlerConfig[ContactRolesInput, domain.ContactRole]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.ContactRole], error) {
+			return resolveService(ctx, svc).ListContactRoles(ctx, params)
+		},
+		buildParams: func(input ContactRolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list contact roles",
+	})
+}
+
+// NewCreateContactRoleHandler creates a handler for the create_contact_role
+// tool.
+func NewCreateContactRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactRoleCreateInput, ContactRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactRoleCreateInput,
+	) (*mcp.CallToolResult, ContactRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactRoleOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ContactRoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateContactRole(ctx, contactRoleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ContactRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactRoleOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateContactRoleHandler creates a handler for the update_contact_role
+// tool.
+func NewUpdateContactRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactRoleUpdateInput, ContactRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactRoleUpdateInput,
+	) (*mcp.CallToolResult, ContactRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactRoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ContactRoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateContactRole(ctx, input.ID, contactRoleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ContactRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactRoleOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteContactRoleHandler creates a handler for the delete_contact_role
+// tool.
+func NewDeleteContactRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactRoleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactRoleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteContactRole(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualDisksHandler creates a handler for the get_virtual_disks tool.
+func NewGetVirtualDisksHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualDisksInput, PaginatedOutput[domain.VirtualDisk]] {
+	return newListHandler(listHandlerConfig[VirtualDisksInput, domain.VirtualDisk]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VirtualDisk], error) {
+			return resolveService(ctx, svc).ListVirtualDisks(ctx, params)
+		},
+		buildParams: func(input VirtualDisksInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "virtual_machine", input.VirtualMachine)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual disks",
+	})
+}
+
+// NewCreateVirtualDiskHandler creates a handler for the create_virtual_disk
+// tool.
+func NewCreateVirtualDiskHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualDiskCreateInput, VirtualDiskOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualDiskCreateInput,
+	) (*mcp.CallToolResult, VirtualDiskOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualDiskOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualDiskOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualDisk(ctx, virtualDiskWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualDiskOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualDiskOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualDiskHandler creates a handler for the update_virtual_disk
+// tool.
+func NewUpdateVirtualDiskHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualDiskUpdateInput, VirtualDiskOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualDiskUpdateInput,
+	) (*mcp.CallToolResult, VirtualDiskOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualDiskOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualDiskOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualDisk(ctx, input.ID, virtualDiskWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualDiskOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualDiskOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualDiskHandler creates a handler for the delete_virtual_disk
+// tool.
+func NewDeleteVirtualDiskHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualDiskDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualDiskDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualDisk(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualMachineTypesHandler creates a handler for the
+// get_virtual_machine_types tool.
+func NewGetVirtualMachineTypesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualMachineTypesInput, PaginatedOutput[domain.VirtualMachineType]] {
+	return newListHandler(listHandlerConfig[VirtualMachineTypesInput, domain.VirtualMachineType]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualMachineType], error) {
+			return resolveService(ctx, svc).ListVirtualMachineTypes(ctx, params)
+		},
+		buildParams: func(input VirtualMachineTypesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual machine types",
+	})
+}
+
+// NewCreateVirtualMachineTypeHandler creates a handler for the
+// create_virtual_machine_type tool.
+func NewCreateVirtualMachineTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualMachineTypeCreateInput, VirtualMachineTypeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualMachineTypeCreateInput,
+	) (*mcp.CallToolResult, VirtualMachineTypeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineTypeOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineTypeOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualMachineType(ctx, virtualMachineTypeWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualMachineTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualMachineTypeOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualMachineTypeHandler creates a handler for the
+// update_virtual_machine_type tool.
+func NewUpdateVirtualMachineTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualMachineTypeUpdateInput, VirtualMachineTypeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualMachineTypeUpdateInput,
+	) (*mcp.CallToolResult, VirtualMachineTypeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineTypeOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineTypeOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualMachineType(ctx, input.ID, virtualMachineTypeWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualMachineTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualMachineTypeOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualMachineTypeHandler creates a handler for the
+// delete_virtual_machine_type tool.
+func NewDeleteVirtualMachineTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualMachineTypeDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualMachineTypeDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualMachineType(ctx, input.ID); err != nil {
 			res, e := writeErrorResult(err)
 
 			return res, struct{}{}, e

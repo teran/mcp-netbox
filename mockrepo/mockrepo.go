@@ -589,6 +589,50 @@ type MockRepo struct {
 		ctx context.Context, token string, id int, in domain.VLANTranslationRuleWrite,
 	) (*domain.VLANTranslationRule, error)
 	DeleteVLANTranslationRuleFunc func(ctx context.Context, token string, id int) error
+
+	ListContactGroupsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ContactGroup], error)
+	CreateContactGroupFunc func(
+		ctx context.Context, token string, in domain.ContactGroupWrite,
+	) (*domain.ContactGroup, error)
+	UpdateContactGroupFunc func(
+		ctx context.Context, token string, id int, in domain.ContactGroupWrite,
+	) (*domain.ContactGroup, error)
+	DeleteContactGroupFunc func(ctx context.Context, token string, id int) error
+
+	ListContactRolesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ContactRole], error)
+	CreateContactRoleFunc func(
+		ctx context.Context, token string, in domain.ContactRoleWrite,
+	) (*domain.ContactRole, error)
+	UpdateContactRoleFunc func(
+		ctx context.Context, token string, id int, in domain.ContactRoleWrite,
+	) (*domain.ContactRole, error)
+	DeleteContactRoleFunc func(ctx context.Context, token string, id int) error
+
+	ListVirtualDisksFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.VirtualDisk], error)
+	CreateVirtualDiskFunc func(
+		ctx context.Context, token string, in domain.VirtualDiskWrite,
+	) (*domain.VirtualDisk, error)
+	UpdateVirtualDiskFunc func(
+		ctx context.Context, token string, id int, in domain.VirtualDiskWrite,
+	) (*domain.VirtualDisk, error)
+	DeleteVirtualDiskFunc func(ctx context.Context, token string, id int) error
+
+	ListVirtualMachineTypesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.VirtualMachineType], error)
+	CreateVirtualMachineTypeFunc func(
+		ctx context.Context, token string, in domain.VirtualMachineTypeWrite,
+	) (*domain.VirtualMachineType, error)
+	UpdateVirtualMachineTypeFunc func(
+		ctx context.Context, token string, id int, in domain.VirtualMachineTypeWrite,
+	) (*domain.VirtualMachineType, error)
+	DeleteVirtualMachineTypeFunc func(ctx context.Context, token string, id int) error
 }
 
 // ListSites delegates to ListSitesFunc.
@@ -2020,6 +2064,110 @@ func (m *MockRepo) UpdateVLANTranslationRule(
 // DeleteVLANTranslationRule delegates to DeleteVLANTranslationRuleFunc.
 func (m *MockRepo) DeleteVLANTranslationRule(ctx context.Context, token string, id int) error {
 	return m.DeleteVLANTranslationRuleFunc(ctx, token, id)
+}
+
+// ListContactGroups delegates to ListContactGroupsFunc.
+func (m *MockRepo) ListContactGroups(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ContactGroup], error) {
+	return m.ListContactGroupsFunc(ctx, token, params)
+}
+
+// CreateContactGroup delegates to CreateContactGroupFunc.
+func (m *MockRepo) CreateContactGroup(
+	ctx context.Context, token string, in domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	return m.CreateContactGroupFunc(ctx, token, in)
+}
+
+// UpdateContactGroup delegates to UpdateContactGroupFunc.
+func (m *MockRepo) UpdateContactGroup(
+	ctx context.Context, token string, id int, in domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	return m.UpdateContactGroupFunc(ctx, token, id, in)
+}
+
+// DeleteContactGroup delegates to DeleteContactGroupFunc.
+func (m *MockRepo) DeleteContactGroup(ctx context.Context, token string, id int) error {
+	return m.DeleteContactGroupFunc(ctx, token, id)
+}
+
+// ListContactRoles delegates to ListContactRolesFunc.
+func (m *MockRepo) ListContactRoles(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ContactRole], error) {
+	return m.ListContactRolesFunc(ctx, token, params)
+}
+
+// CreateContactRole delegates to CreateContactRoleFunc.
+func (m *MockRepo) CreateContactRole(
+	ctx context.Context, token string, in domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	return m.CreateContactRoleFunc(ctx, token, in)
+}
+
+// UpdateContactRole delegates to UpdateContactRoleFunc.
+func (m *MockRepo) UpdateContactRole(
+	ctx context.Context, token string, id int, in domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	return m.UpdateContactRoleFunc(ctx, token, id, in)
+}
+
+// DeleteContactRole delegates to DeleteContactRoleFunc.
+func (m *MockRepo) DeleteContactRole(ctx context.Context, token string, id int) error {
+	return m.DeleteContactRoleFunc(ctx, token, id)
+}
+
+// ListVirtualDisks delegates to ListVirtualDisksFunc.
+func (m *MockRepo) ListVirtualDisks(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualDisk], error) {
+	return m.ListVirtualDisksFunc(ctx, token, params)
+}
+
+// CreateVirtualDisk delegates to CreateVirtualDiskFunc.
+func (m *MockRepo) CreateVirtualDisk(
+	ctx context.Context, token string, in domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	return m.CreateVirtualDiskFunc(ctx, token, in)
+}
+
+// UpdateVirtualDisk delegates to UpdateVirtualDiskFunc.
+func (m *MockRepo) UpdateVirtualDisk(
+	ctx context.Context, token string, id int, in domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	return m.UpdateVirtualDiskFunc(ctx, token, id, in)
+}
+
+// DeleteVirtualDisk delegates to DeleteVirtualDiskFunc.
+func (m *MockRepo) DeleteVirtualDisk(ctx context.Context, token string, id int) error {
+	return m.DeleteVirtualDiskFunc(ctx, token, id)
+}
+
+// ListVirtualMachineTypes delegates to ListVirtualMachineTypesFunc.
+func (m *MockRepo) ListVirtualMachineTypes(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualMachineType], error) {
+	return m.ListVirtualMachineTypesFunc(ctx, token, params)
+}
+
+// CreateVirtualMachineType delegates to CreateVirtualMachineTypeFunc.
+func (m *MockRepo) CreateVirtualMachineType(
+	ctx context.Context, token string, in domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	return m.CreateVirtualMachineTypeFunc(ctx, token, in)
+}
+
+// UpdateVirtualMachineType delegates to UpdateVirtualMachineTypeFunc.
+func (m *MockRepo) UpdateVirtualMachineType(
+	ctx context.Context, token string, id int, in domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	return m.UpdateVirtualMachineTypeFunc(ctx, token, id, in)
+}
+
+// DeleteVirtualMachineType delegates to DeleteVirtualMachineTypeFunc.
+func (m *MockRepo) DeleteVirtualMachineType(ctx context.Context, token string, id int) error {
+	return m.DeleteVirtualMachineTypeFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -3478,5 +3626,109 @@ func (r *NilRepo) UpdateVLANTranslationRule(
 
 // DeleteVLANTranslationRule always succeeds.
 func (r *NilRepo) DeleteVLANTranslationRule(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListContactGroups returns an empty contact group page.
+func (r *NilRepo) ListContactGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ContactGroup], error) {
+	return &domain.PaginatedResponse[domain.ContactGroup]{Count: 0, Results: []domain.ContactGroup{}}, nil
+}
+
+// CreateContactGroup returns a contact group with id 1.
+func (r *NilRepo) CreateContactGroup(
+	_ context.Context, _ string, in domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	return &domain.ContactGroup{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateContactGroup returns the contact group with the given id.
+func (r *NilRepo) UpdateContactGroup(
+	_ context.Context, _ string, id int, in domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	return &domain.ContactGroup{ID: id, Name: in.Name}, nil
+}
+
+// DeleteContactGroup always succeeds.
+func (r *NilRepo) DeleteContactGroup(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListContactRoles returns an empty contact role page.
+func (r *NilRepo) ListContactRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ContactRole], error) {
+	return &domain.PaginatedResponse[domain.ContactRole]{Count: 0, Results: []domain.ContactRole{}}, nil
+}
+
+// CreateContactRole returns a contact role with id 1.
+func (r *NilRepo) CreateContactRole(
+	_ context.Context, _ string, in domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	return &domain.ContactRole{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateContactRole returns the contact role with the given id.
+func (r *NilRepo) UpdateContactRole(
+	_ context.Context, _ string, id int, in domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	return &domain.ContactRole{ID: id, Name: in.Name}, nil
+}
+
+// DeleteContactRole always succeeds.
+func (r *NilRepo) DeleteContactRole(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListVirtualDisks returns an empty virtual disk page.
+func (r *NilRepo) ListVirtualDisks(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualDisk], error) {
+	return &domain.PaginatedResponse[domain.VirtualDisk]{Count: 0, Results: []domain.VirtualDisk{}}, nil
+}
+
+// CreateVirtualDisk returns a virtual disk with id 1.
+func (r *NilRepo) CreateVirtualDisk(
+	_ context.Context, _ string, in domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	return &domain.VirtualDisk{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateVirtualDisk returns the virtual disk with the given id.
+func (r *NilRepo) UpdateVirtualDisk(
+	_ context.Context, _ string, id int, in domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	return &domain.VirtualDisk{ID: id, Name: in.Name}, nil
+}
+
+// DeleteVirtualDisk always succeeds.
+func (r *NilRepo) DeleteVirtualDisk(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListVirtualMachineTypes returns an empty virtual machine type page.
+func (r *NilRepo) ListVirtualMachineTypes(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualMachineType], error) {
+	return &domain.PaginatedResponse[domain.VirtualMachineType]{Count: 0, Results: []domain.VirtualMachineType{}}, nil
+}
+
+// CreateVirtualMachineType returns a virtual machine type with id 1.
+func (r *NilRepo) CreateVirtualMachineType(
+	_ context.Context, _ string, in domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	return &domain.VirtualMachineType{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateVirtualMachineType returns the virtual machine type with the given id.
+func (r *NilRepo) UpdateVirtualMachineType(
+	_ context.Context, _ string, id int, in domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	return &domain.VirtualMachineType{ID: id, Name: in.Name}, nil
+}
+
+// DeleteVirtualMachineType always succeeds.
+func (r *NilRepo) DeleteVirtualMachineType(_ context.Context, _ string, _ int) error {
 	return nil
 }

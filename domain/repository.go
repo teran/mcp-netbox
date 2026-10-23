@@ -355,4 +355,34 @@ type NetworkRepository interface {
 		ctx context.Context, token string, id int, in VLANTranslationRuleWrite,
 	) (*VLANTranslationRule, error)
 	DeleteVLANTranslationRule(ctx context.Context, token string, id int) error
+
+	ListContactGroups(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[ContactGroup], error)
+	CreateContactGroup(ctx context.Context, token string, in ContactGroupWrite) (*ContactGroup, error)
+	UpdateContactGroup(ctx context.Context, token string, id int, in ContactGroupWrite) (*ContactGroup, error)
+	DeleteContactGroup(ctx context.Context, token string, id int) error
+
+	ListContactRoles(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[ContactRole], error)
+	CreateContactRole(ctx context.Context, token string, in ContactRoleWrite) (*ContactRole, error)
+	UpdateContactRole(ctx context.Context, token string, id int, in ContactRoleWrite) (*ContactRole, error)
+	DeleteContactRole(ctx context.Context, token string, id int) error
+
+	ListVirtualDisks(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[VirtualDisk], error)
+	CreateVirtualDisk(ctx context.Context, token string, in VirtualDiskWrite) (*VirtualDisk, error)
+	UpdateVirtualDisk(ctx context.Context, token string, id int, in VirtualDiskWrite) (*VirtualDisk, error)
+	DeleteVirtualDisk(ctx context.Context, token string, id int) error
+
+	ListVirtualMachineTypes(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[VirtualMachineType], error)
+	CreateVirtualMachineType(ctx context.Context, token string, in VirtualMachineTypeWrite) (*VirtualMachineType, error)
+	UpdateVirtualMachineType(
+		ctx context.Context, token string, id int, in VirtualMachineTypeWrite,
+	) (*VirtualMachineType, error)
+	DeleteVirtualMachineType(ctx context.Context, token string, id int) error
 }

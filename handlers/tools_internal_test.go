@@ -477,6 +477,94 @@ func (s *stubRepo) DeleteContact(_ context.Context, _ string, _ int) error {
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) ListContactGroups(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ContactGroup], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateContactGroup(
+	_ context.Context, _ string, _ domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateContactGroup(
+	_ context.Context, _ string, _ int, _ domain.ContactGroupWrite,
+) (*domain.ContactGroup, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteContactGroup(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListContactRoles(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ContactRole], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateContactRole(
+	_ context.Context, _ string, _ domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateContactRole(
+	_ context.Context, _ string, _ int, _ domain.ContactRoleWrite,
+) (*domain.ContactRole, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteContactRole(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListVirtualDisks(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualDisk], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateVirtualDisk(
+	_ context.Context, _ string, _ domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVirtualDisk(
+	_ context.Context, _ string, _ int, _ domain.VirtualDiskWrite,
+) (*domain.VirtualDisk, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVirtualDisk(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListVirtualMachineTypes(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.VirtualMachineType], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateVirtualMachineType(
+	_ context.Context, _ string, _ domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateVirtualMachineType(
+	_ context.Context, _ string, _ int, _ domain.VirtualMachineTypeWrite,
+) (*domain.VirtualMachineType, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteVirtualMachineType(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
 func (s *stubRepo) ListSiteGroups(
 	_ context.Context, _ string, _ map[string]string,
 ) (*domain.PaginatedResponse[domain.SiteGroup], error) {

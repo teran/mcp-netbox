@@ -838,6 +838,102 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 				return res, err
 			},
 		},
+		{
+			name: "create_contact_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateContactGroupHandler(nil)(ctx, nil, ContactGroupCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_contact_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateContactGroupHandler(nil)(ctx, nil, ContactGroupUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_contact_group",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteContactGroupHandler(nil)(ctx, nil, ContactGroupDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_contact_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateContactRoleHandler(nil)(ctx, nil, ContactRoleCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_contact_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateContactRoleHandler(nil)(ctx, nil, ContactRoleUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_contact_role",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteContactRoleHandler(nil)(ctx, nil, ContactRoleDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_virtual_disk",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateVirtualDiskHandler(nil)(ctx, nil, VirtualDiskCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_virtual_disk",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateVirtualDiskHandler(nil)(ctx, nil, VirtualDiskUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_virtual_disk",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteVirtualDiskHandler(nil)(ctx, nil, VirtualDiskDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_virtual_machine_type",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateVirtualMachineTypeHandler(nil)(ctx, nil, VirtualMachineTypeCreateInput{Name: "A"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_virtual_machine_type",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateVirtualMachineTypeHandler(nil)(ctx, nil, VirtualMachineTypeUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_virtual_machine_type",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteVirtualMachineTypeHandler(nil)(ctx, nil, VirtualMachineTypeDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
 	}
 
 	for _, tc := range cases {

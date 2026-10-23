@@ -112,6 +112,34 @@ func TestListEntities_UnmarshalError(t *testing.T) {
 				return err
 			},
 		},
+		{
+			"ListContactGroups", func(c *Client) error {
+				_, err := c.ListContactGroups(context.Background(), "t", nil)
+
+				return err
+			},
+		},
+		{
+			"ListContactRoles", func(c *Client) error {
+				_, err := c.ListContactRoles(context.Background(), "t", nil)
+
+				return err
+			},
+		},
+		{
+			"ListVirtualDisks", func(c *Client) error {
+				_, err := c.ListVirtualDisks(context.Background(), "t", nil)
+
+				return err
+			},
+		},
+		{
+			"ListVirtualMachineTypes", func(c *Client) error {
+				_, err := c.ListVirtualMachineTypes(context.Background(), "t", nil)
+
+				return err
+			},
+		},
 	}
 
 	for _, testCase := range cases {
@@ -229,6 +257,34 @@ func TestUnmarshalEntities_Error(t *testing.T) {
 		{
 			"unmarshalMACAddress", func(raw domain.RawObject) error {
 				_, err := unmarshalMACAddress(raw)
+
+				return err
+			},
+		},
+		{
+			"unmarshalContactGroup", func(raw domain.RawObject) error {
+				_, err := unmarshalContactGroup(raw)
+
+				return err
+			},
+		},
+		{
+			"unmarshalContactRole", func(raw domain.RawObject) error {
+				_, err := unmarshalContactRole(raw)
+
+				return err
+			},
+		},
+		{
+			"unmarshalVirtualDisk", func(raw domain.RawObject) error {
+				_, err := unmarshalVirtualDisk(raw)
+
+				return err
+			},
+		},
+		{
+			"unmarshalVirtualMachineType", func(raw domain.RawObject) error {
+				_, err := unmarshalVirtualMachineType(raw)
 
 				return err
 			},

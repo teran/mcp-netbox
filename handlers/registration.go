@@ -3322,6 +3322,294 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 
 	registerTool(
 		server,
+		toolDefIndex()["get_contact_groups"],
+		metrics,
+		"get_contact_groups",
+		WrapToolHandler[ContactGroupsInput, PaginatedOutput[domain.ContactGroup]](
+			metrics,
+			"get_contact_groups",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ContactGroupsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ContactGroup], error) {
+				return NewGetContactGroupsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_contact_group"],
+		metrics,
+		"create_contact_group",
+		WrapToolHandler[ContactGroupCreateInput, ContactGroupOutput](
+			metrics,
+			"create_contact_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ContactGroupCreateInput,
+			) (*mcp.CallToolResult, ContactGroupOutput, error) {
+				return NewCreateContactGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_contact_group"],
+		metrics,
+		"update_contact_group",
+		WrapToolHandler[ContactGroupUpdateInput, ContactGroupOutput](
+			metrics,
+			"update_contact_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ContactGroupUpdateInput,
+			) (*mcp.CallToolResult, ContactGroupOutput, error) {
+				return NewUpdateContactGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_contact_group"],
+		metrics,
+		"delete_contact_group",
+		WrapToolHandler[ContactGroupDeleteInput, struct{}](
+			metrics,
+			"delete_contact_group",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ContactGroupDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteContactGroupHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_contact_roles"],
+		metrics,
+		"get_contact_roles",
+		WrapToolHandler[ContactRolesInput, PaginatedOutput[domain.ContactRole]](
+			metrics,
+			"get_contact_roles",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ContactRolesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ContactRole], error) {
+				return NewGetContactRolesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_contact_role"],
+		metrics,
+		"create_contact_role",
+		WrapToolHandler[ContactRoleCreateInput, ContactRoleOutput](
+			metrics,
+			"create_contact_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ContactRoleCreateInput,
+			) (*mcp.CallToolResult, ContactRoleOutput, error) {
+				return NewCreateContactRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_contact_role"],
+		metrics,
+		"update_contact_role",
+		WrapToolHandler[ContactRoleUpdateInput, ContactRoleOutput](
+			metrics,
+			"update_contact_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ContactRoleUpdateInput,
+			) (*mcp.CallToolResult, ContactRoleOutput, error) {
+				return NewUpdateContactRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_contact_role"],
+		metrics,
+		"delete_contact_role",
+		WrapToolHandler[ContactRoleDeleteInput, struct{}](
+			metrics,
+			"delete_contact_role",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ContactRoleDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteContactRoleHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_virtual_disks"],
+		metrics,
+		"get_virtual_disks",
+		WrapToolHandler[VirtualDisksInput, PaginatedOutput[domain.VirtualDisk]](
+			metrics,
+			"get_virtual_disks",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualDisksInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.VirtualDisk], error) {
+				return NewGetVirtualDisksHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_virtual_disk"],
+		metrics,
+		"create_virtual_disk",
+		WrapToolHandler[VirtualDiskCreateInput, VirtualDiskOutput](
+			metrics,
+			"create_virtual_disk",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualDiskCreateInput,
+			) (*mcp.CallToolResult, VirtualDiskOutput, error) {
+				return NewCreateVirtualDiskHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_virtual_disk"],
+		metrics,
+		"update_virtual_disk",
+		WrapToolHandler[VirtualDiskUpdateInput, VirtualDiskOutput](
+			metrics,
+			"update_virtual_disk",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualDiskUpdateInput,
+			) (*mcp.CallToolResult, VirtualDiskOutput, error) {
+				return NewUpdateVirtualDiskHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_virtual_disk"],
+		metrics,
+		"delete_virtual_disk",
+		WrapToolHandler[VirtualDiskDeleteInput, struct{}](
+			metrics,
+			"delete_virtual_disk",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualDiskDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteVirtualDiskHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_virtual_machine_types"],
+		metrics,
+		"get_virtual_machine_types",
+		WrapToolHandler[VirtualMachineTypesInput, PaginatedOutput[domain.VirtualMachineType]](
+			metrics,
+			"get_virtual_machine_types",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualMachineTypesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.VirtualMachineType], error) {
+				return NewGetVirtualMachineTypesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_virtual_machine_type"],
+		metrics,
+		"create_virtual_machine_type",
+		WrapToolHandler[VirtualMachineTypeCreateInput, VirtualMachineTypeOutput](
+			metrics,
+			"create_virtual_machine_type",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualMachineTypeCreateInput,
+			) (*mcp.CallToolResult, VirtualMachineTypeOutput, error) {
+				return NewCreateVirtualMachineTypeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_virtual_machine_type"],
+		metrics,
+		"update_virtual_machine_type",
+		WrapToolHandler[VirtualMachineTypeUpdateInput, VirtualMachineTypeOutput](
+			metrics,
+			"update_virtual_machine_type",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualMachineTypeUpdateInput,
+			) (*mcp.CallToolResult, VirtualMachineTypeOutput, error) {
+				return NewUpdateVirtualMachineTypeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_virtual_machine_type"],
+		metrics,
+		"delete_virtual_machine_type",
+		WrapToolHandler[VirtualMachineTypeDeleteInput, struct{}](
+			metrics,
+			"delete_virtual_machine_type",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in VirtualMachineTypeDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteVirtualMachineTypeHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
 		toolDefIndex()["get_aggregates"],
 		metrics,
 		"get_aggregates",

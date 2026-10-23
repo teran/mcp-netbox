@@ -423,6 +423,53 @@ type WireContactWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireContactGroupWrite is the wire request model for tenancy contact group
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields. Parent is the numeric NetBox ID of the parent contact group.
+type WireContactGroupWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Parent       *int           `json:"parent,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireContactRoleWrite is the wire request model for tenancy contact role
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireContactRoleWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireVirtualDiskWrite is the wire request model for virtualization virtual
+// disk create/update (POST/PATCH body). Its json tags intentionally mirror
+// NetBox's writable fields. VirtualMachine is the numeric NetBox ID of the
+// parent virtual machine.
+type WireVirtualDiskWrite struct {
+	Name           string         `json:"name,omitempty"`
+	VirtualMachine *int           `json:"virtual_machine,omitempty"`
+	Size           *int           `json:"size,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireVirtualMachineTypeWrite is the wire request model for virtualization
+// virtual machine type create/update (POST/PATCH body). Its json tags
+// intentionally mirror NetBox's writable fields.
+type WireVirtualMachineTypeWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Slug         *string        `json:"slug,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
 // WireSiteGroupWrite is the wire request model for DCIM site group
 // create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
 // writable fields.
@@ -1311,6 +1358,65 @@ type (
 		Link         string         `json:"link,omitempty"`
 		Description  string         `json:"description,omitempty"`
 		Comments     string         `json:"comments,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireContactGroup mirrors the corresponding NetBox JSON API response object.
+	WireContactGroup struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Parent       *WireNested    `json:"parent"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireContactRole mirrors the corresponding NetBox JSON API response object.
+	WireContactRole struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireVirtualDisk mirrors the corresponding NetBox JSON API response object.
+	WireVirtualDisk struct {
+		ID             int            `json:"id"`
+		URL            string         `json:"url"`
+		Name           string         `json:"name"`
+		Display        string         `json:"display,omitempty"`
+		VirtualMachine *WireNested    `json:"virtual_machine"`
+		Size           int            `json:"size"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []WireTag      `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
+	}
+
+	// WireVirtualMachineType mirrors the corresponding NetBox JSON API response
+	// object.
+	WireVirtualMachineType struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Slug         string         `json:"slug"`
+		Display      string         `json:"display,omitempty"`
+		Description  string         `json:"description,omitempty"`
 		Tags         []WireTag      `json:"tags,omitempty"`
 		CustomFields map[string]any `json:"custom_fields,omitempty"`
 		Created      string         `json:"created"`
