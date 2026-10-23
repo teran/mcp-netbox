@@ -56,6 +56,48 @@ func TestNetworkService_ListSites(t *testing.T) {
 	})
 }
 
+func TestNetworkService_ListRegions(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRegionsFunc: func(
+				_ context.Context, token string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Region], error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want %q", token, "test-token")
+				}
+
+				return &domain.PaginatedResponse[domain.Region]{
+					Count:   1,
+					Results: []domain.Region{{ID: 1, Name: "Test"}},
+				}, nil
+			},
+		})
+		resp, err := svc.ListRegions(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListRegions() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("Count = %d, want %d", resp.Count, 1)
+		}
+	})
+
+	t.Run("error propagation", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRegionsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Region], error) {
+				return nil, errors.New("repo error")
+			},
+		})
+		_, err := svc.ListRegions(context.Background(), nil)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+	})
+}
+
 func TestNetworkService_ListDevices(t *testing.T) {
 	t.Parallel()
 
@@ -656,6 +698,157 @@ func TestNetworkService_DeleteSite(t *testing.T) {
 		err := svc.DeleteSite(context.Background(), 3)
 		if err == nil || !containsService(err.Error(), "delete site:") {
 			t.Errorf("err = %v, want it to contain 'delete site:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreateRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRegionFunc: func(_ context.Context, token string, inData domain.RegionWrite) (*domain.Region, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+
+				return &domain.Region{ID: 1, Name: inData.Name}, nil
+			},
+		})
+		region, err := svc.CreateRegion(context.Background(), domain.RegionWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateRegion() returned error: %v", err)
+		}
+		if region.ID != 1 || region.Name != "A" {
+			t.Errorf("region = %+v, want id 1 name A", region)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRegionFunc: func(_ context.Context, _ string, _ domain.RegionWrite) (*domain.Region, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreateRegion(context.Background(), domain.RegionWrite{})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		var got *domain.ValidationError
+		if !errors.As(err, &got) {
+			t.Fatalf("err = %v, want errors.As to find *domain.ValidationError", err)
+		}
+		if got != valErr {
+			t.Error("ValidationError was not passed through unchanged")
+		}
+		if string(got.Body) != `{"name":["required"]}` {
+			t.Errorf("Body = %s, want original body", got.Body)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRegionFunc: func(_ context.Context, _ string, _ domain.RegionWrite) (*domain.Region, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateRegion(context.Background(), domain.RegionWrite{Name: "A"})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !containsService(err.Error(), "create region:") {
+			t.Errorf("err = %q, want it to contain 'create region:'", err.Error())
+		}
+	})
+}
+
+func TestNetworkService_UpdateRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRegionFunc: func(_ context.Context, _ string, id int, inData domain.RegionWrite) (*domain.Region, error) {
+				return &domain.Region{ID: id, Name: inData.Name}, nil
+			},
+		})
+		region, err := svc.UpdateRegion(context.Background(), 7, domain.RegionWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateRegion() returned error: %v", err)
+		}
+		if region.ID != 7 || region.Name != "Renamed" {
+			t.Errorf("region = %+v, want id 7 name Renamed", region)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"slug":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRegionFunc: func(_ context.Context, _ string, _ int, _ domain.RegionWrite) (*domain.Region, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.UpdateRegion(context.Background(), 7, domain.RegionWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRegionFunc: func(_ context.Context, _ string, _ int, _ domain.RegionWrite) (*domain.Region, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateRegion(context.Background(), 7, domain.RegionWrite{})
+		if err == nil || !containsService(err.Error(), "update region:") {
+			t.Errorf("err = %v, want it to contain 'update region:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteRegion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRegionFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeleteRegion(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteRegion() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRegionFunc: func(_ context.Context, _ string, _ int) error {
+				return valErr
+			},
+		})
+		err := svc.DeleteRegion(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRegionFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteRegion(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete region:") {
+			t.Errorf("err = %v, want it to contain 'delete region:'", err)
 		}
 	})
 }
@@ -4244,6 +4437,1198 @@ func TestNetworkService_DeleteContact(t *testing.T) {
 		err := svc.DeleteContact(context.Background(), 3)
 		if err == nil || !containsService(err.Error(), "delete contact:") {
 			t.Errorf("err = %v, want it to contain 'delete contact:'", err)
+		}
+	})
+}
+
+func TestNetworkService_ListSiteGroups(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListSiteGroupsFunc: func(
+				_ context.Context, token string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+
+				return &domain.PaginatedResponse[domain.SiteGroup]{Count: 1, Results: []domain.SiteGroup{{ID: 1, Name: "EU"}}}, nil
+			},
+		})
+		resp, err := svc.ListSiteGroups(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListSiteGroups() returned error: %v", err)
+		}
+		if resp.Count != 1 || len(resp.Results) != 1 || resp.Results[0].Name != "EU" {
+			t.Errorf("resp = %+v, want count 1 EU", resp)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListSiteGroupsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.ListSiteGroups(context.Background(), nil)
+		if err == nil || !containsService(err.Error(), "list site groups:") {
+			t.Errorf("err = %v, want it to contain 'list site groups:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreateSiteGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateSiteGroupFunc: func(_ context.Context, token string, in domain.SiteGroupWrite) (*domain.SiteGroup, error) {
+				if token != "test-token" {
+					t.Errorf("token = %q, want test-token", token)
+				}
+
+				return &domain.SiteGroup{ID: 1, Name: in.Name}, nil
+			},
+		})
+		sg, err := svc.CreateSiteGroup(context.Background(), domain.SiteGroupWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateSiteGroup() returned error: %v", err)
+		}
+		if sg.ID != 1 || sg.Name != "A" {
+			t.Errorf("site group = %+v, want id 1 name A", sg)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateSiteGroupFunc: func(_ context.Context, _ string, _ domain.SiteGroupWrite) (*domain.SiteGroup, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreateSiteGroup(context.Background(), domain.SiteGroupWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateSiteGroupFunc: func(_ context.Context, _ string, _ domain.SiteGroupWrite) (*domain.SiteGroup, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateSiteGroup(context.Background(), domain.SiteGroupWrite{Name: "A"})
+		if err == nil || !containsService(err.Error(), "create site group:") {
+			t.Errorf("err = %v, want it to contain 'create site group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateSiteGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateSiteGroupFunc: func(_ context.Context, _ string, id int, in domain.SiteGroupWrite) (*domain.SiteGroup, error) {
+				return &domain.SiteGroup{ID: id, Name: in.Name}, nil
+			},
+		})
+		sg, err := svc.UpdateSiteGroup(context.Background(), 7, domain.SiteGroupWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateSiteGroup() returned error: %v", err)
+		}
+		if sg.ID != 7 || sg.Name != "Renamed" {
+			t.Errorf("site group = %+v, want id 7 name Renamed", sg)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateSiteGroupFunc: func(_ context.Context, _ string, _ int, _ domain.SiteGroupWrite) (*domain.SiteGroup, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateSiteGroup(context.Background(), 7, domain.SiteGroupWrite{})
+		if err == nil || !containsService(err.Error(), "update site group:") {
+			t.Errorf("err = %v, want it to contain 'update site group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteSiteGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteSiteGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeleteSiteGroup(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteSiteGroup() returned error: %v", err)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"detail":["dependent"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteSiteGroupFunc: func(_ context.Context, _ string, _ int) error {
+				return valErr
+			},
+		})
+		err := svc.DeleteSiteGroup(context.Background(), 3)
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteSiteGroupFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteSiteGroup(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete site group:") {
+			t.Errorf("err = %v, want it to contain 'delete site group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_ListRackGroups(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRackGroupsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.RackGroup], error) {
+				return &domain.PaginatedResponse[domain.RackGroup]{Count: 1, Results: []domain.RackGroup{{ID: 1, Name: "A"}}}, nil
+			},
+		})
+		resp, err := svc.ListRackGroups(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListRackGroups() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("resp.Count = %d, want 1", resp.Count)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRackGroupsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.RackGroup], error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.ListRackGroups(context.Background(), nil)
+		if err == nil || !containsService(err.Error(), "list rack groups:") {
+			t.Errorf("err = %v, want it to contain 'list rack groups:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreateRackGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackGroupFunc: func(_ context.Context, _ string, in domain.RackGroupWrite) (*domain.RackGroup, error) {
+				return &domain.RackGroup{ID: 1, Name: in.Name}, nil
+			},
+		})
+		rg, err := svc.CreateRackGroup(context.Background(), domain.RackGroupWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateRackGroup() returned error: %v", err)
+		}
+		if rg.ID != 1 || rg.Name != "A" {
+			t.Errorf("rack group = %+v, want id 1 name A", rg)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackGroupFunc: func(_ context.Context, _ string, _ domain.RackGroupWrite) (*domain.RackGroup, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreateRackGroup(context.Background(), domain.RackGroupWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackGroupFunc: func(_ context.Context, _ string, _ domain.RackGroupWrite) (*domain.RackGroup, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateRackGroup(context.Background(), domain.RackGroupWrite{Name: "A"})
+		if err == nil || !containsService(err.Error(), "create rack group:") {
+			t.Errorf("err = %v, want it to contain 'create rack group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateRackGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRackGroupFunc: func(_ context.Context, _ string, id int, in domain.RackGroupWrite) (*domain.RackGroup, error) {
+				return &domain.RackGroup{ID: id, Name: in.Name}, nil
+			},
+		})
+		rg, err := svc.UpdateRackGroup(context.Background(), 7, domain.RackGroupWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateRackGroup() returned error: %v", err)
+		}
+		if rg.ID != 7 || rg.Name != "Renamed" {
+			t.Errorf("rack group = %+v, want id 7 name Renamed", rg)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRackGroupFunc: func(_ context.Context, _ string, _ int, _ domain.RackGroupWrite) (*domain.RackGroup, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateRackGroup(context.Background(), 7, domain.RackGroupWrite{})
+		if err == nil || !containsService(err.Error(), "update rack group:") {
+			t.Errorf("err = %v, want it to contain 'update rack group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteRackGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRackGroupFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeleteRackGroup(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteRackGroup() returned error: %v", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRackGroupFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteRackGroup(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete rack group:") {
+			t.Errorf("err = %v, want it to contain 'delete rack group:'", err)
+		}
+	})
+}
+
+func TestNetworkService_ListRackRoles(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRackRolesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.RackRole], error) {
+				return &domain.PaginatedResponse[domain.RackRole]{Count: 1, Results: []domain.RackRole{{ID: 1, Name: "A"}}}, nil
+			},
+		})
+		resp, err := svc.ListRackRoles(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListRackRoles() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("resp.Count = %d, want 1", resp.Count)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListRackRolesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.RackRole], error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.ListRackRoles(context.Background(), nil)
+		if err == nil || !containsService(err.Error(), "list rack roles:") {
+			t.Errorf("err = %v, want it to contain 'list rack roles:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreateRackRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackRoleFunc: func(_ context.Context, _ string, in domain.RackRoleWrite) (*domain.RackRole, error) {
+				return &domain.RackRole{ID: 1, Name: in.Name}, nil
+			},
+		})
+		rr, err := svc.CreateRackRole(context.Background(), domain.RackRoleWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateRackRole() returned error: %v", err)
+		}
+		if rr.ID != 1 || rr.Name != "A" {
+			t.Errorf("rack role = %+v, want id 1 name A", rr)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackRoleFunc: func(_ context.Context, _ string, _ domain.RackRoleWrite) (*domain.RackRole, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreateRackRole(context.Background(), domain.RackRoleWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateRackRoleFunc: func(_ context.Context, _ string, _ domain.RackRoleWrite) (*domain.RackRole, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateRackRole(context.Background(), domain.RackRoleWrite{Name: "A"})
+		if err == nil || !containsService(err.Error(), "create rack role:") {
+			t.Errorf("err = %v, want it to contain 'create rack role:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateRackRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRackRoleFunc: func(_ context.Context, _ string, id int, in domain.RackRoleWrite) (*domain.RackRole, error) {
+				return &domain.RackRole{ID: id, Name: in.Name}, nil
+			},
+		})
+		rr, err := svc.UpdateRackRole(context.Background(), 7, domain.RackRoleWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateRackRole() returned error: %v", err)
+		}
+		if rr.ID != 7 || rr.Name != "Renamed" {
+			t.Errorf("rack role = %+v, want id 7 name Renamed", rr)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateRackRoleFunc: func(_ context.Context, _ string, _ int, _ domain.RackRoleWrite) (*domain.RackRole, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateRackRole(context.Background(), 7, domain.RackRoleWrite{})
+		if err == nil || !containsService(err.Error(), "update rack role:") {
+			t.Errorf("err = %v, want it to contain 'update rack role:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteRackRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRackRoleFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeleteRackRole(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteRackRole() returned error: %v", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteRackRoleFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteRackRole(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete rack role:") {
+			t.Errorf("err = %v, want it to contain 'delete rack role:'", err)
+		}
+	})
+}
+
+func TestNetworkService_ListDeviceRoles(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListDeviceRolesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+				return &domain.PaginatedResponse[domain.DeviceRole]{Count: 1, Results: []domain.DeviceRole{{ID: 1, Name: "A"}}}, nil
+			},
+		})
+		resp, err := svc.ListDeviceRoles(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListDeviceRoles() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("resp.Count = %d, want 1", resp.Count)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListDeviceRolesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.ListDeviceRoles(context.Background(), nil)
+		if err == nil || !containsService(err.Error(), "list device roles:") {
+			t.Errorf("err = %v, want it to contain 'list device roles:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreateDeviceRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateDeviceRoleFunc: func(_ context.Context, _ string, in domain.DeviceRoleWrite) (*domain.DeviceRole, error) {
+				return &domain.DeviceRole{ID: 1, Name: in.Name}, nil
+			},
+		})
+		dr, err := svc.CreateDeviceRole(context.Background(), domain.DeviceRoleWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateDeviceRole() returned error: %v", err)
+		}
+		if dr.ID != 1 || dr.Name != "A" {
+			t.Errorf("device role = %+v, want id 1 name A", dr)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateDeviceRoleFunc: func(_ context.Context, _ string, _ domain.DeviceRoleWrite) (*domain.DeviceRole, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreateDeviceRole(context.Background(), domain.DeviceRoleWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateDeviceRoleFunc: func(_ context.Context, _ string, _ domain.DeviceRoleWrite) (*domain.DeviceRole, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateDeviceRole(context.Background(), domain.DeviceRoleWrite{Name: "A"})
+		if err == nil || !containsService(err.Error(), "create device role:") {
+			t.Errorf("err = %v, want it to contain 'create device role:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateDeviceRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateDeviceRoleFunc: func(
+				_ context.Context, _ string, id int, in domain.DeviceRoleWrite,
+			) (*domain.DeviceRole, error) {
+				return &domain.DeviceRole{ID: id, Name: in.Name}, nil
+			},
+		})
+		dr, err := svc.UpdateDeviceRole(context.Background(), 7, domain.DeviceRoleWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateDeviceRole() returned error: %v", err)
+		}
+		if dr.ID != 7 || dr.Name != "Renamed" {
+			t.Errorf("device role = %+v, want id 7 name Renamed", dr)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateDeviceRoleFunc: func(
+				_ context.Context, _ string, _ int, _ domain.DeviceRoleWrite,
+			) (*domain.DeviceRole, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateDeviceRole(context.Background(), 7, domain.DeviceRoleWrite{})
+		if err == nil || !containsService(err.Error(), "update device role:") {
+			t.Errorf("err = %v, want it to contain 'update device role:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteDeviceRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteDeviceRoleFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeleteDeviceRole(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteDeviceRole() returned error: %v", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteDeviceRoleFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteDeviceRole(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete device role:") {
+			t.Errorf("err = %v, want it to contain 'delete device role:'", err)
+		}
+	})
+}
+
+func TestNetworkService_ListPlatforms(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListPlatformsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Platform], error) {
+				return &domain.PaginatedResponse[domain.Platform]{Count: 1, Results: []domain.Platform{{ID: 1, Name: "A"}}}, nil
+			},
+		})
+		resp, err := svc.ListPlatforms(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListPlatforms() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("resp.Count = %d, want 1", resp.Count)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListPlatformsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.Platform], error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.ListPlatforms(context.Background(), nil)
+		if err == nil || !containsService(err.Error(), "list platforms:") {
+			t.Errorf("err = %v, want it to contain 'list platforms:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreatePlatform(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePlatformFunc: func(_ context.Context, _ string, in domain.PlatformWrite) (*domain.Platform, error) {
+				return &domain.Platform{ID: 1, Name: in.Name}, nil
+			},
+		})
+		p, err := svc.CreatePlatform(context.Background(), domain.PlatformWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreatePlatform() returned error: %v", err)
+		}
+		if p.ID != 1 || p.Name != "A" {
+			t.Errorf("platform = %+v, want id 1 name A", p)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePlatformFunc: func(_ context.Context, _ string, _ domain.PlatformWrite) (*domain.Platform, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreatePlatform(context.Background(), domain.PlatformWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePlatformFunc: func(_ context.Context, _ string, _ domain.PlatformWrite) (*domain.Platform, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreatePlatform(context.Background(), domain.PlatformWrite{Name: "A"})
+		if err == nil || !containsService(err.Error(), "create platform:") {
+			t.Errorf("err = %v, want it to contain 'create platform:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdatePlatform(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdatePlatformFunc: func(_ context.Context, _ string, id int, in domain.PlatformWrite) (*domain.Platform, error) {
+				return &domain.Platform{ID: id, Name: in.Name}, nil
+			},
+		})
+		p, err := svc.UpdatePlatform(context.Background(), 7, domain.PlatformWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdatePlatform() returned error: %v", err)
+		}
+		if p.ID != 7 || p.Name != "Renamed" {
+			t.Errorf("platform = %+v, want id 7 name Renamed", p)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdatePlatformFunc: func(_ context.Context, _ string, _ int, _ domain.PlatformWrite) (*domain.Platform, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdatePlatform(context.Background(), 7, domain.PlatformWrite{})
+		if err == nil || !containsService(err.Error(), "update platform:") {
+			t.Errorf("err = %v, want it to contain 'update platform:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeletePlatform(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeletePlatformFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeletePlatform(context.Background(), 3); err != nil {
+			t.Fatalf("DeletePlatform() returned error: %v", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeletePlatformFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeletePlatform(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete platform:") {
+			t.Errorf("err = %v, want it to contain 'delete platform:'", err)
+		}
+	})
+}
+
+func TestNetworkService_ListVirtualChassis(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListVirtualChassisFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+				return &domain.PaginatedResponse[domain.VirtualChassis]{
+					Count:   1,
+					Results: []domain.VirtualChassis{{ID: 1, Name: "A"}},
+				}, nil
+			},
+		})
+		resp, err := svc.ListVirtualChassis(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListVirtualChassis() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("resp.Count = %d, want 1", resp.Count)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListVirtualChassisFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.ListVirtualChassis(context.Background(), nil)
+		if err == nil || !containsService(err.Error(), "list virtual chassis:") {
+			t.Errorf("err = %v, want it to contain 'list virtual chassis:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreateVirtualChassis(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVirtualChassisFunc: func(
+				_ context.Context, _ string, in domain.VirtualChassisWrite,
+			) (*domain.VirtualChassis, error) {
+				return &domain.VirtualChassis{ID: 1, Name: in.Name}, nil
+			},
+		})
+		vc, err := svc.CreateVirtualChassis(context.Background(), domain.VirtualChassisWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateVirtualChassis() returned error: %v", err)
+		}
+		if vc.ID != 1 || vc.Name != "A" {
+			t.Errorf("virtual chassis = %+v, want id 1 name A", vc)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVirtualChassisFunc: func(
+				_ context.Context, _ string, _ domain.VirtualChassisWrite,
+			) (*domain.VirtualChassis, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreateVirtualChassis(context.Background(), domain.VirtualChassisWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateVirtualChassisFunc: func(
+				_ context.Context, _ string, _ domain.VirtualChassisWrite,
+			) (*domain.VirtualChassis, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateVirtualChassis(context.Background(), domain.VirtualChassisWrite{Name: "A"})
+		if err == nil || !containsService(err.Error(), "create virtual chassis:") {
+			t.Errorf("err = %v, want it to contain 'create virtual chassis:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateVirtualChassis(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVirtualChassisFunc: func(
+				_ context.Context, _ string, id int, in domain.VirtualChassisWrite,
+			) (*domain.VirtualChassis, error) {
+				return &domain.VirtualChassis{ID: id, Name: in.Name}, nil
+			},
+		})
+		vc, err := svc.UpdateVirtualChassis(context.Background(), 7, domain.VirtualChassisWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateVirtualChassis() returned error: %v", err)
+		}
+		if vc.ID != 7 || vc.Name != "Renamed" {
+			t.Errorf("virtual chassis = %+v, want id 7 name Renamed", vc)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateVirtualChassisFunc: func(
+				_ context.Context, _ string, _ int, _ domain.VirtualChassisWrite,
+			) (*domain.VirtualChassis, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateVirtualChassis(context.Background(), 7, domain.VirtualChassisWrite{})
+		if err == nil || !containsService(err.Error(), "update virtual chassis:") {
+			t.Errorf("err = %v, want it to contain 'update virtual chassis:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteVirtualChassis(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVirtualChassisFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeleteVirtualChassis(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteVirtualChassis() returned error: %v", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteVirtualChassisFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteVirtualChassis(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete virtual chassis:") {
+			t.Errorf("err = %v, want it to contain 'delete virtual chassis:'", err)
+		}
+	})
+}
+
+func TestNetworkService_ListPowerPanels(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListPowerPanelsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+				return &domain.PaginatedResponse[domain.PowerPanel]{Count: 1, Results: []domain.PowerPanel{{ID: 1, Name: "A"}}}, nil
+			},
+		})
+		resp, err := svc.ListPowerPanels(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListPowerPanels() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("resp.Count = %d, want 1", resp.Count)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListPowerPanelsFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.ListPowerPanels(context.Background(), nil)
+		if err == nil || !containsService(err.Error(), "list power panels:") {
+			t.Errorf("err = %v, want it to contain 'list power panels:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreatePowerPanel(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePowerPanelFunc: func(_ context.Context, _ string, in domain.PowerPanelWrite) (*domain.PowerPanel, error) {
+				return &domain.PowerPanel{ID: 1, Name: in.Name}, nil
+			},
+		})
+		pp, err := svc.CreatePowerPanel(context.Background(), domain.PowerPanelWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreatePowerPanel() returned error: %v", err)
+		}
+		if pp.ID != 1 || pp.Name != "A" {
+			t.Errorf("power panel = %+v, want id 1 name A", pp)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePowerPanelFunc: func(_ context.Context, _ string, _ domain.PowerPanelWrite) (*domain.PowerPanel, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreatePowerPanel(context.Background(), domain.PowerPanelWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreatePowerPanelFunc: func(_ context.Context, _ string, _ domain.PowerPanelWrite) (*domain.PowerPanel, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreatePowerPanel(context.Background(), domain.PowerPanelWrite{Name: "A"})
+		if err == nil || !containsService(err.Error(), "create power panel:") {
+			t.Errorf("err = %v, want it to contain 'create power panel:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdatePowerPanel(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdatePowerPanelFunc: func(
+				_ context.Context, _ string, id int, in domain.PowerPanelWrite,
+			) (*domain.PowerPanel, error) {
+				return &domain.PowerPanel{ID: id, Name: in.Name}, nil
+			},
+		})
+		pp, err := svc.UpdatePowerPanel(context.Background(), 7, domain.PowerPanelWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdatePowerPanel() returned error: %v", err)
+		}
+		if pp.ID != 7 || pp.Name != "Renamed" {
+			t.Errorf("power panel = %+v, want id 7 name Renamed", pp)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdatePowerPanelFunc: func(
+				_ context.Context, _ string, _ int, _ domain.PowerPanelWrite,
+			) (*domain.PowerPanel, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdatePowerPanel(context.Background(), 7, domain.PowerPanelWrite{})
+		if err == nil || !containsService(err.Error(), "update power panel:") {
+			t.Errorf("err = %v, want it to contain 'update power panel:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeletePowerPanel(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeletePowerPanelFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeletePowerPanel(context.Background(), 3); err != nil {
+			t.Fatalf("DeletePowerPanel() returned error: %v", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeletePowerPanelFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeletePowerPanel(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete power panel:") {
+			t.Errorf("err = %v, want it to contain 'delete power panel:'", err)
+		}
+	})
+}
+
+func TestNetworkService_ListInventoryItemRoles(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListInventoryItemRolesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+				return &domain.PaginatedResponse[domain.InventoryItemRole]{
+					Count:   1,
+					Results: []domain.InventoryItemRole{{ID: 1, Name: "A"}},
+				}, nil
+			},
+		})
+		resp, err := svc.ListInventoryItemRoles(context.Background(), nil)
+		if err != nil {
+			t.Fatalf("ListInventoryItemRoles() returned error: %v", err)
+		}
+		if resp.Count != 1 {
+			t.Errorf("resp.Count = %d, want 1", resp.Count)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			ListInventoryItemRolesFunc: func(
+				_ context.Context, _ string, _ map[string]string,
+			) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.ListInventoryItemRoles(context.Background(), nil)
+		if err == nil || !containsService(err.Error(), "list inventory item roles:") {
+			t.Errorf("err = %v, want it to contain 'list inventory item roles:'", err)
+		}
+	})
+}
+
+func TestNetworkService_CreateInventoryItemRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateInventoryItemRoleFunc: func(
+				_ context.Context, _ string, in domain.InventoryItemRoleWrite,
+			) (*domain.InventoryItemRole, error) {
+				return &domain.InventoryItemRole{ID: 1, Name: in.Name}, nil
+			},
+		})
+		iir, err := svc.CreateInventoryItemRole(context.Background(), domain.InventoryItemRoleWrite{Name: "A"})
+		if err != nil {
+			t.Fatalf("CreateInventoryItemRole() returned error: %v", err)
+		}
+		if iir.ID != 1 || iir.Name != "A" {
+			t.Errorf("inventory item role = %+v, want id 1 name A", iir)
+		}
+	})
+
+	t.Run("propagates validation error via errors.As", func(t *testing.T) {
+		valErr := &domain.ValidationError{StatusCode: 400, Body: []byte(`{"name":["required"]}`)}
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateInventoryItemRoleFunc: func(
+				_ context.Context, _ string, _ domain.InventoryItemRoleWrite,
+			) (*domain.InventoryItemRole, error) {
+				return nil, valErr
+			},
+		})
+		_, err := svc.CreateInventoryItemRole(context.Background(), domain.InventoryItemRoleWrite{})
+		var got *domain.ValidationError
+		if !errors.As(err, &got) || got != valErr {
+			t.Errorf("err = %v, want the ValidationError passed through", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			CreateInventoryItemRoleFunc: func(
+				_ context.Context, _ string, _ domain.InventoryItemRoleWrite,
+			) (*domain.InventoryItemRole, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.CreateInventoryItemRole(context.Background(), domain.InventoryItemRoleWrite{Name: "A"})
+		if err == nil || !containsService(err.Error(), "create inventory item role:") {
+			t.Errorf("err = %v, want it to contain 'create inventory item role:'", err)
+		}
+	})
+}
+
+func TestNetworkService_UpdateInventoryItemRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateInventoryItemRoleFunc: func(
+				_ context.Context, _ string, id int, in domain.InventoryItemRoleWrite,
+			) (*domain.InventoryItemRole, error) {
+				return &domain.InventoryItemRole{ID: id, Name: in.Name}, nil
+			},
+		})
+		iir, err := svc.UpdateInventoryItemRole(context.Background(), 7, domain.InventoryItemRoleWrite{Name: "Renamed"})
+		if err != nil {
+			t.Fatalf("UpdateInventoryItemRole() returned error: %v", err)
+		}
+		if iir.ID != 7 || iir.Name != "Renamed" {
+			t.Errorf("inventory item role = %+v, want id 7 name Renamed", iir)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			UpdateInventoryItemRoleFunc: func(
+				_ context.Context, _ string, _ int, _ domain.InventoryItemRoleWrite,
+			) (*domain.InventoryItemRole, error) {
+				return nil, errors.New("boom")
+			},
+		})
+		_, err := svc.UpdateInventoryItemRole(context.Background(), 7, domain.InventoryItemRoleWrite{})
+		if err == nil || !containsService(err.Error(), "update inventory item role:") {
+			t.Errorf("err = %v, want it to contain 'update inventory item role:'", err)
+		}
+	})
+}
+
+func TestNetworkService_DeleteInventoryItemRole(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteInventoryItemRoleFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		})
+		if err := svc.DeleteInventoryItemRole(context.Background(), 3); err != nil {
+			t.Fatalf("DeleteInventoryItemRole() returned error: %v", err)
+		}
+	})
+
+	t.Run("wraps generic error with label", func(t *testing.T) {
+		svc := newTestService(&mockrepo.MockRepo{
+			DeleteInventoryItemRoleFunc: func(_ context.Context, _ string, _ int) error {
+				return errors.New("boom")
+			},
+		})
+		err := svc.DeleteInventoryItemRole(context.Background(), 3)
+		if err == nil || !containsService(err.Error(), "delete inventory item role:") {
+			t.Errorf("err = %v, want it to contain 'delete inventory item role:'", err)
 		}
 	})
 }

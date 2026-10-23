@@ -28,6 +28,125 @@ type SitesInput struct {
 	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
 }
 
+// RegionsInput represents the input fields for the get_regions tool.
+type RegionsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent region ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// TenantGroupsInput represents the input fields for the get_tenant_groups tool.
+type TenantGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent tenant group ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RolesInput represents the input fields for the get_roles tool.
+type RolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// TenantsInput represents the input fields for the get_tenants tool.
+type TenantsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Group    string `json:"group,omitempty" jsonschema:"filter by tenant group (ID)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// TagsInput represents the input fields for the get_tags tool.
+type TagsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// SiteGroupsInput represents the input fields for the get_site_groups tool.
+type SiteGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent site group ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RackGroupsInput represents the input fields for the get_rack_groups tool.
+type RackGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent rack group ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RackRolesInput represents the input fields for the get_rack_roles tool.
+type RackRolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Color    string `json:"color,omitempty" jsonschema:"filter by color (hex value)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// DeviceRolesInput represents the input fields for the get_device_roles tool.
+type DeviceRolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Color    string `json:"color,omitempty" jsonschema:"filter by color (hex value)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// PlatformsInput represents the input fields for the get_platforms tool.
+type PlatformsInput struct {
+	Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Manufacturer string `json:"manufacturer,omitempty" jsonschema:"filter by manufacturer (slug)"`
+	Tag          string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page         int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize     int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualChassisInput represents the input fields for the get_virtual_chassis
+// tool.
+type VirtualChassisInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Name     string `json:"name,omitempty" jsonschema:"filter by name (case-insensitive partial match)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// PowerPanelsInput represents the input fields for the get_power_panels tool.
+type PowerPanelsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Site     string `json:"site,omitempty" jsonschema:"filter by site (slug)"`
+	Location string `json:"location,omitempty" jsonschema:"filter by location (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// InventoryItemRolesInput represents the input fields for the
+// get_inventory_item_roles tool.
+type InventoryItemRolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Color    string `json:"color,omitempty" jsonschema:"filter by color (hex value)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
 // DevicesInput represents the input fields for the get_devices tool.
 type DevicesInput struct {
 	Q            string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
@@ -131,7 +250,7 @@ type CircuitsInput struct {
 
 // GetObjectInput represents the input fields for the get_object_by_id tool.
 type GetObjectInput struct {
-	ObjectType string            `json:"object_type" jsonschema:"object type: site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination,required"` //nolint:lll // struct tag cannot be split across lines
+	ObjectType string            `json:"object_type" jsonschema:"object type: site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, provider, tenant, rack, manufacturer, device_type, location, cluster_type, cluster_group, circuit_type, vrf, vlan_group, role, contact, cable, interface, vm_interface, circuit_termination, site_group, rack_group, rack_role, device_role, platform, virtual_chassis, power_panel, inventory_item_role, front_port, rear_port, console_port, console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type, provider_account, provider_network, circuit_group, circuit_group_assignment, virtual_circuit, virtual_circuit_type, virtual_circuit_termination,required"` //nolint:lll // struct tag cannot be split across lines
 	ID         int               `json:"id" jsonschema:"numeric ID of the object (positive integer),required"`
 	Params     map[string]string `json:"params,omitempty" jsonschema:"additional query parameters to pass to NetBox (optional)"` //nolint:lll // struct tag cannot be split across lines
 }
@@ -233,6 +352,303 @@ type SiteUpdateInput struct {
 // SiteDeleteInput represents the input fields for deleting a site.
 type SiteDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the site to delete,required"`
+}
+
+// RegionCreateInput represents the writable fields for creating a region.
+type RegionCreateInput struct {
+	Name         string         `json:"name" jsonschema:"region name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent region ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RegionUpdateInput represents the writable fields for updating a region. All fields
+// are optional; only the explicitly provided ones are patched (PATCH merge).
+type RegionUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the region to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"region name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent region ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RegionDeleteInput represents the input fields for deleting a region.
+type RegionDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the region to delete,required"`
+}
+
+// TenantGroupCreateInput represents the writable fields for creating a tenant
+// group.
+type TenantGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"tenant group name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent tenant group ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// TenantGroupUpdateInput represents the writable fields for updating a tenant
+// group. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type TenantGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the tenant group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"tenant group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent tenant group ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// TenantGroupDeleteInput represents the input fields for deleting a tenant
+// group.
+type TenantGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the tenant group to delete,required"`
+}
+
+// SiteGroupCreateInput represents the writable fields for creating a site
+// group.
+type SiteGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"site group name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent site group ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// SiteGroupUpdateInput represents the writable fields for updating a site
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type SiteGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the site group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"site group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"parent site group ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// SiteGroupDeleteInput represents the input fields for deleting a site group.
+type SiteGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the site group to delete,required"`
+}
+
+// RackGroupCreateInput represents the writable fields for creating a rack
+// group.
+type RackGroupCreateInput struct {
+	Name        string   `json:"name" jsonschema:"rack group name (required)"`
+	Slug        string   `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Site        *int     `json:"site,omitempty" jsonschema:"site ID"`
+	Parent      *int     `json:"parent,omitempty" jsonschema:"parent rack group ID"`
+	Description *string  `json:"description,omitempty" jsonschema:"short description"`
+	Tags        []string `json:"tags,omitempty" jsonschema:"list of tag names"`
+}
+
+// RackGroupUpdateInput represents the writable fields for updating a rack
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type RackGroupUpdateInput struct {
+	ID          int      `json:"id" jsonschema:"numeric ID of the rack group to update,required"`
+	Name        *string  `json:"name,omitempty" jsonschema:"rack group name"`
+	Slug        *string  `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Site        *int     `json:"site,omitempty" jsonschema:"site ID"`
+	Parent      *int     `json:"parent,omitempty" jsonschema:"parent rack group ID"`
+	Description *string  `json:"description,omitempty" jsonschema:"short description"`
+	Tags        []string `json:"tags,omitempty" jsonschema:"list of tag names"`
+}
+
+// RackGroupDeleteInput represents the input fields for deleting a rack group.
+type RackGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the rack group to delete,required"`
+}
+
+// RackRoleCreateInput represents the writable fields for creating a rack role.
+type RackRoleCreateInput struct {
+	Name         string         `json:"name" jsonschema:"rack role name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Color        *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RackRoleUpdateInput represents the writable fields for updating a rack role.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type RackRoleUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the rack role to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"rack role name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Color        *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RackRoleDeleteInput represents the input fields for deleting a rack role.
+type RackRoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the rack role to delete,required"`
+}
+
+// DeviceRoleCreateInput represents the writable fields for creating a device
+// role.
+type DeviceRoleCreateInput struct {
+	Name           string         `json:"name" jsonschema:"device role name (required)"`
+	Slug           string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Color          *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	VMRole         *bool          `json:"vm_role,omitempty" jsonschema:"whether this role is a VM role"`
+	ConfigTemplate *int           `json:"config_template,omitempty" jsonschema:"config template ID"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+	Weight         *int           `json:"weight,omitempty" jsonschema:"sorting weight"`
+}
+
+// DeviceRoleUpdateInput represents the writable fields for updating a device
+// role. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type DeviceRoleUpdateInput struct {
+	ID             int            `json:"id" jsonschema:"numeric ID of the device role to update,required"`
+	Name           *string        `json:"name,omitempty" jsonschema:"device role name"`
+	Slug           *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Color          *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	VMRole         *bool          `json:"vm_role,omitempty" jsonschema:"whether this role is a VM role"`
+	ConfigTemplate *int           `json:"config_template,omitempty" jsonschema:"config template ID"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+	Weight         *int           `json:"weight,omitempty" jsonschema:"sorting weight"`
+}
+
+// DeviceRoleDeleteInput represents the input fields for deleting a device role.
+type DeviceRoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the device role to delete,required"`
+}
+
+// PlatformCreateInput represents the writable fields for creating a platform.
+type PlatformCreateInput struct {
+	Name           string         `json:"name" jsonschema:"platform name (required)"`
+	Slug           string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Manufacturer   *int           `json:"manufacturer,omitempty" jsonschema:"manufacturer ID (look up first)"`
+	ConfigTemplate *int           `json:"config_template,omitempty" jsonschema:"config template ID"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PlatformUpdateInput represents the writable fields for updating a platform.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type PlatformUpdateInput struct {
+	ID             int            `json:"id" jsonschema:"numeric ID of the platform to update,required"`
+	Name           *string        `json:"name,omitempty" jsonschema:"platform name"`
+	Slug           *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Manufacturer   *int           `json:"manufacturer,omitempty" jsonschema:"manufacturer ID (look up first)"`
+	ConfigTemplate *int           `json:"config_template,omitempty" jsonschema:"config template ID"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PlatformDeleteInput represents the input fields for deleting a platform.
+type PlatformDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the platform to delete,required"`
+}
+
+// VirtualChassisCreateInput represents the writable fields for creating a
+// virtual chassis. Name is optional on create for this entity.
+type VirtualChassisCreateInput struct {
+	Name         string         `json:"name,omitempty" jsonschema:"virtual chassis name (optional)"`
+	Domain       *string        `json:"domain,omitempty" jsonschema:"domain name"`
+	Master       *int           `json:"master,omitempty" jsonschema:"master device ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualChassisUpdateInput represents the writable fields for updating a
+// virtual chassis. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type VirtualChassisUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the virtual chassis to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"virtual chassis name"`
+	Domain       *string        `json:"domain,omitempty" jsonschema:"domain name"`
+	Master       *int           `json:"master,omitempty" jsonschema:"master device ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualChassisDeleteInput represents the input fields for deleting a virtual
+// chassis.
+type VirtualChassisDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual chassis to delete,required"`
+}
+
+// PowerPanelCreateInput represents the writable fields for creating a power
+// panel.
+type PowerPanelCreateInput struct {
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Location     *int           `json:"location,omitempty" jsonschema:"location ID"`
+	Name         string         `json:"name" jsonschema:"power panel name (required)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerPanelUpdateInput represents the writable fields for updating a power
+// panel. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type PowerPanelUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the power panel to update,required"`
+	Site         *int           `json:"site,omitempty" jsonschema:"site ID"`
+	Location     *int           `json:"location,omitempty" jsonschema:"location ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"power panel name"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerPanelDeleteInput represents the input fields for deleting a power panel.
+type PowerPanelDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the power panel to delete,required"`
+}
+
+// InventoryItemRoleCreateInput represents the writable fields for creating an
+// inventory item role.
+type InventoryItemRoleCreateInput struct {
+	Name         string         `json:"name" jsonschema:"inventory item role name (required)"`
+	Slug         string         `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier (defaults to a slugified name)"` //nolint:lll // struct tag cannot be split across lines
+	Color        *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// InventoryItemRoleUpdateInput represents the writable fields for updating an
+// inventory item role. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type InventoryItemRoleUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the inventory item role to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"inventory item role name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly unique identifier"`
+	Color        *string        `json:"color,omitempty" jsonschema:"hex color, e.g. 00ff00"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// InventoryItemRoleDeleteInput represents the input fields for deleting an
+// inventory item role.
+type InventoryItemRoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the inventory item role to delete,required"`
 }
 
 // DeviceCreateInput represents the writable fields for creating a device.
@@ -754,6 +1170,7 @@ type ProviderDeleteInput struct {
 type TenantCreateInput struct {
 	Name         string         `json:"name" jsonschema:"tenant name (required)"`
 	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Group        *int           `json:"group,omitempty" jsonschema:"tenant group ID"`
 	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
 	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
 	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
@@ -767,6 +1184,7 @@ type TenantUpdateInput struct {
 	ID           int            `json:"id" jsonschema:"numeric ID of the tenant to update,required"`
 	Name         *string        `json:"name,omitempty" jsonschema:"tenant name"`
 	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Group        *int           `json:"group,omitempty" jsonschema:"tenant group ID"`
 	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
 	Comments     *string        `json:"comments,omitempty" jsonschema:"long-form comments"`
 	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
@@ -776,6 +1194,80 @@ type TenantUpdateInput struct {
 // TenantDeleteInput represents the input fields for deleting a tenant.
 type TenantDeleteInput struct {
 	ID int `json:"id" jsonschema:"numeric ID of the tenant to delete,required"`
+}
+
+// TagCreateInput represents the writable fields for creating a tag.
+type TagCreateInput struct {
+	Name        string  `json:"name" jsonschema:"tag name (required)"`
+	Slug        *string `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Color       *string `json:"color,omitempty" jsonschema:"color (hex value, e.g. ff0000)"`
+	Description *string `json:"description,omitempty" jsonschema:"short description"`
+}
+
+// TagUpdateInput represents the writable fields for updating a tag. All fields
+// are optional; only the explicitly provided ones are patched (PATCH merge).
+type TagUpdateInput struct {
+	ID          int     `json:"id" jsonschema:"numeric ID of the tag to update,required"`
+	Name        *string `json:"name,omitempty" jsonschema:"tag name"`
+	Slug        *string `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Color       *string `json:"color,omitempty" jsonschema:"color (hex value, e.g. ff0000)"`
+	Description *string `json:"description,omitempty" jsonschema:"short description"`
+}
+
+// TagDeleteInput represents the input fields for deleting a tag.
+type TagDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the tag to delete,required"`
+}
+
+// CustomFieldsInput represents the input fields for the get_custom_fields tool.
+type CustomFieldsInput struct {
+	Q           string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	ContentType string `json:"content_type,omitempty" jsonschema:"filter by content type (e.g. dcim.device)"`
+	Tag         string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page        int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize    int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// CustomFieldCreateInput represents the writable fields for creating a custom
+// field.
+type CustomFieldCreateInput struct {
+	Name         string   `json:"name" jsonschema:"custom field name (required)"`
+	Label        string   `json:"label" jsonschema:"custom field label (required)"`
+	Type         *string  `json:"type,omitempty" jsonschema:"field type (e.g. text)"`
+	ContentTypes []string `json:"object_types,omitempty" jsonschema:"list of object types this field applies to"`
+	GroupName    *string  `json:"group_name,omitempty" jsonschema:"group name"`
+	Description  *string  `json:"description,omitempty" jsonschema:"short description"`
+	Required     *bool    `json:"required,omitempty" jsonschema:"whether the field is required"`
+	Default      *string  `json:"default,omitempty" jsonschema:"default value"`
+	FilterLogic  *string  `json:"filter_logic,omitempty" jsonschema:"filter logic (e.g. exact)"`
+	Weight       *int     `json:"weight,omitempty" jsonschema:"weight (integer)"`
+	UIVisibility *string  `json:"ui_visibility,omitempty" jsonschema:"UI visibility (e.g. read-write)"`
+	Choices      []string `json:"choices,omitempty" jsonschema:"list of choices for select-type fields"`
+}
+
+// CustomFieldUpdateInput represents the writable fields for updating a custom
+// field. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type CustomFieldUpdateInput struct {
+	ID           int      `json:"id" jsonschema:"numeric ID of the custom field to update,required"`
+	Name         *string  `json:"name,omitempty" jsonschema:"custom field name"`
+	Label        *string  `json:"label,omitempty" jsonschema:"custom field label"`
+	Type         *string  `json:"type,omitempty" jsonschema:"field type (e.g. text)"`
+	ContentTypes []string `json:"object_types,omitempty" jsonschema:"list of object types this field applies to"`
+	GroupName    *string  `json:"group_name,omitempty" jsonschema:"group name"`
+	Description  *string  `json:"description,omitempty" jsonschema:"short description"`
+	Required     *bool    `json:"required,omitempty" jsonschema:"whether the field is required"`
+	Default      *string  `json:"default,omitempty" jsonschema:"default value"`
+	FilterLogic  *string  `json:"filter_logic,omitempty" jsonschema:"filter logic (e.g. exact)"`
+	Weight       *int     `json:"weight,omitempty" jsonschema:"weight (integer)"`
+	UIVisibility *string  `json:"ui_visibility,omitempty" jsonschema:"UI visibility (e.g. read-write)"`
+	Choices      []string `json:"choices,omitempty" jsonschema:"list of choices for select-type fields"`
+}
+
+// CustomFieldDeleteInput represents the input fields for deleting a custom
+// field.
+type CustomFieldDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the custom field to delete,required"`
 }
 
 // ManufacturerCreateInput represents the writable fields for creating a
@@ -1115,6 +1607,61 @@ type SiteOutput struct {
 	Data domain.Site `json:"data"`
 }
 
+// RegionOutput represents the output for the create/update region tools.
+type RegionOutput struct {
+	Data domain.Region `json:"data"`
+}
+
+// TenantGroupOutput represents the output for the create/update tenant group
+// tools.
+type TenantGroupOutput struct {
+	Data domain.TenantGroup `json:"data"`
+}
+
+// SiteGroupOutput represents the output for the create/update site group tools.
+type SiteGroupOutput struct {
+	Data domain.SiteGroup `json:"data"`
+}
+
+// RackGroupOutput represents the output for the create/update rack group tools.
+type RackGroupOutput struct {
+	Data domain.RackGroup `json:"data"`
+}
+
+// RackRoleOutput represents the output for the create/update rack role tools.
+type RackRoleOutput struct {
+	Data domain.RackRole `json:"data"`
+}
+
+// DeviceRoleOutput represents the output for the create/update device role
+// tools.
+type DeviceRoleOutput struct {
+	Data domain.DeviceRole `json:"data"`
+}
+
+// PlatformOutput represents the output for the create/update platform tools.
+type PlatformOutput struct {
+	Data domain.Platform `json:"data"`
+}
+
+// VirtualChassisOutput represents the output for the create/update virtual
+// chassis tools.
+type VirtualChassisOutput struct {
+	Data domain.VirtualChassis `json:"data"`
+}
+
+// PowerPanelOutput represents the output for the create/update power panel
+// tools.
+type PowerPanelOutput struct {
+	Data domain.PowerPanel `json:"data"`
+}
+
+// InventoryItemRoleOutput represents the output for the create/update inventory
+// item role tools.
+type InventoryItemRoleOutput struct {
+	Data domain.InventoryItemRole `json:"data"`
+}
+
 // DeviceOutput represents the output for the create/update device tools.
 type DeviceOutput struct {
 	Data domain.Device `json:"data"`
@@ -1186,6 +1733,17 @@ type ProviderOutput struct {
 // TenantOutput represents the output for the create/update tenant tools.
 type TenantOutput struct {
 	Data domain.Tenant `json:"data"`
+}
+
+// TagOutput represents the output for the create/update tag tools.
+type TagOutput struct {
+	Data domain.Tag `json:"data"`
+}
+
+// CustomFieldOutput represents the output for the create/update custom field
+// tools.
+type CustomFieldOutput struct {
+	Data domain.CustomField `json:"data"`
 }
 
 // ManufacturerOutput represents the output for the create/update manufacturer
@@ -1304,12 +1862,315 @@ func siteWriteFromUpdate(input SiteUpdateInput) domain.SiteWrite {
 	return write
 }
 
+// regionWriteFromCreate builds a domain.RegionWrite from a create input.
+func regionWriteFromCreate(input RegionCreateInput) domain.RegionWrite {
+	return domain.RegionWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// regionWriteFromUpdate builds a domain.RegionWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func regionWriteFromUpdate(input RegionUpdateInput) domain.RegionWrite {
+	write := domain.RegionWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// tenantGroupWriteFromCreate builds a domain.TenantGroupWrite from a create
+// input.
+func tenantGroupWriteFromCreate(input TenantGroupCreateInput) domain.TenantGroupWrite {
+	return domain.TenantGroupWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// tenantGroupWriteFromUpdate builds a domain.TenantGroupWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func tenantGroupWriteFromUpdate(input TenantGroupUpdateInput) domain.TenantGroupWrite {
+	write := domain.TenantGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
 func strPtr(s string) *string {
 	if s == "" {
 		return nil
 	}
 
 	return &s
+}
+
+// siteGroupWriteFromCreate builds a domain.SiteGroupWrite from a create input.
+func siteGroupWriteFromCreate(input SiteGroupCreateInput) domain.SiteGroupWrite {
+	return domain.SiteGroupWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// siteGroupWriteFromUpdate builds a domain.SiteGroupWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func siteGroupWriteFromUpdate(input SiteGroupUpdateInput) domain.SiteGroupWrite {
+	write := domain.SiteGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// rackGroupWriteFromCreate builds a domain.RackGroupWrite from a create input.
+func rackGroupWriteFromCreate(input RackGroupCreateInput) domain.RackGroupWrite {
+	return domain.RackGroupWrite{
+		Name:        input.Name,
+		Slug:        strPtr(input.Slug),
+		Site:        input.Site,
+		Parent:      input.Parent,
+		Description: input.Description,
+		Tags:        input.Tags,
+	}
+}
+
+// rackGroupWriteFromUpdate builds a domain.RackGroupWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func rackGroupWriteFromUpdate(input RackGroupUpdateInput) domain.RackGroupWrite {
+	write := domain.RackGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Site = input.Site
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+
+	return write
+}
+
+// rackRoleWriteFromCreate builds a domain.RackRoleWrite from a create input.
+func rackRoleWriteFromCreate(input RackRoleCreateInput) domain.RackRoleWrite {
+	return domain.RackRoleWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Color:        input.Color,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// rackRoleWriteFromUpdate builds a domain.RackRoleWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func rackRoleWriteFromUpdate(input RackRoleUpdateInput) domain.RackRoleWrite {
+	write := domain.RackRoleWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Color = input.Color
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// deviceRoleWriteFromCreate builds a domain.DeviceRoleWrite from a create
+// input.
+func deviceRoleWriteFromCreate(input DeviceRoleCreateInput) domain.DeviceRoleWrite {
+	return domain.DeviceRoleWrite{
+		Name:           input.Name,
+		Slug:           strPtr(input.Slug),
+		Color:          input.Color,
+		VMRole:         input.VMRole,
+		ConfigTemplate: input.ConfigTemplate,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+		Weight:         input.Weight,
+	}
+}
+
+// deviceRoleWriteFromUpdate builds a domain.DeviceRoleWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func deviceRoleWriteFromUpdate(input DeviceRoleUpdateInput) domain.DeviceRoleWrite {
+	write := domain.DeviceRoleWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Color = input.Color
+	write.VMRole = input.VMRole
+	write.ConfigTemplate = input.ConfigTemplate
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+	write.Weight = input.Weight
+
+	return write
+}
+
+// platformWriteFromCreate builds a domain.PlatformWrite from a create input.
+func platformWriteFromCreate(input PlatformCreateInput) domain.PlatformWrite {
+	return domain.PlatformWrite{
+		Name:           input.Name,
+		Slug:           strPtr(input.Slug),
+		Manufacturer:   input.Manufacturer,
+		ConfigTemplate: input.ConfigTemplate,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+	}
+}
+
+// platformWriteFromUpdate builds a domain.PlatformWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func platformWriteFromUpdate(input PlatformUpdateInput) domain.PlatformWrite {
+	write := domain.PlatformWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Manufacturer = input.Manufacturer
+	write.ConfigTemplate = input.ConfigTemplate
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualChassisWriteFromCreate builds a domain.VirtualChassisWrite from a
+// create input. Name is optional for this entity.
+func virtualChassisWriteFromCreate(input VirtualChassisCreateInput) domain.VirtualChassisWrite {
+	return domain.VirtualChassisWrite{
+		Name:         input.Name,
+		Domain:       input.Domain,
+		Master:       input.Master,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// virtualChassisWriteFromUpdate builds a domain.VirtualChassisWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func virtualChassisWriteFromUpdate(input VirtualChassisUpdateInput) domain.VirtualChassisWrite {
+	write := domain.VirtualChassisWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Domain = input.Domain
+	write.Master = input.Master
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// powerPanelWriteFromCreate builds a domain.PowerPanelWrite from a create
+// input.
+func powerPanelWriteFromCreate(input PowerPanelCreateInput) domain.PowerPanelWrite {
+	return domain.PowerPanelWrite{
+		Site:         input.Site,
+		Location:     input.Location,
+		Name:         input.Name,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// powerPanelWriteFromUpdate builds a domain.PowerPanelWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func powerPanelWriteFromUpdate(input PowerPanelUpdateInput) domain.PowerPanelWrite {
+	write := domain.PowerPanelWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Site = input.Site
+	write.Location = input.Location
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// inventoryItemRoleWriteFromCreate builds a domain.InventoryItemRoleWrite from
+// a create input.
+func inventoryItemRoleWriteFromCreate(input InventoryItemRoleCreateInput) domain.InventoryItemRoleWrite {
+	return domain.InventoryItemRoleWrite{
+		Name:         input.Name,
+		Slug:         strPtr(input.Slug),
+		Color:        input.Color,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// inventoryItemRoleWriteFromUpdate builds a domain.InventoryItemRoleWrite from
+// an update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func inventoryItemRoleWriteFromUpdate(input InventoryItemRoleUpdateInput) domain.InventoryItemRoleWrite {
+	write := domain.InventoryItemRoleWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Color = input.Color
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
 }
 
 // deviceWriteFromCreate builds a domain.DeviceWrite from a create input.
@@ -1842,6 +2703,7 @@ func tenantWriteFromCreate(input TenantCreateInput) domain.TenantWrite {
 	return domain.TenantWrite{
 		Name:         input.Name,
 		Slug:         input.Slug,
+		Group:        input.Group,
 		Description:  input.Description,
 		Comments:     input.Comments,
 		Tags:         input.Tags,
@@ -1858,10 +2720,79 @@ func tenantWriteFromUpdate(input TenantUpdateInput) domain.TenantWrite {
 		write.Name = *input.Name
 	}
 	write.Slug = input.Slug
+	write.Group = input.Group
 	write.Description = input.Description
 	write.Comments = input.Comments
 	write.Tags = input.Tags
 	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// tagWriteFromCreate builds a domain.TagWrite from a create input.
+func tagWriteFromCreate(input TagCreateInput) domain.TagWrite {
+	return domain.TagWrite{
+		Name:        input.Name,
+		Slug:        input.Slug,
+		Color:       input.Color,
+		Description: input.Description,
+	}
+}
+
+// tagWriteFromUpdate builds a domain.TagWrite from an update input, mapping
+// only the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func tagWriteFromUpdate(input TagUpdateInput) domain.TagWrite {
+	write := domain.TagWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Color = input.Color
+	write.Description = input.Description
+
+	return write
+}
+
+// customFieldWriteFromCreate builds a domain.CustomFieldWrite from a create
+// input.
+func customFieldWriteFromCreate(input CustomFieldCreateInput) domain.CustomFieldWrite {
+	return domain.CustomFieldWrite{
+		Name:         input.Name,
+		Label:        input.Label,
+		Type:         input.Type,
+		ContentTypes: input.ContentTypes,
+		GroupName:    input.GroupName,
+		Description:  input.Description,
+		Required:     input.Required,
+		Default:      input.Default,
+		FilterLogic:  input.FilterLogic,
+		Weight:       input.Weight,
+		UIVisibility: input.UIVisibility,
+		Choices:      input.Choices,
+	}
+}
+
+// customFieldWriteFromUpdate builds a domain.CustomFieldWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func customFieldWriteFromUpdate(input CustomFieldUpdateInput) domain.CustomFieldWrite {
+	write := domain.CustomFieldWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	if input.Label != nil {
+		write.Label = *input.Label
+	}
+	write.Type = input.Type
+	write.ContentTypes = input.ContentTypes
+	write.GroupName = input.GroupName
+	write.Description = input.Description
+	write.Required = input.Required
+	write.Default = input.Default
+	write.FilterLogic = input.FilterLogic
+	write.Weight = input.Weight
+	write.UIVisibility = input.UIVisibility
+	write.Choices = input.Choices
 
 	return write
 }
@@ -2283,6 +3214,308 @@ func NewGetSitesHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Site
 	})
 }
 
+// NewGetRegionsHandler creates a handler for the get_regions tool.
+func NewGetRegionsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RegionsInput, PaginatedOutput[domain.Region]] {
+	return newListHandler(listHandlerConfig[RegionsInput, domain.Region]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Region], error) {
+			return resolveService(ctx, svc).ListRegions(ctx, params)
+		},
+		buildParams: func(input RegionsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list regions",
+	})
+}
+
+// NewGetTenantGroupsHandler creates a handler for the get_tenant_groups tool.
+func NewGetTenantGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TenantGroupsInput, PaginatedOutput[domain.TenantGroup]] {
+	return newListHandler(listHandlerConfig[TenantGroupsInput, domain.TenantGroup]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.TenantGroup], error) {
+			return resolveService(ctx, svc).ListTenantGroups(ctx, params)
+		},
+		buildParams: func(input TenantGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list tenant groups",
+	})
+}
+
+// NewGetRolesHandler creates a handler for the get_roles tool.
+func NewGetRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RolesInput, PaginatedOutput[domain.Role]] {
+	return newListHandler(listHandlerConfig[RolesInput, domain.Role]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Role], error) {
+			return resolveService(ctx, svc).ListRoles(ctx, params)
+		},
+		buildParams: func(input RolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list roles",
+	})
+}
+
+// NewGetTenantsHandler creates a handler for the get_tenants tool.
+func NewGetTenantsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TenantsInput, PaginatedOutput[domain.Tenant]] {
+	return newListHandler(listHandlerConfig[TenantsInput, domain.Tenant]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Tenant], error) {
+			return resolveService(ctx, svc).ListTenants(ctx, params)
+		},
+		buildParams: func(input TenantsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "group", input.Group)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list tenants",
+	})
+}
+
+// NewGetTagsHandler creates a handler for the get_tags tool.
+func NewGetTagsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TagsInput, PaginatedOutput[domain.Tag]] {
+	return newListHandler(listHandlerConfig[TagsInput, domain.Tag]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Tag], error) {
+			return resolveService(ctx, svc).ListTags(ctx, params)
+		},
+		buildParams: func(input TagsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list tags",
+	})
+}
+
+// NewGetCustomFieldsHandler creates a handler for the get_custom_fields tool.
+func NewGetCustomFieldsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CustomFieldsInput, PaginatedOutput[domain.CustomField]] {
+	return newListHandler(listHandlerConfig[CustomFieldsInput, domain.CustomField]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.CustomField], error) {
+			return resolveService(ctx, svc).ListCustomFields(ctx, params)
+		},
+		buildParams: func(input CustomFieldsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "content_type", input.ContentType)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list custom fields",
+	})
+}
+
+// NewGetSiteGroupsHandler creates a handler for the get_site_groups tool.
+func NewGetSiteGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[SiteGroupsInput, PaginatedOutput[domain.SiteGroup]] {
+	return newListHandler(listHandlerConfig[SiteGroupsInput, domain.SiteGroup]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.SiteGroup], error) {
+			return resolveService(ctx, svc).ListSiteGroups(ctx, params)
+		},
+		buildParams: func(input SiteGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list site groups",
+	})
+}
+
+// NewGetRackGroupsHandler creates a handler for the get_rack_groups tool.
+func NewGetRackGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackGroupsInput, PaginatedOutput[domain.RackGroup]] {
+	return newListHandler(listHandlerConfig[RackGroupsInput, domain.RackGroup]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.RackGroup], error) {
+			return resolveService(ctx, svc).ListRackGroups(ctx, params)
+		},
+		buildParams: func(input RackGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "site", input.Site)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list rack groups",
+	})
+}
+
+// NewGetRackRolesHandler creates a handler for the get_rack_roles tool.
+func NewGetRackRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackRolesInput, PaginatedOutput[domain.RackRole]] {
+	return newListHandler(listHandlerConfig[RackRolesInput, domain.RackRole]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.RackRole], error) {
+			return resolveService(ctx, svc).ListRackRoles(ctx, params)
+		},
+		buildParams: func(input RackRolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "color", input.Color)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list rack roles",
+	})
+}
+
+// NewGetDeviceRolesHandler creates a handler for the get_device_roles tool.
+func NewGetDeviceRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceRolesInput, PaginatedOutput[domain.DeviceRole]] {
+	return newListHandler(listHandlerConfig[DeviceRolesInput, domain.DeviceRole]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.DeviceRole], error) {
+			return resolveService(ctx, svc).ListDeviceRoles(ctx, params)
+		},
+		buildParams: func(input DeviceRolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "color", input.Color)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list device roles",
+	})
+}
+
+// NewGetPlatformsHandler creates a handler for the get_platforms tool.
+func NewGetPlatformsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PlatformsInput, PaginatedOutput[domain.Platform]] {
+	return newListHandler(listHandlerConfig[PlatformsInput, domain.Platform]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Platform], error) {
+			return resolveService(ctx, svc).ListPlatforms(ctx, params)
+		},
+		buildParams: func(input PlatformsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "manufacturer", input.Manufacturer)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list platforms",
+	})
+}
+
+// NewGetVirtualChassisHandler creates a handler for the get_virtual_chassis
+// tool.
+func NewGetVirtualChassisHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualChassisInput, PaginatedOutput[domain.VirtualChassis]] {
+	return newListHandler(listHandlerConfig[VirtualChassisInput, domain.VirtualChassis]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualChassis], error) {
+			return resolveService(ctx, svc).ListVirtualChassis(ctx, params)
+		},
+		buildParams: func(input VirtualChassisInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "name", input.Name)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual chassis",
+	})
+}
+
+// NewGetPowerPanelsHandler creates a handler for the get_power_panels tool.
+func NewGetPowerPanelsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPanelsInput, PaginatedOutput[domain.PowerPanel]] {
+	return newListHandler(listHandlerConfig[PowerPanelsInput, domain.PowerPanel]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.PowerPanel], error) {
+			return resolveService(ctx, svc).ListPowerPanels(ctx, params)
+		},
+		buildParams: func(input PowerPanelsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "site", input.Site)
+			addParam(params, "location", input.Location)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list power panels",
+	})
+}
+
+// NewGetInventoryItemRolesHandler creates a handler for the
+// get_inventory_item_roles tool.
+func NewGetInventoryItemRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemRolesInput, PaginatedOutput[domain.InventoryItemRole]] {
+	return newListHandler(listHandlerConfig[InventoryItemRolesInput, domain.InventoryItemRole]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.InventoryItemRole], error) {
+			return resolveService(ctx, svc).ListInventoryItemRoles(ctx, params)
+		},
+		buildParams: func(input InventoryItemRolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "color", input.Color)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list inventory item roles",
+	})
+}
+
 // NewGetDevicesHandler creates a handler for the get_devices tool.
 func NewGetDevicesHandler(
 	svc *application.NetworkService,
@@ -2701,6 +3934,161 @@ func NewDeleteSiteHandler(svc *application.NetworkService) mcp.ToolHandlerFor[Si
 		}
 
 		if err := service.DeleteSite(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateRegionHandler creates a handler for the create_region tool.
+func NewCreateRegionHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RegionCreateInput, RegionOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RegionCreateInput,
+	) (*mcp.CallToolResult, RegionOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RegionOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RegionOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		region, err := service.CreateRegion(ctx, regionWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RegionOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RegionOutput{Data: *region}, nil
+	}
+}
+
+// NewUpdateRegionHandler creates a handler for the update_region tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRegionHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RegionUpdateInput, RegionOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RegionUpdateInput,
+	) (*mcp.CallToolResult, RegionOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RegionOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RegionOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		region, err := service.UpdateRegion(ctx, input.ID, regionWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RegionOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RegionOutput{Data: *region}, nil
+	}
+}
+
+// NewDeleteRegionHandler creates a handler for the delete_region tool.
+func NewDeleteRegionHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RegionDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RegionDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRegion(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateTenantGroupHandler creates a handler for the create_tenant_group
+// tool.
+func NewCreateTenantGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TenantGroupCreateInput, TenantGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TenantGroupCreateInput,
+	) (*mcp.CallToolResult, TenantGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, TenantGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, TenantGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.CreateTenantGroup(ctx, tenantGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, TenantGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TenantGroupOutput{Data: *result}, nil
+	}
+}
+
+// NewUpdateTenantGroupHandler creates a handler for the update_tenant_group
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdateTenantGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[TenantGroupUpdateInput, TenantGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TenantGroupUpdateInput,
+	) (*mcp.CallToolResult, TenantGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, TenantGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, TenantGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.UpdateTenantGroup(ctx, input.ID, tenantGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, TenantGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TenantGroupOutput{Data: *result}, nil
+	}
+}
+
+// NewDeleteTenantGroupHandler creates a handler for the delete_tenant_group
+// tool.
+func NewDeleteTenantGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TenantGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TenantGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteTenantGroup(ctx, input.ID); err != nil {
 			res, e := writeErrorResult(err)
 
 			return res, struct{}{}, e
@@ -3809,6 +5197,166 @@ func NewDeleteTenantHandler(svc *application.NetworkService) mcp.ToolHandlerFor[
 	}
 }
 
+// NewCreateTagHandler creates a handler for the create_tag tool.
+func NewCreateTagHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TagCreateInput, TagOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TagCreateInput,
+	) (*mcp.CallToolResult, TagOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, TagOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, TagOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.CreateTag(ctx, tagWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, TagOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TagOutput{Data: *result}, nil
+	}
+}
+
+// NewUpdateTagHandler creates a handler for the update_tag tool. It performs a
+// partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateTagHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TagUpdateInput, TagOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TagUpdateInput,
+	) (*mcp.CallToolResult, TagOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, TagOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, TagOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.UpdateTag(ctx, input.ID, tagWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, TagOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, TagOutput{Data: *result}, nil
+	}
+}
+
+// NewDeleteTagHandler creates a handler for the delete_tag tool.
+func NewDeleteTagHandler(svc *application.NetworkService) mcp.ToolHandlerFor[TagDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input TagDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteTag(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateCustomFieldHandler creates a handler for the create_custom_field
+// tool.
+func NewCreateCustomFieldHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CustomFieldCreateInput, CustomFieldOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CustomFieldCreateInput,
+	) (*mcp.CallToolResult, CustomFieldOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Label == "" {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, fmt.Errorf("label is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.CreateCustomField(ctx, customFieldWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CustomFieldOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CustomFieldOutput{Data: *result}, nil
+	}
+}
+
+// NewUpdateCustomFieldHandler creates a handler for the update_custom_field
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdateCustomFieldHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CustomFieldUpdateInput, CustomFieldOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CustomFieldUpdateInput,
+	) (*mcp.CallToolResult, CustomFieldOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CustomFieldOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		result, err := service.UpdateCustomField(ctx, input.ID, customFieldWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CustomFieldOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CustomFieldOutput{Data: *result}, nil
+	}
+}
+
+// NewDeleteCustomFieldHandler creates a handler for the delete_custom_field
+// tool.
+func NewDeleteCustomFieldHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CustomFieldDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CustomFieldDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteCustomField(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
 // NewCreateManufacturerHandler creates a handler for the create_manufacturer
 // tool.
 func NewCreateManufacturerHandler(
@@ -4575,6 +6123,6747 @@ func NewDeleteContactHandler(svc *application.NetworkService) mcp.ToolHandlerFor
 		}
 
 		if err := service.DeleteContact(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateSiteGroupHandler creates a handler for the create_site_group tool.
+func NewCreateSiteGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[SiteGroupCreateInput, SiteGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input SiteGroupCreateInput,
+	) (*mcp.CallToolResult, SiteGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, SiteGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, SiteGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		siteGroup, err := service.CreateSiteGroup(ctx, siteGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, SiteGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, SiteGroupOutput{Data: *siteGroup}, nil
+	}
+}
+
+// NewUpdateSiteGroupHandler creates a handler for the update_site_group tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateSiteGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[SiteGroupUpdateInput, SiteGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input SiteGroupUpdateInput,
+	) (*mcp.CallToolResult, SiteGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, SiteGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, SiteGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		siteGroup, err := service.UpdateSiteGroup(ctx, input.ID, siteGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, SiteGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, SiteGroupOutput{Data: *siteGroup}, nil
+	}
+}
+
+// NewDeleteSiteGroupHandler creates a handler for the delete_site_group tool.
+func NewDeleteSiteGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[SiteGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input SiteGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteSiteGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateRackGroupHandler creates a handler for the create_rack_group tool.
+func NewCreateRackGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackGroupCreateInput, RackGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackGroupCreateInput,
+	) (*mcp.CallToolResult, RackGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RackGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackGroup, err := service.CreateRackGroup(ctx, rackGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackGroupOutput{Data: *rackGroup}, nil
+	}
+}
+
+// NewUpdateRackGroupHandler creates a handler for the update_rack_group tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRackGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackGroupUpdateInput, RackGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackGroupUpdateInput,
+	) (*mcp.CallToolResult, RackGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RackGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackGroup, err := service.UpdateRackGroup(ctx, input.ID, rackGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackGroupOutput{Data: *rackGroup}, nil
+	}
+}
+
+// NewDeleteRackGroupHandler creates a handler for the delete_rack_group tool.
+func NewDeleteRackGroupHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRackGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateRackRoleHandler creates a handler for the create_rack_role tool.
+func NewCreateRackRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackRoleCreateInput, RackRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackRoleCreateInput,
+	) (*mcp.CallToolResult, RackRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackRoleOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RackRoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackRole, err := service.CreateRackRole(ctx, rackRoleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackRoleOutput{Data: *rackRole}, nil
+	}
+}
+
+// NewUpdateRackRoleHandler creates a handler for the update_rack_role tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRackRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackRoleUpdateInput, RackRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackRoleUpdateInput,
+	) (*mcp.CallToolResult, RackRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackRoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RackRoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackRole, err := service.UpdateRackRole(ctx, input.ID, rackRoleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackRoleOutput{Data: *rackRole}, nil
+	}
+}
+
+// NewDeleteRackRoleHandler creates a handler for the delete_rack_role tool.
+func NewDeleteRackRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RackRoleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackRoleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRackRole(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateDeviceRoleHandler creates a handler for the create_device_role tool.
+func NewCreateDeviceRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceRoleCreateInput, DeviceRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceRoleCreateInput,
+	) (*mcp.CallToolResult, DeviceRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceRoleOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, DeviceRoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		deviceRole, err := service.CreateDeviceRole(ctx, deviceRoleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, DeviceRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceRoleOutput{Data: *deviceRole}, nil
+	}
+}
+
+// NewUpdateDeviceRoleHandler creates a handler for the update_device_role tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateDeviceRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceRoleUpdateInput, DeviceRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceRoleUpdateInput,
+	) (*mcp.CallToolResult, DeviceRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceRoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceRoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		deviceRole, err := service.UpdateDeviceRole(ctx, input.ID, deviceRoleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, DeviceRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceRoleOutput{Data: *deviceRole}, nil
+	}
+}
+
+// NewDeleteDeviceRoleHandler creates a handler for the delete_device_role tool.
+func NewDeleteDeviceRoleHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceRoleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceRoleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteDeviceRole(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreatePlatformHandler creates a handler for the create_platform tool.
+func NewCreatePlatformHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PlatformCreateInput, PlatformOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PlatformCreateInput,
+	) (*mcp.CallToolResult, PlatformOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PlatformOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, PlatformOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		platform, err := service.CreatePlatform(ctx, platformWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PlatformOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PlatformOutput{Data: *platform}, nil
+	}
+}
+
+// NewUpdatePlatformHandler creates a handler for the update_platform tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdatePlatformHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PlatformUpdateInput, PlatformOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PlatformUpdateInput,
+	) (*mcp.CallToolResult, PlatformOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PlatformOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, PlatformOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		platform, err := service.UpdatePlatform(ctx, input.ID, platformWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PlatformOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PlatformOutput{Data: *platform}, nil
+	}
+}
+
+// NewDeletePlatformHandler creates a handler for the delete_platform tool.
+func NewDeletePlatformHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PlatformDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PlatformDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeletePlatform(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateVirtualChassisHandler creates a handler for the create_virtual_chassis
+// tool.
+func NewCreateVirtualChassisHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualChassisCreateInput, VirtualChassisOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualChassisCreateInput,
+	) (*mcp.CallToolResult, VirtualChassisOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualChassisOutput{}, errServiceNotAvailable
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		virtualChassis, err := service.CreateVirtualChassis(ctx, virtualChassisWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualChassisOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualChassisOutput{Data: *virtualChassis}, nil
+	}
+}
+
+// NewUpdateVirtualChassisHandler creates a handler for the
+// update_virtual_chassis tool. It performs a partial-merge PATCH using only the
+// explicitly provided fields.
+func NewUpdateVirtualChassisHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualChassisUpdateInput, VirtualChassisOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualChassisUpdateInput,
+	) (*mcp.CallToolResult, VirtualChassisOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualChassisOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualChassisOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		virtualChassis, err := service.UpdateVirtualChassis(ctx, input.ID, virtualChassisWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualChassisOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualChassisOutput{Data: *virtualChassis}, nil
+	}
+}
+
+// NewDeleteVirtualChassisHandler creates a handler for the
+// delete_virtual_chassis tool.
+func NewDeleteVirtualChassisHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualChassisDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualChassisDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualChassis(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreatePowerPanelHandler creates a handler for the create_power_panel tool.
+func NewCreatePowerPanelHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPanelCreateInput, PowerPanelOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPanelCreateInput,
+	) (*mcp.CallToolResult, PowerPanelOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPanelOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, PowerPanelOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerPanel, err := service.CreatePowerPanel(ctx, powerPanelWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerPanelOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerPanelOutput{Data: *powerPanel}, nil
+	}
+}
+
+// NewUpdatePowerPanelHandler creates a handler for the update_power_panel tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdatePowerPanelHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPanelUpdateInput, PowerPanelOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPanelUpdateInput,
+	) (*mcp.CallToolResult, PowerPanelOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPanelOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPanelOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerPanel, err := service.UpdatePowerPanel(ctx, input.ID, powerPanelWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerPanelOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerPanelOutput{Data: *powerPanel}, nil
+	}
+}
+
+// NewDeletePowerPanelHandler creates a handler for the delete_power_panel tool.
+func NewDeletePowerPanelHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPanelDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPanelDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeletePowerPanel(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewCreateInventoryItemRoleHandler creates a handler for the
+// create_inventory_item_role tool.
+func NewCreateInventoryItemRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemRoleCreateInput, InventoryItemRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemRoleCreateInput,
+	) (*mcp.CallToolResult, InventoryItemRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemRoleOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemRoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		invItemRole, err := service.CreateInventoryItemRole(ctx, inventoryItemRoleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, InventoryItemRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, InventoryItemRoleOutput{Data: *invItemRole}, nil
+	}
+}
+
+// NewUpdateInventoryItemRoleHandler creates a handler for the
+// update_inventory_item_role tool. It performs a partial-merge PATCH using only
+// the explicitly provided fields.
+func NewUpdateInventoryItemRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemRoleUpdateInput, InventoryItemRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemRoleUpdateInput,
+	) (*mcp.CallToolResult, InventoryItemRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemRoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemRoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		invItemRole, err := service.UpdateInventoryItemRole(ctx, input.ID, inventoryItemRoleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, InventoryItemRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, InventoryItemRoleOutput{Data: *invItemRole}, nil
+	}
+}
+
+// NewDeleteInventoryItemRoleHandler creates a handler for the
+// delete_inventory_item_role tool.
+func NewDeleteInventoryItemRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemRoleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemRoleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteInventoryItemRole(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// FrontPortsInput represents the input fields for the get_front_ports tool.
+type FrontPortsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RearPortsInput represents the input fields for the get_rear_ports tool.
+type RearPortsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ConsolePortsInput represents the input fields for the get_console_ports tool.
+type ConsolePortsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ConsoleServerPortsInput represents the input fields for the
+// get_console_server_ports tool.
+type ConsoleServerPortsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// PowerPortsInput represents the input fields for the get_power_ports tool.
+type PowerPortsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// PowerOutletsInput represents the input fields for the get_power_outlets tool.
+type PowerOutletsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// PowerFeedsInput represents the input fields for the get_power_feeds tool.
+type PowerFeedsInput struct {
+	Q          string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	PowerPanel string `json:"power_panel,omitempty" jsonschema:"filter by power panel (name)"`
+	Tag        string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page       int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize   int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// DeviceBaysInput represents the input fields for the get_device_bays tool.
+type DeviceBaysInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RackReservationsInput represents the input fields for the
+// get_rack_reservations tool.
+type RackReservationsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Rack     string `json:"rack,omitempty" jsonschema:"filter by rack (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// InventoryItemsInput represents the input fields for the get_inventory_items
+// tool.
+type InventoryItemsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device   string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// MACAddressesInput represents the input fields for the get_mac_addresses tool.
+type MACAddressesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RIRsInput represents the input fields for the get_rirs tool.
+type RIRsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ContactGroupsInput represents the input fields for the get_contact_groups
+// tool.
+type ContactGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Parent   string `json:"parent,omitempty" jsonschema:"filter by parent contact group ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ContactRolesInput represents the input fields for the get_contact_roles tool.
+type ContactRolesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualDisksInput represents the input fields for the get_virtual_disks tool.
+type VirtualDisksInput struct {
+	Q              string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	VirtualMachine string `json:"virtual_machine,omitempty" jsonschema:"filter by virtual machine ID"`
+	Tag            string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page           int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize       int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualMachineTypesInput represents the input fields for the
+// get_virtual_machine_types tool.
+type VirtualMachineTypesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// AggregatesInput represents the input fields for the get_aggregates tool.
+type AggregatesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	RIR      string `json:"rir,omitempty" jsonschema:"filter by RIR (slug)"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// IPRangesInput represents the input fields for the get_ip_ranges tool.
+type IPRangesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	VRF      string `json:"vrf,omitempty" jsonschema:"filter by VRF"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Status   string `json:"status,omitempty" jsonschema:"filter by status"`
+	Role     string `json:"role,omitempty" jsonschema:"filter by role (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ASNsInput represents the input fields for the get_asns tool.
+type ASNsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	RIR      string `json:"rir,omitempty" jsonschema:"filter by RIR (slug)"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ASNRangesInput represents the input fields for the get_asn_ranges tool.
+type ASNRangesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	RIR      string `json:"rir,omitempty" jsonschema:"filter by RIR (slug)"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// RouteTargetsInput represents the input fields for the get_route_targets tool.
+type RouteTargetsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tenant   string `json:"tenant,omitempty" jsonschema:"filter by tenant (slug)"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ServicesInput represents the input fields for the get_services tool.
+type ServicesInput struct {
+	Q              string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Device         string `json:"device,omitempty" jsonschema:"filter by device (name)"`
+	VirtualMachine string `json:"virtual_machine,omitempty" jsonschema:"filter by virtual machine (name)"`
+	Tag            string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page           int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize       int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ServiceTemplatesInput represents the input fields for the
+// get_service_templates tool.
+type ServiceTemplatesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Protocol string `json:"protocol,omitempty" jsonschema:"filter by protocol"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// FHRPGroupsInput represents the input fields for the get_fhrp_groups tool.
+type FHRPGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Protocol string `json:"protocol,omitempty" jsonschema:"filter by protocol"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// FHRPGroupAssignmentsInput represents the input fields for the
+// get_fhrp_group_assignments tool.
+type FHRPGroupAssignmentsInput struct {
+	Q         string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Group     string `json:"group,omitempty" jsonschema:"filter by FHRP group ID"`
+	IPAddress string `json:"ip_address,omitempty" jsonschema:"filter by IP address ID"`
+	Page      int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize  int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VLANTranslationPoliciesInput represents the input fields for the
+// get_vlan_translation_policies tool.
+type VLANTranslationPoliciesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VLANTranslationRulesInput represents the input fields for the
+// get_vlan_translation_rules tool.
+type VLANTranslationRulesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Policy   string `json:"policy,omitempty" jsonschema:"filter by policy ID"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// FrontPortCreateInput represents the writable fields for creating a front port.
+type FrontPortCreateInput struct {
+	Device           *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name             string         `json:"name" jsonschema:"front port name (required)"`
+	Type             *string        `json:"type,omitempty" jsonschema:"front port type (choice string)"`
+	RearPort         *int           `json:"rear_port,omitempty" jsonschema:"rear port ID"`
+	RearPortPosition *int           `json:"rear_port_position,omitempty" jsonschema:"rear port position"`
+	Description      *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags             []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields     map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// FrontPortUpdateInput represents the writable fields for updating a front
+// port. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type FrontPortUpdateInput struct {
+	ID               int            `json:"id" jsonschema:"numeric ID of the front port to update,required"`
+	Device           *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name             *string        `json:"name,omitempty" jsonschema:"front port name"`
+	Type             *string        `json:"type,omitempty" jsonschema:"front port type"`
+	RearPort         *int           `json:"rear_port,omitempty" jsonschema:"rear port ID"`
+	RearPortPosition *int           `json:"rear_port_position,omitempty" jsonschema:"rear port position"`
+	Description      *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags             []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields     map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// FrontPortDeleteInput represents the input fields for deleting a front port.
+type FrontPortDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the front port to delete,required"`
+}
+
+// FrontPortOutput represents the output for the create/update front port tools.
+type FrontPortOutput struct {
+	Data domain.FrontPort `json:"data"`
+}
+
+// RearPortCreateInput represents the writable fields for creating a rear port.
+type RearPortCreateInput struct {
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name         string         `json:"name" jsonschema:"rear port name (required)"`
+	Type         *string        `json:"type,omitempty" jsonschema:"rear port type (choice string)"`
+	Positions    *int           `json:"positions,omitempty" jsonschema:"number of positions"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RearPortUpdateInput represents the writable fields for updating a rear port.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type RearPortUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the rear port to update,required"`
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"rear port name"`
+	Type         *string        `json:"type,omitempty" jsonschema:"rear port type"`
+	Positions    *int           `json:"positions,omitempty" jsonschema:"number of positions"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RearPortDeleteInput represents the input fields for deleting a rear port.
+type RearPortDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the rear port to delete,required"`
+}
+
+// RearPortOutput represents the output for the create/update rear port tools.
+type RearPortOutput struct {
+	Data domain.RearPort `json:"data"`
+}
+
+// ConsolePortCreateInput represents the writable fields for creating a console
+// port.
+type ConsolePortCreateInput struct {
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name         string         `json:"name" jsonschema:"console port name (required)"`
+	Type         *string        `json:"type,omitempty" jsonschema:"console port type (choice string)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ConsolePortUpdateInput represents the writable fields for updating a console
+// port. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type ConsolePortUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the console port to update,required"`
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"console port name"`
+	Type         *string        `json:"type,omitempty" jsonschema:"console port type"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ConsolePortDeleteInput represents the input fields for deleting a console
+// port.
+type ConsolePortDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the console port to delete,required"`
+}
+
+// ConsolePortOutput represents the output for the create/update console port
+// tools.
+type ConsolePortOutput struct {
+	Data domain.ConsolePort `json:"data"`
+}
+
+// ConsoleServerPortCreateInput represents the writable fields for creating a
+// console server port.
+type ConsoleServerPortCreateInput struct {
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name         string         `json:"name" jsonschema:"console server port name (required)"`
+	Type         *string        `json:"type,omitempty" jsonschema:"console server port type (choice string)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ConsoleServerPortUpdateInput represents the writable fields for updating a
+// console server port. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type ConsoleServerPortUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the console server port to update,required"`
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"console server port name"`
+	Type         *string        `json:"type,omitempty" jsonschema:"console server port type"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ConsoleServerPortDeleteInput represents the input fields for deleting a
+// console server port.
+type ConsoleServerPortDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the console server port to delete,required"`
+}
+
+// ConsoleServerPortOutput represents the output for the create/update console
+// server port tools.
+type ConsoleServerPortOutput struct {
+	Data domain.ConsoleServerPort `json:"data"`
+}
+
+// PowerPortCreateInput represents the writable fields for creating a power
+// port.
+type PowerPortCreateInput struct {
+	Device        *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name          string         `json:"name" jsonschema:"power port name (required)"`
+	Type          *string        `json:"type,omitempty" jsonschema:"power port type (choice string)"`
+	MaximumDraw   *int           `json:"maximum_draw,omitempty" jsonschema:"maximum power draw (VA)"`
+	AllocatedDraw *int           `json:"allocated_draw,omitempty" jsonschema:"allocated power draw (VA)"`
+	Description   *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags          []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerPortUpdateInput represents the writable fields for updating a power
+// port. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type PowerPortUpdateInput struct {
+	ID            int            `json:"id" jsonschema:"numeric ID of the power port to update,required"`
+	Device        *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name          *string        `json:"name,omitempty" jsonschema:"power port name"`
+	Type          *string        `json:"type,omitempty" jsonschema:"power port type"`
+	MaximumDraw   *int           `json:"maximum_draw,omitempty" jsonschema:"maximum power draw (VA)"`
+	AllocatedDraw *int           `json:"allocated_draw,omitempty" jsonschema:"allocated power draw (VA)"`
+	Description   *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags          []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerPortDeleteInput represents the input fields for deleting a power port.
+type PowerPortDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the power port to delete,required"`
+}
+
+// PowerPortOutput represents the output for the create/update power port tools.
+type PowerPortOutput struct {
+	Data domain.PowerPort `json:"data"`
+}
+
+// PowerOutletCreateInput represents the writable fields for creating a power
+// outlet.
+type PowerOutletCreateInput struct {
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name         string         `json:"name" jsonschema:"power outlet name (required)"`
+	Type         *string        `json:"type,omitempty" jsonschema:"power outlet type (choice string)"`
+	PowerPort    *int           `json:"power_port,omitempty" jsonschema:"linked power port ID"`
+	FeedLeg      *string        `json:"feed_leg,omitempty" jsonschema:"feed leg (choice string)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerOutletUpdateInput represents the writable fields for updating a power
+// outlet. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type PowerOutletUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the power outlet to update,required"`
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"power outlet name"`
+	Type         *string        `json:"type,omitempty" jsonschema:"power outlet type"`
+	PowerPort    *int           `json:"power_port,omitempty" jsonschema:"linked power port ID"`
+	FeedLeg      *string        `json:"feed_leg,omitempty" jsonschema:"feed leg (choice string)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerOutletDeleteInput represents the input fields for deleting a power
+// outlet.
+type PowerOutletDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the power outlet to delete,required"`
+}
+
+// PowerOutletOutput represents the output for the create/update power outlet
+// tools.
+type PowerOutletOutput struct {
+	Data domain.PowerOutlet `json:"data"`
+}
+
+// PowerFeedCreateInput represents the writable fields for creating a power
+// feed.
+type PowerFeedCreateInput struct {
+	Name           string         `json:"name" jsonschema:"power feed name (required)"`
+	PowerPanel     *int           `json:"power_panel,omitempty" jsonschema:"power panel ID"`
+	Status         *string        `json:"status,omitempty" jsonschema:"status (choice string)"`
+	Type           *string        `json:"type,omitempty" jsonschema:"power feed type (choice string)"`
+	Supply         *string        `json:"supply,omitempty" jsonschema:"supply (choice string)"`
+	Phase          *string        `json:"phase,omitempty" jsonschema:"phase (choice string)"`
+	Voltage        *int           `json:"voltage,omitempty" jsonschema:"voltage"`
+	Amperage       *int           `json:"amperage,omitempty" jsonschema:"amperage"`
+	MaxUtilization *int           `json:"max_utilization,omitempty" jsonschema:"maximum utilization (percent)"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerFeedUpdateInput represents the writable fields for updating a power
+// feed. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type PowerFeedUpdateInput struct {
+	ID             int            `json:"id" jsonschema:"numeric ID of the power feed to update,required"`
+	Name           *string        `json:"name,omitempty" jsonschema:"power feed name"`
+	PowerPanel     *int           `json:"power_panel,omitempty" jsonschema:"power panel ID"`
+	Status         *string        `json:"status,omitempty" jsonschema:"status (choice string)"`
+	Type           *string        `json:"type,omitempty" jsonschema:"power feed type (choice string)"`
+	Supply         *string        `json:"supply,omitempty" jsonschema:"supply (choice string)"`
+	Phase          *string        `json:"phase,omitempty" jsonschema:"phase (choice string)"`
+	Voltage        *int           `json:"voltage,omitempty" jsonschema:"voltage"`
+	Amperage       *int           `json:"amperage,omitempty" jsonschema:"amperage"`
+	MaxUtilization *int           `json:"max_utilization,omitempty" jsonschema:"maximum utilization (percent)"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// PowerFeedDeleteInput represents the input fields for deleting a power feed.
+type PowerFeedDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the power feed to delete,required"`
+}
+
+// PowerFeedOutput represents the output for the create/update power feed tools.
+type PowerFeedOutput struct {
+	Data domain.PowerFeed `json:"data"`
+}
+
+// DeviceBayCreateInput represents the writable fields for creating a device
+// bay.
+type DeviceBayCreateInput struct {
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name         string         `json:"name" jsonschema:"device bay name (required)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// DeviceBayUpdateInput represents the writable fields for updating a device
+// bay. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type DeviceBayUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the device bay to update,required"`
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"device bay name"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// DeviceBayDeleteInput represents the input fields for deleting a device bay.
+type DeviceBayDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the device bay to delete,required"`
+}
+
+// DeviceBayOutput represents the output for the create/update device bay tools.
+type DeviceBayOutput struct {
+	Data domain.DeviceBay `json:"data"`
+}
+
+// RackReservationCreateInput represents the writable fields for creating a rack
+// reservation.
+type RackReservationCreateInput struct {
+	Description  string         `json:"description" jsonschema:"description (required)"`
+	Rack         *int           `json:"rack,omitempty" jsonschema:"rack ID"`
+	Units        []int          `json:"units,omitempty" jsonschema:"reserved rack units"`
+	User         *int           `json:"user,omitempty" jsonschema:"user ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RackReservationUpdateInput represents the writable fields for updating a rack
+// reservation. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type RackReservationUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the rack reservation to update,required"`
+	Description  *string        `json:"description,omitempty" jsonschema:"description"`
+	Rack         *int           `json:"rack,omitempty" jsonschema:"rack ID"`
+	Units        []int          `json:"units,omitempty" jsonschema:"reserved rack units"`
+	User         *int           `json:"user,omitempty" jsonschema:"user ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RackReservationDeleteInput represents the input fields for deleting a rack
+// reservation.
+type RackReservationDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the rack reservation to delete,required"`
+}
+
+// RackReservationOutput represents the output for the create/update rack
+// reservation tools.
+type RackReservationOutput struct {
+	Data domain.RackReservation `json:"data"`
+}
+
+// InventoryItemCreateInput represents the writable fields for creating an
+// inventory item.
+type InventoryItemCreateInput struct {
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID (required)"`
+	Name         string         `json:"name" jsonschema:"inventory item name (required)"`
+	Role         *int           `json:"role,omitempty" jsonschema:"inventory item role ID"`
+	Manufacturer *int           `json:"manufacturer,omitempty" jsonschema:"manufacturer ID"`
+	Serial       *string        `json:"serial,omitempty" jsonschema:"serial number"`
+	PartID       *string        `json:"part_id,omitempty" jsonschema:"part ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// InventoryItemUpdateInput represents the writable fields for updating an
+// inventory item. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type InventoryItemUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the inventory item to update,required"`
+	Device       *int           `json:"device,omitempty" jsonschema:"parent device ID"`
+	Name         *string        `json:"name,omitempty" jsonschema:"inventory item name"`
+	Role         *int           `json:"role,omitempty" jsonschema:"inventory item role ID"`
+	Manufacturer *int           `json:"manufacturer,omitempty" jsonschema:"manufacturer ID"`
+	Serial       *string        `json:"serial,omitempty" jsonschema:"serial number"`
+	PartID       *string        `json:"part_id,omitempty" jsonschema:"part ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// InventoryItemDeleteInput represents the input fields for deleting an
+// inventory item.
+type InventoryItemDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the inventory item to delete,required"`
+}
+
+// InventoryItemOutput represents the output for the create/update inventory
+// item tools.
+type InventoryItemOutput struct {
+	Data domain.InventoryItem `json:"data"`
+}
+
+// MACAddressCreateInput represents the writable fields for creating a MAC
+// address.
+type MACAddressCreateInput struct {
+	Address            string         `json:"address" jsonschema:"MAC address (required)"`
+	AssignedObjectType *string        `json:"assigned_object_type,omitempty" jsonschema:"assigned object content type, e.g. dcim.interface"` //nolint:lll // struct tag cannot be split across lines
+	AssignedObjectID   *int           `json:"assigned_object_id,omitempty" jsonschema:"assigned object ID"`
+	Description        *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags               []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields       map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// MACAddressUpdateInput represents the writable fields for updating a MAC
+// address. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type MACAddressUpdateInput struct {
+	ID                 int            `json:"id" jsonschema:"numeric ID of the MAC address to update,required"`
+	Address            *string        `json:"address,omitempty" jsonschema:"MAC address"`
+	AssignedObjectType *string        `json:"assigned_object_type,omitempty" jsonschema:"assigned object content type, e.g. dcim.interface"` //nolint:lll // struct tag cannot be split across lines
+	AssignedObjectID   *int           `json:"assigned_object_id,omitempty" jsonschema:"assigned object ID"`
+	Description        *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags               []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields       map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// MACAddressDeleteInput represents the input fields for deleting a MAC address.
+type MACAddressDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the MAC address to delete,required"`
+}
+
+// MACAddressOutput represents the output for the create/update MAC address
+// tools.
+type MACAddressOutput struct {
+	Data domain.MACAddress `json:"data"`
+}
+
+// RIRCreateInput represents the writable fields for creating an RIR.
+type RIRCreateInput struct {
+	Name         string         `json:"name" jsonschema:"RIR name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	IsPrivate    *bool          `json:"is_private,omitempty" jsonschema:"whether this RIR represents private use"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RIRUpdateInput represents the writable fields for updating an RIR. All fields
+// are optional; only the explicitly provided ones are patched (PATCH merge).
+type RIRUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the RIR to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"RIR name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	IsPrivate    *bool          `json:"is_private,omitempty" jsonschema:"whether this RIR represents private use"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RIRDeleteInput represents the input fields for deleting an RIR.
+type RIRDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the RIR to delete,required"`
+}
+
+// RIROutput represents the output for the create/update RIR tools.
+type RIROutput struct {
+	Data domain.RIR `json:"data"`
+}
+
+// ContactGroupCreateInput represents the writable fields for creating a contact
+// group.
+type ContactGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"contact group name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"ID of the parent contact group"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactGroupUpdateInput represents the writable fields for updating a contact
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type ContactGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the contact group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"contact group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Parent       *int           `json:"parent,omitempty" jsonschema:"ID of the parent contact group"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactGroupDeleteInput represents the input fields for deleting a contact
+// group.
+type ContactGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the contact group to delete,required"`
+}
+
+// ContactGroupOutput represents the output for the create/update contact group
+// tools.
+type ContactGroupOutput struct {
+	Data domain.ContactGroup `json:"data"`
+}
+
+// ContactRoleCreateInput represents the writable fields for creating a contact
+// role.
+type ContactRoleCreateInput struct {
+	Name         string         `json:"name" jsonschema:"contact role name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactRoleUpdateInput represents the writable fields for updating a contact
+// role. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type ContactRoleUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the contact role to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"contact role name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ContactRoleDeleteInput represents the input fields for deleting a contact
+// role.
+type ContactRoleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the contact role to delete,required"`
+}
+
+// ContactRoleOutput represents the output for the create/update contact role
+// tools.
+type ContactRoleOutput struct {
+	Data domain.ContactRole `json:"data"`
+}
+
+// VirtualDiskCreateInput represents the writable fields for creating a virtual
+// disk.
+type VirtualDiskCreateInput struct {
+	Name           string         `json:"name" jsonschema:"virtual disk name (required)"`
+	VirtualMachine *int           `json:"virtual_machine,omitempty" jsonschema:"ID of the parent virtual machine"`
+	Size           *int           `json:"size,omitempty" jsonschema:"disk size in MB"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualDiskUpdateInput represents the writable fields for updating a virtual
+// disk. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type VirtualDiskUpdateInput struct {
+	ID             int            `json:"id" jsonschema:"numeric ID of the virtual disk to update,required"`
+	Name           *string        `json:"name,omitempty" jsonschema:"virtual disk name"`
+	VirtualMachine *int           `json:"virtual_machine,omitempty" jsonschema:"ID of the parent virtual machine"`
+	Size           *int           `json:"size,omitempty" jsonschema:"disk size in MB"`
+	Description    *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags           []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualDiskDeleteInput represents the input fields for deleting a virtual
+// disk.
+type VirtualDiskDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual disk to delete,required"`
+}
+
+// VirtualDiskOutput represents the output for the create/update virtual disk
+// tools.
+type VirtualDiskOutput struct {
+	Data domain.VirtualDisk `json:"data"`
+}
+
+// VirtualMachineTypeCreateInput represents the writable fields for creating a
+// virtual machine type.
+type VirtualMachineTypeCreateInput struct {
+	Name         string         `json:"name" jsonschema:"virtual machine type name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualMachineTypeUpdateInput represents the writable fields for updating a
+// virtual machine type. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type VirtualMachineTypeUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the virtual machine type to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"virtual machine type name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualMachineTypeDeleteInput represents the input fields for deleting a
+// virtual machine type.
+type VirtualMachineTypeDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual machine type to delete,required"`
+}
+
+// VirtualMachineTypeOutput represents the output for the create/update virtual
+// machine type tools.
+type VirtualMachineTypeOutput struct {
+	Data domain.VirtualMachineType `json:"data"`
+}
+
+// ProviderAccountsInput represents the input fields for the
+// get_provider_accounts tool.
+type ProviderAccountsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Provider string `json:"provider,omitempty" jsonschema:"filter by provider ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ProviderAccountCreateInput represents the writable fields for creating a
+// provider account.
+type ProviderAccountCreateInput struct {
+	Name         string         `json:"name" jsonschema:"provider account name (required)"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	Account      *string        `json:"account,omitempty" jsonschema:"account number/identifier"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderAccountUpdateInput represents the writable fields for updating a
+// provider account. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type ProviderAccountUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the provider account to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"provider account name"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	Account      *string        `json:"account,omitempty" jsonschema:"account number/identifier"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderAccountDeleteInput represents the input fields for deleting a
+// provider account.
+type ProviderAccountDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the provider account to delete,required"`
+}
+
+// ProviderAccountOutput represents the output for the create/update provider
+// account tools.
+type ProviderAccountOutput struct {
+	Data domain.ProviderAccount `json:"data"`
+}
+
+// ProviderNetworksInput represents the input fields for the
+// get_provider_networks tool.
+type ProviderNetworksInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Provider string `json:"provider,omitempty" jsonschema:"filter by provider ID"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// ProviderNetworkCreateInput represents the writable fields for creating a
+// provider network.
+type ProviderNetworkCreateInput struct {
+	Name         string         `json:"name" jsonschema:"provider network name (required)"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderNetworkUpdateInput represents the writable fields for updating a
+// provider network. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type ProviderNetworkUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the provider network to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"provider network name"`
+	Provider     *int           `json:"provider,omitempty" jsonschema:"provider ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Comments     *string        `json:"comments,omitempty" jsonschema:"free-form comments"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ProviderNetworkDeleteInput represents the input fields for deleting a
+// provider network.
+type ProviderNetworkDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the provider network to delete,required"`
+}
+
+// ProviderNetworkOutput represents the output for the create/update provider
+// network tools.
+type ProviderNetworkOutput struct {
+	Data domain.ProviderNetwork `json:"data"`
+}
+
+// CircuitGroupsInput represents the input fields for the get_circuit_groups
+// tool.
+type CircuitGroupsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// CircuitGroupCreateInput represents the writable fields for creating a circuit
+// group.
+type CircuitGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"circuit group name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CircuitGroupUpdateInput represents the writable fields for updating a circuit
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type CircuitGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the circuit group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"circuit group name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// CircuitGroupDeleteInput represents the input fields for deleting a circuit
+// group.
+type CircuitGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the circuit group to delete,required"`
+}
+
+// CircuitGroupOutput represents the output for the create/update circuit group
+// tools.
+type CircuitGroupOutput struct {
+	Data domain.CircuitGroup `json:"data"`
+}
+
+// CircuitGroupAssignmentsInput represents the input fields for the
+// get_circuit_group_assignments tool.
+type CircuitGroupAssignmentsInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Group    string `json:"group,omitempty" jsonschema:"filter by circuit group ID"`
+	Circuit  string `json:"circuit,omitempty" jsonschema:"filter by circuit ID"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// CircuitGroupAssignmentCreateInput represents the writable fields for creating
+// a circuit group assignment.
+type CircuitGroupAssignmentCreateInput struct {
+	Group      int     `json:"group" jsonschema:"circuit group ID (required)"`
+	MemberType string  `json:"member_type" jsonschema:"member content type (e.g. circuits.circuit),required"`
+	MemberID   int     `json:"member_id" jsonschema:"member object ID (required)"`
+	Priority   *string `json:"priority,omitempty" jsonschema:"priority (choice: primary/secondary/tertiary/inactive)"`
+}
+
+// CircuitGroupAssignmentUpdateInput represents the writable fields for updating
+// a circuit group assignment. All fields are optional; only the explicitly
+// provided ones are patched (PATCH merge).
+type CircuitGroupAssignmentUpdateInput struct {
+	ID         int     `json:"id" jsonschema:"numeric ID of the circuit group assignment to update,required"`
+	Group      *int    `json:"group,omitempty" jsonschema:"circuit group ID"`
+	MemberType *string `json:"member_type,omitempty" jsonschema:"member content type (e.g. circuits.circuit)"`
+	MemberID   *int    `json:"member_id,omitempty" jsonschema:"member object ID"`
+	Priority   *string `json:"priority,omitempty" jsonschema:"priority (choice: primary/secondary/tertiary/inactive)"`
+}
+
+// CircuitGroupAssignmentDeleteInput represents the input fields for deleting a
+// circuit group assignment.
+type CircuitGroupAssignmentDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the circuit group assignment to delete,required"`
+}
+
+// CircuitGroupAssignmentOutput represents the output for the create/update
+// circuit group assignment tools.
+type CircuitGroupAssignmentOutput struct {
+	Data domain.CircuitGroupAssignment `json:"data"`
+}
+
+// VirtualCircuitsInput represents the input fields for the get_virtual_circuits
+// tool.
+type VirtualCircuitsInput struct {
+	Q               string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Type            string `json:"type,omitempty" jsonschema:"filter by virtual circuit type ID"`
+	ProviderNetwork string `json:"provider_network,omitempty" jsonschema:"filter by provider network ID"`
+	Status          string `json:"status,omitempty" jsonschema:"filter by status (choice string)"`
+	Tag             string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page            int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize        int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualCircuitCreateInput represents the writable fields for creating a
+// virtual circuit.
+type VirtualCircuitCreateInput struct {
+	CID             string         `json:"cid" jsonschema:"unique circuit ID (required)"`
+	Type            *int           `json:"type,omitempty" jsonschema:"virtual circuit type ID"`
+	ProviderNetwork *int           `json:"provider_network,omitempty" jsonschema:"provider network ID"`
+	Status          *string        `json:"status,omitempty" jsonschema:"status (choice string)"`
+	Description     *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags            []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualCircuitUpdateInput represents the writable fields for updating a
+// virtual circuit. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type VirtualCircuitUpdateInput struct {
+	ID              int            `json:"id" jsonschema:"numeric ID of the virtual circuit to update,required"`
+	CID             *string        `json:"cid,omitempty" jsonschema:"unique circuit ID"`
+	Type            *int           `json:"type,omitempty" jsonschema:"virtual circuit type ID"`
+	ProviderNetwork *int           `json:"provider_network,omitempty" jsonschema:"provider network ID"`
+	Status          *string        `json:"status,omitempty" jsonschema:"status (choice string)"`
+	Description     *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags            []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields    map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualCircuitDeleteInput represents the input fields for deleting a virtual
+// circuit.
+type VirtualCircuitDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual circuit to delete,required"`
+}
+
+// VirtualCircuitOutput represents the output for the create/update virtual
+// circuit tools.
+type VirtualCircuitOutput struct {
+	Data domain.VirtualCircuit `json:"data"`
+}
+
+// VirtualCircuitTypesInput represents the input fields for the
+// get_virtual_circuit_types tool.
+type VirtualCircuitTypesInput struct {
+	Q        string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	Tag      string `json:"tag,omitempty" jsonschema:"filter by tag (slug)"`
+	Page     int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualCircuitTypeCreateInput represents the writable fields for creating a
+// virtual circuit type.
+type VirtualCircuitTypeCreateInput struct {
+	Name         string         `json:"name" jsonschema:"virtual circuit type name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualCircuitTypeUpdateInput represents the writable fields for updating a
+// virtual circuit type. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type VirtualCircuitTypeUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the virtual circuit type to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"virtual circuit type name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VirtualCircuitTypeDeleteInput represents the input fields for deleting a
+// virtual circuit type.
+type VirtualCircuitTypeDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual circuit type to delete,required"`
+}
+
+// VirtualCircuitTypeOutput represents the output for the create/update virtual
+// circuit type tools.
+type VirtualCircuitTypeOutput struct {
+	Data domain.VirtualCircuitType `json:"data"`
+}
+
+// VirtualCircuitTerminationsInput represents the input fields for the
+// get_virtual_circuit_terminations tool.
+type VirtualCircuitTerminationsInput struct {
+	Q              string `json:"q,omitempty" jsonschema:"free-text search across all fields"`
+	VirtualCircuit string `json:"virtual_circuit,omitempty" jsonschema:"filter by virtual circuit ID"`
+	InterfaceType  string `json:"interface_type,omitempty" jsonschema:"filter by interface type (e.g. dcim.interface)"`
+	InterfaceID    string `json:"interface_id,omitempty" jsonschema:"filter by interface ID"`
+	Page           int    `json:"page,omitempty" jsonschema:"page number,default=1"`
+	PageSize       int    `json:"page_size,omitempty" jsonschema:"results per page (default: 25, maximum: 1000)"`
+}
+
+// VirtualCircuitTerminationCreateInput represents the writable fields for
+// creating a virtual circuit termination.
+type VirtualCircuitTerminationCreateInput struct {
+	VirtualCircuit int     `json:"virtual_circuit" jsonschema:"virtual circuit ID (required)"`
+	Role           *string `json:"role,omitempty" jsonschema:"role (choice: peer/hub/spoke)"`
+	Interface      int     `json:"interface" jsonschema:"dcim interface ID (required)"`
+}
+
+// VirtualCircuitTerminationUpdateInput represents the writable fields for
+// updating a virtual circuit termination. All fields are optional; only the
+// explicitly provided ones are patched (PATCH merge).
+type VirtualCircuitTerminationUpdateInput struct {
+	ID             int     `json:"id" jsonschema:"numeric ID of the virtual circuit termination to update,required"`
+	VirtualCircuit *int    `json:"virtual_circuit,omitempty" jsonschema:"virtual circuit ID"`
+	Role           *string `json:"role,omitempty" jsonschema:"role (choice: peer/hub/spoke)"`
+	Interface      *int    `json:"interface,omitempty" jsonschema:"dcim interface ID"`
+}
+
+// VirtualCircuitTerminationDeleteInput represents the input fields for deleting
+// a virtual circuit termination.
+type VirtualCircuitTerminationDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the virtual circuit termination to delete,required"`
+}
+
+// VirtualCircuitTerminationOutput represents the output for the create/update
+// virtual circuit termination tools.
+type VirtualCircuitTerminationOutput struct {
+	Data domain.VirtualCircuitTermination `json:"data"`
+}
+
+// AggregateCreateInput represents the writable fields for creating an aggregate.
+type AggregateCreateInput struct {
+	Prefix       string         `json:"prefix" jsonschema:"aggregate prefix (required)"`
+	RIR          *int           `json:"rir,omitempty" jsonschema:"RIR ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	DateAdded    *string        `json:"date_added,omitempty" jsonschema:"date the aggregate was added"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// AggregateUpdateInput represents the writable fields for updating an aggregate.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type AggregateUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the aggregate to update,required"`
+	Prefix       *string        `json:"prefix,omitempty" jsonschema:"aggregate prefix"`
+	RIR          *int           `json:"rir,omitempty" jsonschema:"RIR ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	DateAdded    *string        `json:"date_added,omitempty" jsonschema:"date the aggregate was added"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// AggregateDeleteInput represents the input fields for deleting an aggregate.
+type AggregateDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the aggregate to delete,required"`
+}
+
+// AggregateOutput represents the output for the create/update aggregate tools.
+type AggregateOutput struct {
+	Data domain.Aggregate `json:"data"`
+}
+
+// IPRangeCreateInput represents the writable fields for creating an IP range.
+type IPRangeCreateInput struct {
+	StartAddress string         `json:"start_address" jsonschema:"start address (required)"`
+	EndAddress   string         `json:"end_address" jsonschema:"end address (required)"`
+	VRF          *int           `json:"vrf,omitempty" jsonschema:"VRF ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status (choice string)"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// IPRangeUpdateInput represents the writable fields for updating an IP range.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type IPRangeUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the IP range to update,required"`
+	StartAddress *string        `json:"start_address,omitempty" jsonschema:"start address"`
+	EndAddress   *string        `json:"end_address,omitempty" jsonschema:"end address"`
+	VRF          *int           `json:"vrf,omitempty" jsonschema:"VRF ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Status       *string        `json:"status,omitempty" jsonschema:"status (choice string)"`
+	Role         *int           `json:"role,omitempty" jsonschema:"role ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// IPRangeDeleteInput represents the input fields for deleting an IP range.
+type IPRangeDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the IP range to delete,required"`
+}
+
+// IPRangeOutput represents the output for the create/update IP range tools.
+type IPRangeOutput struct {
+	Data domain.IPRange `json:"data"`
+}
+
+// ASNCreateInput represents the writable fields for creating an ASN.
+type ASNCreateInput struct {
+	ASN          int            `json:"asn" jsonschema:"autonomous system number (required)"`
+	RIR          *int           `json:"rir,omitempty" jsonschema:"RIR ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ASNUpdateInput represents the writable fields for updating an ASN. All fields
+// are optional; only the explicitly provided ones are patched (PATCH merge).
+type ASNUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the ASN to update,required"`
+	ASN          *int           `json:"asn,omitempty" jsonschema:"autonomous system number"`
+	RIR          *int           `json:"rir,omitempty" jsonschema:"RIR ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ASNDeleteInput represents the input fields for deleting an ASN.
+type ASNDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the ASN to delete,required"`
+}
+
+// ASNOutput represents the output for the create/update ASN tools.
+type ASNOutput struct {
+	Data domain.ASN `json:"data"`
+}
+
+// ASNRangeCreateInput represents the writable fields for creating an ASN range.
+type ASNRangeCreateInput struct {
+	Name         string         `json:"name" jsonschema:"ASN range name (required)"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Start        *int           `json:"start,omitempty" jsonschema:"first ASN in the range"`
+	End          *int           `json:"end,omitempty" jsonschema:"last ASN in the range"`
+	RIR          *int           `json:"rir,omitempty" jsonschema:"RIR ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ASNRangeUpdateInput represents the writable fields for updating an ASN range.
+// All fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type ASNRangeUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the ASN range to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"ASN range name"`
+	Slug         *string        `json:"slug,omitempty" jsonschema:"URL-friendly slug"`
+	Start        *int           `json:"start,omitempty" jsonschema:"first ASN in the range"`
+	End          *int           `json:"end,omitempty" jsonschema:"last ASN in the range"`
+	RIR          *int           `json:"rir,omitempty" jsonschema:"RIR ID"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ASNRangeDeleteInput represents the input fields for deleting an ASN range.
+type ASNRangeDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the ASN range to delete,required"`
+}
+
+// ASNRangeOutput represents the output for the create/update ASN range tools.
+type ASNRangeOutput struct {
+	Data domain.ASNRange `json:"data"`
+}
+
+// RouteTargetCreateInput represents the writable fields for creating a route
+// target.
+type RouteTargetCreateInput struct {
+	Name         string         `json:"name" jsonschema:"route target name (required)"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RouteTargetUpdateInput represents the writable fields for updating a route
+// target. All fields are optional; only the explicitly provided ones are
+// patched (PATCH merge).
+type RouteTargetUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the route target to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"route target name"`
+	Tenant       *int           `json:"tenant,omitempty" jsonschema:"tenant ID"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// RouteTargetDeleteInput represents the input fields for deleting a route
+// target.
+type RouteTargetDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the route target to delete,required"`
+}
+
+// RouteTargetOutput represents the output for the create/update route target
+// tools.
+type RouteTargetOutput struct {
+	Data domain.RouteTarget `json:"data"`
+}
+
+// ServiceCreateInput represents the writable fields for creating a service.
+type ServiceCreateInput struct {
+	Name             string         `json:"name" jsonschema:"service name (required)"`
+	ParentObjectType *string        `json:"parent_object_type,omitempty" jsonschema:"parent object type (dcim.device)"`
+	ParentObjectID   *int           `json:"parent_object_id,omitempty" jsonschema:"assigned parent object ID"`
+	Protocol         *string        `json:"protocol,omitempty" jsonschema:"protocol (choice string, e.g. tcp)"`
+	Ports            []int          `json:"ports,omitempty" jsonschema:"list of port numbers"`
+	Description      *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags             []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields     map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ServiceUpdateInput represents the writable fields for updating a service. All
+// fields are optional; only the explicitly provided ones are patched (PATCH
+// merge).
+type ServiceUpdateInput struct {
+	ID               int            `json:"id" jsonschema:"numeric ID of the service to update,required"`
+	Name             *string        `json:"name,omitempty" jsonschema:"service name"`
+	ParentObjectType *string        `json:"parent_object_type,omitempty" jsonschema:"assigned parent object type"`
+	ParentObjectID   *int           `json:"parent_object_id,omitempty" jsonschema:"assigned parent object ID"`
+	Protocol         *string        `json:"protocol,omitempty" jsonschema:"protocol (choice string, e.g. tcp)"`
+	Ports            []int          `json:"ports,omitempty" jsonschema:"list of port numbers"`
+	Description      *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags             []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields     map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ServiceDeleteInput represents the input fields for deleting a service.
+type ServiceDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the service to delete,required"`
+}
+
+// ServiceOutput represents the output for the create/update service tools.
+type ServiceOutput struct {
+	Data domain.Service `json:"data"`
+}
+
+// ServiceTemplateCreateInput represents the writable fields for creating a
+// service template.
+type ServiceTemplateCreateInput struct {
+	Name         string         `json:"name" jsonschema:"service template name (required)"`
+	Protocol     *string        `json:"protocol,omitempty" jsonschema:"protocol (choice string, e.g. tcp)"`
+	Ports        []int          `json:"ports,omitempty" jsonschema:"list of port numbers"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ServiceTemplateUpdateInput represents the writable fields for updating a
+// service template. All fields are optional; only the explicitly provided ones
+// are patched (PATCH merge).
+type ServiceTemplateUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the service template to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"service template name"`
+	Protocol     *string        `json:"protocol,omitempty" jsonschema:"protocol (choice string, e.g. tcp)"`
+	Ports        []int          `json:"ports,omitempty" jsonschema:"list of port numbers"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// ServiceTemplateDeleteInput represents the input fields for deleting a service
+// template.
+type ServiceTemplateDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the service template to delete,required"`
+}
+
+// ServiceTemplateOutput represents the output for the create/update service
+// template tools.
+type ServiceTemplateOutput struct {
+	Data domain.ServiceTemplate `json:"data"`
+}
+
+// FHRPGroupCreateInput represents the writable fields for creating an FHRP
+// group.
+type FHRPGroupCreateInput struct {
+	Name         string         `json:"name" jsonschema:"FHRP group name (required)"`
+	Protocol     *string        `json:"protocol,omitempty" jsonschema:"protocol (choice string, e.g. vrrp)"`
+	GroupID      *int           `json:"group_id,omitempty" jsonschema:"FHRP group number"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// FHRPGroupUpdateInput represents the writable fields for updating an FHRP
+// group. All fields are optional; only the explicitly provided ones are patched
+// (PATCH merge).
+type FHRPGroupUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the FHRP group to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"FHRP group name"`
+	Protocol     *string        `json:"protocol,omitempty" jsonschema:"protocol (choice string, e.g. vrrp)"`
+	GroupID      *int           `json:"group_id,omitempty" jsonschema:"FHRP group number"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// FHRPGroupDeleteInput represents the input fields for deleting an FHRP group.
+type FHRPGroupDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the FHRP group to delete,required"`
+}
+
+// FHRPGroupOutput represents the output for the create/update FHRP group tools.
+type FHRPGroupOutput struct {
+	Data domain.FHRPGroup `json:"data"`
+}
+
+// FHRPGroupAssignmentCreateInput represents the writable fields for creating an
+// FHRP group assignment.
+type FHRPGroupAssignmentCreateInput struct {
+	Group         int    `json:"group" jsonschema:"FHRP group ID (required)"`
+	InterfaceType string `json:"interface_type" jsonschema:"assigned interface type (e.g. dcim.interface) (required)"`
+	InterfaceID   int    `json:"interface_id" jsonschema:"assigned interface ID (required)"`
+	Priority      *int   `json:"priority,omitempty" jsonschema:"priority value"`
+}
+
+// FHRPGroupAssignmentUpdateInput represents the writable fields for updating an
+// FHRP group assignment. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type FHRPGroupAssignmentUpdateInput struct {
+	ID            int     `json:"id" jsonschema:"numeric ID of the FHRP group assignment to update,required"`
+	Group         *int    `json:"group,omitempty" jsonschema:"FHRP group ID"`
+	InterfaceType *string `json:"interface_type,omitempty" jsonschema:"assigned interface type"`
+	InterfaceID   *int    `json:"interface_id,omitempty" jsonschema:"assigned interface ID"`
+	Priority      *int    `json:"priority,omitempty" jsonschema:"priority value"`
+}
+
+// FHRPGroupAssignmentDeleteInput represents the input fields for deleting an
+// FHRP group assignment.
+type FHRPGroupAssignmentDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the FHRP group assignment to delete,required"`
+}
+
+// FHRPGroupAssignmentOutput represents the output for the create/update FHRP
+// group assignment tools.
+type FHRPGroupAssignmentOutput struct {
+	Data domain.FHRPGroupAssignment `json:"data"`
+}
+
+// VLANTranslationPolicyCreateInput represents the writable fields for creating
+// a VLAN translation policy.
+type VLANTranslationPolicyCreateInput struct {
+	Name         string         `json:"name" jsonschema:"policy name (required)"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VLANTranslationPolicyUpdateInput represents the writable fields for updating
+// a VLAN translation policy. All fields are optional; only the explicitly
+// provided ones are patched (PATCH merge).
+type VLANTranslationPolicyUpdateInput struct {
+	ID           int            `json:"id" jsonschema:"numeric ID of the policy to update,required"`
+	Name         *string        `json:"name,omitempty" jsonschema:"policy name"`
+	Description  *string        `json:"description,omitempty" jsonschema:"short description"`
+	Tags         []string       `json:"tags,omitempty" jsonschema:"list of tag names"`
+	CustomFields map[string]any `json:"custom_fields,omitempty" jsonschema:"custom field values keyed by name"`
+}
+
+// VLANTranslationPolicyDeleteInput represents the input fields for deleting a
+// VLAN translation policy.
+type VLANTranslationPolicyDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the policy to delete,required"`
+}
+
+// VLANTranslationPolicyOutput represents the output for the create/update VLAN
+// translation policy tools.
+type VLANTranslationPolicyOutput struct {
+	Data domain.VLANTranslationPolicy `json:"data"`
+}
+
+// VLANTranslationRuleCreateInput represents the writable fields for creating a
+// VLAN translation rule.
+type VLANTranslationRuleCreateInput struct {
+	Policy      int     `json:"policy" jsonschema:"policy ID (required)"`
+	LocalVID    *int    `json:"local_vid,omitempty" jsonschema:"local VLAN VID"`
+	RemoteVID   *int    `json:"remote_vid,omitempty" jsonschema:"remote VLAN VID"`
+	Description *string `json:"description,omitempty" jsonschema:"short description"`
+}
+
+// VLANTranslationRuleUpdateInput represents the writable fields for updating a
+// VLAN translation rule. All fields are optional; only the explicitly provided
+// ones are patched (PATCH merge).
+type VLANTranslationRuleUpdateInput struct {
+	ID          int     `json:"id" jsonschema:"numeric ID of the rule to update,required"`
+	Policy      *int    `json:"policy,omitempty" jsonschema:"policy ID"`
+	LocalVID    *int    `json:"local_vid,omitempty" jsonschema:"local VLAN VID"`
+	RemoteVID   *int    `json:"remote_vid,omitempty" jsonschema:"remote VLAN VID"`
+	Description *string `json:"description,omitempty" jsonschema:"short description"`
+}
+
+// VLANTranslationRuleDeleteInput represents the input fields for deleting a VLAN
+// translation rule.
+type VLANTranslationRuleDeleteInput struct {
+	ID int `json:"id" jsonschema:"numeric ID of the rule to delete,required"`
+}
+
+// VLANTranslationRuleOutput represents the output for the create/update VLAN
+// translation rule tools.
+type VLANTranslationRuleOutput struct {
+	Data domain.VLANTranslationRule `json:"data"`
+}
+
+// frontPortWriteFromCreate builds a domain.FrontPortWrite from a create input.
+func frontPortWriteFromCreate(input FrontPortCreateInput) domain.FrontPortWrite {
+	return domain.FrontPortWrite{
+		Name:             input.Name,
+		Device:           input.Device,
+		Type:             input.Type,
+		RearPort:         input.RearPort,
+		RearPortPosition: input.RearPortPosition,
+		Description:      input.Description,
+		Tags:             input.Tags,
+		CustomFields:     input.CustomFields,
+	}
+}
+
+// frontPortWriteFromUpdate builds a domain.FrontPortWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func frontPortWriteFromUpdate(input FrontPortUpdateInput) domain.FrontPortWrite {
+	write := domain.FrontPortWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Device = input.Device
+	write.Type = input.Type
+	write.RearPort = input.RearPort
+	write.RearPortPosition = input.RearPortPosition
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// rearPortWriteFromCreate builds a domain.RearPortWrite from a create input.
+func rearPortWriteFromCreate(input RearPortCreateInput) domain.RearPortWrite {
+	return domain.RearPortWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Type:         input.Type,
+		Positions:    input.Positions,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// rearPortWriteFromUpdate builds a domain.RearPortWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func rearPortWriteFromUpdate(input RearPortUpdateInput) domain.RearPortWrite {
+	write := domain.RearPortWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Device = input.Device
+	write.Type = input.Type
+	write.Positions = input.Positions
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// consolePortWriteFromCreate builds a domain.ConsolePortWrite from a create
+// input.
+func consolePortWriteFromCreate(input ConsolePortCreateInput) domain.ConsolePortWrite {
+	return domain.ConsolePortWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Type:         input.Type,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// consolePortWriteFromUpdate builds a domain.ConsolePortWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func consolePortWriteFromUpdate(input ConsolePortUpdateInput) domain.ConsolePortWrite {
+	write := domain.ConsolePortWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Device = input.Device
+	write.Type = input.Type
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// consoleServerPortWriteFromCreate builds a domain.ConsoleServerPortWrite from
+// a create input.
+func consoleServerPortWriteFromCreate(input ConsoleServerPortCreateInput) domain.ConsoleServerPortWrite {
+	return domain.ConsoleServerPortWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Type:         input.Type,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// consoleServerPortWriteFromUpdate builds a domain.ConsoleServerPortWrite from
+// an update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func consoleServerPortWriteFromUpdate(input ConsoleServerPortUpdateInput) domain.ConsoleServerPortWrite {
+	write := domain.ConsoleServerPortWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Device = input.Device
+	write.Type = input.Type
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// powerPortWriteFromCreate builds a domain.PowerPortWrite from a create input.
+func powerPortWriteFromCreate(input PowerPortCreateInput) domain.PowerPortWrite {
+	return domain.PowerPortWrite{
+		Name:          input.Name,
+		Device:        input.Device,
+		Type:          input.Type,
+		MaximumDraw:   input.MaximumDraw,
+		AllocatedDraw: input.AllocatedDraw,
+		Description:   input.Description,
+		Tags:          input.Tags,
+		CustomFields:  input.CustomFields,
+	}
+}
+
+// powerPortWriteFromUpdate builds a domain.PowerPortWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func powerPortWriteFromUpdate(input PowerPortUpdateInput) domain.PowerPortWrite {
+	write := domain.PowerPortWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Device = input.Device
+	write.Type = input.Type
+	write.MaximumDraw = input.MaximumDraw
+	write.AllocatedDraw = input.AllocatedDraw
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// powerOutletWriteFromCreate builds a domain.PowerOutletWrite from a create
+// input.
+func powerOutletWriteFromCreate(input PowerOutletCreateInput) domain.PowerOutletWrite {
+	return domain.PowerOutletWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Type:         input.Type,
+		PowerPort:    input.PowerPort,
+		FeedLeg:      input.FeedLeg,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// powerOutletWriteFromUpdate builds a domain.PowerOutletWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func powerOutletWriteFromUpdate(input PowerOutletUpdateInput) domain.PowerOutletWrite {
+	write := domain.PowerOutletWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Device = input.Device
+	write.Type = input.Type
+	write.PowerPort = input.PowerPort
+	write.FeedLeg = input.FeedLeg
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// powerFeedWriteFromCreate builds a domain.PowerFeedWrite from a create input.
+func powerFeedWriteFromCreate(input PowerFeedCreateInput) domain.PowerFeedWrite {
+	return domain.PowerFeedWrite{
+		Name:           input.Name,
+		PowerPanel:     input.PowerPanel,
+		Status:         input.Status,
+		Type:           input.Type,
+		Supply:         input.Supply,
+		Phase:          input.Phase,
+		Voltage:        input.Voltage,
+		Amperage:       input.Amperage,
+		MaxUtilization: input.MaxUtilization,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+	}
+}
+
+// powerFeedWriteFromUpdate builds a domain.PowerFeedWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func powerFeedWriteFromUpdate(input PowerFeedUpdateInput) domain.PowerFeedWrite {
+	write := domain.PowerFeedWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.PowerPanel = input.PowerPanel
+	write.Status = input.Status
+	write.Type = input.Type
+	write.Supply = input.Supply
+	write.Phase = input.Phase
+	write.Voltage = input.Voltage
+	write.Amperage = input.Amperage
+	write.MaxUtilization = input.MaxUtilization
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// deviceBayWriteFromCreate builds a domain.DeviceBayWrite from a create input.
+func deviceBayWriteFromCreate(input DeviceBayCreateInput) domain.DeviceBayWrite {
+	return domain.DeviceBayWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// deviceBayWriteFromUpdate builds a domain.DeviceBayWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func deviceBayWriteFromUpdate(input DeviceBayUpdateInput) domain.DeviceBayWrite {
+	write := domain.DeviceBayWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Device = input.Device
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// rackReservationWriteFromCreate builds a domain.RackReservationWrite from a
+// create input.
+func rackReservationWriteFromCreate(input RackReservationCreateInput) domain.RackReservationWrite {
+	return domain.RackReservationWrite{
+		Description:  input.Description,
+		Rack:         input.Rack,
+		Units:        input.Units,
+		User:         input.User,
+		Tenant:       input.Tenant,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// rackReservationWriteFromUpdate builds a domain.RackReservationWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func rackReservationWriteFromUpdate(input RackReservationUpdateInput) domain.RackReservationWrite {
+	write := domain.RackReservationWrite{}
+	if input.Description != nil {
+		write.Description = *input.Description
+	}
+	write.Rack = input.Rack
+	write.Units = input.Units
+	write.User = input.User
+	write.Tenant = input.Tenant
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// inventoryItemWriteFromCreate builds a domain.InventoryItemWrite from a create
+// input.
+func inventoryItemWriteFromCreate(input InventoryItemCreateInput) domain.InventoryItemWrite {
+	return domain.InventoryItemWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Role:         input.Role,
+		Manufacturer: input.Manufacturer,
+		Serial:       input.Serial,
+		PartID:       input.PartID,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// inventoryItemWriteFromUpdate builds a domain.InventoryItemWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func inventoryItemWriteFromUpdate(input InventoryItemUpdateInput) domain.InventoryItemWrite {
+	write := domain.InventoryItemWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Device = input.Device
+	write.Role = input.Role
+	write.Manufacturer = input.Manufacturer
+	write.Serial = input.Serial
+	write.PartID = input.PartID
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// macAddressWriteFromCreate builds a domain.MACAddressWrite from a create
+// input.
+func macAddressWriteFromCreate(input MACAddressCreateInput) domain.MACAddressWrite {
+	return domain.MACAddressWrite{
+		Address:            input.Address,
+		AssignedObjectType: input.AssignedObjectType,
+		AssignedObjectID:   input.AssignedObjectID,
+		Description:        input.Description,
+		Tags:               input.Tags,
+		CustomFields:       input.CustomFields,
+	}
+}
+
+// macAddressWriteFromUpdate builds a domain.MACAddressWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func macAddressWriteFromUpdate(input MACAddressUpdateInput) domain.MACAddressWrite {
+	write := domain.MACAddressWrite{}
+	if input.Address != nil {
+		write.Address = *input.Address
+	}
+	write.AssignedObjectType = input.AssignedObjectType
+	write.AssignedObjectID = input.AssignedObjectID
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// rirWriteFromCreate builds a domain.RIRWrite from a create input.
+func rirWriteFromCreate(input RIRCreateInput) domain.RIRWrite {
+	return domain.RIRWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		IsPrivate:    input.IsPrivate,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// rirWriteFromUpdate builds a domain.RIRWrite from an update input, mapping only
+// the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func rirWriteFromUpdate(input RIRUpdateInput) domain.RIRWrite {
+	write := domain.RIRWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.IsPrivate = input.IsPrivate
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// contactGroupWriteFromCreate builds a domain.ContactGroupWrite from a create
+// input.
+func contactGroupWriteFromCreate(input ContactGroupCreateInput) domain.ContactGroupWrite {
+	return domain.ContactGroupWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Parent:       input.Parent,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// contactGroupWriteFromUpdate builds a domain.ContactGroupWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func contactGroupWriteFromUpdate(input ContactGroupUpdateInput) domain.ContactGroupWrite {
+	write := domain.ContactGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Parent = input.Parent
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// contactRoleWriteFromCreate builds a domain.ContactRoleWrite from a create
+// input.
+func contactRoleWriteFromCreate(input ContactRoleCreateInput) domain.ContactRoleWrite {
+	return domain.ContactRoleWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// contactRoleWriteFromUpdate builds a domain.ContactRoleWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func contactRoleWriteFromUpdate(input ContactRoleUpdateInput) domain.ContactRoleWrite {
+	write := domain.ContactRoleWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualDiskWriteFromCreate builds a domain.VirtualDiskWrite from a create
+// input.
+func virtualDiskWriteFromCreate(input VirtualDiskCreateInput) domain.VirtualDiskWrite {
+	return domain.VirtualDiskWrite{
+		Name:           input.Name,
+		VirtualMachine: input.VirtualMachine,
+		Size:           input.Size,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+	}
+}
+
+// virtualDiskWriteFromUpdate builds a domain.VirtualDiskWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func virtualDiskWriteFromUpdate(input VirtualDiskUpdateInput) domain.VirtualDiskWrite {
+	write := domain.VirtualDiskWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.VirtualMachine = input.VirtualMachine
+	write.Size = input.Size
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualMachineTypeWriteFromCreate builds a domain.VirtualMachineTypeWrite from
+// a create input.
+func virtualMachineTypeWriteFromCreate(input VirtualMachineTypeCreateInput) domain.VirtualMachineTypeWrite {
+	return domain.VirtualMachineTypeWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// virtualMachineTypeWriteFromUpdate builds a domain.VirtualMachineTypeWrite from
+// an update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func virtualMachineTypeWriteFromUpdate(input VirtualMachineTypeUpdateInput) domain.VirtualMachineTypeWrite {
+	write := domain.VirtualMachineTypeWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// aggregateWriteFromCreate builds a domain.AggregateWrite from a create input.
+func aggregateWriteFromCreate(input AggregateCreateInput) domain.AggregateWrite {
+	return domain.AggregateWrite{
+		Prefix:       input.Prefix,
+		RIR:          input.RIR,
+		Tenant:       input.Tenant,
+		DateAdded:    input.DateAdded,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// aggregateWriteFromUpdate builds a domain.AggregateWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func aggregateWriteFromUpdate(input AggregateUpdateInput) domain.AggregateWrite {
+	write := domain.AggregateWrite{}
+	if input.Prefix != nil {
+		write.Prefix = *input.Prefix
+	}
+	write.RIR = input.RIR
+	write.Tenant = input.Tenant
+	write.DateAdded = input.DateAdded
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// ipRangeWriteFromCreate builds a domain.IPRangeWrite from a create input.
+func ipRangeWriteFromCreate(input IPRangeCreateInput) domain.IPRangeWrite {
+	return domain.IPRangeWrite{
+		StartAddress: input.StartAddress,
+		EndAddress:   input.EndAddress,
+		VRF:          input.VRF,
+		Tenant:       input.Tenant,
+		Status:       input.Status,
+		Role:         input.Role,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// ipRangeWriteFromUpdate builds a domain.IPRangeWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func ipRangeWriteFromUpdate(input IPRangeUpdateInput) domain.IPRangeWrite {
+	write := domain.IPRangeWrite{}
+	if input.StartAddress != nil {
+		write.StartAddress = *input.StartAddress
+	}
+	if input.EndAddress != nil {
+		write.EndAddress = *input.EndAddress
+	}
+	write.VRF = input.VRF
+	write.Tenant = input.Tenant
+	write.Status = input.Status
+	write.Role = input.Role
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// asnWriteFromCreate builds a domain.ASNWrite from a create input.
+func asnWriteFromCreate(input ASNCreateInput) domain.ASNWrite {
+	return domain.ASNWrite{
+		ASN:          input.ASN,
+		RIR:          input.RIR,
+		Tenant:       input.Tenant,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// asnWriteFromUpdate builds a domain.ASNWrite from an update input, mapping only
+// the explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func asnWriteFromUpdate(input ASNUpdateInput) domain.ASNWrite {
+	write := domain.ASNWrite{}
+	if input.ASN != nil {
+		write.ASN = *input.ASN
+	}
+	write.RIR = input.RIR
+	write.Tenant = input.Tenant
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// asnRangeWriteFromCreate builds a domain.ASNRangeWrite from a create input.
+func asnRangeWriteFromCreate(input ASNRangeCreateInput) domain.ASNRangeWrite {
+	return domain.ASNRangeWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Start:        input.Start,
+		End:          input.End,
+		RIR:          input.RIR,
+		Tenant:       input.Tenant,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// asnRangeWriteFromUpdate builds a domain.ASNRangeWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func asnRangeWriteFromUpdate(input ASNRangeUpdateInput) domain.ASNRangeWrite {
+	write := domain.ASNRangeWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Start = input.Start
+	write.End = input.End
+	write.RIR = input.RIR
+	write.Tenant = input.Tenant
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// routeTargetWriteFromCreate builds a domain.RouteTargetWrite from a create
+// input.
+func routeTargetWriteFromCreate(input RouteTargetCreateInput) domain.RouteTargetWrite {
+	return domain.RouteTargetWrite{
+		Name:         input.Name,
+		Tenant:       input.Tenant,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// routeTargetWriteFromUpdate builds a domain.RouteTargetWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH body
+// is minimal.
+func routeTargetWriteFromUpdate(input RouteTargetUpdateInput) domain.RouteTargetWrite {
+	write := domain.RouteTargetWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Tenant = input.Tenant
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// serviceWriteFromCreate builds a domain.ServiceWrite from a create input.
+func serviceWriteFromCreate(input ServiceCreateInput) domain.ServiceWrite {
+	return domain.ServiceWrite{
+		Name:             input.Name,
+		ParentObjectType: input.ParentObjectType,
+		ParentObjectID:   input.ParentObjectID,
+		Protocol:         input.Protocol,
+		Ports:            input.Ports,
+		Description:      input.Description,
+		Tags:             input.Tags,
+		CustomFields:     input.CustomFields,
+	}
+}
+
+// serviceWriteFromUpdate builds a domain.ServiceWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func serviceWriteFromUpdate(input ServiceUpdateInput) domain.ServiceWrite {
+	write := domain.ServiceWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	if input.ParentObjectType != nil {
+		write.ParentObjectType = input.ParentObjectType
+	}
+	if input.ParentObjectID != nil {
+		write.ParentObjectID = input.ParentObjectID
+	}
+	write.Protocol = input.Protocol
+	write.Ports = input.Ports
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// serviceTemplateWriteFromCreate builds a domain.ServiceTemplateWrite from a
+// create input.
+func serviceTemplateWriteFromCreate(input ServiceTemplateCreateInput) domain.ServiceTemplateWrite {
+	return domain.ServiceTemplateWrite{
+		Name:         input.Name,
+		Protocol:     input.Protocol,
+		Ports:        input.Ports,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// serviceTemplateWriteFromUpdate builds a domain.ServiceTemplateWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func serviceTemplateWriteFromUpdate(input ServiceTemplateUpdateInput) domain.ServiceTemplateWrite {
+	write := domain.ServiceTemplateWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Protocol = input.Protocol
+	write.Ports = input.Ports
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// fhrpGroupWriteFromCreate builds a domain.FHRPGroupWrite from a create input.
+func fhrpGroupWriteFromCreate(input FHRPGroupCreateInput) domain.FHRPGroupWrite {
+	return domain.FHRPGroupWrite{
+		Name:         input.Name,
+		Protocol:     input.Protocol,
+		GroupID:      input.GroupID,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// fhrpGroupWriteFromUpdate builds a domain.FHRPGroupWrite from an update input,
+// mapping only the explicitly-provided (non-nil) fields so the PATCH body is
+// minimal.
+func fhrpGroupWriteFromUpdate(input FHRPGroupUpdateInput) domain.FHRPGroupWrite {
+	write := domain.FHRPGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Protocol = input.Protocol
+	write.GroupID = input.GroupID
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// fhrpGroupAssignmentWriteFromCreate builds a domain.FHRPGroupAssignmentWrite
+// from a create input.
+func fhrpGroupAssignmentWriteFromCreate(input FHRPGroupAssignmentCreateInput) domain.FHRPGroupAssignmentWrite {
+	return domain.FHRPGroupAssignmentWrite{
+		Group:         input.Group,
+		InterfaceType: input.InterfaceType,
+		InterfaceID:   input.InterfaceID,
+		Priority:      input.Priority,
+	}
+}
+
+// fhrpGroupAssignmentWriteFromUpdate builds a domain.FHRPGroupAssignmentWrite
+// from an update input, mapping only the explicitly-provided (non-nil) fields so
+// the PATCH body is minimal.
+func fhrpGroupAssignmentWriteFromUpdate(input FHRPGroupAssignmentUpdateInput) domain.FHRPGroupAssignmentWrite {
+	write := domain.FHRPGroupAssignmentWrite{}
+	if input.Group != nil {
+		write.Group = *input.Group
+	}
+	if input.InterfaceType != nil {
+		write.InterfaceType = *input.InterfaceType
+	}
+	if input.InterfaceID != nil {
+		write.InterfaceID = *input.InterfaceID
+	}
+	write.Priority = input.Priority
+
+	return write
+}
+
+// providerAccountWriteFromCreate builds a domain.ProviderAccountWrite from a
+// create input.
+func providerAccountWriteFromCreate(input ProviderAccountCreateInput) domain.ProviderAccountWrite {
+	return domain.ProviderAccountWrite{
+		Name:         input.Name,
+		Provider:     input.Provider,
+		Account:      input.Account,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// providerAccountWriteFromUpdate builds a domain.ProviderAccountWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func providerAccountWriteFromUpdate(input ProviderAccountUpdateInput) domain.ProviderAccountWrite {
+	write := domain.ProviderAccountWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Provider = input.Provider
+	write.Account = input.Account
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// providerNetworkWriteFromCreate builds a domain.ProviderNetworkWrite from a
+// create input.
+func providerNetworkWriteFromCreate(input ProviderNetworkCreateInput) domain.ProviderNetworkWrite {
+	return domain.ProviderNetworkWrite{
+		Name:         input.Name,
+		Provider:     input.Provider,
+		Description:  input.Description,
+		Comments:     input.Comments,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// providerNetworkWriteFromUpdate builds a domain.ProviderNetworkWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func providerNetworkWriteFromUpdate(input ProviderNetworkUpdateInput) domain.ProviderNetworkWrite {
+	write := domain.ProviderNetworkWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Provider = input.Provider
+	write.Description = input.Description
+	write.Comments = input.Comments
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// circuitGroupWriteFromCreate builds a domain.CircuitGroupWrite from a create
+// input.
+func circuitGroupWriteFromCreate(input CircuitGroupCreateInput) domain.CircuitGroupWrite {
+	return domain.CircuitGroupWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// circuitGroupWriteFromUpdate builds a domain.CircuitGroupWrite from an update
+// input, mapping only the explicitly-provided (non-nil) fields so the PATCH
+// body is minimal.
+func circuitGroupWriteFromUpdate(input CircuitGroupUpdateInput) domain.CircuitGroupWrite {
+	write := domain.CircuitGroupWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// circuitGroupAssignmentWriteFromCreate builds a domain.CircuitGroupAssignmentWrite
+// from a create input.
+func circuitGroupAssignmentWriteFromCreate(input CircuitGroupAssignmentCreateInput) domain.CircuitGroupAssignmentWrite {
+	return domain.CircuitGroupAssignmentWrite{
+		Group:      input.Group,
+		MemberType: input.MemberType,
+		MemberID:   input.MemberID,
+		Priority:   input.Priority,
+	}
+}
+
+// circuitGroupAssignmentWriteFromUpdate builds a domain.CircuitGroupAssignmentWrite
+// from an update input, mapping only the explicitly-provided (non-nil) fields
+// so the PATCH body is minimal.
+func circuitGroupAssignmentWriteFromUpdate(input CircuitGroupAssignmentUpdateInput) domain.CircuitGroupAssignmentWrite {
+	write := domain.CircuitGroupAssignmentWrite{}
+	if input.Group != nil {
+		write.Group = *input.Group
+	}
+	if input.MemberType != nil {
+		write.MemberType = *input.MemberType
+	}
+	if input.MemberID != nil {
+		write.MemberID = *input.MemberID
+	}
+	write.Priority = input.Priority
+
+	return write
+}
+
+// virtualCircuitWriteFromCreate builds a domain.VirtualCircuitWrite from a
+// create input.
+func virtualCircuitWriteFromCreate(input VirtualCircuitCreateInput) domain.VirtualCircuitWrite {
+	return domain.VirtualCircuitWrite{
+		CID:             input.CID,
+		Type:            input.Type,
+		ProviderNetwork: input.ProviderNetwork,
+		Status:          input.Status,
+		Description:     input.Description,
+		Tags:            input.Tags,
+		CustomFields:    input.CustomFields,
+	}
+}
+
+// virtualCircuitWriteFromUpdate builds a domain.VirtualCircuitWrite from an
+// update input, mapping only the explicitly-provided (non-nil) fields so the
+// PATCH body is minimal.
+func virtualCircuitWriteFromUpdate(input VirtualCircuitUpdateInput) domain.VirtualCircuitWrite {
+	write := domain.VirtualCircuitWrite{}
+	if input.CID != nil {
+		write.CID = *input.CID
+	}
+	write.Type = input.Type
+	write.ProviderNetwork = input.ProviderNetwork
+	write.Status = input.Status
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualCircuitTypeWriteFromCreate builds a domain.VirtualCircuitTypeWrite
+// from a create input.
+func virtualCircuitTypeWriteFromCreate(input VirtualCircuitTypeCreateInput) domain.VirtualCircuitTypeWrite {
+	return domain.VirtualCircuitTypeWrite{
+		Name:         input.Name,
+		Slug:         input.Slug,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// virtualCircuitTypeWriteFromUpdate builds a domain.VirtualCircuitTypeWrite
+// from an update input, mapping only the explicitly-provided (non-nil) fields
+// so the PATCH body is minimal.
+func virtualCircuitTypeWriteFromUpdate(input VirtualCircuitTypeUpdateInput) domain.VirtualCircuitTypeWrite {
+	write := domain.VirtualCircuitTypeWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Slug = input.Slug
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// virtualCircuitTerminationWriteFromCreate builds a
+// domain.VirtualCircuitTerminationWrite from a create input.
+func virtualCircuitTerminationWriteFromCreate(
+	input VirtualCircuitTerminationCreateInput,
+) domain.VirtualCircuitTerminationWrite {
+	return domain.VirtualCircuitTerminationWrite{
+		VirtualCircuit: input.VirtualCircuit,
+		Role:           input.Role,
+		Interface:      input.Interface,
+	}
+}
+
+// virtualCircuitTerminationWriteFromUpdate builds a
+// domain.VirtualCircuitTerminationWrite from an update input, mapping only the
+// explicitly-provided (non-nil) fields so the PATCH body is minimal.
+func virtualCircuitTerminationWriteFromUpdate(
+	input VirtualCircuitTerminationUpdateInput,
+) domain.VirtualCircuitTerminationWrite {
+	write := domain.VirtualCircuitTerminationWrite{}
+	if input.VirtualCircuit != nil {
+		write.VirtualCircuit = *input.VirtualCircuit
+	}
+	write.Role = input.Role
+	if input.Interface != nil {
+		write.Interface = *input.Interface
+	}
+
+	return write
+}
+
+// vlanTranslationPolicyWriteFromCreate builds a domain.VLANTranslationPolicyWrite
+// from a create input.
+func vlanTranslationPolicyWriteFromCreate(input VLANTranslationPolicyCreateInput) domain.VLANTranslationPolicyWrite {
+	return domain.VLANTranslationPolicyWrite{
+		Name:         input.Name,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// vlanTranslationPolicyWriteFromUpdate builds a domain.VLANTranslationPolicyWrite
+// from an update input, mapping only the explicitly-provided (non-nil) fields so
+// the PATCH body is minimal.
+func vlanTranslationPolicyWriteFromUpdate(input VLANTranslationPolicyUpdateInput) domain.VLANTranslationPolicyWrite {
+	write := domain.VLANTranslationPolicyWrite{}
+	if input.Name != nil {
+		write.Name = *input.Name
+	}
+	write.Description = input.Description
+	write.Tags = input.Tags
+	write.CustomFields = input.CustomFields
+
+	return write
+}
+
+// vlanTranslationRuleWriteFromCreate builds a domain.VLANTranslationRuleWrite
+// from a create input.
+func vlanTranslationRuleWriteFromCreate(input VLANTranslationRuleCreateInput) domain.VLANTranslationRuleWrite {
+	return domain.VLANTranslationRuleWrite{
+		Policy:      input.Policy,
+		LocalVID:    input.LocalVID,
+		RemoteVID:   input.RemoteVID,
+		Description: input.Description,
+	}
+}
+
+// vlanTranslationRuleWriteFromUpdate builds a domain.VLANTranslationRuleWrite
+// from an update input, mapping only the explicitly-provided (non-nil) fields so
+// the PATCH body is minimal.
+func vlanTranslationRuleWriteFromUpdate(input VLANTranslationRuleUpdateInput) domain.VLANTranslationRuleWrite {
+	write := domain.VLANTranslationRuleWrite{}
+	if input.Policy != nil {
+		write.Policy = *input.Policy
+	}
+	write.LocalVID = input.LocalVID
+	write.RemoteVID = input.RemoteVID
+	write.Description = input.Description
+
+	return write
+}
+
+// NewGetFrontPortsHandler creates a handler for the get_front_ports tool.
+func NewGetFrontPortsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FrontPortsInput, PaginatedOutput[domain.FrontPort]] {
+	return newListHandler(listHandlerConfig[FrontPortsInput, domain.FrontPort]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.FrontPort], error) {
+			return resolveService(ctx, svc).ListFrontPorts(ctx, params)
+		},
+		buildParams: func(input FrontPortsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list front ports",
+	})
+}
+
+// NewCreateFrontPortHandler creates a handler for the create_front_port tool.
+func NewCreateFrontPortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FrontPortCreateInput, FrontPortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FrontPortCreateInput,
+	) (*mcp.CallToolResult, FrontPortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, FrontPortOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, FrontPortOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, FrontPortOutput{}, fmt.Errorf("device is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		frontPort, err := service.CreateFrontPort(ctx, frontPortWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, FrontPortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, FrontPortOutput{Data: *frontPort}, nil
+	}
+}
+
+// NewUpdateFrontPortHandler creates a handler for the update_front_port tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateFrontPortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FrontPortUpdateInput, FrontPortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FrontPortUpdateInput,
+	) (*mcp.CallToolResult, FrontPortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, FrontPortOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, FrontPortOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		frontPort, err := service.UpdateFrontPort(ctx, input.ID, frontPortWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, FrontPortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, FrontPortOutput{Data: *frontPort}, nil
+	}
+}
+
+// NewDeleteFrontPortHandler creates a handler for the delete_front_port tool.
+func NewDeleteFrontPortHandler(svc *application.NetworkService) mcp.ToolHandlerFor[FrontPortDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FrontPortDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteFrontPort(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetRearPortsHandler creates a handler for the get_rear_ports tool.
+func NewGetRearPortsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RearPortsInput, PaginatedOutput[domain.RearPort]] {
+	return newListHandler(listHandlerConfig[RearPortsInput, domain.RearPort]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.RearPort], error) {
+			return resolveService(ctx, svc).ListRearPorts(ctx, params)
+		},
+		buildParams: func(input RearPortsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list rear ports",
+	})
+}
+
+// NewCreateRearPortHandler creates a handler for the create_rear_port tool.
+func NewCreateRearPortHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RearPortCreateInput, RearPortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RearPortCreateInput,
+	) (*mcp.CallToolResult, RearPortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RearPortOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RearPortOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, RearPortOutput{}, fmt.Errorf("device is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rearPort, err := service.CreateRearPort(ctx, rearPortWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RearPortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RearPortOutput{Data: *rearPort}, nil
+	}
+}
+
+// NewUpdateRearPortHandler creates a handler for the update_rear_port tool. It
+// performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateRearPortHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RearPortUpdateInput, RearPortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RearPortUpdateInput,
+	) (*mcp.CallToolResult, RearPortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RearPortOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RearPortOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rearPort, err := service.UpdateRearPort(ctx, input.ID, rearPortWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RearPortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RearPortOutput{Data: *rearPort}, nil
+	}
+}
+
+// NewDeleteRearPortHandler creates a handler for the delete_rear_port tool.
+func NewDeleteRearPortHandler(svc *application.NetworkService) mcp.ToolHandlerFor[RearPortDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RearPortDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRearPort(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetConsolePortsHandler creates a handler for the get_console_ports tool.
+func NewGetConsolePortsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ConsolePortsInput, PaginatedOutput[domain.ConsolePort]] {
+	return newListHandler(listHandlerConfig[ConsolePortsInput, domain.ConsolePort]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.ConsolePort], error) {
+			return resolveService(ctx, svc).ListConsolePorts(ctx, params)
+		},
+		buildParams: func(input ConsolePortsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list console ports",
+	})
+}
+
+// NewCreateConsolePortHandler creates a handler for the create_console_port
+// tool.
+func NewCreateConsolePortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ConsolePortCreateInput, ConsolePortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ConsolePortCreateInput,
+	) (*mcp.CallToolResult, ConsolePortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ConsolePortOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ConsolePortOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, ConsolePortOutput{}, fmt.Errorf("device is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		consolePort, err := service.CreateConsolePort(ctx, consolePortWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ConsolePortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ConsolePortOutput{Data: *consolePort}, nil
+	}
+}
+
+// NewUpdateConsolePortHandler creates a handler for the update_console_port
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdateConsolePortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ConsolePortUpdateInput, ConsolePortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ConsolePortUpdateInput,
+	) (*mcp.CallToolResult, ConsolePortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ConsolePortOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ConsolePortOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		consolePort, err := service.UpdateConsolePort(ctx, input.ID, consolePortWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ConsolePortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ConsolePortOutput{Data: *consolePort}, nil
+	}
+}
+
+// NewDeleteConsolePortHandler creates a handler for the delete_console_port
+// tool.
+func NewDeleteConsolePortHandler(svc *application.NetworkService) mcp.ToolHandlerFor[ConsolePortDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ConsolePortDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteConsolePort(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetConsoleServerPortsHandler creates a handler for the
+// get_console_server_ports tool.
+func NewGetConsoleServerPortsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ConsoleServerPortsInput, PaginatedOutput[domain.ConsoleServerPort]] {
+	return newListHandler(listHandlerConfig[ConsoleServerPortsInput, domain.ConsoleServerPort]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.ConsoleServerPort], error) {
+			return resolveService(ctx, svc).ListConsoleServerPorts(ctx, params)
+		},
+		buildParams: func(input ConsoleServerPortsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list console server ports",
+	})
+}
+
+// NewCreateConsoleServerPortHandler creates a handler for the
+// create_console_server_port tool.
+func NewCreateConsoleServerPortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ConsoleServerPortCreateInput, ConsoleServerPortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ConsoleServerPortCreateInput,
+	) (*mcp.CallToolResult, ConsoleServerPortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ConsoleServerPortOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ConsoleServerPortOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, ConsoleServerPortOutput{}, fmt.Errorf("device is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		csp, err := service.CreateConsoleServerPort(ctx, consoleServerPortWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ConsoleServerPortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ConsoleServerPortOutput{Data: *csp}, nil
+	}
+}
+
+// NewUpdateConsoleServerPortHandler creates a handler for the
+// update_console_server_port tool. It performs a partial-merge PATCH using only
+// the explicitly provided fields.
+func NewUpdateConsoleServerPortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ConsoleServerPortUpdateInput, ConsoleServerPortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ConsoleServerPortUpdateInput,
+	) (*mcp.CallToolResult, ConsoleServerPortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ConsoleServerPortOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ConsoleServerPortOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		csp, err := service.UpdateConsoleServerPort(ctx, input.ID, consoleServerPortWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ConsoleServerPortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ConsoleServerPortOutput{Data: *csp}, nil
+	}
+}
+
+// NewDeleteConsoleServerPortHandler creates a handler for the
+// delete_console_server_port tool.
+func NewDeleteConsoleServerPortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ConsoleServerPortDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ConsoleServerPortDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteConsoleServerPort(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetPowerPortsHandler creates a handler for the get_power_ports tool.
+func NewGetPowerPortsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPortsInput, PaginatedOutput[domain.PowerPort]] {
+	return newListHandler(listHandlerConfig[PowerPortsInput, domain.PowerPort]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.PowerPort], error) {
+			return resolveService(ctx, svc).ListPowerPorts(ctx, params)
+		},
+		buildParams: func(input PowerPortsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list power ports",
+	})
+}
+
+// NewCreatePowerPortHandler creates a handler for the create_power_port tool.
+func NewCreatePowerPortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPortCreateInput, PowerPortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPortCreateInput,
+	) (*mcp.CallToolResult, PowerPortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPortOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, PowerPortOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPortOutput{}, fmt.Errorf("device is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerPort, err := service.CreatePowerPort(ctx, powerPortWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerPortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerPortOutput{Data: *powerPort}, nil
+	}
+}
+
+// NewUpdatePowerPortHandler creates a handler for the update_power_port tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdatePowerPortHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerPortUpdateInput, PowerPortOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPortUpdateInput,
+	) (*mcp.CallToolResult, PowerPortOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPortOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, PowerPortOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerPort, err := service.UpdatePowerPort(ctx, input.ID, powerPortWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerPortOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerPortOutput{Data: *powerPort}, nil
+	}
+}
+
+// NewDeletePowerPortHandler creates a handler for the delete_power_port tool.
+func NewDeletePowerPortHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PowerPortDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerPortDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeletePowerPort(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetPowerOutletsHandler creates a handler for the get_power_outlets tool.
+func NewGetPowerOutletsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerOutletsInput, PaginatedOutput[domain.PowerOutlet]] {
+	return newListHandler(listHandlerConfig[PowerOutletsInput, domain.PowerOutlet]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.PowerOutlet], error) {
+			return resolveService(ctx, svc).ListPowerOutlets(ctx, params)
+		},
+		buildParams: func(input PowerOutletsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list power outlets",
+	})
+}
+
+// NewCreatePowerOutletHandler creates a handler for the create_power_outlet
+// tool.
+func NewCreatePowerOutletHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerOutletCreateInput, PowerOutletOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerOutletCreateInput,
+	) (*mcp.CallToolResult, PowerOutletOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerOutletOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, PowerOutletOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerOutletOutput{}, fmt.Errorf("device is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerOutlet, err := service.CreatePowerOutlet(ctx, powerOutletWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerOutletOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerOutletOutput{Data: *powerOutlet}, nil
+	}
+}
+
+// NewUpdatePowerOutletHandler creates a handler for the update_power_outlet
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdatePowerOutletHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerOutletUpdateInput, PowerOutletOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerOutletUpdateInput,
+	) (*mcp.CallToolResult, PowerOutletOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerOutletOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, PowerOutletOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerOutlet, err := service.UpdatePowerOutlet(ctx, input.ID, powerOutletWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerOutletOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerOutletOutput{Data: *powerOutlet}, nil
+	}
+}
+
+// NewDeletePowerOutletHandler creates a handler for the delete_power_outlet
+// tool.
+func NewDeletePowerOutletHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PowerOutletDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerOutletDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeletePowerOutlet(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetPowerFeedsHandler creates a handler for the get_power_feeds tool.
+func NewGetPowerFeedsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerFeedsInput, PaginatedOutput[domain.PowerFeed]] {
+	return newListHandler(listHandlerConfig[PowerFeedsInput, domain.PowerFeed]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.PowerFeed], error) {
+			return resolveService(ctx, svc).ListPowerFeeds(ctx, params)
+		},
+		buildParams: func(input PowerFeedsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "power_panel", input.PowerPanel)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list power feeds",
+	})
+}
+
+// NewCreatePowerFeedHandler creates a handler for the create_power_feed tool.
+func NewCreatePowerFeedHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerFeedCreateInput, PowerFeedOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerFeedCreateInput,
+	) (*mcp.CallToolResult, PowerFeedOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerFeedOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, PowerFeedOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerFeed, err := service.CreatePowerFeed(ctx, powerFeedWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerFeedOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerFeedOutput{Data: *powerFeed}, nil
+	}
+}
+
+// NewUpdatePowerFeedHandler creates a handler for the update_power_feed tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdatePowerFeedHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[PowerFeedUpdateInput, PowerFeedOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerFeedUpdateInput,
+	) (*mcp.CallToolResult, PowerFeedOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, PowerFeedOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, PowerFeedOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		powerFeed, err := service.UpdatePowerFeed(ctx, input.ID, powerFeedWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, PowerFeedOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, PowerFeedOutput{Data: *powerFeed}, nil
+	}
+}
+
+// NewDeletePowerFeedHandler creates a handler for the delete_power_feed tool.
+func NewDeletePowerFeedHandler(svc *application.NetworkService) mcp.ToolHandlerFor[PowerFeedDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input PowerFeedDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeletePowerFeed(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetDeviceBaysHandler creates a handler for the get_device_bays tool.
+func NewGetDeviceBaysHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceBaysInput, PaginatedOutput[domain.DeviceBay]] {
+	return newListHandler(listHandlerConfig[DeviceBaysInput, domain.DeviceBay]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.DeviceBay], error) {
+			return resolveService(ctx, svc).ListDeviceBays(ctx, params)
+		},
+		buildParams: func(input DeviceBaysInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list device bays",
+	})
+}
+
+// NewCreateDeviceBayHandler creates a handler for the create_device_bay tool.
+func NewCreateDeviceBayHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceBayCreateInput, DeviceBayOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceBayCreateInput,
+	) (*mcp.CallToolResult, DeviceBayOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceBayOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, DeviceBayOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceBayOutput{}, fmt.Errorf("device is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		deviceBay, err := service.CreateDeviceBay(ctx, deviceBayWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, DeviceBayOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceBayOutput{Data: *deviceBay}, nil
+	}
+}
+
+// NewUpdateDeviceBayHandler creates a handler for the update_device_bay tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateDeviceBayHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[DeviceBayUpdateInput, DeviceBayOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceBayUpdateInput,
+	) (*mcp.CallToolResult, DeviceBayOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceBayOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, DeviceBayOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		deviceBay, err := service.UpdateDeviceBay(ctx, input.ID, deviceBayWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, DeviceBayOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, DeviceBayOutput{Data: *deviceBay}, nil
+	}
+}
+
+// NewDeleteDeviceBayHandler creates a handler for the delete_device_bay tool.
+func NewDeleteDeviceBayHandler(svc *application.NetworkService) mcp.ToolHandlerFor[DeviceBayDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input DeviceBayDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteDeviceBay(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetRackReservationsHandler creates a handler for the
+// get_rack_reservations tool.
+func NewGetRackReservationsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackReservationsInput, PaginatedOutput[domain.RackReservation]] {
+	return newListHandler(listHandlerConfig[RackReservationsInput, domain.RackReservation]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.RackReservation], error) {
+			return resolveService(ctx, svc).ListRackReservations(ctx, params)
+		},
+		buildParams: func(input RackReservationsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "rack", input.Rack)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list rack reservations",
+	})
+}
+
+// NewCreateRackReservationHandler creates a handler for the
+// create_rack_reservation tool.
+func NewCreateRackReservationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackReservationCreateInput, RackReservationOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackReservationCreateInput,
+	) (*mcp.CallToolResult, RackReservationOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackReservationOutput{}, errServiceNotAvailable
+		}
+		if input.Description == "" {
+			return &mcp.CallToolResult{IsError: true}, RackReservationOutput{}, fmt.Errorf("description is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackReservation, err := service.CreateRackReservation(ctx, rackReservationWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackReservationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackReservationOutput{Data: *rackReservation}, nil
+	}
+}
+
+// NewUpdateRackReservationHandler creates a handler for the
+// update_rack_reservation tool. It performs a partial-merge PATCH using only
+// the explicitly provided fields.
+func NewUpdateRackReservationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackReservationUpdateInput, RackReservationOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackReservationUpdateInput,
+	) (*mcp.CallToolResult, RackReservationOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RackReservationOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RackReservationOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		rackReservation, err := service.UpdateRackReservation(ctx, input.ID, rackReservationWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RackReservationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RackReservationOutput{Data: *rackReservation}, nil
+	}
+}
+
+// NewDeleteRackReservationHandler creates a handler for the
+// delete_rack_reservation tool.
+func NewDeleteRackReservationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RackReservationDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RackReservationDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRackReservation(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetInventoryItemsHandler creates a handler for the get_inventory_items
+// tool.
+func NewGetInventoryItemsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemsInput, PaginatedOutput[domain.InventoryItem]] {
+	return newListHandler(listHandlerConfig[InventoryItemsInput, domain.InventoryItem]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.InventoryItem], error) {
+			return resolveService(ctx, svc).ListInventoryItems(ctx, params)
+		},
+		buildParams: func(input InventoryItemsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list inventory items",
+	})
+}
+
+// NewCreateInventoryItemHandler creates a handler for the create_inventory_item
+// tool.
+func NewCreateInventoryItemHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemCreateInput, InventoryItemOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemCreateInput,
+	) (*mcp.CallToolResult, InventoryItemOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemOutput{}, fmt.Errorf("name is required")
+		}
+		if input.Device == nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemOutput{}, fmt.Errorf("device is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		inventoryItem, err := service.CreateInventoryItem(ctx, inventoryItemWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, InventoryItemOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, InventoryItemOutput{Data: *inventoryItem}, nil
+	}
+}
+
+// NewUpdateInventoryItemHandler creates a handler for the update_inventory_item
+// tool. It performs a partial-merge PATCH using only the explicitly provided
+// fields.
+func NewUpdateInventoryItemHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemUpdateInput, InventoryItemOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemUpdateInput,
+	) (*mcp.CallToolResult, InventoryItemOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, InventoryItemOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		inventoryItem, err := service.UpdateInventoryItem(ctx, input.ID, inventoryItemWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, InventoryItemOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, InventoryItemOutput{Data: *inventoryItem}, nil
+	}
+}
+
+// NewDeleteInventoryItemHandler creates a handler for the delete_inventory_item
+// tool.
+func NewDeleteInventoryItemHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[InventoryItemDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input InventoryItemDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteInventoryItem(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetMACAddressesHandler creates a handler for the get_mac_addresses tool.
+func NewGetMACAddressesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[MACAddressesInput, PaginatedOutput[domain.MACAddress]] {
+	return newListHandler(listHandlerConfig[MACAddressesInput, domain.MACAddress]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.MACAddress], error) {
+			return resolveService(ctx, svc).ListMACAddresses(ctx, params)
+		},
+		buildParams: func(input MACAddressesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list MAC addresses",
+	})
+}
+
+// NewCreateMACAddressHandler creates a handler for the create_mac_address tool.
+func NewCreateMACAddressHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[MACAddressCreateInput, MACAddressOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input MACAddressCreateInput,
+	) (*mcp.CallToolResult, MACAddressOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, MACAddressOutput{}, errServiceNotAvailable
+		}
+		if input.Address == "" {
+			return &mcp.CallToolResult{IsError: true}, MACAddressOutput{}, fmt.Errorf("address is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		macAddr, err := service.CreateMACAddress(ctx, macAddressWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, MACAddressOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, MACAddressOutput{Data: *macAddr}, nil
+	}
+}
+
+// NewUpdateMACAddressHandler creates a handler for the update_mac_address tool.
+// It performs a partial-merge PATCH using only the explicitly provided fields.
+func NewUpdateMACAddressHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[MACAddressUpdateInput, MACAddressOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input MACAddressUpdateInput,
+	) (*mcp.CallToolResult, MACAddressOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, MACAddressOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, MACAddressOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		macAddr, err := service.UpdateMACAddress(ctx, input.ID, macAddressWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, MACAddressOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, MACAddressOutput{Data: *macAddr}, nil
+	}
+}
+
+// NewDeleteMACAddressHandler creates a handler for the delete_mac_address tool.
+func NewDeleteMACAddressHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[MACAddressDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input MACAddressDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteMACAddress(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetRIRsHandler creates a handler for the get_rirs tool.
+func NewGetRIRsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RIRsInput, PaginatedOutput[domain.RIR]] {
+	return newListHandler(listHandlerConfig[RIRsInput, domain.RIR]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.RIR], error) {
+			return resolveService(ctx, svc).ListRIRs(ctx, params)
+		},
+		buildParams: func(input RIRsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list RIRs",
+	})
+}
+
+// NewCreateRIRHandler creates a handler for the create_rir tool.
+func NewCreateRIRHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RIRCreateInput, RIROutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RIRCreateInput,
+	) (*mcp.CallToolResult, RIROutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RIROutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RIROutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateRIR(ctx, rirWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RIROutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RIROutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateRIRHandler creates a handler for the update_rir tool.
+func NewUpdateRIRHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RIRUpdateInput, RIROutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RIRUpdateInput,
+	) (*mcp.CallToolResult, RIROutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RIROutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RIROutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateRIR(ctx, input.ID, rirWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RIROutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RIROutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteRIRHandler creates a handler for the delete_rir tool.
+func NewDeleteRIRHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RIRDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RIRDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRIR(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetContactGroupsHandler creates a handler for the get_contact_groups tool.
+func NewGetContactGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactGroupsInput, PaginatedOutput[domain.ContactGroup]] {
+	return newListHandler(listHandlerConfig[ContactGroupsInput, domain.ContactGroup]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.ContactGroup], error) {
+			return resolveService(ctx, svc).ListContactGroups(ctx, params)
+		},
+		buildParams: func(input ContactGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "parent", input.Parent)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list contact groups",
+	})
+}
+
+// NewCreateContactGroupHandler creates a handler for the create_contact_group
+// tool.
+func NewCreateContactGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactGroupCreateInput, ContactGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactGroupCreateInput,
+	) (*mcp.CallToolResult, ContactGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ContactGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateContactGroup(ctx, contactGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ContactGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateContactGroupHandler creates a handler for the update_contact_group
+// tool.
+func NewUpdateContactGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactGroupUpdateInput, ContactGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactGroupUpdateInput,
+	) (*mcp.CallToolResult, ContactGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ContactGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateContactGroup(ctx, input.ID, contactGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ContactGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteContactGroupHandler creates a handler for the delete_contact_group
+// tool.
+func NewDeleteContactGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteContactGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetContactRolesHandler creates a handler for the get_contact_roles tool.
+func NewGetContactRolesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactRolesInput, PaginatedOutput[domain.ContactRole]] {
+	return newListHandler(listHandlerConfig[ContactRolesInput, domain.ContactRole]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.ContactRole], error) {
+			return resolveService(ctx, svc).ListContactRoles(ctx, params)
+		},
+		buildParams: func(input ContactRolesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list contact roles",
+	})
+}
+
+// NewCreateContactRoleHandler creates a handler for the create_contact_role
+// tool.
+func NewCreateContactRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactRoleCreateInput, ContactRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactRoleCreateInput,
+	) (*mcp.CallToolResult, ContactRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactRoleOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ContactRoleOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateContactRole(ctx, contactRoleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ContactRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactRoleOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateContactRoleHandler creates a handler for the update_contact_role
+// tool.
+func NewUpdateContactRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactRoleUpdateInput, ContactRoleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactRoleUpdateInput,
+	) (*mcp.CallToolResult, ContactRoleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ContactRoleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ContactRoleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateContactRole(ctx, input.ID, contactRoleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ContactRoleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ContactRoleOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteContactRoleHandler creates a handler for the delete_contact_role
+// tool.
+func NewDeleteContactRoleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ContactRoleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ContactRoleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteContactRole(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualDisksHandler creates a handler for the get_virtual_disks tool.
+func NewGetVirtualDisksHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualDisksInput, PaginatedOutput[domain.VirtualDisk]] {
+	return newListHandler(listHandlerConfig[VirtualDisksInput, domain.VirtualDisk]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.VirtualDisk], error) {
+			return resolveService(ctx, svc).ListVirtualDisks(ctx, params)
+		},
+		buildParams: func(input VirtualDisksInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "virtual_machine", input.VirtualMachine)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual disks",
+	})
+}
+
+// NewCreateVirtualDiskHandler creates a handler for the create_virtual_disk
+// tool.
+func NewCreateVirtualDiskHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualDiskCreateInput, VirtualDiskOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualDiskCreateInput,
+	) (*mcp.CallToolResult, VirtualDiskOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualDiskOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualDiskOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualDisk(ctx, virtualDiskWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualDiskOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualDiskOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualDiskHandler creates a handler for the update_virtual_disk
+// tool.
+func NewUpdateVirtualDiskHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualDiskUpdateInput, VirtualDiskOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualDiskUpdateInput,
+	) (*mcp.CallToolResult, VirtualDiskOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualDiskOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualDiskOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualDisk(ctx, input.ID, virtualDiskWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualDiskOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualDiskOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualDiskHandler creates a handler for the delete_virtual_disk
+// tool.
+func NewDeleteVirtualDiskHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualDiskDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualDiskDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualDisk(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualMachineTypesHandler creates a handler for the
+// get_virtual_machine_types tool.
+func NewGetVirtualMachineTypesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualMachineTypesInput, PaginatedOutput[domain.VirtualMachineType]] {
+	return newListHandler(listHandlerConfig[VirtualMachineTypesInput, domain.VirtualMachineType]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualMachineType], error) {
+			return resolveService(ctx, svc).ListVirtualMachineTypes(ctx, params)
+		},
+		buildParams: func(input VirtualMachineTypesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual machine types",
+	})
+}
+
+// NewCreateVirtualMachineTypeHandler creates a handler for the
+// create_virtual_machine_type tool.
+func NewCreateVirtualMachineTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualMachineTypeCreateInput, VirtualMachineTypeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualMachineTypeCreateInput,
+	) (*mcp.CallToolResult, VirtualMachineTypeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineTypeOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineTypeOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualMachineType(ctx, virtualMachineTypeWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualMachineTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualMachineTypeOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualMachineTypeHandler creates a handler for the
+// update_virtual_machine_type tool.
+func NewUpdateVirtualMachineTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualMachineTypeUpdateInput, VirtualMachineTypeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualMachineTypeUpdateInput,
+	) (*mcp.CallToolResult, VirtualMachineTypeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineTypeOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualMachineTypeOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualMachineType(ctx, input.ID, virtualMachineTypeWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualMachineTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualMachineTypeOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualMachineTypeHandler creates a handler for the
+// delete_virtual_machine_type tool.
+func NewDeleteVirtualMachineTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualMachineTypeDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualMachineTypeDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualMachineType(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetAggregatesHandler creates a handler for the get_aggregates tool.
+func NewGetAggregatesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[AggregatesInput, PaginatedOutput[domain.Aggregate]] {
+	return newListHandler(listHandlerConfig[AggregatesInput, domain.Aggregate]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Aggregate], error) {
+			return resolveService(ctx, svc).ListAggregates(ctx, params)
+		},
+		buildParams: func(input AggregatesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "rir", input.RIR)
+			addParam(params, "tenant", input.Tenant)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list aggregates",
+	})
+}
+
+// NewCreateAggregateHandler creates a handler for the create_aggregate tool.
+func NewCreateAggregateHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[AggregateCreateInput, AggregateOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input AggregateCreateInput,
+	) (*mcp.CallToolResult, AggregateOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, AggregateOutput{}, errServiceNotAvailable
+		}
+		if input.Prefix == "" {
+			return &mcp.CallToolResult{IsError: true}, AggregateOutput{}, fmt.Errorf("prefix is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateAggregate(ctx, aggregateWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, AggregateOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, AggregateOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateAggregateHandler creates a handler for the update_aggregate tool.
+func NewUpdateAggregateHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[AggregateUpdateInput, AggregateOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input AggregateUpdateInput,
+	) (*mcp.CallToolResult, AggregateOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, AggregateOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, AggregateOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateAggregate(ctx, input.ID, aggregateWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, AggregateOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, AggregateOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteAggregateHandler creates a handler for the delete_aggregate tool.
+func NewDeleteAggregateHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[AggregateDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input AggregateDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteAggregate(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetIPRangesHandler creates a handler for the get_ip_ranges tool.
+func NewGetIPRangesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[IPRangesInput, PaginatedOutput[domain.IPRange]] {
+	return newListHandler(listHandlerConfig[IPRangesInput, domain.IPRange]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.IPRange], error) {
+			return resolveService(ctx, svc).ListIPRanges(ctx, params)
+		},
+		buildParams: func(input IPRangesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "vrf", input.VRF)
+			addParam(params, "tenant", input.Tenant)
+			addParam(params, "status", input.Status)
+			addParam(params, "role", input.Role)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list IP ranges",
+	})
+}
+
+// NewCreateIPRangeHandler creates a handler for the create_ip_range tool.
+func NewCreateIPRangeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[IPRangeCreateInput, IPRangeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input IPRangeCreateInput,
+	) (*mcp.CallToolResult, IPRangeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, IPRangeOutput{}, errServiceNotAvailable
+		}
+		if input.StartAddress == "" {
+			return &mcp.CallToolResult{IsError: true}, IPRangeOutput{}, fmt.Errorf("start_address is required")
+		}
+		if input.EndAddress == "" {
+			return &mcp.CallToolResult{IsError: true}, IPRangeOutput{}, fmt.Errorf("end_address is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateIPRange(ctx, ipRangeWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, IPRangeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, IPRangeOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateIPRangeHandler creates a handler for the update_ip_range tool.
+func NewUpdateIPRangeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[IPRangeUpdateInput, IPRangeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input IPRangeUpdateInput,
+	) (*mcp.CallToolResult, IPRangeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, IPRangeOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, IPRangeOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateIPRange(ctx, input.ID, ipRangeWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, IPRangeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, IPRangeOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteIPRangeHandler creates a handler for the delete_ip_range tool.
+func NewDeleteIPRangeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[IPRangeDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input IPRangeDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteIPRange(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetASNsHandler creates a handler for the get_asns tool.
+func NewGetASNsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ASNsInput, PaginatedOutput[domain.ASN]] {
+	return newListHandler(listHandlerConfig[ASNsInput, domain.ASN]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.ASN], error) {
+			return resolveService(ctx, svc).ListASNs(ctx, params)
+		},
+		buildParams: func(input ASNsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "rir", input.RIR)
+			addParam(params, "tenant", input.Tenant)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list ASNs",
+	})
+}
+
+// NewCreateASNHandler creates a handler for the create_asn tool.
+func NewCreateASNHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ASNCreateInput, ASNOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ASNCreateInput,
+	) (*mcp.CallToolResult, ASNOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ASNOutput{}, errServiceNotAvailable
+		}
+		if input.ASN == 0 {
+			return &mcp.CallToolResult{IsError: true}, ASNOutput{}, fmt.Errorf("asn is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateASN(ctx, asnWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ASNOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ASNOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateASNHandler creates a handler for the update_asn tool.
+func NewUpdateASNHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ASNUpdateInput, ASNOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ASNUpdateInput,
+	) (*mcp.CallToolResult, ASNOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ASNOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ASNOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateASN(ctx, input.ID, asnWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ASNOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ASNOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteASNHandler creates a handler for the delete_asn tool.
+func NewDeleteASNHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ASNDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ASNDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteASN(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetASNRangesHandler creates a handler for the get_asn_ranges tool.
+func NewGetASNRangesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ASNRangesInput, PaginatedOutput[domain.ASNRange]] {
+	return newListHandler(listHandlerConfig[ASNRangesInput, domain.ASNRange]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.ASNRange], error) {
+			return resolveService(ctx, svc).ListASNRanges(ctx, params)
+		},
+		buildParams: func(input ASNRangesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "rir", input.RIR)
+			addParam(params, "tenant", input.Tenant)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list ASN ranges",
+	})
+}
+
+// NewCreateASNRangeHandler creates a handler for the create_asn_range tool.
+func NewCreateASNRangeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ASNRangeCreateInput, ASNRangeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ASNRangeCreateInput,
+	) (*mcp.CallToolResult, ASNRangeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ASNRangeOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ASNRangeOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateASNRange(ctx, asnRangeWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ASNRangeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ASNRangeOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateASNRangeHandler creates a handler for the update_asn_range tool.
+func NewUpdateASNRangeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ASNRangeUpdateInput, ASNRangeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ASNRangeUpdateInput,
+	) (*mcp.CallToolResult, ASNRangeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ASNRangeOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ASNRangeOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateASNRange(ctx, input.ID, asnRangeWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ASNRangeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ASNRangeOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteASNRangeHandler creates a handler for the delete_asn_range tool.
+func NewDeleteASNRangeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ASNRangeDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ASNRangeDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteASNRange(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetRouteTargetsHandler creates a handler for the get_route_targets tool.
+func NewGetRouteTargetsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RouteTargetsInput, PaginatedOutput[domain.RouteTarget]] {
+	return newListHandler(listHandlerConfig[RouteTargetsInput, domain.RouteTarget]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.RouteTarget], error) {
+			return resolveService(ctx, svc).ListRouteTargets(ctx, params)
+		},
+		buildParams: func(input RouteTargetsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tenant", input.Tenant)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list route targets",
+	})
+}
+
+// NewCreateRouteTargetHandler creates a handler for the create_route_target tool.
+func NewCreateRouteTargetHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RouteTargetCreateInput, RouteTargetOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RouteTargetCreateInput,
+	) (*mcp.CallToolResult, RouteTargetOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RouteTargetOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, RouteTargetOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateRouteTarget(ctx, routeTargetWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RouteTargetOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RouteTargetOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateRouteTargetHandler creates a handler for the update_route_target tool.
+func NewUpdateRouteTargetHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RouteTargetUpdateInput, RouteTargetOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RouteTargetUpdateInput,
+	) (*mcp.CallToolResult, RouteTargetOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, RouteTargetOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, RouteTargetOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateRouteTarget(ctx, input.ID, routeTargetWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, RouteTargetOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, RouteTargetOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteRouteTargetHandler creates a handler for the delete_route_target tool.
+func NewDeleteRouteTargetHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[RouteTargetDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input RouteTargetDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteRouteTarget(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetServicesHandler creates a handler for the get_services tool.
+func NewGetServicesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ServicesInput, PaginatedOutput[domain.Service]] {
+	return newListHandler(listHandlerConfig[ServicesInput, domain.Service]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.Service], error) {
+			return resolveService(ctx, svc).ListServices(ctx, params)
+		},
+		buildParams: func(input ServicesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "device", input.Device)
+			addParam(params, "virtual_machine", input.VirtualMachine)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list services",
+	})
+}
+
+// NewCreateServiceHandler creates a handler for the create_service tool.
+func NewCreateServiceHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ServiceCreateInput, ServiceOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ServiceCreateInput,
+	) (*mcp.CallToolResult, ServiceOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ServiceOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ServiceOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateService(ctx, serviceWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ServiceOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ServiceOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateServiceHandler creates a handler for the update_service tool.
+func NewUpdateServiceHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ServiceUpdateInput, ServiceOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ServiceUpdateInput,
+	) (*mcp.CallToolResult, ServiceOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ServiceOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ServiceOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateService(ctx, input.ID, serviceWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ServiceOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ServiceOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteServiceHandler creates a handler for the delete_service tool.
+func NewDeleteServiceHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ServiceDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ServiceDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteService(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetServiceTemplatesHandler creates a handler for the get_service_templates tool.
+func NewGetServiceTemplatesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ServiceTemplatesInput, PaginatedOutput[domain.ServiceTemplate]] {
+	return newListHandler(listHandlerConfig[ServiceTemplatesInput, domain.ServiceTemplate]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.ServiceTemplate], error) {
+			return resolveService(ctx, svc).ListServiceTemplates(ctx, params)
+		},
+		buildParams: func(input ServiceTemplatesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "protocol", input.Protocol)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list service templates",
+	})
+}
+
+// NewCreateServiceTemplateHandler creates a handler for the
+// create_service_template tool.
+func NewCreateServiceTemplateHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ServiceTemplateCreateInput, ServiceTemplateOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ServiceTemplateCreateInput,
+	) (*mcp.CallToolResult, ServiceTemplateOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ServiceTemplateOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ServiceTemplateOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateServiceTemplate(ctx, serviceTemplateWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ServiceTemplateOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ServiceTemplateOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateServiceTemplateHandler creates a handler for the
+// update_service_template tool.
+func NewUpdateServiceTemplateHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ServiceTemplateUpdateInput, ServiceTemplateOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ServiceTemplateUpdateInput,
+	) (*mcp.CallToolResult, ServiceTemplateOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ServiceTemplateOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ServiceTemplateOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateServiceTemplate(ctx, input.ID, serviceTemplateWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ServiceTemplateOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ServiceTemplateOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteServiceTemplateHandler creates a handler for the
+// delete_service_template tool.
+func NewDeleteServiceTemplateHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ServiceTemplateDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ServiceTemplateDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteServiceTemplate(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetFHRPGroupsHandler creates a handler for the get_fhrp_groups tool.
+func NewGetFHRPGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FHRPGroupsInput, PaginatedOutput[domain.FHRPGroup]] {
+	return newListHandler(listHandlerConfig[FHRPGroupsInput, domain.FHRPGroup]{
+		svc: svc,
+		listFunc: func(ctx context.Context, params map[string]string) (*domain.PaginatedResponse[domain.FHRPGroup], error) {
+			return resolveService(ctx, svc).ListFHRPGroups(ctx, params)
+		},
+		buildParams: func(input FHRPGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "protocol", input.Protocol)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list FHRP groups",
+	})
+}
+
+// NewCreateFHRPGroupHandler creates a handler for the create_fhrp_group tool.
+func NewCreateFHRPGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FHRPGroupCreateInput, FHRPGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FHRPGroupCreateInput,
+	) (*mcp.CallToolResult, FHRPGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateFHRPGroup(ctx, fhrpGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, FHRPGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, FHRPGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateFHRPGroupHandler creates a handler for the update_fhrp_group tool.
+func NewUpdateFHRPGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FHRPGroupUpdateInput, FHRPGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FHRPGroupUpdateInput,
+	) (*mcp.CallToolResult, FHRPGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateFHRPGroup(ctx, input.ID, fhrpGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, FHRPGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, FHRPGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteFHRPGroupHandler creates a handler for the delete_fhrp_group tool.
+func NewDeleteFHRPGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FHRPGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FHRPGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteFHRPGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetFHRPGroupAssignmentsHandler creates a handler for the
+// get_fhrp_group_assignments tool.
+func NewGetFHRPGroupAssignmentsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FHRPGroupAssignmentsInput, PaginatedOutput[domain.FHRPGroupAssignment]] {
+	return newListHandler(listHandlerConfig[FHRPGroupAssignmentsInput, domain.FHRPGroupAssignment]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.FHRPGroupAssignment], error) {
+			return resolveService(ctx, svc).ListFHRPGroupAssignments(ctx, params)
+		},
+		buildParams: func(input FHRPGroupAssignmentsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "group", input.Group)
+			addParam(params, "ip_address", input.IPAddress)
+
+			return params
+		},
+		errorLabel: "list FHRP group assignments",
+	})
+}
+
+// NewCreateFHRPGroupAssignmentHandler creates a handler for the
+// create_fhrp_group_assignment tool.
+func NewCreateFHRPGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FHRPGroupAssignmentCreateInput, FHRPGroupAssignmentOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FHRPGroupAssignmentCreateInput,
+	) (*mcp.CallToolResult, FHRPGroupAssignmentOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupAssignmentOutput{}, errServiceNotAvailable
+		}
+		if input.Group == 0 {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupAssignmentOutput{}, fmt.Errorf("group is required")
+		}
+		if input.InterfaceID == 0 {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupAssignmentOutput{}, fmt.Errorf("interface_id is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateFHRPGroupAssignment(ctx, fhrpGroupAssignmentWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, FHRPGroupAssignmentOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, FHRPGroupAssignmentOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateFHRPGroupAssignmentHandler creates a handler for the
+// update_fhrp_group_assignment tool.
+func NewUpdateFHRPGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FHRPGroupAssignmentUpdateInput, FHRPGroupAssignmentOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FHRPGroupAssignmentUpdateInput,
+	) (*mcp.CallToolResult, FHRPGroupAssignmentOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupAssignmentOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, FHRPGroupAssignmentOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateFHRPGroupAssignment(ctx, input.ID, fhrpGroupAssignmentWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, FHRPGroupAssignmentOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, FHRPGroupAssignmentOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteFHRPGroupAssignmentHandler creates a handler for the
+// delete_fhrp_group_assignment tool.
+func NewDeleteFHRPGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[FHRPGroupAssignmentDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input FHRPGroupAssignmentDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteFHRPGroupAssignment(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVLANTranslationPoliciesHandler creates a handler for the
+// get_vlan_translation_policies tool.
+func NewGetVLANTranslationPoliciesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VLANTranslationPoliciesInput, PaginatedOutput[domain.VLANTranslationPolicy]] {
+	return newListHandler(listHandlerConfig[VLANTranslationPoliciesInput, domain.VLANTranslationPolicy]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VLANTranslationPolicy], error) {
+			return resolveService(ctx, svc).ListVLANTranslationPolicies(ctx, params)
+		},
+		buildParams: func(input VLANTranslationPoliciesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list VLAN translation policies",
+	})
+}
+
+// NewCreateVLANTranslationPolicyHandler creates a handler for the
+// create_vlan_translation_policy tool.
+func NewCreateVLANTranslationPolicyHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VLANTranslationPolicyCreateInput, VLANTranslationPolicyOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VLANTranslationPolicyCreateInput,
+	) (*mcp.CallToolResult, VLANTranslationPolicyOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VLANTranslationPolicyOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VLANTranslationPolicyOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVLANTranslationPolicy(ctx, vlanTranslationPolicyWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VLANTranslationPolicyOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VLANTranslationPolicyOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVLANTranslationPolicyHandler creates a handler for the
+// update_vlan_translation_policy tool.
+func NewUpdateVLANTranslationPolicyHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VLANTranslationPolicyUpdateInput, VLANTranslationPolicyOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VLANTranslationPolicyUpdateInput,
+	) (*mcp.CallToolResult, VLANTranslationPolicyOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VLANTranslationPolicyOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VLANTranslationPolicyOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVLANTranslationPolicy(ctx, input.ID, vlanTranslationPolicyWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VLANTranslationPolicyOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VLANTranslationPolicyOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVLANTranslationPolicyHandler creates a handler for the
+// delete_vlan_translation_policy tool.
+func NewDeleteVLANTranslationPolicyHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VLANTranslationPolicyDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VLANTranslationPolicyDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVLANTranslationPolicy(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVLANTranslationRulesHandler creates a handler for the
+// get_vlan_translation_rules tool.
+func NewGetVLANTranslationRulesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VLANTranslationRulesInput, PaginatedOutput[domain.VLANTranslationRule]] {
+	return newListHandler(listHandlerConfig[VLANTranslationRulesInput, domain.VLANTranslationRule]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VLANTranslationRule], error) {
+			return resolveService(ctx, svc).ListVLANTranslationRules(ctx, params)
+		},
+		buildParams: func(input VLANTranslationRulesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "policy", input.Policy)
+
+			return params
+		},
+		errorLabel: "list VLAN translation rules",
+	})
+}
+
+// NewCreateVLANTranslationRuleHandler creates a handler for the
+// create_vlan_translation_rule tool.
+func NewCreateVLANTranslationRuleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VLANTranslationRuleCreateInput, VLANTranslationRuleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VLANTranslationRuleCreateInput,
+	) (*mcp.CallToolResult, VLANTranslationRuleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VLANTranslationRuleOutput{}, errServiceNotAvailable
+		}
+		if input.Policy == 0 {
+			return &mcp.CallToolResult{IsError: true}, VLANTranslationRuleOutput{}, fmt.Errorf("policy is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVLANTranslationRule(ctx, vlanTranslationRuleWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VLANTranslationRuleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VLANTranslationRuleOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVLANTranslationRuleHandler creates a handler for the
+// update_vlan_translation_rule tool.
+func NewUpdateVLANTranslationRuleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VLANTranslationRuleUpdateInput, VLANTranslationRuleOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VLANTranslationRuleUpdateInput,
+	) (*mcp.CallToolResult, VLANTranslationRuleOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VLANTranslationRuleOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VLANTranslationRuleOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVLANTranslationRule(ctx, input.ID, vlanTranslationRuleWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VLANTranslationRuleOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VLANTranslationRuleOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVLANTranslationRuleHandler creates a handler for the
+// delete_vlan_translation_rule tool.
+func NewDeleteVLANTranslationRuleHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VLANTranslationRuleDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VLANTranslationRuleDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVLANTranslationRule(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetProviderAccountsHandler creates a handler for the get_provider_accounts
+// tool.
+func NewGetProviderAccountsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderAccountsInput, PaginatedOutput[domain.ProviderAccount]] {
+	return newListHandler(listHandlerConfig[ProviderAccountsInput, domain.ProviderAccount]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.ProviderAccount], error) {
+			return resolveService(ctx, svc).ListProviderAccounts(ctx, params)
+		},
+		buildParams: func(input ProviderAccountsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "provider", input.Provider)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list provider accounts",
+	})
+}
+
+// NewCreateProviderAccountHandler creates a handler for the
+// create_provider_account tool.
+func NewCreateProviderAccountHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderAccountCreateInput, ProviderAccountOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderAccountCreateInput,
+	) (*mcp.CallToolResult, ProviderAccountOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderAccountOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ProviderAccountOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateProviderAccount(ctx, providerAccountWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ProviderAccountOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderAccountOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateProviderAccountHandler creates a handler for the
+// update_provider_account tool.
+func NewUpdateProviderAccountHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderAccountUpdateInput, ProviderAccountOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderAccountUpdateInput,
+	) (*mcp.CallToolResult, ProviderAccountOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderAccountOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderAccountOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateProviderAccount(ctx, input.ID, providerAccountWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ProviderAccountOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderAccountOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteProviderAccountHandler creates a handler for the
+// delete_provider_account tool.
+func NewDeleteProviderAccountHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderAccountDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderAccountDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteProviderAccount(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetProviderNetworksHandler creates a handler for the
+// get_provider_networks tool.
+func NewGetProviderNetworksHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderNetworksInput, PaginatedOutput[domain.ProviderNetwork]] {
+	return newListHandler(listHandlerConfig[ProviderNetworksInput, domain.ProviderNetwork]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.ProviderNetwork], error) {
+			return resolveService(ctx, svc).ListProviderNetworks(ctx, params)
+		},
+		buildParams: func(input ProviderNetworksInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "provider", input.Provider)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list provider networks",
+	})
+}
+
+// NewCreateProviderNetworkHandler creates a handler for the
+// create_provider_network tool.
+func NewCreateProviderNetworkHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderNetworkCreateInput, ProviderNetworkOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderNetworkCreateInput,
+	) (*mcp.CallToolResult, ProviderNetworkOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderNetworkOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, ProviderNetworkOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateProviderNetwork(ctx, providerNetworkWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ProviderNetworkOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderNetworkOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateProviderNetworkHandler creates a handler for the
+// update_provider_network tool.
+func NewUpdateProviderNetworkHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderNetworkUpdateInput, ProviderNetworkOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderNetworkUpdateInput,
+	) (*mcp.CallToolResult, ProviderNetworkOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderNetworkOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, ProviderNetworkOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateProviderNetwork(ctx, input.ID, providerNetworkWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, ProviderNetworkOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, ProviderNetworkOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteProviderNetworkHandler creates a handler for the
+// delete_provider_network tool.
+func NewDeleteProviderNetworkHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[ProviderNetworkDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input ProviderNetworkDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteProviderNetwork(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetCircuitGroupsHandler creates a handler for the get_circuit_groups tool.
+func NewGetCircuitGroupsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupsInput, PaginatedOutput[domain.CircuitGroup]] {
+	return newListHandler(listHandlerConfig[CircuitGroupsInput, domain.CircuitGroup]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.CircuitGroup], error) {
+			return resolveService(ctx, svc).ListCircuitGroups(ctx, params)
+		},
+		buildParams: func(input CircuitGroupsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list circuit groups",
+	})
+}
+
+// NewCreateCircuitGroupHandler creates a handler for the create_circuit_group
+// tool.
+func NewCreateCircuitGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupCreateInput, CircuitGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupCreateInput,
+	) (*mcp.CallToolResult, CircuitGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateCircuitGroup(ctx, circuitGroupWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CircuitGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateCircuitGroupHandler creates a handler for the update_circuit_group
+// tool.
+func NewUpdateCircuitGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupUpdateInput, CircuitGroupOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupUpdateInput,
+	) (*mcp.CallToolResult, CircuitGroupOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateCircuitGroup(ctx, input.ID, circuitGroupWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CircuitGroupOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitGroupOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteCircuitGroupHandler creates a handler for the delete_circuit_group
+// tool.
+func NewDeleteCircuitGroupHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteCircuitGroup(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetCircuitGroupAssignmentsHandler creates a handler for the
+// get_circuit_group_assignments tool.
+func NewGetCircuitGroupAssignmentsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupAssignmentsInput, PaginatedOutput[domain.CircuitGroupAssignment]] {
+	return newListHandler(listHandlerConfig[CircuitGroupAssignmentsInput, domain.CircuitGroupAssignment]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.CircuitGroupAssignment], error) {
+			return resolveService(ctx, svc).ListCircuitGroupAssignments(ctx, params)
+		},
+		buildParams: func(input CircuitGroupAssignmentsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "group", input.Group)
+			addParam(params, "circuit", input.Circuit)
+
+			return params
+		},
+		errorLabel: "list circuit group assignments",
+	})
+}
+
+// NewCreateCircuitGroupAssignmentHandler creates a handler for the
+// create_circuit_group_assignment tool.
+func NewCreateCircuitGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupAssignmentCreateInput, CircuitGroupAssignmentOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupAssignmentCreateInput,
+	) (*mcp.CallToolResult, CircuitGroupAssignmentOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{}, errServiceNotAvailable
+		}
+		if input.Group == 0 {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{}, fmt.Errorf("group is required")
+		}
+		if input.MemberType == "" || input.MemberID == 0 {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{},
+				fmt.Errorf("member_type and member_id are required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateCircuitGroupAssignment(ctx, circuitGroupAssignmentWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CircuitGroupAssignmentOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitGroupAssignmentOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateCircuitGroupAssignmentHandler creates a handler for the
+// update_circuit_group_assignment tool.
+func NewUpdateCircuitGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupAssignmentUpdateInput, CircuitGroupAssignmentOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupAssignmentUpdateInput,
+	) (*mcp.CallToolResult, CircuitGroupAssignmentOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, CircuitGroupAssignmentOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateCircuitGroupAssignment(ctx, input.ID, circuitGroupAssignmentWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, CircuitGroupAssignmentOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, CircuitGroupAssignmentOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteCircuitGroupAssignmentHandler creates a handler for the
+// delete_circuit_group_assignment tool.
+func NewDeleteCircuitGroupAssignmentHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[CircuitGroupAssignmentDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input CircuitGroupAssignmentDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteCircuitGroupAssignment(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualCircuitsHandler creates a handler for the get_virtual_circuits
+// tool.
+func NewGetVirtualCircuitsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitsInput, PaginatedOutput[domain.VirtualCircuit]] {
+	return newListHandler(listHandlerConfig[VirtualCircuitsInput, domain.VirtualCircuit]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualCircuit], error) {
+			return resolveService(ctx, svc).ListVirtualCircuits(ctx, params)
+		},
+		buildParams: func(input VirtualCircuitsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "type", input.Type)
+			addParam(params, "provider_network", input.ProviderNetwork)
+			addParam(params, "status", input.Status)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual circuits",
+	})
+}
+
+// NewCreateVirtualCircuitHandler creates a handler for the
+// create_virtual_circuit tool.
+func NewCreateVirtualCircuitHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitCreateInput, VirtualCircuitOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitCreateInput,
+	) (*mcp.CallToolResult, VirtualCircuitOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitOutput{}, errServiceNotAvailable
+		}
+		if input.CID == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitOutput{}, fmt.Errorf("cid is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualCircuit(ctx, virtualCircuitWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualCircuitHandler creates a handler for the
+// update_virtual_circuit tool.
+func NewUpdateVirtualCircuitHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitUpdateInput, VirtualCircuitOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitUpdateInput,
+	) (*mcp.CallToolResult, VirtualCircuitOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualCircuit(ctx, input.ID, virtualCircuitWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualCircuitHandler creates a handler for the
+// delete_virtual_circuit tool.
+func NewDeleteVirtualCircuitHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualCircuit(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualCircuitTypesHandler creates a handler for the
+// get_virtual_circuit_types tool.
+func NewGetVirtualCircuitTypesHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTypesInput, PaginatedOutput[domain.VirtualCircuitType]] {
+	return newListHandler(listHandlerConfig[VirtualCircuitTypesInput, domain.VirtualCircuitType]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualCircuitType], error) {
+			return resolveService(ctx, svc).ListVirtualCircuitTypes(ctx, params)
+		},
+		buildParams: func(input VirtualCircuitTypesInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "tag", input.Tag)
+
+			return params
+		},
+		errorLabel: "list virtual circuit types",
+	})
+}
+
+// NewCreateVirtualCircuitTypeHandler creates a handler for the
+// create_virtual_circuit_type tool.
+func NewCreateVirtualCircuitTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTypeCreateInput, VirtualCircuitTypeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTypeCreateInput,
+	) (*mcp.CallToolResult, VirtualCircuitTypeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTypeOutput{}, errServiceNotAvailable
+		}
+		if input.Name == "" {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTypeOutput{}, fmt.Errorf("name is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualCircuitType(ctx, virtualCircuitTypeWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitTypeOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualCircuitTypeHandler creates a handler for the
+// update_virtual_circuit_type tool.
+func NewUpdateVirtualCircuitTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTypeUpdateInput, VirtualCircuitTypeOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTypeUpdateInput,
+	) (*mcp.CallToolResult, VirtualCircuitTypeOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTypeOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTypeOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualCircuitType(ctx, input.ID, virtualCircuitTypeWriteFromUpdate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitTypeOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitTypeOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualCircuitTypeHandler creates a handler for the
+// delete_virtual_circuit_type tool.
+func NewDeleteVirtualCircuitTypeHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTypeDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTypeDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualCircuitType(ctx, input.ID); err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, struct{}{}, e
+		}
+
+		return &mcp.CallToolResult{}, struct{}{}, nil
+	}
+}
+
+// NewGetVirtualCircuitTerminationsHandler creates a handler for the
+// get_virtual_circuit_terminations tool.
+func NewGetVirtualCircuitTerminationsHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTerminationsInput, PaginatedOutput[domain.VirtualCircuitTermination]] {
+	return newListHandler(listHandlerConfig[VirtualCircuitTerminationsInput, domain.VirtualCircuitTermination]{
+		svc: svc,
+		listFunc: func(
+			ctx context.Context, params map[string]string,
+		) (*domain.PaginatedResponse[domain.VirtualCircuitTermination], error) {
+			return resolveService(ctx, svc).ListVirtualCircuitTerminations(ctx, params)
+		},
+		buildParams: func(input VirtualCircuitTerminationsInput) map[string]string {
+			params := paginationParams(input.Page, input.PageSize)
+			addParam(params, "q", input.Q)
+			addParam(params, "virtual_circuit", input.VirtualCircuit)
+			addParam(params, "interface_type", input.InterfaceType)
+			addParam(params, "interface_id", input.InterfaceID)
+
+			return params
+		},
+		errorLabel: "list virtual circuit terminations",
+	})
+}
+
+// NewCreateVirtualCircuitTerminationHandler creates a handler for the
+// create_virtual_circuit_termination tool.
+func NewCreateVirtualCircuitTerminationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTerminationCreateInput, VirtualCircuitTerminationOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTerminationCreateInput,
+	) (*mcp.CallToolResult, VirtualCircuitTerminationOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTerminationOutput{}, errServiceNotAvailable
+		}
+		if input.VirtualCircuit == 0 {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTerminationOutput{},
+				fmt.Errorf("virtual_circuit is required")
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.CreateVirtualCircuitTermination(ctx, virtualCircuitTerminationWriteFromCreate(input))
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitTerminationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitTerminationOutput{Data: *obj}, nil
+	}
+}
+
+// NewUpdateVirtualCircuitTerminationHandler creates a handler for the
+// update_virtual_circuit_termination tool.
+func NewUpdateVirtualCircuitTerminationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTerminationUpdateInput, VirtualCircuitTerminationOutput] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTerminationUpdateInput,
+	) (*mcp.CallToolResult, VirtualCircuitTerminationOutput, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTerminationOutput{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, VirtualCircuitTerminationOutput{}, err
+		}
+
+		sanitizeAllStrings(reflect.ValueOf(&input))
+		obj, err := service.UpdateVirtualCircuitTermination(
+			ctx, input.ID, virtualCircuitTerminationWriteFromUpdate(input),
+		)
+		if err != nil {
+			res, e := writeErrorResult(err)
+
+			return res, VirtualCircuitTerminationOutput{}, e
+		}
+
+		return &mcp.CallToolResult{}, VirtualCircuitTerminationOutput{Data: *obj}, nil
+	}
+}
+
+// NewDeleteVirtualCircuitTerminationHandler creates a handler for the
+// delete_virtual_circuit_termination tool.
+func NewDeleteVirtualCircuitTerminationHandler(
+	svc *application.NetworkService,
+) mcp.ToolHandlerFor[VirtualCircuitTerminationDeleteInput, struct{}] {
+	return func(
+		ctx context.Context, _ *mcp.CallToolRequest, input VirtualCircuitTerminationDeleteInput,
+	) (*mcp.CallToolResult, struct{}, error) {
+		service := resolveService(ctx, svc)
+		if service == nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, errServiceNotAvailable
+		}
+		if err := validatePositiveID(input.ID); err != nil {
+			return &mcp.CallToolResult{IsError: true}, struct{}{}, err
+		}
+
+		if err := service.DeleteVirtualCircuitTermination(ctx, input.ID); err != nil {
 			res, e := writeErrorResult(err)
 
 			return res, struct{}{}, e

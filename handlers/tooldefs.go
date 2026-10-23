@@ -29,6 +29,60 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"read-only tool over get_object_by_id when you need multiple sites or don't yet know the exact ID.",
 		},
 		{
+			Name:  "get_regions",
+			Title: "List Regions",
+			Description: "List regions in NetBox with optional filters. Use q for free-text search, or filter by " +
+				"parent (region ID), or tag. Results are paginated: set page and page_size (max 1000). " +
+				"An empty results array means no regions match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox regions. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple regions or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_tenant_groups",
+			Title: "List Tenant Groups",
+			Description: "List tenant groups in NetBox with optional filters. Use q for free-text search, or filter " +
+				"by parent (tenant group ID), or tag. Results are paginated: set page and page_size (max 1000). " +
+				"An empty results array means no tenant groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox tenant groups. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple tenant groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_roles",
+			Title: "List Roles",
+			Description: "List IPAM roles in NetBox with optional filters. Use q for free-text search, or filter " +
+				"by tag. Results are paginated: set page and page_size (max 1000). An empty results array means " +
+				"no roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox IPAM roles. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple roles or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_tenants",
+			Title: "List Tenants",
+			Description: "List tenancy tenants in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by group (tenant group ID) or tag. Results are paginated: set page and page_size (max " +
+				"1000). An empty results array means no tenants match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox tenants. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple tenants or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_tags",
+			Title: "List Tags",
+			Description: "List extras tags in NetBox with optional filters. Use q for free-text search, or filter " +
+				"by tag. Results are paginated: set page and page_size (max 1000). An empty results array means " +
+				"no tags match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox tags. All filters are additive. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple tags or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_custom_fields",
+			Title: "List Custom Fields",
+			Description: "List extras custom fields in NetBox with optional filters. Use q for free-text search, " +
+				"filter by content_type (e.g. dcim.device), or by tag. Results are paginated: set page and " +
+				"page_size (max 1000). An empty results array means no custom fields match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox custom fields. All filters are additive. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple custom fields or don't yet know the exact ID.",
+		},
+		{
 			Name:  "get_devices",
 			Title: "List Devices",
 			Description: "List devices in NetBox with optional filters. Filter by site, role, manufacturer, " +
@@ -90,8 +144,16 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 			Name:  "get_object_by_id",
 			Title: "Get Object by ID",
 			Description: "Retrieve any single NetBox object by its type and numeric ID. object_type is " +
-				"required (e.g. site, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, " +
-				"provider, tenant, rack, cable, interface). Returns a 404-style error if the object does " +
+				"required (e.g. site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, " +
+				"provider, tenant, rack, cable, interface, site_group, rack_group, rack_role, device_role, platform, " +
+				"virtual_chassis, power_panel, inventory_item_role, front_port, rear_port, console_port, " +
+				"console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, " +
+				"inventory_item, mac_address, rir, aggregate, ip_range, asn, asn_range, route_target, " +
+				"service, service_template, fhrp_group, fhrp_group_assignment, vlan_translation_policy, " +
+				"vlan_translation_rule, contact_group, contact_role, virtual_disk, virtual_machine_type, " +
+				"provider_account, provider_network, circuit_group, circuit_group_assignment, virtual_circuit, " +
+				"virtual_circuit_type, virtual_circuit_termination, tag). " +
+				"Returns a 404-style error if the object does " +
 				"not exist or the token lacks permission.",
 			Instructions: "Use when you already know the object type and numeric ID. For searching without " +
 				"an ID, prefer the dedicated list tools.",
@@ -137,6 +199,79 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 			Instructions: "Use to look up virtual machine interfaces.",
 		},
 		{
+			Name:  "get_site_groups",
+			Title: "List Site Groups",
+			Description: "List site groups in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by parent (site group ID) or tag. Results are paginated: set page and page_size " +
+				"(max 1000). An empty results array means no site groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox site groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple site groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_rack_groups",
+			Title: "List Rack Groups",
+			Description: "List rack groups in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by site, parent (rack group ID) or tag. Results are paginated: set page and " +
+				"page_size (max 1000). An empty results array means no rack groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox rack groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple rack groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_rack_roles",
+			Title: "List Rack Roles",
+			Description: "List rack roles in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by color or tag. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no rack roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox rack roles. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple rack roles or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_device_roles",
+			Title: "List Device Roles",
+			Description: "List device roles in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by color or tag. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no device roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox device roles. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple device roles or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_platforms",
+			Title: "List Platforms",
+			Description: "List platforms in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by manufacturer or tag. Results are paginated: set page and page_size (max 1000). " +
+				"An empty results array means no platforms match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox platforms. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple platforms or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_virtual_chassis",
+			Title: "List Virtual Chassis",
+			Description: "List virtual chassis in NetBox with optional filters. Use q for free-text search, " +
+				"or filter by name or tag. Results are paginated: set page and page_size (max 1000). An " +
+				"empty results array means no virtual chassis match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual chassis. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple virtual chassis or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_power_panels",
+			Title: "List Power Panels",
+			Description: "List power panels in NetBox with optional filters. Use q for free-text search, or " +
+				"filter by site, location or tag. Results are paginated: set page and page_size (max 1000). " +
+				"An empty results array means no power panels match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox power panels. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple power panels or don't yet know the exact ID.",
+		},
+		{
+			Name:  "get_inventory_item_roles",
+			Title: "List Inventory Item Roles",
+			Description: "List inventory item roles in NetBox with optional filters. Use q for free-text " +
+				"search, or filter by color or tag. Results are paginated: set page and page_size (max " +
+				"1000). An empty results array means no inventory item roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox inventory item roles. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple inventory item roles or don't yet know " +
+				"the exact ID.",
+		},
+		{
 			Name:  "create_site",
 			Title: "Create Site",
 			Description: "Create a new site in NetBox. name is required; all other fields are optional. " +
@@ -161,6 +296,62 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"dependent objects) from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
 				"want to delete the site, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_region",
+			Title: "Create Region",
+			Description: "Create a new region in NetBox. name is required; all other fields are optional. " +
+				"Provide parent as a numeric region ID (look it up first), and tags as a list of tag names. " +
+				"Returns the created region.",
+			Instructions: "Use only when the caller explicitly wants to create a region and provides a name. " +
+				"This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:  "update_region",
+			Title: "Update Region",
+			Description: "Partially update a region in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated region.",
+			Instructions: "Use to modify one or more fields of an existing region. Provide id plus only the " +
+				"fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_region",
+			Title: "Delete Region",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a region (and its " +
+				"dependent objects) from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the region, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_tenant_group",
+			Title: "Create Tenant Group",
+			Description: "Create a new tenancy tenant group in NetBox. name is required; all other fields are " +
+				"optional. Provide parent as a numeric tenant group ID (look it up first), and tags as a list of " +
+				"tag names. Returns the created tenant group.",
+			Instructions: "Use only when the caller explicitly wants to create a tenant group and provides a name. " +
+				"This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:  "update_tenant_group",
+			Title: "Update Tenant Group",
+			Description: "Partially update a tenancy tenant group in NetBox by its numeric ID. Only the fields " +
+				"you explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated tenant group.",
+			Instructions: "Use to modify one or more fields of an existing tenant group. Provide id plus only the " +
+				"fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_tenant_group",
+			Title: "Delete Tenant Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a tenancy tenant group " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the tenant group, ideally by ID, and understands it is permanent and cannot be " +
 				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
 				"ask for explicit confirmation first.",
 		},
@@ -552,7 +743,8 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 			Name:  "create_tenant",
 			Title: "Create Tenant",
 			Description: "Create a new tenancy tenant in NetBox. name is required; all other fields are " +
-				"optional. Provide slug/description/comments as strings, and tags as a list of tag names. " +
+				"optional. Provide slug/description/comments as strings, group as a numeric tenant group ID, " +
+				"and tags as a list of tag names. " +
 				"Returns the created tenant.",
 			Instructions: "Use only when the caller explicitly wants to create a tenant and provides a " +
 				"name. This tool mutates NetBox; confirm the key attributes before calling.",
@@ -573,6 +765,62 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"from NetBox by its numeric ID. There is no undo.",
 			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
 				"want to delete the tenant, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_tag",
+			Title: "Create Tag",
+			Description: "Create a new extras tag in NetBox. name is required; all other fields are " +
+				"optional. Provide slug/color/description as strings. Returns the created tag.",
+			Instructions: "Use only when the caller explicitly wants to create a tag and provides a name. " +
+				"This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_tag",
+			Title: "Update Tag",
+			Description: "Partially update an extras tag in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated tag.",
+			Instructions: "Use to modify one or more fields of an existing tag. Provide id plus only the " +
+				"fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_tag",
+			Title: "Delete Tag",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an extras tag from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the tag, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_custom_field",
+			Title: "Create Custom Field",
+			Description: "Create a new extras custom field in NetBox. name and label are required; all other " +
+				"fields are optional. Provide type (e.g. text), object_types (list of object types), " +
+				"group_name, description, required (boolean), default, filter_logic, weight (integer), " +
+				"ui_visibility, and choices. Returns the created custom field.",
+			Instructions: "Use only when the caller explicitly wants to create a custom field and provides a " +
+				"name and label. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_custom_field",
+			Title: "Update Custom Field",
+			Description: "Partially update an extras custom field in NetBox by its numeric ID. Only the fields " +
+				"you explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated custom field.",
+			Instructions: "Use to modify one or more fields of an existing custom field. Provide id plus only the " +
+				"fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_custom_field",
+			Title: "Delete Custom Field",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an extras custom field " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the custom field, ideally by ID, and understands it is permanent and cannot be " +
 				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
 				"ask for explicit confirmation first.",
 		},
@@ -862,6 +1110,1364 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"want to delete the contact, ideally by ID, and understands it is permanent and cannot be " +
 				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
 				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_site_group",
+			Title: "Create Site Group",
+			Description: "Create a new site group in NetBox. name is required; all other fields are " +
+				"optional. Provide parent as a numeric site group ID (look it up first), and tags as a " +
+				"list of tag names. Returns the created site group.",
+			Instructions: "Use only when the caller explicitly wants to create a site group and provides " +
+				"a name. This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:  "update_site_group",
+			Title: "Update Site Group",
+			Description: "Partially update a site group in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated site group.",
+			Instructions: "Use to modify one or more fields of an existing site group. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_site_group",
+			Title: "Delete Site Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a site group (and " +
+				"its dependent objects) from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the site group, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_rack_group",
+			Title: "Create Rack Group",
+			Description: "Create a new rack group in NetBox. name is required; all other fields are " +
+				"optional. Provide site and parent as numeric IDs (look them up first), and tags as a " +
+				"list of tag names. Returns the created rack group.",
+			Instructions: "Use only when the caller explicitly wants to create a rack group and provides " +
+				"a name. This tool mutates NetBox; confirm the name and key attributes before calling.",
+		},
+		{
+			Name:  "update_rack_group",
+			Title: "Update Rack Group",
+			Description: "Partially update a rack group in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated rack group.",
+			Instructions: "Use to modify one or more fields of an existing rack group. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_rack_group",
+			Title: "Delete Rack Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a rack group (and " +
+				"its dependent objects) from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the rack group, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_rack_role",
+			Title: "Create Rack Role",
+			Description: "Create a new rack role in NetBox. name is required; all other fields are " +
+				"optional. Provide slug/color/description as strings, and tags as a list of tag names. " +
+				"Returns the created rack role.",
+			Instructions: "Use only when the caller explicitly wants to create a rack role and provides a " +
+				"name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_rack_role",
+			Title: "Update Rack Role",
+			Description: "Partially update a rack role in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated rack role.",
+			Instructions: "Use to modify one or more fields of an existing rack role. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_rack_role",
+			Title: "Delete Rack Role",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a rack role from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the rack role, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_device_role",
+			Title: "Create Device Role",
+			Description: "Create a new device role in NetBox. name is required; all other fields are " +
+				"optional. Provide slug/color/description as strings, vm_role as a boolean, weight as an " +
+				"integer, config_template as a numeric ID, and tags as a list of tag names. Returns the " +
+				"created device role.",
+			Instructions: "Use only when the caller explicitly wants to create a device role and provides " +
+				"a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_device_role",
+			Title: "Update Device Role",
+			Description: "Partially update a device role in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated device role.",
+			Instructions: "Use to modify one or more fields of an existing device role. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_device_role",
+			Title: "Delete Device Role",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a device role from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the device role, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_platform",
+			Title: "Create Platform",
+			Description: "Create a new platform in NetBox. name is required; all other fields are " +
+				"optional. Provide manufacturer and config_template as numeric IDs (look them up first), " +
+				"slug/description as strings, and tags as a list of tag names. Returns the created platform.",
+			Instructions: "Use only when the caller explicitly wants to create a platform and provides a " +
+				"name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_platform",
+			Title: "Update Platform",
+			Description: "Partially update a platform in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated) are ignored. Returns the updated platform.",
+			Instructions: "Use to modify one or more fields of an existing platform. Provide id plus only " +
+				"the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_platform",
+			Title: "Delete Platform",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a platform from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the platform, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_virtual_chassis",
+			Title: "Create Virtual Chassis",
+			Description: "Create a new virtual chassis in NetBox. name is optional here (unlike most " +
+				"entities); all other fields are optional. Provide master as a numeric device ID (look it " +
+				"up first), domain/description as strings, and tags as a list of tag names. Returns the " +
+				"created virtual chassis.",
+			Instructions: "Use only when the caller explicitly wants to create a virtual chassis. This " +
+				"tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_virtual_chassis",
+			Title: "Update Virtual Chassis",
+			Description: "Partially update a virtual chassis in NetBox by its numeric ID. Only the fields " +
+				"you explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, member_count) are ignored. Returns the " +
+				"updated virtual chassis.",
+			Instructions: "Use to modify one or more fields of an existing virtual chassis. Provide id " +
+				"plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_virtual_chassis",
+			Title: "Delete Virtual Chassis",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual chassis " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual chassis, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_power_panel",
+			Title: "Create Power Panel",
+			Description: "Create a new power panel in NetBox. name is required; all other fields are " +
+				"optional. Provide site and location as numeric IDs (look them up first), description as " +
+				"a string, and tags as a list of tag names. Returns the created power panel.",
+			Instructions: "Use only when the caller explicitly wants to create a power panel and provides " +
+				"a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_power_panel",
+			Title: "Update Power Panel",
+			Description: "Partially update a power panel in NetBox by its numeric ID. Only the fields you " +
+				"explicitly provide are changed (PATCH merge); omitted fields are left untouched. " +
+				"Read-only fields (id, url, created, last_updated, display) are ignored. Returns the updated power panel.",
+			Instructions: "Use to modify one or more fields of an existing power panel. Provide id plus " +
+				"only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_power_panel",
+			Title: "Delete Power Panel",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a power panel from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the power panel, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "create_inventory_item_role",
+			Title: "Create Inventory Item Role",
+			Description: "Create a new inventory item role in NetBox. name is required; all other fields " +
+				"are optional. Provide slug/color/description as strings, and tags as a list of tag names. " +
+				"Returns the created inventory item role.",
+			Instructions: "Use only when the caller explicitly wants to create an inventory item role and " +
+				"provides a name. This tool mutates NetBox; confirm the key attributes before calling.",
+		},
+		{
+			Name:  "update_inventory_item_role",
+			Title: "Update Inventory Item Role",
+			Description: "Partially update an inventory item role in NetBox by its numeric ID. Only the " +
+				"fields you explicitly provide are changed (PATCH merge); omitted fields are left " +
+				"untouched. Read-only fields (id, url, created, last_updated) are ignored. Returns the " +
+				"updated inventory item role.",
+			Instructions: "Use to modify one or more fields of an existing inventory item role. Provide id " +
+				"plus only the fields to change. This tool mutates NetBox.",
+		},
+		{
+			Name:  "delete_inventory_item_role",
+			Title: "Delete Inventory Item Role",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an inventory item " +
+				"role from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the inventory item role, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without " +
+				"confirming deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_front_ports",
+			Title: "List Front Ports",
+			Description: "List front ports in NetBox. Filter by device or tag, or use q for free-text search. " +
+				"Results are paginated: set page and page_size (max 1000). An empty results array means no " +
+				"front ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox front ports. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple front ports or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_front_port",
+			Title: "Create Front Port",
+			Description: "Create a front port in NetBox. Name and device are required; type is a choice " +
+				"string (e.g. lc, sc). Provide rear_port and rear_port_position to link a rear port.",
+			Instructions: "Use to add a new front port to a device.",
+		},
+		{
+			Name:  "update_front_port",
+			Title: "Update Front Port",
+			Description: "Partially update a front port in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing front port.",
+		},
+		{
+			Name:  "delete_front_port",
+			Title: "Delete Front Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a front port from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the front port, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_rear_ports",
+			Title: "List Rear Ports",
+			Description: "List rear ports in NetBox. Filter by device or tag, or use q for free-text search. " +
+				"Results are paginated: set page and page_size (max 1000). An empty results array means no " +
+				"rear ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox rear ports. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple rear ports or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_rear_port",
+			Title: "Create Rear Port",
+			Description: "Create a rear port in NetBox. Name and device are required; type is a choice " +
+				"string (e.g. lc, sc) and positions sets the number of positions.",
+			Instructions: "Use to add a new rear port to a device.",
+		},
+		{
+			Name:  "update_rear_port",
+			Title: "Update Rear Port",
+			Description: "Partially update a rear port in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing rear port.",
+		},
+		{
+			Name:  "delete_rear_port",
+			Title: "Delete Rear Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a rear port from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the rear port, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_console_ports",
+			Title: "List Console Ports",
+			Description: "List console ports in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no console ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox console ports. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple console ports or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_console_port",
+			Title: "Create Console Port",
+			Description: "Create a console port in NetBox. Name and device are required; type is a choice " +
+				"string (e.g. de-9, usb-c).",
+			Instructions: "Use to add a new console port to a device.",
+		},
+		{
+			Name:  "update_console_port",
+			Title: "Update Console Port",
+			Description: "Partially update a console port in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing console port.",
+		},
+		{
+			Name:  "delete_console_port",
+			Title: "Delete Console Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a console port from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the console port, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_console_server_ports",
+			Title: "List Console Server Ports",
+			Description: "List console server ports in NetBox. Filter by device or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no console server ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox console server ports. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple console server ports or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_console_server_port",
+			Title: "Create Console Server Port",
+			Description: "Create a console server port in NetBox. Name and device are required; type is a " +
+				"choice string.",
+			Instructions: "Use to add a new console server port to a device.",
+		},
+		{
+			Name:  "update_console_server_port",
+			Title: "Update Console Server Port",
+			Description: "Partially update a console server port in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing console server port.",
+		},
+		{
+			Name:  "delete_console_server_port",
+			Title: "Delete Console Server Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a console server " +
+				"port from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the console server port, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without " +
+				"confirming deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_power_ports",
+			Title: "List Power Ports",
+			Description: "List power ports in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no power ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox power ports. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple power ports or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_power_port",
+			Title: "Create Power Port",
+			Description: "Create a power port in NetBox. Name and device are required; type is a choice " +
+				"string. Provide maximum_draw and allocated_draw (in VA).",
+			Instructions: "Use to add a new power port to a device.",
+		},
+		{
+			Name:  "update_power_port",
+			Title: "Update Power Port",
+			Description: "Partially update a power port in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing power port.",
+		},
+		{
+			Name:  "delete_power_port",
+			Title: "Delete Power Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a power port from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the power port, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_power_outlets",
+			Title: "List Power Outlets",
+			Description: "List power outlets in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no power outlets match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox power outlets. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple power outlets or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_power_outlet",
+			Title: "Create Power Outlet",
+			Description: "Create a power outlet in NetBox. Name and device are required; type is a choice " +
+				"string. Provide power_port to link a power port and feed_leg for the feed leg.",
+			Instructions: "Use to add a new power outlet to a device.",
+		},
+		{
+			Name:  "update_power_outlet",
+			Title: "Update Power Outlet",
+			Description: "Partially update a power outlet in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing power outlet.",
+		},
+		{
+			Name:  "delete_power_outlet",
+			Title: "Delete Power Outlet",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a power outlet from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the power outlet, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_power_feeds",
+			Title: "List Power Feeds",
+			Description: "List power feeds in NetBox. Filter by power panel or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no power feeds match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox power feeds. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple power feeds or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_power_feed",
+			Title: "Create Power Feed",
+			Description: "Create a power feed in NetBox. Name is required; provide power_panel to attach " +
+				"the feed to a power panel, plus voltage, amperage and other electrical properties.",
+			Instructions: "Use to add a new power feed.",
+		},
+		{
+			Name:  "update_power_feed",
+			Title: "Update Power Feed",
+			Description: "Partially update a power feed in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing power feed.",
+		},
+		{
+			Name:  "delete_power_feed",
+			Title: "Delete Power Feed",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a power feed from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the power feed, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_device_bays",
+			Title: "List Device Bays",
+			Description: "List device bays in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no device bays match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox device bays. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple device bays or don't yet know the exact ID.",
+		},
+		{
+			Name:         "create_device_bay",
+			Title:        "Create Device Bay",
+			Description:  "Create a device bay in NetBox. Name and device are required.",
+			Instructions: "Use to add a new device bay to a device.",
+		},
+		{
+			Name:  "update_device_bay",
+			Title: "Update Device Bay",
+			Description: "Partially update a device bay in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing device bay.",
+		},
+		{
+			Name:  "delete_device_bay",
+			Title: "Delete Device Bay",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a device bay from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the device bay, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_rack_reservations",
+			Title: "List Rack Reservations",
+			Description: "List rack reservations in NetBox. Filter by rack or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no rack reservations match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox rack reservations. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple rack reservations or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_rack_reservation",
+			Title: "Create Rack Reservation",
+			Description: "Create a rack reservation in NetBox. Description is required; provide rack and " +
+				"units to reserve specific rack units.",
+			Instructions: "Use to reserve space in a rack.",
+		},
+		{
+			Name:  "update_rack_reservation",
+			Title: "Update Rack Reservation",
+			Description: "Partially update a rack reservation in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing rack reservation.",
+		},
+		{
+			Name:  "delete_rack_reservation",
+			Title: "Delete Rack Reservation",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a rack reservation " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the rack reservation, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_inventory_items",
+			Title: "List Inventory Items",
+			Description: "List inventory items in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no inventory items match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox inventory items. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple inventory items or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_inventory_item",
+			Title: "Create Inventory Item",
+			Description: "Create an inventory item in NetBox. Name and device are required; provide " +
+				"manufacturer, serial and part_id as applicable.",
+			Instructions: "Use to add a new inventory item to a device.",
+		},
+		{
+			Name:  "update_inventory_item",
+			Title: "Update Inventory Item",
+			Description: "Partially update an inventory item in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing inventory item.",
+		},
+		{
+			Name:  "delete_inventory_item",
+			Title: "Delete Inventory Item",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an inventory item " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the inventory item, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_mac_addresses",
+			Title: "List MAC Addresses",
+			Description: "List MAC addresses in NetBox. Filter by tag, or use q for free-text search. " +
+				"Results are paginated: set page and page_size (max 1000). An empty results array means no " +
+				"MAC addresses match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox MAC addresses. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple MAC addresses or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_mac_address",
+			Title: "Create MAC Address",
+			Description: "Create a MAC address in NetBox. Address is required; provide " +
+				"assigned_object_type (e.g. dcim.interface) and assigned_object_id to assign the MAC to an " +
+				"object.",
+			Instructions: "Use to add a new MAC address.",
+		},
+		{
+			Name:  "update_mac_address",
+			Title: "Update MAC Address",
+			Description: "Partially update a MAC address in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing MAC address.",
+		},
+		{
+			Name:  "delete_mac_address",
+			Title: "Delete MAC Address",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a MAC address from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the MAC address, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_rirs",
+			Title: "List RIRs",
+			Description: "List regional internet registries (RIRs) in NetBox. Filter by tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no RIRs match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox RIRs. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple RIRs or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_rir",
+			Title: "Create RIR",
+			Description: "Create a regional internet registry (RIR) in NetBox. Name is required; provide " +
+				"slug, is_private, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new RIR.",
+		},
+		{
+			Name:  "update_rir",
+			Title: "Update RIR",
+			Description: "Partially update an RIR in NetBox by its numeric ID. Only the provided fields are " +
+				"patched (PATCH merge).",
+			Instructions: "Use to modify an existing RIR.",
+		},
+		{
+			Name:  "delete_rir",
+			Title: "Delete RIR",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an RIR from NetBox " +
+				"by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the RIR, ideally by ID, and understands it is permanent and cannot be undone. " +
+				"If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for " +
+				"explicit confirmation first.",
+		},
+		{
+			Name:  "get_contact_groups",
+			Title: "List Contact Groups",
+			Description: "List tenancy contact groups in NetBox. Filter by parent or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no contact groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox contact groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple contact groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_contact_group",
+			Title: "Create Contact Group",
+			Description: "Create a tenancy contact group in NetBox. Name is required; provide slug, parent, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new contact group.",
+		},
+		{
+			Name:  "update_contact_group",
+			Title: "Update Contact Group",
+			Description: "Partially update a tenancy contact group in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing contact group.",
+		},
+		{
+			Name:  "delete_contact_group",
+			Title: "Delete Contact Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a contact group from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the contact group, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_contact_roles",
+			Title: "List Contact Roles",
+			Description: "List tenancy contact roles in NetBox. Filter by tag, or use q for free-text search. " +
+				"Results are paginated: set page and page_size (max 1000). An empty results array means no " +
+				"contact roles match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox contact roles. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple contact roles or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_contact_role",
+			Title: "Create Contact Role",
+			Description: "Create a tenancy contact role in NetBox. Name is required; provide slug, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new contact role.",
+		},
+		{
+			Name:  "update_contact_role",
+			Title: "Update Contact Role",
+			Description: "Partially update a tenancy contact role in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing contact role.",
+		},
+		{
+			Name:  "delete_contact_role",
+			Title: "Delete Contact Role",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a contact role from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the contact role, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_disks",
+			Title: "List Virtual Disks",
+			Description: "List virtualization virtual disks in NetBox. Filter by virtual_machine or tag, or " +
+				"use q for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no virtual disks match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual disks. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple virtual disks or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_virtual_disk",
+			Title: "Create Virtual Disk",
+			Description: "Create a virtualization virtual disk in NetBox. Name is required; provide " +
+				"virtual_machine, size, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new virtual disk.",
+		},
+		{
+			Name:  "update_virtual_disk",
+			Title: "Update Virtual Disk",
+			Description: "Partially update a virtualization virtual disk in NetBox by its numeric ID. Only " +
+				"the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual disk.",
+		},
+		{
+			Name:  "delete_virtual_disk",
+			Title: "Delete Virtual Disk",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual disk from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual disk, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for " +
+				"explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_machine_types",
+			Title: "List Virtual Machine Types",
+			Description: "List virtualization virtual machine types in NetBox. Filter by tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no virtual machine types match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual machine types. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple virtual machine types or don't yet know the " +
+				"exact ID.",
+		},
+		{
+			Name:  "create_virtual_machine_type",
+			Title: "Create Virtual Machine Type",
+			Description: "Create a virtualization virtual machine type in NetBox. Name is required; provide " +
+				"slug, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new virtual machine type.",
+		},
+		{
+			Name:  "update_virtual_machine_type",
+			Title: "Update Virtual Machine Type",
+			Description: "Partially update a virtualization virtual machine type in NetBox by its numeric " +
+				"ID. Only the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual machine type.",
+		},
+		{
+			Name:  "delete_virtual_machine_type",
+			Title: "Delete Virtual Machine Type",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual machine " +
+				"type from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual machine type, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_aggregates",
+			Title: "List Aggregates",
+			Description: "List IPAM aggregates in NetBox. Filter by rir, tenant or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no aggregates match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox aggregates. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple aggregates or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_aggregate",
+			Title: "Create Aggregate",
+			Description: "Create an IPAM aggregate in NetBox. Prefix is required; provide rir, tenant, " +
+				"date_added, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new aggregate.",
+		},
+		{
+			Name:  "update_aggregate",
+			Title: "Update Aggregate",
+			Description: "Partially update an aggregate in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing aggregate.",
+		},
+		{
+			Name:  "delete_aggregate",
+			Title: "Delete Aggregate",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an aggregate from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the aggregate, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_ip_ranges",
+			Title: "List IP Ranges",
+			Description: "List IPAM IP ranges in NetBox. Filter by vrf, tenant, status, role or tag, or use " +
+				"q for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no IP ranges match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox IP ranges. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple IP ranges or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_ip_range",
+			Title: "Create IP Range",
+			Description: "Create an IPAM IP range in NetBox. Start address and end address are required; " +
+				"provide vrf, tenant, status, role, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new IP range.",
+		},
+		{
+			Name:  "update_ip_range",
+			Title: "Update IP Range",
+			Description: "Partially update an IP range in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing IP range.",
+		},
+		{
+			Name:  "delete_ip_range",
+			Title: "Delete IP Range",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an IP range from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the IP range, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_asns",
+			Title: "List ASNs",
+			Description: "List autonomous system numbers (ASNs) in NetBox. Filter by rir, tenant or tag, or " +
+				"use q for free-text search. Results are paginated: set page and page_size (max 1000). An " +
+				"empty results array means no ASNs match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox ASNs. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple ASNs or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_asn",
+			Title: "Create ASN",
+			Description: "Create an autonomous system number (ASN) in NetBox. Asn is required; provide " +
+				"rir, tenant, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new ASN.",
+		},
+		{
+			Name:  "update_asn",
+			Title: "Update ASN",
+			Description: "Partially update an ASN in NetBox by its numeric ID. Only the provided fields are " +
+				"patched (PATCH merge).",
+			Instructions: "Use to modify an existing ASN.",
+		},
+		{
+			Name:  "delete_asn",
+			Title: "Delete ASN",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an ASN from NetBox " +
+				"by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the ASN, ideally by ID, and understands it is permanent and cannot be undone. " +
+				"If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask for " +
+				"explicit confirmation first.",
+		},
+		{
+			Name:  "get_asn_ranges",
+			Title: "List ASN Ranges",
+			Description: "List IPAM ASN ranges in NetBox. Filter by rir, tenant or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no ASN ranges match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox ASN ranges. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple ASN ranges or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_asn_range",
+			Title: "Create ASN Range",
+			Description: "Create an IPAM ASN range in NetBox. Name is required; provide start, end, rir, " +
+				"tenant, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new ASN range.",
+		},
+		{
+			Name:  "update_asn_range",
+			Title: "Update ASN Range",
+			Description: "Partially update an ASN range in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing ASN range.",
+		},
+		{
+			Name:  "delete_asn_range",
+			Title: "Delete ASN Range",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an ASN range from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the ASN range, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_route_targets",
+			Title: "List Route Targets",
+			Description: "List IPAM route targets in NetBox. Filter by tenant or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no route targets match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox route targets. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple route targets or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_route_target",
+			Title: "Create Route Target",
+			Description: "Create an IPAM route target in NetBox. Name is required; provide tenant, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new route target.",
+		},
+		{
+			Name:  "update_route_target",
+			Title: "Update Route Target",
+			Description: "Partially update a route target in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing route target.",
+		},
+		{
+			Name:  "delete_route_target",
+			Title: "Delete Route Target",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a route target from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the route target, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_services",
+			Title: "List Services",
+			Description: "List IPAM services in NetBox. Filter by device, virtual_machine or tag, or use q " +
+				"for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no services match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox services. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple services or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_service",
+			Title: "Create Service",
+			Description: "Create an IPAM service in NetBox. Name is required; provide device, " +
+				"virtual_machine, protocol, ports, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new service.",
+		},
+		{
+			Name:  "update_service",
+			Title: "Update Service",
+			Description: "Partially update a service in NetBox by its numeric ID. Only the provided fields " +
+				"are patched (PATCH merge).",
+			Instructions: "Use to modify an existing service.",
+		},
+		{
+			Name:  "delete_service",
+			Title: "Delete Service",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a service from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the service, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_service_templates",
+			Title: "List Service Templates",
+			Description: "List IPAM service templates in NetBox. Filter by protocol or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no service templates match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox service templates. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple service templates or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_service_template",
+			Title: "Create Service Template",
+			Description: "Create an IPAM service template in NetBox. Name is required; provide protocol, " +
+				"ports, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new service template.",
+		},
+		{
+			Name:  "update_service_template",
+			Title: "Update Service Template",
+			Description: "Partially update a service template in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing service template.",
+		},
+		{
+			Name:  "delete_service_template",
+			Title: "Delete Service Template",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a service template " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the service template, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_fhrp_groups",
+			Title: "List FHRP Groups",
+			Description: "List IPAM FHRP (first-hop redundancy protocol) groups in NetBox. Filter by " +
+				"protocol or tag, or use q for free-text search. Results are paginated: set page and page_size " +
+				"(max 1000). An empty results array means no FHRP groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox FHRP groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple FHRP groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_fhrp_group",
+			Title: "Create FHRP Group",
+			Description: "Create an IPAM FHRP group in NetBox. Name is required; provide protocol, group_id, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new FHRP group.",
+		},
+		{
+			Name:  "update_fhrp_group",
+			Title: "Update FHRP Group",
+			Description: "Partially update an FHRP group in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing FHRP group.",
+		},
+		{
+			Name:  "delete_fhrp_group",
+			Title: "Delete FHRP Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an FHRP group from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the FHRP group, ideally by ID, and understands it is permanent and cannot be " +
+				"undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, ask " +
+				"for explicit confirmation first.",
+		},
+		{
+			Name:  "get_fhrp_group_assignments",
+			Title: "List FHRP Group Assignments",
+			Description: "List IPAM FHRP group assignments in NetBox. Filter by group or ip_address, or use " +
+				"q for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no FHRP group assignments match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox FHRP group assignments. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple FHRP group assignments or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_fhrp_group_assignment",
+			Title: "Create FHRP Group Assignment",
+			Description: "Create an IPAM FHRP group assignment in NetBox. Group and ip_address are " +
+				"required; provide priority as needed.",
+			Instructions: "Use to map an FHRP group to an IP address.",
+		},
+		{
+			Name:  "update_fhrp_group_assignment",
+			Title: "Update FHRP Group Assignment",
+			Description: "Partially update an FHRP group assignment in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing FHRP group assignment.",
+		},
+		{
+			Name:  "delete_fhrp_group_assignment",
+			Title: "Delete FHRP Group Assignment",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an FHRP group " +
+				"assignment from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the FHRP group assignment, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_vlan_translation_policies",
+			Title: "List VLAN Translation Policies",
+			Description: "List IPAM VLAN translation policies in NetBox. Filter by tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no VLAN translation policies match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox VLAN translation policies. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple policies or don't yet know the " +
+				"exact ID.",
+		},
+		{
+			Name:  "create_vlan_translation_policy",
+			Title: "Create VLAN Translation Policy",
+			Description: "Create an IPAM VLAN translation policy in NetBox. Name is required; provide " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new VLAN translation policy.",
+		},
+		{
+			Name:  "update_vlan_translation_policy",
+			Title: "Update VLAN Translation Policy",
+			Description: "Partially update a VLAN translation policy in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing VLAN translation policy.",
+		},
+		{
+			Name:  "delete_vlan_translation_policy",
+			Title: "Delete VLAN Translation Policy",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a VLAN translation " +
+				"policy from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the VLAN translation policy, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_vlan_translation_rules",
+			Title: "List VLAN Translation Rules",
+			Description: "List IPAM VLAN translation rules in NetBox. Filter by policy, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no VLAN translation rules match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox VLAN translation rules. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple rules or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_vlan_translation_rule",
+			Title: "Create VLAN Translation Rule",
+			Description: "Create an IPAM VLAN translation rule in NetBox. Policy is required; provide " +
+				"local_vid and remote_vid as needed.",
+			Instructions: "Use to add a new VLAN translation rule.",
+		},
+		{
+			Name:  "update_vlan_translation_rule",
+			Title: "Update VLAN Translation Rule",
+			Description: "Partially update a VLAN translation rule in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing VLAN translation rule.",
+		},
+		{
+			Name:  "delete_vlan_translation_rule",
+			Title: "Delete VLAN Translation Rule",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a VLAN translation " +
+				"rule from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the VLAN translation rule, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_provider_accounts",
+			Title: "List Provider Accounts",
+			Description: "List circuits provider accounts in NetBox. Filter by provider or tag, or use q " +
+				"for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no provider accounts match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox provider accounts. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple provider accounts or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_provider_account",
+			Title: "Create Provider Account",
+			Description: "Create a circuits provider account in NetBox. Name is required; provide provider, " +
+				"account, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new provider account.",
+		},
+		{
+			Name:  "update_provider_account",
+			Title: "Update Provider Account",
+			Description: "Partially update a circuits provider account in NetBox by its numeric ID. Only " +
+				"the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing provider account.",
+		},
+		{
+			Name:  "delete_provider_account",
+			Title: "Delete Provider Account",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a provider account " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the provider account, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_provider_networks",
+			Title: "List Provider Networks",
+			Description: "List circuits provider networks in NetBox. Filter by provider or tag, or use q " +
+				"for free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no provider networks match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox provider networks. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple provider networks or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_provider_network",
+			Title: "Create Provider Network",
+			Description: "Create a circuits provider network in NetBox. Name is required; provide provider, " +
+				"description, comments, tags and custom_fields as needed.",
+			Instructions: "Use to add a new provider network.",
+		},
+		{
+			Name:  "update_provider_network",
+			Title: "Update Provider Network",
+			Description: "Partially update a circuits provider network in NetBox by its numeric ID. Only " +
+				"the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing provider network.",
+		},
+		{
+			Name:  "delete_provider_network",
+			Title: "Delete Provider Network",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a provider network " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the provider network, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_circuit_groups",
+			Title: "List Circuit Groups",
+			Description: "List circuits circuit groups in NetBox. Filter by tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no circuit groups match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox circuit groups. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple circuit groups or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_circuit_group",
+			Title: "Create Circuit Group",
+			Description: "Create a circuits circuit group in NetBox. Name is required; provide description, " +
+				"tags and custom_fields as needed.",
+			Instructions: "Use to add a new circuit group.",
+		},
+		{
+			Name:  "update_circuit_group",
+			Title: "Update Circuit Group",
+			Description: "Partially update a circuits circuit group in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing circuit group.",
+		},
+		{
+			Name:  "delete_circuit_group",
+			Title: "Delete Circuit Group",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a circuit group from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the circuit group, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_circuit_group_assignments",
+			Title: "List Circuit Group Assignments",
+			Description: "List circuits circuit group assignments in NetBox. Filter by group or circuit, or " +
+				"use q for free-text search. Results are paginated: set page and page_size (max 1000). An " +
+				"empty results array means no circuit group assignments match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox circuit group assignments. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple assignments or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_circuit_group_assignment",
+			Title: "Create Circuit Group Assignment",
+			Description: "Create a circuits circuit group assignment in NetBox. Group and circuit are " +
+				"required; provide priority as needed.",
+			Instructions: "Use to map a circuit to a circuit group.",
+		},
+		{
+			Name:  "update_circuit_group_assignment",
+			Title: "Update Circuit Group Assignment",
+			Description: "Partially update a circuits circuit group assignment in NetBox by its numeric " +
+				"ID. Only the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing circuit group assignment.",
+		},
+		{
+			Name:  "delete_circuit_group_assignment",
+			Title: "Delete Circuit Group Assignment",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a circuit group " +
+				"assignment from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the circuit group assignment, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_circuits",
+			Title: "List Virtual Circuits",
+			Description: "List circuits virtual circuits in NetBox. Filter by type, provider_network, " +
+				"status or tag, or use q for free-text search. Results are paginated: set page and page_size " +
+				"(max 1000). An empty results array means no virtual circuits match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual circuits. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple virtual circuits or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_virtual_circuit",
+			Title: "Create Virtual Circuit",
+			Description: "Create a circuits virtual circuit in NetBox. Name is required; provide type, " +
+				"provider_network, status, description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new virtual circuit.",
+		},
+		{
+			Name:  "update_virtual_circuit",
+			Title: "Update Virtual Circuit",
+			Description: "Partially update a circuits virtual circuit in NetBox by its numeric ID. Only " +
+				"the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual circuit.",
+		},
+		{
+			Name:  "delete_virtual_circuit",
+			Title: "Delete Virtual Circuit",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual circuit " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual circuit, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_circuit_types",
+			Title: "List Virtual Circuit Types",
+			Description: "List circuits virtual circuit types in NetBox. Filter by tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty results " +
+				"array means no virtual circuit types match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual circuit types. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple virtual circuit types or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_virtual_circuit_type",
+			Title: "Create Virtual Circuit Type",
+			Description: "Create a circuits virtual circuit type in NetBox. Name is required; provide slug, " +
+				"description, tags and custom_fields as needed.",
+			Instructions: "Use to add a new virtual circuit type.",
+		},
+		{
+			Name:  "update_virtual_circuit_type",
+			Title: "Update Virtual Circuit Type",
+			Description: "Partially update a circuits virtual circuit type in NetBox by its numeric ID. " +
+				"Only the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual circuit type.",
+		},
+		{
+			Name:  "delete_virtual_circuit_type",
+			Title: "Delete Virtual Circuit Type",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual circuit " +
+				"type from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual circuit type, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_virtual_circuit_terminations",
+			Title: "List Virtual Circuit Terminations",
+			Description: "List circuits virtual circuit terminations in NetBox. Filter by virtual_circuit, " +
+				"interface_type or interface_id, or use q for free-text search. Results are paginated: set " +
+				"page and page_size (max 1000). An empty results array means no terminations match the " +
+				"filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox virtual circuit terminations. Prefer this " +
+				"read-only tool over get_object_by_id when you need multiple terminations or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_virtual_circuit_termination",
+			Title: "Create Virtual Circuit Termination",
+			Description: "Create a circuits virtual circuit termination in NetBox. Virtual circuit is " +
+				"required; provide role, interface_type and interface_id as needed.",
+			Instructions: "Use to attach a virtual circuit to an interface.",
+		},
+		{
+			Name:  "update_virtual_circuit_termination",
+			Title: "Update Virtual Circuit Termination",
+			Description: "Partially update a circuits virtual circuit termination in NetBox by its numeric " +
+				"ID. Only the provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing virtual circuit termination.",
+		},
+		{
+			Name:  "delete_virtual_circuit_termination",
+			Title: "Delete Virtual Circuit Termination",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a virtual circuit " +
+				"termination from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the virtual circuit termination, ideally by ID, and understands it is " +
+				"permanent and cannot be undone. If the user merely asks to 'remove' or 'clean up' without " +
+				"confirming deletion, ask for explicit confirmation first.",
 		},
 	}
 }

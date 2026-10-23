@@ -22,6 +22,7 @@ func init() {
 	registerCRUD("interface", interfaceCRUD)
 	registerCRUD("cable", cableCRUD)
 	registerCRUD("location", locationCRUD)
+	registerCRUD("region", regionCRUD)
 	// rack is intentionally not registered: NetBox 4.6 serializes Rack.width as
 	// a ChoiceField object ({"value": 19, "label": "19 inches"}), but the
 	// codebase's WireRack.Width is typed int, so create_rack/update_rack (and
@@ -175,6 +176,31 @@ func locationCRUD(t *testing.T, c *e2eClient, runID string) {
 
 	c.call("delete_location", map[string]interface{}{"id": id})
 	c.callExpectError("get_object_by_id", map[string]interface{}{"object_type": "location", "id": id})
+}
+
+func regionCRUD(t *testing.T, c *e2eClient, runID string) {
+	t.Helper()
+	name := "e2e-region-" + runID
+
+	// NetBox 4.6 requires slug explicitly on region creation (it is not
+	// auto-derived), mirroring the site pattern above.
+	created := c.call("create_region", map[string]interface{}{"name": name, "slug": name})
+	id := c.mustID(created)
+	if got := c.str(c.data(created), "name"); got != name {
+		t.Fatalf("created region name = %q, want %q", got, name)
+	}
+
+	if data := c.data(c.getByID("region", id)); c.str(data, "name") != name {
+		t.Fatalf("get region name = %q, want %q", c.str(data, "name"), name)
+	}
+
+	c.call("update_region", map[string]interface{}{"id": id, "description": "updated"})
+	if data := c.data(c.getByID("region", id)); c.str(data, "description") != "updated" {
+		t.Fatalf("get region after update description = %q, want %q", c.str(data, "description"), "updated")
+	}
+
+	c.call("delete_region", map[string]interface{}{"id": id})
+	c.callExpectError("get_object_by_id", map[string]interface{}{"object_type": "region", "id": id})
 }
 
 func manufacturerCRUD(t *testing.T, c *e2eClient, runID string) {

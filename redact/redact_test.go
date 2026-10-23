@@ -166,7 +166,6 @@ func TestRedactArray(t *testing.T) {
 
 func TestRedactMap(t *testing.T) {
 	t.Parallel()
-
 	t.Run("values redacted, keys untouched", func(t *testing.T) {
 		input := map[string]flat{
 			"key-a":       {Token: "tok-a", Public: "pub-a"},
@@ -372,5 +371,27 @@ func TestString(t *testing.T) {
 	}
 	if !strings.Contains(str, Mask) {
 		t.Errorf("String missing mask, got: %str", str)
+	}
+}
+
+// TestRedactNilInterfaceInMap covers the nil-interface handling inside maps:
+// a nil value stored in an interface must be preserved (not panic) while the
+// surrounding structure is still deep-copied.
+func TestRedactNilInterfaceInMap(t *testing.T) {
+	t.Parallel()
+
+	input := map[string]any{
+		"token":  "secret-inner",
+		"nilval": nil,
+	}
+	out, ok := Redact(input).(map[string]any)
+	if !ok {
+		t.Fatalf("Redact() type = %T, want map[string]any", Redact(input))
+	}
+	if out["token"] != "secret-inner" {
+		t.Errorf("out[token] = %q, want %q (plain map values are not masked)", out["token"], "secret-inner")
+	}
+	if v, present := out["nilval"]; !present || v != nil {
+		t.Errorf("out[nilval] = %v (present=%v), want nil", v, present)
 	}
 }

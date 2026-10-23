@@ -54,6 +54,7 @@ This document describes the agents/assistants involved in the development and op
 | MCP Tool                   | Agent Role | NetBox Endpoint                                   |
 |----------------------------|------------|---------------------------------------------------|
 | `get_sites`                | MCP Server | `GET /api/dcim/sites/`                            |
+| `get_regions`              | MCP Server | `GET /api/dcim/regions/`                          |
 | `get_devices`              | MCP Server | `GET /api/dcim/devices/`                          |
 | `get_ip_addresses`         | MCP Server | `GET /api/ipam/ip-addresses/`                     |
 | `get_prefixes`             | MCP Server | `GET /api/ipam/prefixes/`                         |
@@ -66,16 +67,18 @@ This document describes the agents/assistants involved in the development and op
 | `get_vm_interfaces`        | MCP Server | `GET /api/virtualization/interfaces/`             |
 | `get_circuit_terminations` | MCP Server | `GET /api/circuits/circuit-terminations/`         |
 | `get_cables`               | MCP Server | `GET /api/dcim/cables/`                           |
+| `get_tenant_groups`        | MCP Server | `GET /api/tenancy/tenant-groups/`                 |
 | `get_object_by_id`         | MCP Server | `GET /api/*/<type>/<id>/`                         |
 
 In addition to the read tools above, the server registers **typed write tools**
-for every one of the **25 entities**: `create_<e>` (POST), `update_<e>`
+for every one of the **27 entities**: `create_<e>` (POST), `update_<e>`
 (partial PATCH), and `delete_<e>` (irreversible, `DestructiveHint: true`) —
-75 write tools in total (89 tools overall). The entity set is: `site`, `device`,
-`ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `rack`,
-`interface`, `circuit_termination`, `cable`, `vm_interface`, `provider`,
-`tenant`, `manufacturer`, `device_type`, `location`, `cluster_type`,
-`cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`.
+81 write tools in total (97 tools overall). The entity set is: `site`, `region`,
+`device`, `ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`,
+`circuit`, `rack`, `interface`, `circuit_termination`, `cable`, `vm_interface`,
+`provider`, `tenant`, `tenant_group`, `manufacturer`, `device_type`, `location`,
+`cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`,
+`contact`.
 
 The write tools map to the corresponding NetBox endpoints (`POST`, `PATCH`,
 `DELETE`) under `/api/dcim/`, `/api/ipam/`, `/api/virtualization/`,

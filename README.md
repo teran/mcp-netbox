@@ -19,7 +19,7 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 
 ## Features
 
-- **Full CRUD** — 14 read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for all **25 entities** (89 tools total). `create_*` (POST) and `update_*` (partial PATCH) modify NetBox; `delete_*` is **irreversible** and each delete tool is flagged with `DestructiveHint: true`.
+- **Full CRUD** — read-only `get_*` tools plus typed `create_*`/`update_*`/`delete_*` tools for **71 NetBox entities** (275 tools total) across DCIM, IPAM, tenancy, virtualization, circuits, wireless-adjacent and extras (tags, custom fields). `create_*` (POST) and `update_*` (partial PATCH) modify NetBox; `delete_*` is **irreversible** and each delete tool is flagged with `DestructiveHint: true`.
 - **Hybrid transport** — serves MCP over **Streamable HTTP** (remote) or **STDIO** (local), selected at startup via `-mode http|stdio` (default `stdio`); the `TRANSPORT` env var remains a backward-compatible override.
 - **Per-request token authentication (HTTP)** — the NetBox API token is passed in the `Authorization` header of each MCP request. No server-side token storage.
 - **Env-token authentication (STDIO)** — in STDIO mode the NetBox token is provided once via the `NETBOX_TOKEN` environment variable.
@@ -32,13 +32,14 @@ This server exposes NetBox DCIM, IPAM, virtualization, tenancy, and circuits dat
 
 ## Tools
 
-The server exposes **89 MCP tools**: **14 read-only** queries and **75 typed write tools** — `create_*`, `update_*` and `delete_*` for every one of the **25 entities**.
+The server exposes **275 MCP tools** across **71 entities** — read-only `get_*` queries plus typed `create_*`, `update_*` and `delete_*` write tools, plus the generic `get_object_by_id`. See `FEEDBACK.md` for the full feature history.
 
 ### Read tools
 
 | Tool | Description |
 |------|-------------|
 | `get_sites` | List sites with optional filters and free-text search |
+| `get_regions` | List regions with filters (parent) and free-text search |
 | `get_devices` | List devices with filters and free-text search |
 | `get_ip_addresses` | Search IP addresses with free-text search |
 | `get_prefixes` | Search IP prefixes with free-text search |
@@ -51,15 +52,16 @@ The server exposes **89 MCP tools**: **14 read-only** queries and **75 typed wri
 | `get_vm_interfaces` | List VM interfaces with filters (virtual machine, name) |
 | `get_circuit_terminations` | List circuit terminations with filters (circuit, site, term_side) |
 | `get_cables` | List cables with filters (type, status, site, color, label) |
-| `get_object_by_id` | Get any object by type and ID (25+ supported types) |
+| `get_tenant_groups` | List tenant groups with filters (parent) and free-text search |
+| `get_object_by_id` | Get any object by type and ID (27+ supported types) |
 
 > All list tools support a `q` parameter for free-text search across all fields and a `tag` parameter for tag-based filtering.
 
 ### Write tools — create / update
 
-For every entity `<e>` there is a **`create_<e>`** (POST, creates a new object) and an **`update_<e>`** (PATCH, **partial update** — only the fields you provide are changed). Write payloads are **validated on the NetBox side**: a NetBox 400 response is surfaced to the model as a structured `ValidationError` (the error string itself never includes the response body). The 25 entities are:
+For every entity `<e>` there is a **`create_<e>`** (POST, creates a new object) and an **`update_<e>`** (PATCH, **partial update** — only the fields you provide are changed). Write payloads are **validated on the NetBox side**: a NetBox 400 response is surfaced to the model as a structured `ValidationError` (the error string itself never includes the response body). The 27 entities are:
 
-`site`, `device`, `ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `rack`, `interface`, `circuit_termination`, `cable`, `vm_interface`, `provider`, `tenant`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`
+`site`, `region`, `device`, `ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `rack`, `interface`, `circuit_termination`, `cable`, `vm_interface`, `provider`, `tenant`, `tenant_group`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`
 
 ### Write tools — delete (destructive)
 
