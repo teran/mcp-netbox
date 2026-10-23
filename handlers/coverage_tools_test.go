@@ -78,7 +78,7 @@ func TestVrfWriteFromUpdate_WithRd(t *testing.T) {
 	}
 }
 
-//nolint:funlen // Table of write handlers hitting the errServiceNotAvailable branch.
+//nolint:funlen,maintidx // Table of write handlers hitting the errServiceNotAvailable branch.
 func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 	t.Parallel()
 
@@ -278,6 +278,270 @@ func TestWriteHandlers_ServiceNotAvailable(t *testing.T) {
 			name: "delete_inventory_item_role",
 			handler: func() (*mcp.CallToolResult, error) {
 				res, _, err := NewDeleteInventoryItemRoleHandler(nil)(ctx, nil, InventoryItemRoleDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_front_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateFrontPortHandler(nil)(ctx, nil, FrontPortCreateInput{Name: "FP1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_front_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateFrontPortHandler(nil)(ctx, nil, FrontPortUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_front_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteFrontPortHandler(nil)(ctx, nil, FrontPortDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_rear_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateRearPortHandler(nil)(ctx, nil, RearPortCreateInput{Name: "RP1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_rear_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateRearPortHandler(nil)(ctx, nil, RearPortUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_rear_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteRearPortHandler(nil)(ctx, nil, RearPortDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_console_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateConsolePortHandler(nil)(ctx, nil, ConsolePortCreateInput{Name: "CP1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_console_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateConsolePortHandler(nil)(ctx, nil, ConsolePortUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_console_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteConsolePortHandler(nil)(ctx, nil, ConsolePortDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_console_server_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateConsoleServerPortHandler(nil)(ctx, nil, ConsoleServerPortCreateInput{Name: "CSP1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_console_server_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateConsoleServerPortHandler(nil)(ctx, nil, ConsoleServerPortUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_console_server_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteConsoleServerPortHandler(nil)(ctx, nil, ConsoleServerPortDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_power_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreatePowerPortHandler(nil)(ctx, nil, PowerPortCreateInput{Name: "PP1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_power_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdatePowerPortHandler(nil)(ctx, nil, PowerPortUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_power_port",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeletePowerPortHandler(nil)(ctx, nil, PowerPortDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_power_outlet",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreatePowerOutletHandler(nil)(ctx, nil, PowerOutletCreateInput{Name: "PO1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_power_outlet",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdatePowerOutletHandler(nil)(ctx, nil, PowerOutletUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_power_outlet",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeletePowerOutletHandler(nil)(ctx, nil, PowerOutletDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_power_feed",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreatePowerFeedHandler(nil)(ctx, nil, PowerFeedCreateInput{Name: "PF1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_power_feed",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdatePowerFeedHandler(nil)(ctx, nil, PowerFeedUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_power_feed",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeletePowerFeedHandler(nil)(ctx, nil, PowerFeedDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_device_bay",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateDeviceBayHandler(nil)(ctx, nil, DeviceBayCreateInput{Name: "Bay 1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_device_bay",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateDeviceBayHandler(nil)(ctx, nil, DeviceBayUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_device_bay",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteDeviceBayHandler(nil)(ctx, nil, DeviceBayDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_rack_reservation",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateRackReservationHandler(nil)(ctx, nil, RackReservationCreateInput{Description: "res"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_rack_reservation",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateRackReservationHandler(nil)(ctx, nil, RackReservationUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_rack_reservation",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteRackReservationHandler(nil)(ctx, nil, RackReservationDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_inventory_item",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateInventoryItemHandler(nil)(ctx, nil, InventoryItemCreateInput{Name: "PSU-1"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_inventory_item",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateInventoryItemHandler(nil)(ctx, nil, InventoryItemUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_inventory_item",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteInventoryItemHandler(nil)(ctx, nil, InventoryItemDeleteInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "create_mac_address",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewCreateMACAddressHandler(nil)(ctx, nil, MACAddressCreateInput{Address: "00:11:22:33:44:55"})
+
+				return res, err
+			},
+		},
+		{
+			name: "update_mac_address",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewUpdateMACAddressHandler(nil)(ctx, nil, MACAddressUpdateInput{ID: 1})
+
+				return res, err
+			},
+		},
+		{
+			name: "delete_mac_address",
+			handler: func() (*mcp.CallToolResult, error) {
+				res, _, err := NewDeleteMACAddressHandler(nil)(ctx, nil, MACAddressDeleteInput{ID: 1})
 
 				return res, err
 			},

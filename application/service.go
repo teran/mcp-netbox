@@ -1451,3 +1451,513 @@ func (s *NetworkService) DeleteInventoryItemRole(ctx context.Context, id int) er
 
 	return nil
 }
+
+// ListFrontPorts returns the page of front ports matching params.
+func (s *NetworkService) ListFrontPorts(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.FrontPort], error) {
+	resp, err := s.repo.ListFrontPorts(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list front ports: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateFrontPort relays a front port create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateFrontPort(ctx context.Context, in domain.FrontPortWrite) (*domain.FrontPort, error) {
+	resp, err := s.repo.CreateFrontPort(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create front port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateFrontPort relays a front port update to the repository.
+func (s *NetworkService) UpdateFrontPort(
+	ctx context.Context, id int, in domain.FrontPortWrite,
+) (*domain.FrontPort, error) {
+	resp, err := s.repo.UpdateFrontPort(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update front port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteFrontPort relays a front port delete to the repository.
+func (s *NetworkService) DeleteFrontPort(ctx context.Context, id int) error {
+	if err := s.repo.DeleteFrontPort(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete front port: %w", err)
+	}
+
+	return nil
+}
+
+// ListRearPorts returns the page of rear ports matching params.
+func (s *NetworkService) ListRearPorts(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.RearPort], error) {
+	resp, err := s.repo.ListRearPorts(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list rear ports: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateRearPort relays a rear port create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateRearPort(ctx context.Context, in domain.RearPortWrite) (*domain.RearPort, error) {
+	resp, err := s.repo.CreateRearPort(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create rear port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateRearPort relays a rear port update to the repository.
+func (s *NetworkService) UpdateRearPort(
+	ctx context.Context, id int, in domain.RearPortWrite,
+) (*domain.RearPort, error) {
+	resp, err := s.repo.UpdateRearPort(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update rear port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteRearPort relays a rear port delete to the repository.
+func (s *NetworkService) DeleteRearPort(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRearPort(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete rear port: %w", err)
+	}
+
+	return nil
+}
+
+// ListConsolePorts returns the page of console ports matching params.
+func (s *NetworkService) ListConsolePorts(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.ConsolePort], error) {
+	resp, err := s.repo.ListConsolePorts(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list console ports: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateConsolePort relays a console port create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateConsolePort(
+	ctx context.Context, in domain.ConsolePortWrite,
+) (*domain.ConsolePort, error) {
+	resp, err := s.repo.CreateConsolePort(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create console port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateConsolePort relays a console port update to the repository.
+func (s *NetworkService) UpdateConsolePort(
+	ctx context.Context, id int, in domain.ConsolePortWrite,
+) (*domain.ConsolePort, error) {
+	resp, err := s.repo.UpdateConsolePort(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update console port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteConsolePort relays a console port delete to the repository.
+func (s *NetworkService) DeleteConsolePort(ctx context.Context, id int) error {
+	if err := s.repo.DeleteConsolePort(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete console port: %w", err)
+	}
+
+	return nil
+}
+
+// ListConsoleServerPorts returns the page of console server ports matching
+// params.
+func (s *NetworkService) ListConsoleServerPorts(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.ConsoleServerPort], error) {
+	resp, err := s.repo.ListConsoleServerPorts(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list console server ports: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateConsoleServerPort relays a console server port create to the
+// repository. ValidationError is wrapped (via %w) and left intact so callers
+// can recover it with errors.As.
+func (s *NetworkService) CreateConsoleServerPort(
+	ctx context.Context, in domain.ConsoleServerPortWrite,
+) (*domain.ConsoleServerPort, error) {
+	resp, err := s.repo.CreateConsoleServerPort(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create console server port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateConsoleServerPort relays a console server port update to the
+// repository.
+func (s *NetworkService) UpdateConsoleServerPort(
+	ctx context.Context, id int, in domain.ConsoleServerPortWrite,
+) (*domain.ConsoleServerPort, error) {
+	resp, err := s.repo.UpdateConsoleServerPort(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update console server port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteConsoleServerPort relays a console server port delete to the
+// repository.
+func (s *NetworkService) DeleteConsoleServerPort(ctx context.Context, id int) error {
+	if err := s.repo.DeleteConsoleServerPort(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete console server port: %w", err)
+	}
+
+	return nil
+}
+
+// ListPowerPorts returns the page of power ports matching params.
+func (s *NetworkService) ListPowerPorts(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.PowerPort], error) {
+	resp, err := s.repo.ListPowerPorts(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list power ports: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreatePowerPort relays a power port create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreatePowerPort(ctx context.Context, in domain.PowerPortWrite) (*domain.PowerPort, error) {
+	resp, err := s.repo.CreatePowerPort(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create power port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdatePowerPort relays a power port update to the repository.
+func (s *NetworkService) UpdatePowerPort(
+	ctx context.Context, id int, in domain.PowerPortWrite,
+) (*domain.PowerPort, error) {
+	resp, err := s.repo.UpdatePowerPort(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update power port: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeletePowerPort relays a power port delete to the repository.
+func (s *NetworkService) DeletePowerPort(ctx context.Context, id int) error {
+	if err := s.repo.DeletePowerPort(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete power port: %w", err)
+	}
+
+	return nil
+}
+
+// ListPowerOutlets returns the page of power outlets matching params.
+func (s *NetworkService) ListPowerOutlets(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.PowerOutlet], error) {
+	resp, err := s.repo.ListPowerOutlets(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list power outlets: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreatePowerOutlet relays a power outlet create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreatePowerOutlet(
+	ctx context.Context, in domain.PowerOutletWrite,
+) (*domain.PowerOutlet, error) {
+	resp, err := s.repo.CreatePowerOutlet(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create power outlet: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdatePowerOutlet relays a power outlet update to the repository.
+func (s *NetworkService) UpdatePowerOutlet(
+	ctx context.Context, id int, in domain.PowerOutletWrite,
+) (*domain.PowerOutlet, error) {
+	resp, err := s.repo.UpdatePowerOutlet(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update power outlet: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeletePowerOutlet relays a power outlet delete to the repository.
+func (s *NetworkService) DeletePowerOutlet(ctx context.Context, id int) error {
+	if err := s.repo.DeletePowerOutlet(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete power outlet: %w", err)
+	}
+
+	return nil
+}
+
+// ListPowerFeeds returns the page of power feeds matching params.
+func (s *NetworkService) ListPowerFeeds(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.PowerFeed], error) {
+	resp, err := s.repo.ListPowerFeeds(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list power feeds: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreatePowerFeed relays a power feed create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreatePowerFeed(ctx context.Context, in domain.PowerFeedWrite) (*domain.PowerFeed, error) {
+	resp, err := s.repo.CreatePowerFeed(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create power feed: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdatePowerFeed relays a power feed update to the repository.
+func (s *NetworkService) UpdatePowerFeed(
+	ctx context.Context, id int, in domain.PowerFeedWrite,
+) (*domain.PowerFeed, error) {
+	resp, err := s.repo.UpdatePowerFeed(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update power feed: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeletePowerFeed relays a power feed delete to the repository.
+func (s *NetworkService) DeletePowerFeed(ctx context.Context, id int) error {
+	if err := s.repo.DeletePowerFeed(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete power feed: %w", err)
+	}
+
+	return nil
+}
+
+// ListDeviceBays returns the page of device bays matching params.
+func (s *NetworkService) ListDeviceBays(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.DeviceBay], error) {
+	resp, err := s.repo.ListDeviceBays(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list device bays: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateDeviceBay relays a device bay create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateDeviceBay(ctx context.Context, in domain.DeviceBayWrite) (*domain.DeviceBay, error) {
+	resp, err := s.repo.CreateDeviceBay(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create device bay: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateDeviceBay relays a device bay update to the repository.
+func (s *NetworkService) UpdateDeviceBay(
+	ctx context.Context, id int, in domain.DeviceBayWrite,
+) (*domain.DeviceBay, error) {
+	resp, err := s.repo.UpdateDeviceBay(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update device bay: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteDeviceBay relays a device bay delete to the repository.
+func (s *NetworkService) DeleteDeviceBay(ctx context.Context, id int) error {
+	if err := s.repo.DeleteDeviceBay(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete device bay: %w", err)
+	}
+
+	return nil
+}
+
+// ListRackReservations returns the page of rack reservations matching params.
+func (s *NetworkService) ListRackReservations(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.RackReservation], error) {
+	resp, err := s.repo.ListRackReservations(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list rack reservations: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateRackReservation relays a rack reservation create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateRackReservation(
+	ctx context.Context, in domain.RackReservationWrite,
+) (*domain.RackReservation, error) {
+	resp, err := s.repo.CreateRackReservation(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create rack reservation: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateRackReservation relays a rack reservation update to the repository.
+func (s *NetworkService) UpdateRackReservation(
+	ctx context.Context, id int, in domain.RackReservationWrite,
+) (*domain.RackReservation, error) {
+	resp, err := s.repo.UpdateRackReservation(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update rack reservation: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteRackReservation relays a rack reservation delete to the repository.
+func (s *NetworkService) DeleteRackReservation(ctx context.Context, id int) error {
+	if err := s.repo.DeleteRackReservation(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete rack reservation: %w", err)
+	}
+
+	return nil
+}
+
+// ListInventoryItems returns the page of inventory items matching params.
+func (s *NetworkService) ListInventoryItems(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.InventoryItem], error) {
+	resp, err := s.repo.ListInventoryItems(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list inventory items: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateInventoryItem relays an inventory item create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateInventoryItem(
+	ctx context.Context, in domain.InventoryItemWrite,
+) (*domain.InventoryItem, error) {
+	resp, err := s.repo.CreateInventoryItem(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create inventory item: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateInventoryItem relays an inventory item update to the repository.
+func (s *NetworkService) UpdateInventoryItem(
+	ctx context.Context, id int, in domain.InventoryItemWrite,
+) (*domain.InventoryItem, error) {
+	resp, err := s.repo.UpdateInventoryItem(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update inventory item: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteInventoryItem relays an inventory item delete to the repository.
+func (s *NetworkService) DeleteInventoryItem(ctx context.Context, id int) error {
+	if err := s.repo.DeleteInventoryItem(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete inventory item: %w", err)
+	}
+
+	return nil
+}
+
+// ListMACAddresses returns the page of MAC addresses matching params.
+func (s *NetworkService) ListMACAddresses(
+	ctx context.Context, params map[string]string,
+) (*domain.PaginatedResponse[domain.MACAddress], error) {
+	resp, err := s.repo.ListMACAddresses(ctx, s.token.Value(), params)
+	if err != nil {
+		return nil, fmt.Errorf("list MAC addresses: %w", err)
+	}
+
+	return resp, nil
+}
+
+// CreateMACAddress relays a MAC address create to the repository.
+// ValidationError is wrapped (via %w) and left intact so callers can recover
+// it with errors.As.
+func (s *NetworkService) CreateMACAddress(
+	ctx context.Context, in domain.MACAddressWrite,
+) (*domain.MACAddress, error) {
+	resp, err := s.repo.CreateMACAddress(ctx, s.token.Value(), in)
+	if err != nil {
+		return nil, fmt.Errorf("create MAC address: %w", err)
+	}
+
+	return resp, nil
+}
+
+// UpdateMACAddress relays a MAC address update to the repository.
+func (s *NetworkService) UpdateMACAddress(
+	ctx context.Context, id int, in domain.MACAddressWrite,
+) (*domain.MACAddress, error) {
+	resp, err := s.repo.UpdateMACAddress(ctx, s.token.Value(), id, in)
+	if err != nil {
+		return nil, fmt.Errorf("update MAC address: %w", err)
+	}
+
+	return resp, nil
+}
+
+// DeleteMACAddress relays a MAC address delete to the repository.
+func (s *NetworkService) DeleteMACAddress(ctx context.Context, id int) error {
+	if err := s.repo.DeleteMACAddress(ctx, s.token.Value(), id); err != nil {
+		return fmt.Errorf("delete MAC address: %w", err)
+	}
+
+	return nil
+}

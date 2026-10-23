@@ -208,4 +208,69 @@ type NetworkRepository interface {
 		ctx context.Context, token string, id int, in InventoryItemRoleWrite,
 	) (*InventoryItemRole, error)
 	DeleteInventoryItemRole(ctx context.Context, token string, id int) error
+
+	ListFrontPorts(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[FrontPort], error)
+	CreateFrontPort(ctx context.Context, token string, in FrontPortWrite) (*FrontPort, error)
+	UpdateFrontPort(ctx context.Context, token string, id int, in FrontPortWrite) (*FrontPort, error)
+	DeleteFrontPort(ctx context.Context, token string, id int) error
+
+	ListRearPorts(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[RearPort], error)
+	CreateRearPort(ctx context.Context, token string, in RearPortWrite) (*RearPort, error)
+	UpdateRearPort(ctx context.Context, token string, id int, in RearPortWrite) (*RearPort, error)
+	DeleteRearPort(ctx context.Context, token string, id int) error
+
+	ListConsolePorts(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[ConsolePort], error)
+	CreateConsolePort(ctx context.Context, token string, in ConsolePortWrite) (*ConsolePort, error)
+	UpdateConsolePort(ctx context.Context, token string, id int, in ConsolePortWrite) (*ConsolePort, error)
+	DeleteConsolePort(ctx context.Context, token string, id int) error
+
+	ListConsoleServerPorts(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[ConsoleServerPort], error)
+	CreateConsoleServerPort(ctx context.Context, token string, in ConsoleServerPortWrite) (*ConsoleServerPort, error)
+	UpdateConsoleServerPort(
+		ctx context.Context, token string, id int, in ConsoleServerPortWrite,
+	) (*ConsoleServerPort, error)
+	DeleteConsoleServerPort(ctx context.Context, token string, id int) error
+
+	ListPowerPorts(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[PowerPort], error)
+	CreatePowerPort(ctx context.Context, token string, in PowerPortWrite) (*PowerPort, error)
+	UpdatePowerPort(ctx context.Context, token string, id int, in PowerPortWrite) (*PowerPort, error)
+	DeletePowerPort(ctx context.Context, token string, id int) error
+
+	ListPowerOutlets(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[PowerOutlet], error)
+	CreatePowerOutlet(ctx context.Context, token string, in PowerOutletWrite) (*PowerOutlet, error)
+	UpdatePowerOutlet(ctx context.Context, token string, id int, in PowerOutletWrite) (*PowerOutlet, error)
+	DeletePowerOutlet(ctx context.Context, token string, id int) error
+
+	ListPowerFeeds(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[PowerFeed], error)
+	CreatePowerFeed(ctx context.Context, token string, in PowerFeedWrite) (*PowerFeed, error)
+	UpdatePowerFeed(ctx context.Context, token string, id int, in PowerFeedWrite) (*PowerFeed, error)
+	DeletePowerFeed(ctx context.Context, token string, id int) error
+
+	ListDeviceBays(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[DeviceBay], error)
+	CreateDeviceBay(ctx context.Context, token string, in DeviceBayWrite) (*DeviceBay, error)
+	UpdateDeviceBay(ctx context.Context, token string, id int, in DeviceBayWrite) (*DeviceBay, error)
+	DeleteDeviceBay(ctx context.Context, token string, id int) error
+
+	ListRackReservations(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[RackReservation], error)
+	CreateRackReservation(ctx context.Context, token string, in RackReservationWrite) (*RackReservation, error)
+	UpdateRackReservation(
+		ctx context.Context, token string, id int, in RackReservationWrite,
+	) (*RackReservation, error)
+	DeleteRackReservation(ctx context.Context, token string, id int) error
+
+	ListInventoryItems(
+		ctx context.Context, token string, params map[string]string,
+	) (*PaginatedResponse[InventoryItem], error)
+	CreateInventoryItem(ctx context.Context, token string, in InventoryItemWrite) (*InventoryItem, error)
+	UpdateInventoryItem(ctx context.Context, token string, id int, in InventoryItemWrite) (*InventoryItem, error)
+	DeleteInventoryItem(ctx context.Context, token string, id int) error
+
+	ListMACAddresses(ctx context.Context, token string, params map[string]string) (*PaginatedResponse[MACAddress], error)
+	CreateMACAddress(ctx context.Context, token string, in MACAddressWrite) (*MACAddress, error)
+	UpdateMACAddress(ctx context.Context, token string, id int, in MACAddressWrite) (*MACAddress, error)
+	DeleteMACAddress(ctx context.Context, token string, id int) error
 }

@@ -336,6 +336,127 @@ type MockRepo struct {
 		ctx context.Context, token string, id int, in domain.InventoryItemRoleWrite,
 	) (*domain.InventoryItemRole, error)
 	DeleteInventoryItemRoleFunc func(ctx context.Context, token string, id int) error
+
+	ListFrontPortsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.FrontPort], error)
+	CreateFrontPortFunc func(
+		ctx context.Context, token string, in domain.FrontPortWrite,
+	) (*domain.FrontPort, error)
+	UpdateFrontPortFunc func(
+		ctx context.Context, token string, id int, in domain.FrontPortWrite,
+	) (*domain.FrontPort, error)
+	DeleteFrontPortFunc func(ctx context.Context, token string, id int) error
+
+	ListRearPortsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.RearPort], error)
+	CreateRearPortFunc func(
+		ctx context.Context, token string, in domain.RearPortWrite,
+	) (*domain.RearPort, error)
+	UpdateRearPortFunc func(
+		ctx context.Context, token string, id int, in domain.RearPortWrite,
+	) (*domain.RearPort, error)
+	DeleteRearPortFunc func(ctx context.Context, token string, id int) error
+
+	ListConsolePortsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ConsolePort], error)
+	CreateConsolePortFunc func(
+		ctx context.Context, token string, in domain.ConsolePortWrite,
+	) (*domain.ConsolePort, error)
+	UpdateConsolePortFunc func(
+		ctx context.Context, token string, id int, in domain.ConsolePortWrite,
+	) (*domain.ConsolePort, error)
+	DeleteConsolePortFunc func(ctx context.Context, token string, id int) error
+
+	ListConsoleServerPortsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.ConsoleServerPort], error)
+	CreateConsoleServerPortFunc func(
+		ctx context.Context, token string, in domain.ConsoleServerPortWrite,
+	) (*domain.ConsoleServerPort, error)
+	UpdateConsoleServerPortFunc func(
+		ctx context.Context, token string, id int, in domain.ConsoleServerPortWrite,
+	) (*domain.ConsoleServerPort, error)
+	DeleteConsoleServerPortFunc func(ctx context.Context, token string, id int) error
+
+	ListPowerPortsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.PowerPort], error)
+	CreatePowerPortFunc func(
+		ctx context.Context, token string, in domain.PowerPortWrite,
+	) (*domain.PowerPort, error)
+	UpdatePowerPortFunc func(
+		ctx context.Context, token string, id int, in domain.PowerPortWrite,
+	) (*domain.PowerPort, error)
+	DeletePowerPortFunc func(ctx context.Context, token string, id int) error
+
+	ListPowerOutletsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.PowerOutlet], error)
+	CreatePowerOutletFunc func(
+		ctx context.Context, token string, in domain.PowerOutletWrite,
+	) (*domain.PowerOutlet, error)
+	UpdatePowerOutletFunc func(
+		ctx context.Context, token string, id int, in domain.PowerOutletWrite,
+	) (*domain.PowerOutlet, error)
+	DeletePowerOutletFunc func(ctx context.Context, token string, id int) error
+
+	ListPowerFeedsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.PowerFeed], error)
+	CreatePowerFeedFunc func(
+		ctx context.Context, token string, in domain.PowerFeedWrite,
+	) (*domain.PowerFeed, error)
+	UpdatePowerFeedFunc func(
+		ctx context.Context, token string, id int, in domain.PowerFeedWrite,
+	) (*domain.PowerFeed, error)
+	DeletePowerFeedFunc func(ctx context.Context, token string, id int) error
+
+	ListDeviceBaysFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.DeviceBay], error)
+	CreateDeviceBayFunc func(
+		ctx context.Context, token string, in domain.DeviceBayWrite,
+	) (*domain.DeviceBay, error)
+	UpdateDeviceBayFunc func(
+		ctx context.Context, token string, id int, in domain.DeviceBayWrite,
+	) (*domain.DeviceBay, error)
+	DeleteDeviceBayFunc func(ctx context.Context, token string, id int) error
+
+	ListRackReservationsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.RackReservation], error)
+	CreateRackReservationFunc func(
+		ctx context.Context, token string, in domain.RackReservationWrite,
+	) (*domain.RackReservation, error)
+	UpdateRackReservationFunc func(
+		ctx context.Context, token string, id int, in domain.RackReservationWrite,
+	) (*domain.RackReservation, error)
+	DeleteRackReservationFunc func(ctx context.Context, token string, id int) error
+
+	ListInventoryItemsFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.InventoryItem], error)
+	CreateInventoryItemFunc func(
+		ctx context.Context, token string, in domain.InventoryItemWrite,
+	) (*domain.InventoryItem, error)
+	UpdateInventoryItemFunc func(
+		ctx context.Context, token string, id int, in domain.InventoryItemWrite,
+	) (*domain.InventoryItem, error)
+	DeleteInventoryItemFunc func(ctx context.Context, token string, id int) error
+
+	ListMACAddressesFunc func(
+		ctx context.Context, token string, params map[string]string,
+	) (*domain.PaginatedResponse[domain.MACAddress], error)
+	CreateMACAddressFunc func(
+		ctx context.Context, token string, in domain.MACAddressWrite,
+	) (*domain.MACAddress, error)
+	UpdateMACAddressFunc func(
+		ctx context.Context, token string, id int, in domain.MACAddressWrite,
+	) (*domain.MACAddress, error)
+	DeleteMACAddressFunc func(ctx context.Context, token string, id int) error
 }
 
 // ListSites delegates to ListSitesFunc.
@@ -1169,6 +1290,292 @@ func (m *MockRepo) UpdateInventoryItemRole(
 // DeleteInventoryItemRole delegates to DeleteInventoryItemRoleFunc.
 func (m *MockRepo) DeleteInventoryItemRole(ctx context.Context, token string, id int) error {
 	return m.DeleteInventoryItemRoleFunc(ctx, token, id)
+}
+
+// ListFrontPorts delegates to ListFrontPortsFunc.
+func (m *MockRepo) ListFrontPorts(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.FrontPort], error) {
+	return m.ListFrontPortsFunc(ctx, token, params)
+}
+
+// CreateFrontPort delegates to CreateFrontPortFunc.
+func (m *MockRepo) CreateFrontPort(
+	ctx context.Context, token string, in domain.FrontPortWrite,
+) (*domain.FrontPort, error) {
+	return m.CreateFrontPortFunc(ctx, token, in)
+}
+
+// UpdateFrontPort delegates to UpdateFrontPortFunc.
+func (m *MockRepo) UpdateFrontPort(
+	ctx context.Context, token string, id int, in domain.FrontPortWrite,
+) (*domain.FrontPort, error) {
+	return m.UpdateFrontPortFunc(ctx, token, id, in)
+}
+
+// DeleteFrontPort delegates to DeleteFrontPortFunc.
+func (m *MockRepo) DeleteFrontPort(ctx context.Context, token string, id int) error {
+	return m.DeleteFrontPortFunc(ctx, token, id)
+}
+
+// ListRearPorts delegates to ListRearPortsFunc.
+func (m *MockRepo) ListRearPorts(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.RearPort], error) {
+	return m.ListRearPortsFunc(ctx, token, params)
+}
+
+// CreateRearPort delegates to CreateRearPortFunc.
+func (m *MockRepo) CreateRearPort(
+	ctx context.Context, token string, in domain.RearPortWrite,
+) (*domain.RearPort, error) {
+	return m.CreateRearPortFunc(ctx, token, in)
+}
+
+// UpdateRearPort delegates to UpdateRearPortFunc.
+func (m *MockRepo) UpdateRearPort(
+	ctx context.Context, token string, id int, in domain.RearPortWrite,
+) (*domain.RearPort, error) {
+	return m.UpdateRearPortFunc(ctx, token, id, in)
+}
+
+// DeleteRearPort delegates to DeleteRearPortFunc.
+func (m *MockRepo) DeleteRearPort(ctx context.Context, token string, id int) error {
+	return m.DeleteRearPortFunc(ctx, token, id)
+}
+
+// ListConsolePorts delegates to ListConsolePortsFunc.
+func (m *MockRepo) ListConsolePorts(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ConsolePort], error) {
+	return m.ListConsolePortsFunc(ctx, token, params)
+}
+
+// CreateConsolePort delegates to CreateConsolePortFunc.
+func (m *MockRepo) CreateConsolePort(
+	ctx context.Context, token string, in domain.ConsolePortWrite,
+) (*domain.ConsolePort, error) {
+	return m.CreateConsolePortFunc(ctx, token, in)
+}
+
+// UpdateConsolePort delegates to UpdateConsolePortFunc.
+func (m *MockRepo) UpdateConsolePort(
+	ctx context.Context, token string, id int, in domain.ConsolePortWrite,
+) (*domain.ConsolePort, error) {
+	return m.UpdateConsolePortFunc(ctx, token, id, in)
+}
+
+// DeleteConsolePort delegates to DeleteConsolePortFunc.
+func (m *MockRepo) DeleteConsolePort(ctx context.Context, token string, id int) error {
+	return m.DeleteConsolePortFunc(ctx, token, id)
+}
+
+// ListConsoleServerPorts delegates to ListConsoleServerPortsFunc.
+func (m *MockRepo) ListConsoleServerPorts(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.ConsoleServerPort], error) {
+	return m.ListConsoleServerPortsFunc(ctx, token, params)
+}
+
+// CreateConsoleServerPort delegates to CreateConsoleServerPortFunc.
+func (m *MockRepo) CreateConsoleServerPort(
+	ctx context.Context, token string, in domain.ConsoleServerPortWrite,
+) (*domain.ConsoleServerPort, error) {
+	return m.CreateConsoleServerPortFunc(ctx, token, in)
+}
+
+// UpdateConsoleServerPort delegates to UpdateConsoleServerPortFunc.
+func (m *MockRepo) UpdateConsoleServerPort(
+	ctx context.Context, token string, id int, in domain.ConsoleServerPortWrite,
+) (*domain.ConsoleServerPort, error) {
+	return m.UpdateConsoleServerPortFunc(ctx, token, id, in)
+}
+
+// DeleteConsoleServerPort delegates to DeleteConsoleServerPortFunc.
+func (m *MockRepo) DeleteConsoleServerPort(ctx context.Context, token string, id int) error {
+	return m.DeleteConsoleServerPortFunc(ctx, token, id)
+}
+
+// ListPowerPorts delegates to ListPowerPortsFunc.
+func (m *MockRepo) ListPowerPorts(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.PowerPort], error) {
+	return m.ListPowerPortsFunc(ctx, token, params)
+}
+
+// CreatePowerPort delegates to CreatePowerPortFunc.
+func (m *MockRepo) CreatePowerPort(
+	ctx context.Context, token string, in domain.PowerPortWrite,
+) (*domain.PowerPort, error) {
+	return m.CreatePowerPortFunc(ctx, token, in)
+}
+
+// UpdatePowerPort delegates to UpdatePowerPortFunc.
+func (m *MockRepo) UpdatePowerPort(
+	ctx context.Context, token string, id int, in domain.PowerPortWrite,
+) (*domain.PowerPort, error) {
+	return m.UpdatePowerPortFunc(ctx, token, id, in)
+}
+
+// DeletePowerPort delegates to DeletePowerPortFunc.
+func (m *MockRepo) DeletePowerPort(ctx context.Context, token string, id int) error {
+	return m.DeletePowerPortFunc(ctx, token, id)
+}
+
+// ListPowerOutlets delegates to ListPowerOutletsFunc.
+func (m *MockRepo) ListPowerOutlets(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.PowerOutlet], error) {
+	return m.ListPowerOutletsFunc(ctx, token, params)
+}
+
+// CreatePowerOutlet delegates to CreatePowerOutletFunc.
+func (m *MockRepo) CreatePowerOutlet(
+	ctx context.Context, token string, in domain.PowerOutletWrite,
+) (*domain.PowerOutlet, error) {
+	return m.CreatePowerOutletFunc(ctx, token, in)
+}
+
+// UpdatePowerOutlet delegates to UpdatePowerOutletFunc.
+func (m *MockRepo) UpdatePowerOutlet(
+	ctx context.Context, token string, id int, in domain.PowerOutletWrite,
+) (*domain.PowerOutlet, error) {
+	return m.UpdatePowerOutletFunc(ctx, token, id, in)
+}
+
+// DeletePowerOutlet delegates to DeletePowerOutletFunc.
+func (m *MockRepo) DeletePowerOutlet(ctx context.Context, token string, id int) error {
+	return m.DeletePowerOutletFunc(ctx, token, id)
+}
+
+// ListPowerFeeds delegates to ListPowerFeedsFunc.
+func (m *MockRepo) ListPowerFeeds(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.PowerFeed], error) {
+	return m.ListPowerFeedsFunc(ctx, token, params)
+}
+
+// CreatePowerFeed delegates to CreatePowerFeedFunc.
+func (m *MockRepo) CreatePowerFeed(
+	ctx context.Context, token string, in domain.PowerFeedWrite,
+) (*domain.PowerFeed, error) {
+	return m.CreatePowerFeedFunc(ctx, token, in)
+}
+
+// UpdatePowerFeed delegates to UpdatePowerFeedFunc.
+func (m *MockRepo) UpdatePowerFeed(
+	ctx context.Context, token string, id int, in domain.PowerFeedWrite,
+) (*domain.PowerFeed, error) {
+	return m.UpdatePowerFeedFunc(ctx, token, id, in)
+}
+
+// DeletePowerFeed delegates to DeletePowerFeedFunc.
+func (m *MockRepo) DeletePowerFeed(ctx context.Context, token string, id int) error {
+	return m.DeletePowerFeedFunc(ctx, token, id)
+}
+
+// ListDeviceBays delegates to ListDeviceBaysFunc.
+func (m *MockRepo) ListDeviceBays(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.DeviceBay], error) {
+	return m.ListDeviceBaysFunc(ctx, token, params)
+}
+
+// CreateDeviceBay delegates to CreateDeviceBayFunc.
+func (m *MockRepo) CreateDeviceBay(
+	ctx context.Context, token string, in domain.DeviceBayWrite,
+) (*domain.DeviceBay, error) {
+	return m.CreateDeviceBayFunc(ctx, token, in)
+}
+
+// UpdateDeviceBay delegates to UpdateDeviceBayFunc.
+func (m *MockRepo) UpdateDeviceBay(
+	ctx context.Context, token string, id int, in domain.DeviceBayWrite,
+) (*domain.DeviceBay, error) {
+	return m.UpdateDeviceBayFunc(ctx, token, id, in)
+}
+
+// DeleteDeviceBay delegates to DeleteDeviceBayFunc.
+func (m *MockRepo) DeleteDeviceBay(ctx context.Context, token string, id int) error {
+	return m.DeleteDeviceBayFunc(ctx, token, id)
+}
+
+// ListRackReservations delegates to ListRackReservationsFunc.
+func (m *MockRepo) ListRackReservations(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.RackReservation], error) {
+	return m.ListRackReservationsFunc(ctx, token, params)
+}
+
+// CreateRackReservation delegates to CreateRackReservationFunc.
+func (m *MockRepo) CreateRackReservation(
+	ctx context.Context, token string, in domain.RackReservationWrite,
+) (*domain.RackReservation, error) {
+	return m.CreateRackReservationFunc(ctx, token, in)
+}
+
+// UpdateRackReservation delegates to UpdateRackReservationFunc.
+func (m *MockRepo) UpdateRackReservation(
+	ctx context.Context, token string, id int, in domain.RackReservationWrite,
+) (*domain.RackReservation, error) {
+	return m.UpdateRackReservationFunc(ctx, token, id, in)
+}
+
+// DeleteRackReservation delegates to DeleteRackReservationFunc.
+func (m *MockRepo) DeleteRackReservation(ctx context.Context, token string, id int) error {
+	return m.DeleteRackReservationFunc(ctx, token, id)
+}
+
+// ListInventoryItems delegates to ListInventoryItemsFunc.
+func (m *MockRepo) ListInventoryItems(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.InventoryItem], error) {
+	return m.ListInventoryItemsFunc(ctx, token, params)
+}
+
+// CreateInventoryItem delegates to CreateInventoryItemFunc.
+func (m *MockRepo) CreateInventoryItem(
+	ctx context.Context, token string, in domain.InventoryItemWrite,
+) (*domain.InventoryItem, error) {
+	return m.CreateInventoryItemFunc(ctx, token, in)
+}
+
+// UpdateInventoryItem delegates to UpdateInventoryItemFunc.
+func (m *MockRepo) UpdateInventoryItem(
+	ctx context.Context, token string, id int, in domain.InventoryItemWrite,
+) (*domain.InventoryItem, error) {
+	return m.UpdateInventoryItemFunc(ctx, token, id, in)
+}
+
+// DeleteInventoryItem delegates to DeleteInventoryItemFunc.
+func (m *MockRepo) DeleteInventoryItem(ctx context.Context, token string, id int) error {
+	return m.DeleteInventoryItemFunc(ctx, token, id)
+}
+
+// ListMACAddresses delegates to ListMACAddressesFunc.
+func (m *MockRepo) ListMACAddresses(
+	ctx context.Context, token string, params map[string]string,
+) (*domain.PaginatedResponse[domain.MACAddress], error) {
+	return m.ListMACAddressesFunc(ctx, token, params)
+}
+
+// CreateMACAddress delegates to CreateMACAddressFunc.
+func (m *MockRepo) CreateMACAddress(
+	ctx context.Context, token string, in domain.MACAddressWrite,
+) (*domain.MACAddress, error) {
+	return m.CreateMACAddressFunc(ctx, token, in)
+}
+
+// UpdateMACAddress delegates to UpdateMACAddressFunc.
+func (m *MockRepo) UpdateMACAddress(
+	ctx context.Context, token string, id int, in domain.MACAddressWrite,
+) (*domain.MACAddress, error) {
+	return m.UpdateMACAddressFunc(ctx, token, id, in)
+}
+
+// DeleteMACAddress delegates to DeleteMACAddressFunc.
+func (m *MockRepo) DeleteMACAddress(ctx context.Context, token string, id int) error {
+	return m.DeleteMACAddressFunc(ctx, token, id)
 }
 
 // NilRepo is a mock implementation of domain.NetworkRepository
@@ -2015,5 +2422,291 @@ func (r *NilRepo) UpdateInventoryItemRole(
 
 // DeleteInventoryItemRole always succeeds.
 func (r *NilRepo) DeleteInventoryItemRole(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListFrontPorts returns an empty front port page.
+func (r *NilRepo) ListFrontPorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.FrontPort], error) {
+	return &domain.PaginatedResponse[domain.FrontPort]{Count: 0, Results: []domain.FrontPort{}}, nil
+}
+
+// CreateFrontPort returns a front port with id 1.
+func (r *NilRepo) CreateFrontPort(
+	_ context.Context, _ string, in domain.FrontPortWrite,
+) (*domain.FrontPort, error) {
+	return &domain.FrontPort{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateFrontPort returns the front port with the given id.
+func (r *NilRepo) UpdateFrontPort(
+	_ context.Context, _ string, id int, in domain.FrontPortWrite,
+) (*domain.FrontPort, error) {
+	return &domain.FrontPort{ID: id, Name: in.Name}, nil
+}
+
+// DeleteFrontPort always succeeds.
+func (r *NilRepo) DeleteFrontPort(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListRearPorts returns an empty rear port page.
+func (r *NilRepo) ListRearPorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RearPort], error) {
+	return &domain.PaginatedResponse[domain.RearPort]{Count: 0, Results: []domain.RearPort{}}, nil
+}
+
+// CreateRearPort returns a rear port with id 1.
+func (r *NilRepo) CreateRearPort(
+	_ context.Context, _ string, in domain.RearPortWrite,
+) (*domain.RearPort, error) {
+	return &domain.RearPort{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateRearPort returns the rear port with the given id.
+func (r *NilRepo) UpdateRearPort(
+	_ context.Context, _ string, id int, in domain.RearPortWrite,
+) (*domain.RearPort, error) {
+	return &domain.RearPort{ID: id, Name: in.Name}, nil
+}
+
+// DeleteRearPort always succeeds.
+func (r *NilRepo) DeleteRearPort(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListConsolePorts returns an empty console port page.
+func (r *NilRepo) ListConsolePorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ConsolePort], error) {
+	return &domain.PaginatedResponse[domain.ConsolePort]{Count: 0, Results: []domain.ConsolePort{}}, nil
+}
+
+// CreateConsolePort returns a console port with id 1.
+func (r *NilRepo) CreateConsolePort(
+	_ context.Context, _ string, in domain.ConsolePortWrite,
+) (*domain.ConsolePort, error) {
+	return &domain.ConsolePort{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateConsolePort returns the console port with the given id.
+func (r *NilRepo) UpdateConsolePort(
+	_ context.Context, _ string, id int, in domain.ConsolePortWrite,
+) (*domain.ConsolePort, error) {
+	return &domain.ConsolePort{ID: id, Name: in.Name}, nil
+}
+
+// DeleteConsolePort always succeeds.
+func (r *NilRepo) DeleteConsolePort(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListConsoleServerPorts returns an empty console server port page.
+func (r *NilRepo) ListConsoleServerPorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ConsoleServerPort], error) {
+	return &domain.PaginatedResponse[domain.ConsoleServerPort]{Count: 0, Results: []domain.ConsoleServerPort{}}, nil
+}
+
+// CreateConsoleServerPort returns a console server port with id 1.
+func (r *NilRepo) CreateConsoleServerPort(
+	_ context.Context, _ string, in domain.ConsoleServerPortWrite,
+) (*domain.ConsoleServerPort, error) {
+	return &domain.ConsoleServerPort{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateConsoleServerPort returns the console server port with the given id.
+func (r *NilRepo) UpdateConsoleServerPort(
+	_ context.Context, _ string, id int, in domain.ConsoleServerPortWrite,
+) (*domain.ConsoleServerPort, error) {
+	return &domain.ConsoleServerPort{ID: id, Name: in.Name}, nil
+}
+
+// DeleteConsoleServerPort always succeeds.
+func (r *NilRepo) DeleteConsoleServerPort(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListPowerPorts returns an empty power port page.
+func (r *NilRepo) ListPowerPorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.PowerPort], error) {
+	return &domain.PaginatedResponse[domain.PowerPort]{Count: 0, Results: []domain.PowerPort{}}, nil
+}
+
+// CreatePowerPort returns a power port with id 1.
+func (r *NilRepo) CreatePowerPort(
+	_ context.Context, _ string, in domain.PowerPortWrite,
+) (*domain.PowerPort, error) {
+	return &domain.PowerPort{ID: 1, Name: in.Name}, nil
+}
+
+// UpdatePowerPort returns the power port with the given id.
+func (r *NilRepo) UpdatePowerPort(
+	_ context.Context, _ string, id int, in domain.PowerPortWrite,
+) (*domain.PowerPort, error) {
+	return &domain.PowerPort{ID: id, Name: in.Name}, nil
+}
+
+// DeletePowerPort always succeeds.
+func (r *NilRepo) DeletePowerPort(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListPowerOutlets returns an empty power outlet page.
+func (r *NilRepo) ListPowerOutlets(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.PowerOutlet], error) {
+	return &domain.PaginatedResponse[domain.PowerOutlet]{Count: 0, Results: []domain.PowerOutlet{}}, nil
+}
+
+// CreatePowerOutlet returns a power outlet with id 1.
+func (r *NilRepo) CreatePowerOutlet(
+	_ context.Context, _ string, in domain.PowerOutletWrite,
+) (*domain.PowerOutlet, error) {
+	return &domain.PowerOutlet{ID: 1, Name: in.Name}, nil
+}
+
+// UpdatePowerOutlet returns the power outlet with the given id.
+func (r *NilRepo) UpdatePowerOutlet(
+	_ context.Context, _ string, id int, in domain.PowerOutletWrite,
+) (*domain.PowerOutlet, error) {
+	return &domain.PowerOutlet{ID: id, Name: in.Name}, nil
+}
+
+// DeletePowerOutlet always succeeds.
+func (r *NilRepo) DeletePowerOutlet(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListPowerFeeds returns an empty power feed page.
+func (r *NilRepo) ListPowerFeeds(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.PowerFeed], error) {
+	return &domain.PaginatedResponse[domain.PowerFeed]{Count: 0, Results: []domain.PowerFeed{}}, nil
+}
+
+// CreatePowerFeed returns a power feed with id 1.
+func (r *NilRepo) CreatePowerFeed(
+	_ context.Context, _ string, in domain.PowerFeedWrite,
+) (*domain.PowerFeed, error) {
+	return &domain.PowerFeed{ID: 1, Name: in.Name}, nil
+}
+
+// UpdatePowerFeed returns the power feed with the given id.
+func (r *NilRepo) UpdatePowerFeed(
+	_ context.Context, _ string, id int, in domain.PowerFeedWrite,
+) (*domain.PowerFeed, error) {
+	return &domain.PowerFeed{ID: id, Name: in.Name}, nil
+}
+
+// DeletePowerFeed always succeeds.
+func (r *NilRepo) DeletePowerFeed(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListDeviceBays returns an empty device bay page.
+func (r *NilRepo) ListDeviceBays(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.DeviceBay], error) {
+	return &domain.PaginatedResponse[domain.DeviceBay]{Count: 0, Results: []domain.DeviceBay{}}, nil
+}
+
+// CreateDeviceBay returns a device bay with id 1.
+func (r *NilRepo) CreateDeviceBay(
+	_ context.Context, _ string, in domain.DeviceBayWrite,
+) (*domain.DeviceBay, error) {
+	return &domain.DeviceBay{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateDeviceBay returns the device bay with the given id.
+func (r *NilRepo) UpdateDeviceBay(
+	_ context.Context, _ string, id int, in domain.DeviceBayWrite,
+) (*domain.DeviceBay, error) {
+	return &domain.DeviceBay{ID: id, Name: in.Name}, nil
+}
+
+// DeleteDeviceBay always succeeds.
+func (r *NilRepo) DeleteDeviceBay(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListRackReservations returns an empty rack reservation page.
+func (r *NilRepo) ListRackReservations(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RackReservation], error) {
+	return &domain.PaginatedResponse[domain.RackReservation]{Count: 0, Results: []domain.RackReservation{}}, nil
+}
+
+// CreateRackReservation returns a rack reservation with id 1.
+func (r *NilRepo) CreateRackReservation(
+	_ context.Context, _ string, in domain.RackReservationWrite,
+) (*domain.RackReservation, error) {
+	return &domain.RackReservation{ID: 1, Description: in.Description}, nil
+}
+
+// UpdateRackReservation returns the rack reservation with the given id.
+func (r *NilRepo) UpdateRackReservation(
+	_ context.Context, _ string, id int, in domain.RackReservationWrite,
+) (*domain.RackReservation, error) {
+	return &domain.RackReservation{ID: id, Description: in.Description}, nil
+}
+
+// DeleteRackReservation always succeeds.
+func (r *NilRepo) DeleteRackReservation(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListInventoryItems returns an empty inventory item page.
+func (r *NilRepo) ListInventoryItems(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.InventoryItem], error) {
+	return &domain.PaginatedResponse[domain.InventoryItem]{Count: 0, Results: []domain.InventoryItem{}}, nil
+}
+
+// CreateInventoryItem returns an inventory item with id 1.
+func (r *NilRepo) CreateInventoryItem(
+	_ context.Context, _ string, in domain.InventoryItemWrite,
+) (*domain.InventoryItem, error) {
+	return &domain.InventoryItem{ID: 1, Name: in.Name}, nil
+}
+
+// UpdateInventoryItem returns the inventory item with the given id.
+func (r *NilRepo) UpdateInventoryItem(
+	_ context.Context, _ string, id int, in domain.InventoryItemWrite,
+) (*domain.InventoryItem, error) {
+	return &domain.InventoryItem{ID: id, Name: in.Name}, nil
+}
+
+// DeleteInventoryItem always succeeds.
+func (r *NilRepo) DeleteInventoryItem(_ context.Context, _ string, _ int) error {
+	return nil
+}
+
+// ListMACAddresses returns an empty MAC address page.
+func (r *NilRepo) ListMACAddresses(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.MACAddress], error) {
+	return &domain.PaginatedResponse[domain.MACAddress]{Count: 0, Results: []domain.MACAddress{}}, nil
+}
+
+// CreateMACAddress returns a MAC address with id 1.
+func (r *NilRepo) CreateMACAddress(
+	_ context.Context, _ string, in domain.MACAddressWrite,
+) (*domain.MACAddress, error) {
+	return &domain.MACAddress{ID: 1, Address: in.Address}, nil
+}
+
+// UpdateMACAddress returns the MAC address with the given id.
+func (r *NilRepo) UpdateMACAddress(
+	_ context.Context, _ string, id int, in domain.MACAddressWrite,
+) (*domain.MACAddress, error) {
+	return &domain.MACAddress{ID: id, Address: in.Address}, nil
+}
+
+// DeleteMACAddress always succeeds.
+func (r *NilRepo) DeleteMACAddress(_ context.Context, _ string, _ int) error {
 	return nil
 }

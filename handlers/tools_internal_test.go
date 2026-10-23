@@ -641,6 +641,236 @@ func (s *stubRepo) DeleteInventoryItemRole(_ context.Context, _ string, _ int) e
 	return errors.New("not implemented")
 }
 
+func (s *stubRepo) ListFrontPorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.FrontPort], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateFrontPort(_ context.Context, _ string, _ domain.FrontPortWrite) (*domain.FrontPort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateFrontPort(
+	_ context.Context, _ string, _ int, _ domain.FrontPortWrite,
+) (*domain.FrontPort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteFrontPort(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListRearPorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RearPort], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateRearPort(_ context.Context, _ string, _ domain.RearPortWrite) (*domain.RearPort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateRearPort(
+	_ context.Context, _ string, _ int, _ domain.RearPortWrite,
+) (*domain.RearPort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteRearPort(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListConsolePorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ConsolePort], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateConsolePort(
+	_ context.Context, _ string, _ domain.ConsolePortWrite,
+) (*domain.ConsolePort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateConsolePort(
+	_ context.Context, _ string, _ int, _ domain.ConsolePortWrite,
+) (*domain.ConsolePort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteConsolePort(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListConsoleServerPorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.ConsoleServerPort], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateConsoleServerPort(
+	_ context.Context, _ string, _ domain.ConsoleServerPortWrite,
+) (*domain.ConsoleServerPort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateConsoleServerPort(
+	_ context.Context, _ string, _ int, _ domain.ConsoleServerPortWrite,
+) (*domain.ConsoleServerPort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteConsoleServerPort(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListPowerPorts(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.PowerPort], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreatePowerPort(_ context.Context, _ string, _ domain.PowerPortWrite) (*domain.PowerPort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdatePowerPort(
+	_ context.Context, _ string, _ int, _ domain.PowerPortWrite,
+) (*domain.PowerPort, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeletePowerPort(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListPowerOutlets(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.PowerOutlet], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreatePowerOutlet(
+	_ context.Context, _ string, _ domain.PowerOutletWrite,
+) (*domain.PowerOutlet, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdatePowerOutlet(
+	_ context.Context, _ string, _ int, _ domain.PowerOutletWrite,
+) (*domain.PowerOutlet, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeletePowerOutlet(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListPowerFeeds(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.PowerFeed], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreatePowerFeed(_ context.Context, _ string, _ domain.PowerFeedWrite) (*domain.PowerFeed, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdatePowerFeed(
+	_ context.Context, _ string, _ int, _ domain.PowerFeedWrite,
+) (*domain.PowerFeed, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeletePowerFeed(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListDeviceBays(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.DeviceBay], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateDeviceBay(_ context.Context, _ string, _ domain.DeviceBayWrite) (*domain.DeviceBay, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateDeviceBay(
+	_ context.Context, _ string, _ int, _ domain.DeviceBayWrite,
+) (*domain.DeviceBay, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteDeviceBay(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListRackReservations(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.RackReservation], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateRackReservation(
+	_ context.Context, _ string, _ domain.RackReservationWrite,
+) (*domain.RackReservation, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateRackReservation(
+	_ context.Context, _ string, _ int, _ domain.RackReservationWrite,
+) (*domain.RackReservation, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteRackReservation(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListInventoryItems(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.InventoryItem], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateInventoryItem(
+	_ context.Context, _ string, _ domain.InventoryItemWrite,
+) (*domain.InventoryItem, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateInventoryItem(
+	_ context.Context, _ string, _ int, _ domain.InventoryItemWrite,
+) (*domain.InventoryItem, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteInventoryItem(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
+func (s *stubRepo) ListMACAddresses(
+	_ context.Context, _ string, _ map[string]string,
+) (*domain.PaginatedResponse[domain.MACAddress], error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) CreateMACAddress(_ context.Context, _ string, _ domain.MACAddressWrite) (*domain.MACAddress, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) UpdateMACAddress(
+	_ context.Context, _ string, _ int, _ domain.MACAddressWrite,
+) (*domain.MACAddress, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *stubRepo) DeleteMACAddress(_ context.Context, _ string, _ int) error {
+	return errors.New("not implemented")
+}
+
 func TestPaginationParams(t *testing.T) { //nolint:funlen,lll // Large table-driven/declarative function; splitting is not sensible.
 	t.Parallel()
 

@@ -110,7 +110,9 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 			Description: "Retrieve any single NetBox object by its type and numeric ID. object_type is " +
 				"required (e.g. site, region, device, prefix, ip_address, vlan, virtual_machine, cluster, circuit, " +
 				"provider, tenant, rack, cable, interface, site_group, rack_group, rack_role, device_role, platform, " +
-				"virtual_chassis, power_panel, inventory_item_role). Returns a 404-style error if the object does " +
+				"virtual_chassis, power_panel, inventory_item_role, front_port, rear_port, console_port, " +
+				"console_server_port, power_port, power_outlet, power_feed, device_bay, rack_reservation, " +
+				"inventory_item, mac_address). Returns a 404-style error if the object does " +
 				"not exist or the token lacks permission.",
 			Instructions: "Use when you already know the object type and numeric ID. For searching without " +
 				"an ID, prefer the dedicated list tools.",
@@ -1239,6 +1241,370 @@ func toolDefs() []toolDef { //nolint:funlen,maintidx,lll // Data-declaration fun
 				"want to delete the inventory item role, ideally by ID, and understands it is permanent " +
 				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without " +
 				"confirming deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_front_ports",
+			Title: "List Front Ports",
+			Description: "List front ports in NetBox. Filter by device or tag, or use q for free-text search. " +
+				"Results are paginated: set page and page_size (max 1000). An empty results array means no " +
+				"front ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox front ports. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple front ports or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_front_port",
+			Title: "Create Front Port",
+			Description: "Create a front port in NetBox. Name and device are required; type is a choice " +
+				"string (e.g. lc, sc). Provide rear_port and rear_port_position to link a rear port.",
+			Instructions: "Use to add a new front port to a device.",
+		},
+		{
+			Name:  "update_front_port",
+			Title: "Update Front Port",
+			Description: "Partially update a front port in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing front port.",
+		},
+		{
+			Name:  "delete_front_port",
+			Title: "Delete Front Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a front port from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the front port, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_rear_ports",
+			Title: "List Rear Ports",
+			Description: "List rear ports in NetBox. Filter by device or tag, or use q for free-text search. " +
+				"Results are paginated: set page and page_size (max 1000). An empty results array means no " +
+				"rear ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox rear ports. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple rear ports or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_rear_port",
+			Title: "Create Rear Port",
+			Description: "Create a rear port in NetBox. Name and device are required; type is a choice " +
+				"string (e.g. lc, sc) and positions sets the number of positions.",
+			Instructions: "Use to add a new rear port to a device.",
+		},
+		{
+			Name:  "update_rear_port",
+			Title: "Update Rear Port",
+			Description: "Partially update a rear port in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing rear port.",
+		},
+		{
+			Name:  "delete_rear_port",
+			Title: "Delete Rear Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a rear port from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the rear port, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_console_ports",
+			Title: "List Console Ports",
+			Description: "List console ports in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no console ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox console ports. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple console ports or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_console_port",
+			Title: "Create Console Port",
+			Description: "Create a console port in NetBox. Name and device are required; type is a choice " +
+				"string (e.g. de-9, usb-c).",
+			Instructions: "Use to add a new console port to a device.",
+		},
+		{
+			Name:  "update_console_port",
+			Title: "Update Console Port",
+			Description: "Partially update a console port in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing console port.",
+		},
+		{
+			Name:  "delete_console_port",
+			Title: "Delete Console Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a console port from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the console port, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_console_server_ports",
+			Title: "List Console Server Ports",
+			Description: "List console server ports in NetBox. Filter by device or tag, or use q for " +
+				"free-text search. Results are paginated: set page and page_size (max 1000). An empty " +
+				"results array means no console server ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox console server ports. Prefer this read-only " +
+				"tool over get_object_by_id when you need multiple console server ports or don't yet know " +
+				"the exact ID.",
+		},
+		{
+			Name:  "create_console_server_port",
+			Title: "Create Console Server Port",
+			Description: "Create a console server port in NetBox. Name and device are required; type is a " +
+				"choice string.",
+			Instructions: "Use to add a new console server port to a device.",
+		},
+		{
+			Name:  "update_console_server_port",
+			Title: "Update Console Server Port",
+			Description: "Partially update a console server port in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing console server port.",
+		},
+		{
+			Name:  "delete_console_server_port",
+			Title: "Delete Console Server Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a console server " +
+				"port from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the console server port, ideally by ID, and understands it is permanent " +
+				"and cannot be undone. If the user merely asks to 'remove' or 'clean up' without " +
+				"confirming deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_power_ports",
+			Title: "List Power Ports",
+			Description: "List power ports in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no power ports match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox power ports. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple power ports or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_power_port",
+			Title: "Create Power Port",
+			Description: "Create a power port in NetBox. Name and device are required; type is a choice " +
+				"string. Provide maximum_draw and allocated_draw (in VA).",
+			Instructions: "Use to add a new power port to a device.",
+		},
+		{
+			Name:  "update_power_port",
+			Title: "Update Power Port",
+			Description: "Partially update a power port in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing power port.",
+		},
+		{
+			Name:  "delete_power_port",
+			Title: "Delete Power Port",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a power port from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the power port, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_power_outlets",
+			Title: "List Power Outlets",
+			Description: "List power outlets in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no power outlets match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox power outlets. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple power outlets or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_power_outlet",
+			Title: "Create Power Outlet",
+			Description: "Create a power outlet in NetBox. Name and device are required; type is a choice " +
+				"string. Provide power_port to link a power port and feed_leg for the feed leg.",
+			Instructions: "Use to add a new power outlet to a device.",
+		},
+		{
+			Name:  "update_power_outlet",
+			Title: "Update Power Outlet",
+			Description: "Partially update a power outlet in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing power outlet.",
+		},
+		{
+			Name:  "delete_power_outlet",
+			Title: "Delete Power Outlet",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a power outlet from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the power outlet, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_power_feeds",
+			Title: "List Power Feeds",
+			Description: "List power feeds in NetBox. Filter by power panel or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no power feeds match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox power feeds. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple power feeds or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_power_feed",
+			Title: "Create Power Feed",
+			Description: "Create a power feed in NetBox. Name is required; provide power_panel to attach " +
+				"the feed to a power panel, plus voltage, amperage and other electrical properties.",
+			Instructions: "Use to add a new power feed.",
+		},
+		{
+			Name:  "update_power_feed",
+			Title: "Update Power Feed",
+			Description: "Partially update a power feed in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing power feed.",
+		},
+		{
+			Name:  "delete_power_feed",
+			Title: "Delete Power Feed",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a power feed from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the power feed, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_device_bays",
+			Title: "List Device Bays",
+			Description: "List device bays in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no device bays match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox device bays. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple device bays or don't yet know the exact ID.",
+		},
+		{
+			Name:         "create_device_bay",
+			Title:        "Create Device Bay",
+			Description:  "Create a device bay in NetBox. Name and device are required.",
+			Instructions: "Use to add a new device bay to a device.",
+		},
+		{
+			Name:  "update_device_bay",
+			Title: "Update Device Bay",
+			Description: "Partially update a device bay in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing device bay.",
+		},
+		{
+			Name:  "delete_device_bay",
+			Title: "Delete Device Bay",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a device bay from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the device bay, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_rack_reservations",
+			Title: "List Rack Reservations",
+			Description: "List rack reservations in NetBox. Filter by rack or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no rack reservations match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox rack reservations. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple rack reservations or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_rack_reservation",
+			Title: "Create Rack Reservation",
+			Description: "Create a rack reservation in NetBox. Description is required; provide rack and " +
+				"units to reserve specific rack units.",
+			Instructions: "Use to reserve space in a rack.",
+		},
+		{
+			Name:  "update_rack_reservation",
+			Title: "Update Rack Reservation",
+			Description: "Partially update a rack reservation in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing rack reservation.",
+		},
+		{
+			Name:  "delete_rack_reservation",
+			Title: "Delete Rack Reservation",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a rack reservation " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the rack reservation, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_inventory_items",
+			Title: "List Inventory Items",
+			Description: "List inventory items in NetBox. Filter by device or tag, or use q for free-text " +
+				"search. Results are paginated: set page and page_size (max 1000). An empty results array " +
+				"means no inventory items match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox inventory items. Prefer this read-only tool " +
+				"over get_object_by_id when you need multiple inventory items or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_inventory_item",
+			Title: "Create Inventory Item",
+			Description: "Create an inventory item in NetBox. Name and device are required; provide " +
+				"manufacturer, serial and part_id as applicable.",
+			Instructions: "Use to add a new inventory item to a device.",
+		},
+		{
+			Name:  "update_inventory_item",
+			Title: "Update Inventory Item",
+			Description: "Partially update an inventory item in NetBox by its numeric ID. Only the " +
+				"provided fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing inventory item.",
+		},
+		{
+			Name:  "delete_inventory_item",
+			Title: "Delete Inventory Item",
+			Description: "WARNING: This operation is irreversible. Permanently deletes an inventory item " +
+				"from NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the inventory item, ideally by ID, and understands it is permanent and " +
+				"cannot be undone. If the user merely asks to 'remove' or 'clean up' without confirming " +
+				"deletion, ask for explicit confirmation first.",
+		},
+		{
+			Name:  "get_mac_addresses",
+			Title: "List MAC Addresses",
+			Description: "List MAC addresses in NetBox. Filter by tag, or use q for free-text search. " +
+				"Results are paginated: set page and page_size (max 1000). An empty results array means no " +
+				"MAC addresses match the filters, not an error.",
+			Instructions: "Use to enumerate or search NetBox MAC addresses. Prefer this read-only tool over " +
+				"get_object_by_id when you need multiple MAC addresses or don't yet know the exact ID.",
+		},
+		{
+			Name:  "create_mac_address",
+			Title: "Create MAC Address",
+			Description: "Create a MAC address in NetBox. Address is required; provide " +
+				"assigned_object_type (e.g. dcim.interface) and assigned_object_id to assign the MAC to an " +
+				"object.",
+			Instructions: "Use to add a new MAC address.",
+		},
+		{
+			Name:  "update_mac_address",
+			Title: "Update MAC Address",
+			Description: "Partially update a MAC address in NetBox by its numeric ID. Only the provided " +
+				"fields are patched (PATCH merge).",
+			Instructions: "Use to modify an existing MAC address.",
+		},
+		{
+			Name:  "delete_mac_address",
+			Title: "Delete MAC Address",
+			Description: "WARNING: This operation is irreversible. Permanently deletes a MAC address from " +
+				"NetBox by its numeric ID. There is no undo.",
+			Instructions: "Only call this after the user has explicitly and unambiguously confirmed they " +
+				"want to delete the MAC address, ideally by ID, and understands it is permanent and cannot " +
+				"be undone. If the user merely asks to 'remove' or 'clean up' without confirming deletion, " +
+				"ask for explicit confirmation first.",
 		},
 	}
 }

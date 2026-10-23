@@ -523,6 +523,154 @@ type WireInventoryItemRoleWrite struct {
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
 }
 
+// WireFrontPortWrite is the wire request model for DCIM front port
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireFrontPortWrite struct {
+	Name             string         `json:"name,omitempty"`
+	Device           *int           `json:"device,omitempty"`
+	Type             *string        `json:"type,omitempty"`
+	RearPort         *int           `json:"rear_port,omitempty"`
+	RearPortPosition *int           `json:"rear_port_position,omitempty"`
+	Description      *string        `json:"description,omitempty"`
+	Tags             []string       `json:"tags,omitempty"`
+	CustomFields     map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireRearPortWrite is the wire request model for DCIM rear port create/update
+// (POST/PATCH body). Its json tags intentionally mirror NetBox's writable
+// fields.
+type WireRearPortWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Positions    *int           `json:"positions,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireConsolePortWrite is the wire request model for DCIM console port
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireConsolePortWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireConsoleServerPortWrite is the wire request model for DCIM console server
+// port create/update (POST/PATCH body). Its json tags intentionally mirror
+// NetBox's writable fields.
+type WireConsoleServerPortWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WirePowerPortWrite is the wire request model for DCIM power port
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WirePowerPortWrite struct {
+	Name          string         `json:"name,omitempty"`
+	Device        *int           `json:"device,omitempty"`
+	Type          *string        `json:"type,omitempty"`
+	MaximumDraw   *int           `json:"maximum_draw,omitempty"`
+	AllocatedDraw *int           `json:"allocated_draw,omitempty"`
+	Description   *string        `json:"description,omitempty"`
+	Tags          []string       `json:"tags,omitempty"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WirePowerOutletWrite is the wire request model for DCIM power outlet
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WirePowerOutletWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	PowerPort    *int           `json:"power_port,omitempty"`
+	FeedLeg      *string        `json:"feed_leg,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WirePowerFeedWrite is the wire request model for DCIM power feed
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WirePowerFeedWrite struct {
+	Name           string         `json:"name,omitempty"`
+	PowerPanel     *int           `json:"power_panel,omitempty"`
+	Status         *string        `json:"status,omitempty"`
+	Type           *string        `json:"type,omitempty"`
+	Supply         *string        `json:"supply,omitempty"`
+	Phase          *string        `json:"phase,omitempty"`
+	Voltage        *int           `json:"voltage,omitempty"`
+	Amperage       *int           `json:"amperage,omitempty"`
+	MaxUtilization *int           `json:"max_utilization,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireDeviceBayWrite is the wire request model for DCIM device bay
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireDeviceBayWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireRackReservationWrite is the wire request model for DCIM rack reservation
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireRackReservationWrite struct {
+	Description  string         `json:"description,omitempty"`
+	Rack         *int           `json:"rack,omitempty"`
+	Units        []int          `json:"units,omitempty"`
+	User         *int           `json:"user,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireInventoryItemWrite is the wire request model for DCIM inventory item
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireInventoryItemWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Manufacturer *int           `json:"manufacturer,omitempty"`
+	Serial       *string        `json:"serial,omitempty"`
+	PartID       *string        `json:"part_id,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// WireMACAddressWrite is the wire request model for DCIM MAC address
+// create/update (POST/PATCH body). Its json tags intentionally mirror NetBox's
+// writable fields.
+type WireMACAddressWrite struct {
+	Address            string         `json:"mac_address,omitempty"`
+	AssignedObjectType *string        `json:"assigned_object_type,omitempty"`
+	AssignedObjectID   *int           `json:"assigned_object_id,omitempty"`
+	Description        *string        `json:"description,omitempty"`
+	Tags               []string       `json:"tags,omitempty"`
+	CustomFields       map[string]any `json:"custom_fields,omitempty"`
+}
+
 // Wire types mirror the NetBox JSON API response objects.
 type (
 	// WireSite mirrors the corresponding NetBox JSON API response object.
@@ -1147,6 +1295,184 @@ type (
 		Name         string         `json:"name"`
 		Slug         string         `json:"slug"`
 		Color        string         `json:"color,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireFrontPort mirrors the corresponding NetBox JSON API response object.
+	WireFrontPort struct {
+		ID               int            `json:"id"`
+		URL              string         `json:"url"`
+		Name             string         `json:"name"`
+		Display          string         `json:"display,omitempty"`
+		Device           *WireNested    `json:"device"`
+		Type             *WireLabel     `json:"type"`
+		RearPort         *WireNested    `json:"rear_port"`
+		RearPortPosition int            `json:"rear_port_position,omitempty"`
+		Description      string         `json:"description,omitempty"`
+		Tags             []WireTag      `json:"tags,omitempty"`
+		CustomFields     map[string]any `json:"custom_fields,omitempty"`
+		Created          string         `json:"created"`
+		LastUpdated      string         `json:"last_updated"`
+	}
+
+	// WireRearPort mirrors the corresponding NetBox JSON API response object.
+	WireRearPort struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *WireNested    `json:"device"`
+		Type         *WireLabel     `json:"type"`
+		Positions    int            `json:"positions"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireConsolePort mirrors the corresponding NetBox JSON API response object.
+	WireConsolePort struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *WireNested    `json:"device"`
+		Type         *WireLabel     `json:"type"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireConsoleServerPort mirrors the corresponding NetBox JSON API response
+	// object.
+	WireConsoleServerPort struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *WireNested    `json:"device"`
+		Type         *WireLabel     `json:"type"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WirePowerPort mirrors the corresponding NetBox JSON API response object.
+	WirePowerPort struct {
+		ID            int            `json:"id"`
+		URL           string         `json:"url"`
+		Name          string         `json:"name"`
+		Display       string         `json:"display,omitempty"`
+		Device        *WireNested    `json:"device"`
+		Type          *WireLabel     `json:"type"`
+		MaximumDraw   int            `json:"maximum_draw,omitempty"`
+		AllocatedDraw int            `json:"allocated_draw,omitempty"`
+		Description   string         `json:"description,omitempty"`
+		Tags          []WireTag      `json:"tags,omitempty"`
+		CustomFields  map[string]any `json:"custom_fields,omitempty"`
+		Created       string         `json:"created"`
+		LastUpdated   string         `json:"last_updated"`
+	}
+
+	// WirePowerOutlet mirrors the corresponding NetBox JSON API response object.
+	WirePowerOutlet struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *WireNested    `json:"device"`
+		Type         *WireLabel     `json:"type"`
+		PowerPort    *WireNested    `json:"power_port"`
+		FeedLeg      *WireLabel     `json:"feed_leg"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WirePowerFeed mirrors the corresponding NetBox JSON API response object.
+	WirePowerFeed struct {
+		ID             int            `json:"id"`
+		URL            string         `json:"url"`
+		Name           string         `json:"name"`
+		Display        string         `json:"display,omitempty"`
+		PowerPanel     *WireNested    `json:"power_panel"`
+		Status         *WireLabel     `json:"status"`
+		Type           *WireLabel     `json:"type"`
+		Supply         *WireLabel     `json:"supply"`
+		Phase          *WireLabel     `json:"phase"`
+		Voltage        int            `json:"voltage"`
+		Amperage       int            `json:"amperage"`
+		MaxUtilization int            `json:"max_utilization,omitempty"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []WireTag      `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
+	}
+
+	// WireDeviceBay mirrors the corresponding NetBox JSON API response object.
+	WireDeviceBay struct {
+		ID              int            `json:"id"`
+		URL             string         `json:"url"`
+		Name            string         `json:"name"`
+		Display         string         `json:"display,omitempty"`
+		Device          *WireNested    `json:"device"`
+		InstalledDevice *WireNested    `json:"installed_device"`
+		Description     string         `json:"description,omitempty"`
+		Tags            []WireTag      `json:"tags,omitempty"`
+		CustomFields    map[string]any `json:"custom_fields,omitempty"`
+		Created         string         `json:"created"`
+		LastUpdated     string         `json:"last_updated"`
+	}
+
+	// WireRackReservation mirrors the corresponding NetBox JSON API response
+	// object.
+	WireRackReservation struct {
+		ID          int         `json:"id"`
+		URL         string      `json:"url"`
+		Rack        *WireNested `json:"rack"`
+		Units       []int       `json:"units,omitempty"`
+		Description string      `json:"description"`
+		User        *WireNested `json:"user"`
+		Created     string      `json:"created"`
+		LastUpdated string      `json:"last_updated"`
+	}
+
+	// WireInventoryItem mirrors the corresponding NetBox JSON API response
+	// object.
+	WireInventoryItem struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *WireNested    `json:"device"`
+		Role         *WireNested    `json:"role"`
+		Manufacturer *WireNested    `json:"manufacturer"`
+		Serial       string         `json:"serial,omitempty"`
+		PartID       string         `json:"part_id,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []WireTag      `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// WireMACAddress mirrors the corresponding NetBox JSON API response object.
+	WireMACAddress struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url"`
+		Address      string         `json:"mac_address"`
 		Description  string         `json:"description,omitempty"`
 		Tags         []WireTag      `json:"tags,omitempty"`
 		CustomFields map[string]any `json:"custom_fields,omitempty"`

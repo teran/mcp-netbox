@@ -65,6 +65,17 @@ var objectTypeToEndpoint = map[string]string{
 	"virtual_chassis":     "/api/dcim/virtual-chassis/",
 	"power_panel":         "/api/dcim/power-panels/",
 	"inventory_item_role": "/api/dcim/inventory-item-roles/",
+	"front_port":          "/api/dcim/front-ports/",
+	"rear_port":           "/api/dcim/rear-ports/",
+	"console_port":        "/api/dcim/console-ports/",
+	"console_server_port": "/api/dcim/console-server-ports/",
+	"power_port":          "/api/dcim/power-ports/",
+	"power_outlet":        "/api/dcim/power-outlets/",
+	"power_feed":          "/api/dcim/power-feeds/",
+	"device_bay":          "/api/dcim/device-bays/",
+	"rack_reservation":    "/api/dcim/rack-reservations/",
+	"inventory_item":      "/api/dcim/inventory-items/",
+	"mac_address":         "/api/dcim/mac-addresses/",
 }
 
 // maxBodySize is the maximum response body size accepted from NetBox. Larger
@@ -669,6 +680,182 @@ func (c *Client) ListInventoryItemRoles(ctx context.Context, token string, param
 	}
 
 	return convertPaginated(&wireResp, wireInventoryItemRoleToDomain), nil
+}
+
+// ListFrontPorts returns a paginated list of front ports.
+func (c *Client) ListFrontPorts(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.FrontPort], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/front-ports/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireFrontPort]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal front ports: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireFrontPortToDomain), nil
+}
+
+// ListRearPorts returns a paginated list of rear ports.
+func (c *Client) ListRearPorts(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.RearPort], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/rear-ports/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireRearPort]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rear ports: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireRearPortToDomain), nil
+}
+
+// ListConsolePorts returns a paginated list of console ports.
+func (c *Client) ListConsolePorts(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.ConsolePort], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/console-ports/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireConsolePort]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal console ports: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireConsolePortToDomain), nil
+}
+
+// ListConsoleServerPorts returns a paginated list of console server ports.
+func (c *Client) ListConsoleServerPorts(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.ConsoleServerPort], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/console-server-ports/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireConsoleServerPort]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal console server ports: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireConsoleServerPortToDomain), nil
+}
+
+// ListPowerPorts returns a paginated list of power ports.
+func (c *Client) ListPowerPorts(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.PowerPort], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/power-ports/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WirePowerPort]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power ports: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wirePowerPortToDomain), nil
+}
+
+// ListPowerOutlets returns a paginated list of power outlets.
+func (c *Client) ListPowerOutlets(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.PowerOutlet], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/power-outlets/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WirePowerOutlet]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power outlets: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wirePowerOutletToDomain), nil
+}
+
+// ListPowerFeeds returns a paginated list of power feeds.
+func (c *Client) ListPowerFeeds(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.PowerFeed], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/power-feeds/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WirePowerFeed]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power feeds: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wirePowerFeedToDomain), nil
+}
+
+// ListDeviceBays returns a paginated list of device bays.
+func (c *Client) ListDeviceBays(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.DeviceBay], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/device-bays/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireDeviceBay]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal device bays: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireDeviceBayToDomain), nil
+}
+
+// ListRackReservations returns a paginated list of rack reservations.
+func (c *Client) ListRackReservations(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.RackReservation], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/rack-reservations/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireRackReservation]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rack reservations: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireRackReservationToDomain), nil
+}
+
+// ListInventoryItems returns a paginated list of inventory items.
+func (c *Client) ListInventoryItems(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.InventoryItem], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/inventory-items/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireInventoryItem]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal inventory items: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireInventoryItemToDomain), nil
+}
+
+// ListMACAddresses returns a paginated list of MAC addresses.
+func (c *Client) ListMACAddresses(ctx context.Context, token string, params map[string]string) (
+	*domain.PaginatedResponse[domain.MACAddress], error,
+) {
+	raw, err := c.get(ctx, token, "/api/dcim/mac-addresses/", params)
+	if err != nil {
+		return nil, err
+	}
+	var wireResp domain.PaginatedResponse[WireMACAddress]
+	if err := json.Unmarshal(raw, &wireResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal MAC addresses: %w", err)
+	}
+
+	return convertPaginated(&wireResp, wireMACAddressToDomain), nil
 }
 
 // GetObject retrieves a single object by its type and ID.
@@ -2254,6 +2441,509 @@ func convertPaginated[W, D any](resp *domain.PaginatedResponse[W], convert func(
 
 // Ensure Client implements domain.NetworkRepository.
 var _ domain.NetworkRepository = (*Client)(nil)
+
+// CreateFrontPort creates a new front port via POST /api/dcim/front-ports/.
+func (c *Client) CreateFrontPort(ctx context.Context, token string, in domain.FrontPortWrite) (
+	*domain.FrontPort, error,
+) {
+	payload, err := json.Marshal(frontPortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal front port create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/front-ports/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalFrontPort(raw)
+}
+
+// UpdateFrontPort partially updates a front port via PATCH
+// /api/dcim/front-ports/<id>/.
+func (c *Client) UpdateFrontPort(ctx context.Context, token string, objectID int, in domain.FrontPortWrite) (
+	*domain.FrontPort, error,
+) {
+	payload, err := json.Marshal(frontPortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal front port update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/front-ports/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalFrontPort(raw)
+}
+
+// DeleteFrontPort deletes a front port via DELETE /api/dcim/front-ports/<id>/.
+func (c *Client) DeleteFrontPort(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/front-ports/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateRearPort creates a new rear port via POST /api/dcim/rear-ports/.
+func (c *Client) CreateRearPort(ctx context.Context, token string, in domain.RearPortWrite) (*domain.RearPort, error) {
+	payload, err := json.Marshal(rearPortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rear port create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/rear-ports/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRearPort(raw)
+}
+
+// UpdateRearPort partially updates a rear port via PATCH
+// /api/dcim/rear-ports/<id>/.
+func (c *Client) UpdateRearPort(ctx context.Context, token string, objectID int, in domain.RearPortWrite) (
+	*domain.RearPort, error,
+) {
+	payload, err := json.Marshal(rearPortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rear port update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/rear-ports/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRearPort(raw)
+}
+
+// DeleteRearPort deletes a rear port via DELETE /api/dcim/rear-ports/<id>/.
+func (c *Client) DeleteRearPort(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/rear-ports/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateConsolePort creates a new console port via POST /api/dcim/console-ports/.
+func (c *Client) CreateConsolePort(ctx context.Context, token string, in domain.ConsolePortWrite) (
+	*domain.ConsolePort, error,
+) {
+	payload, err := json.Marshal(consolePortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal console port create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/console-ports/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalConsolePort(raw)
+}
+
+// UpdateConsolePort partially updates a console port via PATCH
+// /api/dcim/console-ports/<id>/.
+func (c *Client) UpdateConsolePort(ctx context.Context, token string, objectID int, in domain.ConsolePortWrite) (
+	*domain.ConsolePort, error,
+) {
+	payload, err := json.Marshal(consolePortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal console port update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/console-ports/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalConsolePort(raw)
+}
+
+// DeleteConsolePort deletes a console port via DELETE /api/dcim/console-ports/<id>/.
+func (c *Client) DeleteConsolePort(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/console-ports/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateConsoleServerPort creates a new console server port via POST
+// /api/dcim/console-server-ports/.
+func (c *Client) CreateConsoleServerPort(ctx context.Context, token string, in domain.ConsoleServerPortWrite) (
+	*domain.ConsoleServerPort, error,
+) {
+	payload, err := json.Marshal(consoleServerPortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal console server port create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/console-server-ports/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalConsoleServerPort(raw)
+}
+
+// UpdateConsoleServerPort partially updates a console server port via PATCH
+// /api/dcim/console-server-ports/<id>/.
+func (c *Client) UpdateConsoleServerPort(
+	ctx context.Context, token string, objectID int, in domain.ConsoleServerPortWrite,
+) (
+	*domain.ConsoleServerPort, error,
+) {
+	payload, err := json.Marshal(consoleServerPortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal console server port update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/console-server-ports/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalConsoleServerPort(raw)
+}
+
+// DeleteConsoleServerPort deletes a console server port via DELETE
+// /api/dcim/console-server-ports/<id>/.
+func (c *Client) DeleteConsoleServerPort(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/console-server-ports/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreatePowerPort creates a new power port via POST /api/dcim/power-ports/.
+func (c *Client) CreatePowerPort(ctx context.Context, token string, in domain.PowerPortWrite) (
+	*domain.PowerPort, error,
+) {
+	payload, err := json.Marshal(powerPortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal power port create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/power-ports/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPowerPort(raw)
+}
+
+// UpdatePowerPort partially updates a power port via PATCH
+// /api/dcim/power-ports/<id>/.
+func (c *Client) UpdatePowerPort(ctx context.Context, token string, objectID int, in domain.PowerPortWrite) (
+	*domain.PowerPort, error,
+) {
+	payload, err := json.Marshal(powerPortWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal power port update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/power-ports/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPowerPort(raw)
+}
+
+// DeletePowerPort deletes a power port via DELETE /api/dcim/power-ports/<id>/.
+func (c *Client) DeletePowerPort(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/power-ports/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreatePowerOutlet creates a new power outlet via POST /api/dcim/power-outlets/.
+func (c *Client) CreatePowerOutlet(ctx context.Context, token string, in domain.PowerOutletWrite) (
+	*domain.PowerOutlet, error,
+) {
+	payload, err := json.Marshal(powerOutletWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal power outlet create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/power-outlets/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPowerOutlet(raw)
+}
+
+// UpdatePowerOutlet partially updates a power outlet via PATCH
+// /api/dcim/power-outlets/<id>/.
+func (c *Client) UpdatePowerOutlet(ctx context.Context, token string, objectID int, in domain.PowerOutletWrite) (
+	*domain.PowerOutlet, error,
+) {
+	payload, err := json.Marshal(powerOutletWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal power outlet update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/power-outlets/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPowerOutlet(raw)
+}
+
+// DeletePowerOutlet deletes a power outlet via DELETE /api/dcim/power-outlets/<id>/.
+func (c *Client) DeletePowerOutlet(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/power-outlets/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreatePowerFeed creates a new power feed via POST /api/dcim/power-feeds/.
+func (c *Client) CreatePowerFeed(ctx context.Context, token string, in domain.PowerFeedWrite) (
+	*domain.PowerFeed, error,
+) {
+	payload, err := json.Marshal(powerFeedWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal power feed create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/power-feeds/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPowerFeed(raw)
+}
+
+// UpdatePowerFeed partially updates a power feed via PATCH
+// /api/dcim/power-feeds/<id>/.
+func (c *Client) UpdatePowerFeed(ctx context.Context, token string, objectID int, in domain.PowerFeedWrite) (
+	*domain.PowerFeed, error,
+) {
+	payload, err := json.Marshal(powerFeedWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal power feed update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/power-feeds/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalPowerFeed(raw)
+}
+
+// DeletePowerFeed deletes a power feed via DELETE /api/dcim/power-feeds/<id>/.
+func (c *Client) DeletePowerFeed(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/power-feeds/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateDeviceBay creates a new device bay via POST /api/dcim/device-bays/.
+func (c *Client) CreateDeviceBay(ctx context.Context, token string, in domain.DeviceBayWrite) (
+	*domain.DeviceBay, error,
+) {
+	payload, err := json.Marshal(deviceBayWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal device bay create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/device-bays/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalDeviceBay(raw)
+}
+
+// UpdateDeviceBay partially updates a device bay via PATCH
+// /api/dcim/device-bays/<id>/.
+func (c *Client) UpdateDeviceBay(ctx context.Context, token string, objectID int, in domain.DeviceBayWrite) (
+	*domain.DeviceBay, error,
+) {
+	payload, err := json.Marshal(deviceBayWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal device bay update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/device-bays/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalDeviceBay(raw)
+}
+
+// DeleteDeviceBay deletes a device bay via DELETE /api/dcim/device-bays/<id>/.
+func (c *Client) DeleteDeviceBay(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/device-bays/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateRackReservation creates a new rack reservation via POST
+// /api/dcim/rack-reservations/.
+func (c *Client) CreateRackReservation(ctx context.Context, token string, in domain.RackReservationWrite) (
+	*domain.RackReservation, error,
+) {
+	payload, err := json.Marshal(rackReservationWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rack reservation create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/rack-reservations/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRackReservation(raw)
+}
+
+// UpdateRackReservation partially updates a rack reservation via PATCH
+// /api/dcim/rack-reservations/<id>/.
+func (c *Client) UpdateRackReservation(
+	ctx context.Context, token string, objectID int, in domain.RackReservationWrite,
+) (
+	*domain.RackReservation, error,
+) {
+	payload, err := json.Marshal(rackReservationWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal rack reservation update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/rack-reservations/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalRackReservation(raw)
+}
+
+// DeleteRackReservation deletes a rack reservation via DELETE
+// /api/dcim/rack-reservations/<id>/.
+func (c *Client) DeleteRackReservation(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/rack-reservations/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateInventoryItem creates a new inventory item via POST
+// /api/dcim/inventory-items/.
+func (c *Client) CreateInventoryItem(ctx context.Context, token string, in domain.InventoryItemWrite) (
+	*domain.InventoryItem, error,
+) {
+	payload, err := json.Marshal(inventoryItemWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal inventory item create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/inventory-items/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalInventoryItem(raw)
+}
+
+// UpdateInventoryItem partially updates an inventory item via PATCH
+// /api/dcim/inventory-items/<id>/.
+func (c *Client) UpdateInventoryItem(ctx context.Context, token string, objectID int, in domain.InventoryItemWrite) (
+	*domain.InventoryItem, error,
+) {
+	payload, err := json.Marshal(inventoryItemWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal inventory item update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/inventory-items/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalInventoryItem(raw)
+}
+
+// DeleteInventoryItem deletes an inventory item via DELETE
+// /api/dcim/inventory-items/<id>/.
+func (c *Client) DeleteInventoryItem(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/inventory-items/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
+
+// CreateMACAddress creates a new MAC address via POST /api/dcim/mac-addresses/.
+func (c *Client) CreateMACAddress(ctx context.Context, token string, in domain.MACAddressWrite) (
+	*domain.MACAddress, error,
+) {
+	payload, err := json.Marshal(macAddressWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal MAC address create request: %w", err)
+	}
+	body, err := c.post(ctx, token, "/api/dcim/mac-addresses/", payload)
+	raw, mErr := writeResult(http.StatusCreated, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalMACAddress(raw)
+}
+
+// UpdateMACAddress partially updates a MAC address via PATCH
+// /api/dcim/mac-addresses/<id>/.
+func (c *Client) UpdateMACAddress(ctx context.Context, token string, objectID int, in domain.MACAddressWrite) (
+	*domain.MACAddress, error,
+) {
+	payload, err := json.Marshal(macAddressWriteToWire(in))
+	if err != nil {
+		return nil, fmt.Errorf("marshal MAC address update request: %w", err)
+	}
+	path := fmt.Sprintf("/api/dcim/mac-addresses/%d/", objectID)
+	body, err := c.patch(ctx, token, path, payload)
+	raw, mErr := writeResult(http.StatusOK, body, err)
+	if mErr != nil {
+		return nil, mErr
+	}
+
+	return unmarshalMACAddress(raw)
+}
+
+// DeleteMACAddress deletes a MAC address via DELETE /api/dcim/mac-addresses/<id>/.
+func (c *Client) DeleteMACAddress(ctx context.Context, token string, objectID int) error {
+	path := fmt.Sprintf("/api/dcim/mac-addresses/%d/", objectID)
+	body, err := c.delete(ctx, token, path)
+	_, mErr := writeResult(http.StatusNoContent, body, err)
+
+	return mErr
+}
 
 // — conversion functions —
 
@@ -4008,6 +4698,515 @@ func wireInventoryItemRoleToDomain(wire WireInventoryItemRole) domain.InventoryI
 		Name:         wire.Name,
 		Slug:         wire.Slug,
 		Color:        wire.Color,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// frontPortWriteToWire converts a domain front port write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func frontPortWriteToWire(input domain.FrontPortWrite) WireFrontPortWrite {
+	return WireFrontPortWrite{
+		Name:             input.Name,
+		Device:           input.Device,
+		Type:             input.Type,
+		RearPort:         input.RearPort,
+		RearPortPosition: input.RearPortPosition,
+		Description:      input.Description,
+		Tags:             input.Tags,
+		CustomFields:     input.CustomFields,
+	}
+}
+
+// unmarshalFrontPort decodes a front port response body into a
+// domain.FrontPort.
+func unmarshalFrontPort(raw domain.RawObject) (*domain.FrontPort, error) {
+	var w WireFrontPort
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal front port: %w", err)
+	}
+	d := wireFrontPortToDomain(w)
+
+	return &d, nil
+}
+
+// wireFrontPortToDomain converts a wire front port to the domain model.
+func wireFrontPortToDomain(wire WireFrontPort) domain.FrontPort {
+	return domain.FrontPort{
+		ID:               wire.ID,
+		URL:              wire.URL,
+		Name:             wire.Name,
+		Display:          wire.Display,
+		Device:           wireNestedToDomain(wire.Device),
+		Type:             wireLabelToDomain(wire.Type),
+		RearPort:         wireNestedToDomain(wire.RearPort),
+		RearPortPosition: wire.RearPortPosition,
+		Description:      wire.Description,
+		Tags:             wireTagsToDomain(wire.Tags),
+		CustomFields:     wire.CustomFields,
+		Created:          wire.Created,
+		LastUpdated:      wire.LastUpdated,
+	}
+}
+
+// rearPortWriteToWire converts a domain rear port write DTO to the wire request
+// model. The fields map one-to-one; nil pointers on the domain side remain nil
+// on the wire side so json.Marshal omits them (required for a partial PATCH
+// body).
+func rearPortWriteToWire(input domain.RearPortWrite) WireRearPortWrite {
+	return WireRearPortWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Type:         input.Type,
+		Positions:    input.Positions,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalRearPort decodes a rear port response body into a domain.RearPort.
+func unmarshalRearPort(raw domain.RawObject) (*domain.RearPort, error) {
+	var w WireRearPort
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rear port: %w", err)
+	}
+	d := wireRearPortToDomain(w)
+
+	return &d, nil
+}
+
+// wireRearPortToDomain converts a wire rear port to the domain model.
+func wireRearPortToDomain(wire WireRearPort) domain.RearPort {
+	return domain.RearPort{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Display:      wire.Display,
+		Device:       wireNestedToDomain(wire.Device),
+		Type:         wireLabelToDomain(wire.Type),
+		Positions:    wire.Positions,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// consolePortWriteToWire converts a domain console port write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func consolePortWriteToWire(input domain.ConsolePortWrite) WireConsolePortWrite {
+	return WireConsolePortWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Type:         input.Type,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalConsolePort decodes a console port response body into a
+// domain.ConsolePort.
+func unmarshalConsolePort(raw domain.RawObject) (*domain.ConsolePort, error) {
+	var w WireConsolePort
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal console port: %w", err)
+	}
+	d := wireConsolePortToDomain(w)
+
+	return &d, nil
+}
+
+// wireConsolePortToDomain converts a wire console port to the domain model.
+func wireConsolePortToDomain(wire WireConsolePort) domain.ConsolePort {
+	return domain.ConsolePort{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Display:      wire.Display,
+		Device:       wireNestedToDomain(wire.Device),
+		Type:         wireLabelToDomain(wire.Type),
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// consoleServerPortWriteToWire converts a domain console server port write DTO
+// to the wire request model. The fields map one-to-one; nil pointers on the
+// domain side remain nil on the wire side so json.Marshal omits them (required
+// for a partial PATCH body).
+func consoleServerPortWriteToWire(input domain.ConsoleServerPortWrite) WireConsoleServerPortWrite {
+	return WireConsoleServerPortWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Type:         input.Type,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalConsoleServerPort decodes a console server port response body into
+// a domain.ConsoleServerPort.
+func unmarshalConsoleServerPort(raw domain.RawObject) (*domain.ConsoleServerPort, error) {
+	var w WireConsoleServerPort
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal console server port: %w", err)
+	}
+	d := wireConsoleServerPortToDomain(w)
+
+	return &d, nil
+}
+
+// wireConsoleServerPortToDomain converts a wire console server port to the
+// domain model.
+func wireConsoleServerPortToDomain(wire WireConsoleServerPort) domain.ConsoleServerPort {
+	return domain.ConsoleServerPort{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Display:      wire.Display,
+		Device:       wireNestedToDomain(wire.Device),
+		Type:         wireLabelToDomain(wire.Type),
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// powerPortWriteToWire converts a domain power port write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func powerPortWriteToWire(input domain.PowerPortWrite) WirePowerPortWrite {
+	return WirePowerPortWrite{
+		Name:          input.Name,
+		Device:        input.Device,
+		Type:          input.Type,
+		MaximumDraw:   input.MaximumDraw,
+		AllocatedDraw: input.AllocatedDraw,
+		Description:   input.Description,
+		Tags:          input.Tags,
+		CustomFields:  input.CustomFields,
+	}
+}
+
+// unmarshalPowerPort decodes a power port response body into a
+// domain.PowerPort.
+func unmarshalPowerPort(raw domain.RawObject) (*domain.PowerPort, error) {
+	var w WirePowerPort
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power port: %w", err)
+	}
+	d := wirePowerPortToDomain(w)
+
+	return &d, nil
+}
+
+// wirePowerPortToDomain converts a wire power port to the domain model.
+func wirePowerPortToDomain(wire WirePowerPort) domain.PowerPort {
+	return domain.PowerPort{
+		ID:            wire.ID,
+		URL:           wire.URL,
+		Name:          wire.Name,
+		Display:       wire.Display,
+		Device:        wireNestedToDomain(wire.Device),
+		Type:          wireLabelToDomain(wire.Type),
+		MaximumDraw:   wire.MaximumDraw,
+		AllocatedDraw: wire.AllocatedDraw,
+		Description:   wire.Description,
+		Tags:          wireTagsToDomain(wire.Tags),
+		CustomFields:  wire.CustomFields,
+		Created:       wire.Created,
+		LastUpdated:   wire.LastUpdated,
+	}
+}
+
+// powerOutletWriteToWire converts a domain power outlet write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func powerOutletWriteToWire(input domain.PowerOutletWrite) WirePowerOutletWrite {
+	return WirePowerOutletWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Type:         input.Type,
+		PowerPort:    input.PowerPort,
+		FeedLeg:      input.FeedLeg,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalPowerOutlet decodes a power outlet response body into a
+// domain.PowerOutlet.
+func unmarshalPowerOutlet(raw domain.RawObject) (*domain.PowerOutlet, error) {
+	var w WirePowerOutlet
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power outlet: %w", err)
+	}
+	d := wirePowerOutletToDomain(w)
+
+	return &d, nil
+}
+
+// wirePowerOutletToDomain converts a wire power outlet to the domain model.
+func wirePowerOutletToDomain(wire WirePowerOutlet) domain.PowerOutlet {
+	return domain.PowerOutlet{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Display:      wire.Display,
+		Device:       wireNestedToDomain(wire.Device),
+		Type:         wireLabelToDomain(wire.Type),
+		PowerPort:    wireNestedToDomain(wire.PowerPort),
+		FeedLeg:      wireLabelToDomain(wire.FeedLeg),
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// powerFeedWriteToWire converts a domain power feed write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func powerFeedWriteToWire(input domain.PowerFeedWrite) WirePowerFeedWrite {
+	return WirePowerFeedWrite{
+		Name:           input.Name,
+		PowerPanel:     input.PowerPanel,
+		Status:         input.Status,
+		Type:           input.Type,
+		Supply:         input.Supply,
+		Phase:          input.Phase,
+		Voltage:        input.Voltage,
+		Amperage:       input.Amperage,
+		MaxUtilization: input.MaxUtilization,
+		Description:    input.Description,
+		Tags:           input.Tags,
+		CustomFields:   input.CustomFields,
+	}
+}
+
+// unmarshalPowerFeed decodes a power feed response body into a domain.PowerFeed.
+func unmarshalPowerFeed(raw domain.RawObject) (*domain.PowerFeed, error) {
+	var w WirePowerFeed
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power feed: %w", err)
+	}
+	d := wirePowerFeedToDomain(w)
+
+	return &d, nil
+}
+
+// wirePowerFeedToDomain converts a wire power feed to the domain model.
+func wirePowerFeedToDomain(wire WirePowerFeed) domain.PowerFeed {
+	return domain.PowerFeed{
+		ID:             wire.ID,
+		URL:            wire.URL,
+		Name:           wire.Name,
+		Display:        wire.Display,
+		PowerPanel:     wireNestedToDomain(wire.PowerPanel),
+		Status:         wireLabelToDomain(wire.Status),
+		Type:           wireLabelToDomain(wire.Type),
+		Supply:         wireLabelToDomain(wire.Supply),
+		Phase:          wireLabelToDomain(wire.Phase),
+		Voltage:        wire.Voltage,
+		Amperage:       wire.Amperage,
+		MaxUtilization: wire.MaxUtilization,
+		Description:    wire.Description,
+		Tags:           wireTagsToDomain(wire.Tags),
+		CustomFields:   wire.CustomFields,
+		Created:        wire.Created,
+		LastUpdated:    wire.LastUpdated,
+	}
+}
+
+// deviceBayWriteToWire converts a domain device bay write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func deviceBayWriteToWire(input domain.DeviceBayWrite) WireDeviceBayWrite {
+	return WireDeviceBayWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalDeviceBay decodes a device bay response body into a domain.DeviceBay.
+func unmarshalDeviceBay(raw domain.RawObject) (*domain.DeviceBay, error) {
+	var w WireDeviceBay
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal device bay: %w", err)
+	}
+	d := wireDeviceBayToDomain(w)
+
+	return &d, nil
+}
+
+// wireDeviceBayToDomain converts a wire device bay to the domain model.
+func wireDeviceBayToDomain(wire WireDeviceBay) domain.DeviceBay {
+	return domain.DeviceBay{
+		ID:              wire.ID,
+		URL:             wire.URL,
+		Name:            wire.Name,
+		Display:         wire.Display,
+		Device:          wireNestedToDomain(wire.Device),
+		InstalledDevice: wireNestedToDomain(wire.InstalledDevice),
+		Description:     wire.Description,
+		Tags:            wireTagsToDomain(wire.Tags),
+		CustomFields:    wire.CustomFields,
+		Created:         wire.Created,
+		LastUpdated:     wire.LastUpdated,
+	}
+}
+
+// rackReservationWriteToWire converts a domain rack reservation write DTO to
+// the wire request model. The fields map one-to-one; nil pointers on the domain
+// side remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func rackReservationWriteToWire(input domain.RackReservationWrite) WireRackReservationWrite {
+	return WireRackReservationWrite{
+		Description:  input.Description,
+		Rack:         input.Rack,
+		Units:        input.Units,
+		User:         input.User,
+		Tenant:       input.Tenant,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalRackReservation decodes a rack reservation response body into a
+// domain.RackReservation.
+func unmarshalRackReservation(raw domain.RawObject) (*domain.RackReservation, error) {
+	var w WireRackReservation
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rack reservation: %w", err)
+	}
+	d := wireRackReservationToDomain(w)
+
+	return &d, nil
+}
+
+// wireRackReservationToDomain converts a wire rack reservation to the domain
+// model.
+func wireRackReservationToDomain(wire WireRackReservation) domain.RackReservation {
+	return domain.RackReservation{
+		ID:          wire.ID,
+		URL:         wire.URL,
+		Rack:        wireNestedToDomain(wire.Rack),
+		Units:       wire.Units,
+		Description: wire.Description,
+		User:        wireNestedToDomain(wire.User),
+		Created:     wire.Created,
+		LastUpdated: wire.LastUpdated,
+	}
+}
+
+// inventoryItemWriteToWire converts a domain inventory item write DTO to the
+// wire request model. The fields map one-to-one; nil pointers on the domain
+// side remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func inventoryItemWriteToWire(input domain.InventoryItemWrite) WireInventoryItemWrite {
+	return WireInventoryItemWrite{
+		Name:         input.Name,
+		Device:       input.Device,
+		Role:         input.Role,
+		Manufacturer: input.Manufacturer,
+		Serial:       input.Serial,
+		PartID:       input.PartID,
+		Description:  input.Description,
+		Tags:         input.Tags,
+		CustomFields: input.CustomFields,
+	}
+}
+
+// unmarshalInventoryItem decodes an inventory item response body into a
+// domain.InventoryItem.
+func unmarshalInventoryItem(raw domain.RawObject) (*domain.InventoryItem, error) {
+	var w WireInventoryItem
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal inventory item: %w", err)
+	}
+	d := wireInventoryItemToDomain(w)
+
+	return &d, nil
+}
+
+// wireInventoryItemToDomain converts a wire inventory item to the domain model.
+func wireInventoryItemToDomain(wire WireInventoryItem) domain.InventoryItem {
+	return domain.InventoryItem{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Name:         wire.Name,
+		Display:      wire.Display,
+		Device:       wireNestedToDomain(wire.Device),
+		Role:         wireNestedToDomain(wire.Role),
+		Manufacturer: wireNestedToDomain(wire.Manufacturer),
+		Serial:       wire.Serial,
+		PartID:       wire.PartID,
+		Description:  wire.Description,
+		Tags:         wireTagsToDomain(wire.Tags),
+		CustomFields: wire.CustomFields,
+		Created:      wire.Created,
+		LastUpdated:  wire.LastUpdated,
+	}
+}
+
+// macAddressWriteToWire converts a domain MAC address write DTO to the wire
+// request model. The fields map one-to-one; nil pointers on the domain side
+// remain nil on the wire side so json.Marshal omits them (required for a
+// partial PATCH body).
+func macAddressWriteToWire(input domain.MACAddressWrite) WireMACAddressWrite {
+	return WireMACAddressWrite{
+		Address:            input.Address,
+		AssignedObjectType: input.AssignedObjectType,
+		AssignedObjectID:   input.AssignedObjectID,
+		Description:        input.Description,
+		Tags:               input.Tags,
+		CustomFields:       input.CustomFields,
+	}
+}
+
+// unmarshalMACAddress decodes a MAC address response body into a
+// domain.MACAddress.
+func unmarshalMACAddress(raw domain.RawObject) (*domain.MACAddress, error) {
+	var w WireMACAddress
+	if err := json.Unmarshal(raw, &w); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal MAC address: %w", err)
+	}
+	d := wireMACAddressToDomain(w)
+
+	return &d, nil
+}
+
+// wireMACAddressToDomain converts a wire MAC address to the domain model.
+func wireMACAddressToDomain(wire WireMACAddress) domain.MACAddress {
+	return domain.MACAddress{
+		ID:           wire.ID,
+		URL:          wire.URL,
+		Address:      wire.Address,
 		Description:  wire.Description,
 		Tags:         wireTagsToDomain(wire.Tags),
 		CustomFields: wire.CustomFields,

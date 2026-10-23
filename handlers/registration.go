@@ -2455,4 +2455,796 @@ func RegisterTools(server *mcp.Server, metrics *Metrics, svc *application.Networ
 			},
 		),
 	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_front_ports"],
+		metrics,
+		"get_front_ports",
+		WrapToolHandler[FrontPortsInput, PaginatedOutput[domain.FrontPort]](
+			metrics,
+			"get_front_ports",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FrontPortsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.FrontPort], error) {
+				return NewGetFrontPortsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_front_port"],
+		metrics,
+		"create_front_port",
+		WrapToolHandler[FrontPortCreateInput, FrontPortOutput](
+			metrics,
+			"create_front_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FrontPortCreateInput,
+			) (*mcp.CallToolResult, FrontPortOutput, error) {
+				return NewCreateFrontPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_front_port"],
+		metrics,
+		"update_front_port",
+		WrapToolHandler[FrontPortUpdateInput, FrontPortOutput](
+			metrics,
+			"update_front_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FrontPortUpdateInput,
+			) (*mcp.CallToolResult, FrontPortOutput, error) {
+				return NewUpdateFrontPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_front_port"],
+		metrics,
+		"delete_front_port",
+		WrapToolHandler[FrontPortDeleteInput, struct{}](
+			metrics,
+			"delete_front_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in FrontPortDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteFrontPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_rear_ports"],
+		metrics,
+		"get_rear_ports",
+		WrapToolHandler[RearPortsInput, PaginatedOutput[domain.RearPort]](
+			metrics,
+			"get_rear_ports",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RearPortsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.RearPort], error) {
+				return NewGetRearPortsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_rear_port"],
+		metrics,
+		"create_rear_port",
+		WrapToolHandler[RearPortCreateInput, RearPortOutput](
+			metrics,
+			"create_rear_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RearPortCreateInput,
+			) (*mcp.CallToolResult, RearPortOutput, error) {
+				return NewCreateRearPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_rear_port"],
+		metrics,
+		"update_rear_port",
+		WrapToolHandler[RearPortUpdateInput, RearPortOutput](
+			metrics,
+			"update_rear_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RearPortUpdateInput,
+			) (*mcp.CallToolResult, RearPortOutput, error) {
+				return NewUpdateRearPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_rear_port"],
+		metrics,
+		"delete_rear_port",
+		WrapToolHandler[RearPortDeleteInput, struct{}](
+			metrics,
+			"delete_rear_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RearPortDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteRearPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_console_ports"],
+		metrics,
+		"get_console_ports",
+		WrapToolHandler[ConsolePortsInput, PaginatedOutput[domain.ConsolePort]](
+			metrics,
+			"get_console_ports",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ConsolePortsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ConsolePort], error) {
+				return NewGetConsolePortsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_console_port"],
+		metrics,
+		"create_console_port",
+		WrapToolHandler[ConsolePortCreateInput, ConsolePortOutput](
+			metrics,
+			"create_console_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ConsolePortCreateInput,
+			) (*mcp.CallToolResult, ConsolePortOutput, error) {
+				return NewCreateConsolePortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_console_port"],
+		metrics,
+		"update_console_port",
+		WrapToolHandler[ConsolePortUpdateInput, ConsolePortOutput](
+			metrics,
+			"update_console_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ConsolePortUpdateInput,
+			) (*mcp.CallToolResult, ConsolePortOutput, error) {
+				return NewUpdateConsolePortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_console_port"],
+		metrics,
+		"delete_console_port",
+		WrapToolHandler[ConsolePortDeleteInput, struct{}](
+			metrics,
+			"delete_console_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ConsolePortDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteConsolePortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_console_server_ports"],
+		metrics,
+		"get_console_server_ports",
+		WrapToolHandler[ConsoleServerPortsInput, PaginatedOutput[domain.ConsoleServerPort]](
+			metrics,
+			"get_console_server_ports",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ConsoleServerPortsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.ConsoleServerPort], error) {
+				return NewGetConsoleServerPortsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_console_server_port"],
+		metrics,
+		"create_console_server_port",
+		WrapToolHandler[ConsoleServerPortCreateInput, ConsoleServerPortOutput](
+			metrics,
+			"create_console_server_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ConsoleServerPortCreateInput,
+			) (*mcp.CallToolResult, ConsoleServerPortOutput, error) {
+				return NewCreateConsoleServerPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_console_server_port"],
+		metrics,
+		"update_console_server_port",
+		WrapToolHandler[ConsoleServerPortUpdateInput, ConsoleServerPortOutput](
+			metrics,
+			"update_console_server_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ConsoleServerPortUpdateInput,
+			) (*mcp.CallToolResult, ConsoleServerPortOutput, error) {
+				return NewUpdateConsoleServerPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_console_server_port"],
+		metrics,
+		"delete_console_server_port",
+		WrapToolHandler[ConsoleServerPortDeleteInput, struct{}](
+			metrics,
+			"delete_console_server_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in ConsoleServerPortDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteConsoleServerPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_power_ports"],
+		metrics,
+		"get_power_ports",
+		WrapToolHandler[PowerPortsInput, PaginatedOutput[domain.PowerPort]](
+			metrics,
+			"get_power_ports",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerPortsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.PowerPort], error) {
+				return NewGetPowerPortsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_power_port"],
+		metrics,
+		"create_power_port",
+		WrapToolHandler[PowerPortCreateInput, PowerPortOutput](
+			metrics,
+			"create_power_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerPortCreateInput,
+			) (*mcp.CallToolResult, PowerPortOutput, error) {
+				return NewCreatePowerPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_power_port"],
+		metrics,
+		"update_power_port",
+		WrapToolHandler[PowerPortUpdateInput, PowerPortOutput](
+			metrics,
+			"update_power_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerPortUpdateInput,
+			) (*mcp.CallToolResult, PowerPortOutput, error) {
+				return NewUpdatePowerPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_power_port"],
+		metrics,
+		"delete_power_port",
+		WrapToolHandler[PowerPortDeleteInput, struct{}](
+			metrics,
+			"delete_power_port",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerPortDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeletePowerPortHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_power_outlets"],
+		metrics,
+		"get_power_outlets",
+		WrapToolHandler[PowerOutletsInput, PaginatedOutput[domain.PowerOutlet]](
+			metrics,
+			"get_power_outlets",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerOutletsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.PowerOutlet], error) {
+				return NewGetPowerOutletsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_power_outlet"],
+		metrics,
+		"create_power_outlet",
+		WrapToolHandler[PowerOutletCreateInput, PowerOutletOutput](
+			metrics,
+			"create_power_outlet",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerOutletCreateInput,
+			) (*mcp.CallToolResult, PowerOutletOutput, error) {
+				return NewCreatePowerOutletHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_power_outlet"],
+		metrics,
+		"update_power_outlet",
+		WrapToolHandler[PowerOutletUpdateInput, PowerOutletOutput](
+			metrics,
+			"update_power_outlet",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerOutletUpdateInput,
+			) (*mcp.CallToolResult, PowerOutletOutput, error) {
+				return NewUpdatePowerOutletHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_power_outlet"],
+		metrics,
+		"delete_power_outlet",
+		WrapToolHandler[PowerOutletDeleteInput, struct{}](
+			metrics,
+			"delete_power_outlet",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerOutletDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeletePowerOutletHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_power_feeds"],
+		metrics,
+		"get_power_feeds",
+		WrapToolHandler[PowerFeedsInput, PaginatedOutput[domain.PowerFeed]](
+			metrics,
+			"get_power_feeds",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerFeedsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.PowerFeed], error) {
+				return NewGetPowerFeedsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_power_feed"],
+		metrics,
+		"create_power_feed",
+		WrapToolHandler[PowerFeedCreateInput, PowerFeedOutput](
+			metrics,
+			"create_power_feed",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerFeedCreateInput,
+			) (*mcp.CallToolResult, PowerFeedOutput, error) {
+				return NewCreatePowerFeedHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_power_feed"],
+		metrics,
+		"update_power_feed",
+		WrapToolHandler[PowerFeedUpdateInput, PowerFeedOutput](
+			metrics,
+			"update_power_feed",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerFeedUpdateInput,
+			) (*mcp.CallToolResult, PowerFeedOutput, error) {
+				return NewUpdatePowerFeedHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_power_feed"],
+		metrics,
+		"delete_power_feed",
+		WrapToolHandler[PowerFeedDeleteInput, struct{}](
+			metrics,
+			"delete_power_feed",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in PowerFeedDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeletePowerFeedHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_device_bays"],
+		metrics,
+		"get_device_bays",
+		WrapToolHandler[DeviceBaysInput, PaginatedOutput[domain.DeviceBay]](
+			metrics,
+			"get_device_bays",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in DeviceBaysInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.DeviceBay], error) {
+				return NewGetDeviceBaysHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_device_bay"],
+		metrics,
+		"create_device_bay",
+		WrapToolHandler[DeviceBayCreateInput, DeviceBayOutput](
+			metrics,
+			"create_device_bay",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in DeviceBayCreateInput,
+			) (*mcp.CallToolResult, DeviceBayOutput, error) {
+				return NewCreateDeviceBayHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_device_bay"],
+		metrics,
+		"update_device_bay",
+		WrapToolHandler[DeviceBayUpdateInput, DeviceBayOutput](
+			metrics,
+			"update_device_bay",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in DeviceBayUpdateInput,
+			) (*mcp.CallToolResult, DeviceBayOutput, error) {
+				return NewUpdateDeviceBayHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_device_bay"],
+		metrics,
+		"delete_device_bay",
+		WrapToolHandler[DeviceBayDeleteInput, struct{}](
+			metrics,
+			"delete_device_bay",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in DeviceBayDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteDeviceBayHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_rack_reservations"],
+		metrics,
+		"get_rack_reservations",
+		WrapToolHandler[RackReservationsInput, PaginatedOutput[domain.RackReservation]](
+			metrics,
+			"get_rack_reservations",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackReservationsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.RackReservation], error) {
+				return NewGetRackReservationsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_rack_reservation"],
+		metrics,
+		"create_rack_reservation",
+		WrapToolHandler[RackReservationCreateInput, RackReservationOutput](
+			metrics,
+			"create_rack_reservation",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackReservationCreateInput,
+			) (*mcp.CallToolResult, RackReservationOutput, error) {
+				return NewCreateRackReservationHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_rack_reservation"],
+		metrics,
+		"update_rack_reservation",
+		WrapToolHandler[RackReservationUpdateInput, RackReservationOutput](
+			metrics,
+			"update_rack_reservation",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackReservationUpdateInput,
+			) (*mcp.CallToolResult, RackReservationOutput, error) {
+				return NewUpdateRackReservationHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_rack_reservation"],
+		metrics,
+		"delete_rack_reservation",
+		WrapToolHandler[RackReservationDeleteInput, struct{}](
+			metrics,
+			"delete_rack_reservation",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in RackReservationDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteRackReservationHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_inventory_items"],
+		metrics,
+		"get_inventory_items",
+		WrapToolHandler[InventoryItemsInput, PaginatedOutput[domain.InventoryItem]](
+			metrics,
+			"get_inventory_items",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in InventoryItemsInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.InventoryItem], error) {
+				return NewGetInventoryItemsHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_inventory_item"],
+		metrics,
+		"create_inventory_item",
+		WrapToolHandler[InventoryItemCreateInput, InventoryItemOutput](
+			metrics,
+			"create_inventory_item",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in InventoryItemCreateInput,
+			) (*mcp.CallToolResult, InventoryItemOutput, error) {
+				return NewCreateInventoryItemHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_inventory_item"],
+		metrics,
+		"update_inventory_item",
+		WrapToolHandler[InventoryItemUpdateInput, InventoryItemOutput](
+			metrics,
+			"update_inventory_item",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in InventoryItemUpdateInput,
+			) (*mcp.CallToolResult, InventoryItemOutput, error) {
+				return NewUpdateInventoryItemHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_inventory_item"],
+		metrics,
+		"delete_inventory_item",
+		WrapToolHandler[InventoryItemDeleteInput, struct{}](
+			metrics,
+			"delete_inventory_item",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in InventoryItemDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteInventoryItemHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerTool(
+		server,
+		toolDefIndex()["get_mac_addresses"],
+		metrics,
+		"get_mac_addresses",
+		WrapToolHandler[MACAddressesInput, PaginatedOutput[domain.MACAddress]](
+			metrics,
+			"get_mac_addresses",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in MACAddressesInput,
+			) (*mcp.CallToolResult, PaginatedOutput[domain.MACAddress], error) {
+				return NewGetMACAddressesHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["create_mac_address"],
+		metrics,
+		"create_mac_address",
+		WrapToolHandler[MACAddressCreateInput, MACAddressOutput](
+			metrics,
+			"create_mac_address",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in MACAddressCreateInput,
+			) (*mcp.CallToolResult, MACAddressOutput, error) {
+				return NewCreateMACAddressHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerWriteTool(
+		server,
+		toolDefIndex()["update_mac_address"],
+		metrics,
+		"update_mac_address",
+		WrapToolHandler[MACAddressUpdateInput, MACAddressOutput](
+			metrics,
+			"update_mac_address",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in MACAddressUpdateInput,
+			) (*mcp.CallToolResult, MACAddressOutput, error) {
+				return NewUpdateMACAddressHandler(svc)(ctx, req, in)
+			},
+		),
+	)
+
+	registerDeleteTool(
+		server,
+		toolDefIndex()["delete_mac_address"],
+		metrics,
+		"delete_mac_address",
+		WrapToolHandler[MACAddressDeleteInput, struct{}](
+			metrics,
+			"delete_mac_address",
+			func(
+				ctx context.Context,
+				req *mcp.CallToolRequest,
+				in MACAddressDeleteInput,
+			) (*mcp.CallToolResult, struct{}, error) {
+				return NewDeleteMACAddressHandler(svc)(ctx, req, in)
+			},
+		),
+	)
 }

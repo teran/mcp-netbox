@@ -1588,6 +1588,556 @@ func TestMockRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,ma
 			t.Errorf("DeleteInventoryItemRole = %v", err)
 		}
 	})
+	t.Run("ListFrontPorts", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListFrontPortsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.FrontPort], error) {
+				return &domain.PaginatedResponse[domain.FrontPort]{Count: 1}, nil
+			},
+		}).ListFrontPorts(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListFrontPorts = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateFrontPort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateFrontPortFunc: func(
+				_ context.Context, _ string, in domain.FrontPortWrite,
+			) (*domain.FrontPort, error) {
+				return &domain.FrontPort{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateFrontPort(context.Background(), "t", domain.FrontPortWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateFrontPort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateFrontPort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateFrontPortFunc: func(
+				_ context.Context, _ string, id int, in domain.FrontPortWrite,
+			) (*domain.FrontPort, error) {
+				return &domain.FrontPort{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateFrontPort(context.Background(), "t", 7, domain.FrontPortWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateFrontPort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteFrontPort", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteFrontPortFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteFrontPort(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteFrontPort = %v", err)
+		}
+	})
+	t.Run("ListRearPorts", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListRearPortsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.RearPort], error) {
+				return &domain.PaginatedResponse[domain.RearPort]{Count: 1}, nil
+			},
+		}).ListRearPorts(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListRearPorts = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateRearPort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateRearPortFunc: func(
+				_ context.Context, _ string, in domain.RearPortWrite,
+			) (*domain.RearPort, error) {
+				return &domain.RearPort{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateRearPort(context.Background(), "t", domain.RearPortWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateRearPort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRearPort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateRearPortFunc: func(
+				_ context.Context, _ string, id int, in domain.RearPortWrite,
+			) (*domain.RearPort, error) {
+				return &domain.RearPort{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateRearPort(context.Background(), "t", 7, domain.RearPortWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRearPort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRearPort", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteRearPortFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRearPort(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRearPort = %v", err)
+		}
+	})
+	t.Run("ListConsolePorts", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListConsolePortsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.ConsolePort], error) {
+				return &domain.PaginatedResponse[domain.ConsolePort]{Count: 1}, nil
+			},
+		}).ListConsolePorts(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListConsolePorts = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateConsolePort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateConsolePortFunc: func(
+				_ context.Context, _ string, in domain.ConsolePortWrite,
+			) (*domain.ConsolePort, error) {
+				return &domain.ConsolePort{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateConsolePort(context.Background(), "t", domain.ConsolePortWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateConsolePort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateConsolePort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateConsolePortFunc: func(
+				_ context.Context, _ string, id int, in domain.ConsolePortWrite,
+			) (*domain.ConsolePort, error) {
+				return &domain.ConsolePort{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateConsolePort(context.Background(), "t", 7, domain.ConsolePortWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateConsolePort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteConsolePort", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteConsolePortFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteConsolePort(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteConsolePort = %v", err)
+		}
+	})
+	t.Run("ListConsoleServerPorts", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListConsoleServerPortsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.ConsoleServerPort], error) {
+				return &domain.PaginatedResponse[domain.ConsoleServerPort]{Count: 1}, nil
+			},
+		}).ListConsoleServerPorts(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListConsoleServerPorts = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateConsoleServerPort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateConsoleServerPortFunc: func(
+				_ context.Context, _ string, in domain.ConsoleServerPortWrite,
+			) (*domain.ConsoleServerPort, error) {
+				return &domain.ConsoleServerPort{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateConsoleServerPort(context.Background(), "t", domain.ConsoleServerPortWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateConsoleServerPort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateConsoleServerPort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateConsoleServerPortFunc: func(
+				_ context.Context, _ string, id int, in domain.ConsoleServerPortWrite,
+			) (*domain.ConsoleServerPort, error) {
+				return &domain.ConsoleServerPort{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateConsoleServerPort(context.Background(), "t", 7, domain.ConsoleServerPortWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateConsoleServerPort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteConsoleServerPort", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteConsoleServerPortFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteConsoleServerPort(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteConsoleServerPort = %v", err)
+		}
+	})
+	t.Run("ListPowerPorts", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListPowerPortsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.PowerPort], error) {
+				return &domain.PaginatedResponse[domain.PowerPort]{Count: 1}, nil
+			},
+		}).ListPowerPorts(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListPowerPorts = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreatePowerPort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreatePowerPortFunc: func(
+				_ context.Context, _ string, in domain.PowerPortWrite,
+			) (*domain.PowerPort, error) {
+				return &domain.PowerPort{ID: 1, Name: in.Name}, nil
+			},
+		}).CreatePowerPort(context.Background(), "t", domain.PowerPortWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreatePowerPort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdatePowerPort", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdatePowerPortFunc: func(
+				_ context.Context, _ string, id int, in domain.PowerPortWrite,
+			) (*domain.PowerPort, error) {
+				return &domain.PowerPort{ID: id, Name: in.Name}, nil
+			},
+		}).UpdatePowerPort(context.Background(), "t", 7, domain.PowerPortWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdatePowerPort = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeletePowerPort", func(t *testing.T) {
+		err := (&MockRepo{
+			DeletePowerPortFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeletePowerPort(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeletePowerPort = %v", err)
+		}
+	})
+	t.Run("ListPowerOutlets", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListPowerOutletsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.PowerOutlet], error) {
+				return &domain.PaginatedResponse[domain.PowerOutlet]{Count: 1}, nil
+			},
+		}).ListPowerOutlets(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListPowerOutlets = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreatePowerOutlet", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreatePowerOutletFunc: func(
+				_ context.Context, _ string, in domain.PowerOutletWrite,
+			) (*domain.PowerOutlet, error) {
+				return &domain.PowerOutlet{ID: 1, Name: in.Name}, nil
+			},
+		}).CreatePowerOutlet(context.Background(), "t", domain.PowerOutletWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreatePowerOutlet = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdatePowerOutlet", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdatePowerOutletFunc: func(
+				_ context.Context, _ string, id int, in domain.PowerOutletWrite,
+			) (*domain.PowerOutlet, error) {
+				return &domain.PowerOutlet{ID: id, Name: in.Name}, nil
+			},
+		}).UpdatePowerOutlet(context.Background(), "t", 7, domain.PowerOutletWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdatePowerOutlet = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeletePowerOutlet", func(t *testing.T) {
+		err := (&MockRepo{
+			DeletePowerOutletFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeletePowerOutlet(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeletePowerOutlet = %v", err)
+		}
+	})
+	t.Run("ListPowerFeeds", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListPowerFeedsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.PowerFeed], error) {
+				return &domain.PaginatedResponse[domain.PowerFeed]{Count: 1}, nil
+			},
+		}).ListPowerFeeds(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListPowerFeeds = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreatePowerFeed", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreatePowerFeedFunc: func(
+				_ context.Context, _ string, in domain.PowerFeedWrite,
+			) (*domain.PowerFeed, error) {
+				return &domain.PowerFeed{ID: 1, Name: in.Name}, nil
+			},
+		}).CreatePowerFeed(context.Background(), "t", domain.PowerFeedWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreatePowerFeed = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdatePowerFeed", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdatePowerFeedFunc: func(
+				_ context.Context, _ string, id int, in domain.PowerFeedWrite,
+			) (*domain.PowerFeed, error) {
+				return &domain.PowerFeed{ID: id, Name: in.Name}, nil
+			},
+		}).UpdatePowerFeed(context.Background(), "t", 7, domain.PowerFeedWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdatePowerFeed = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeletePowerFeed", func(t *testing.T) {
+		err := (&MockRepo{
+			DeletePowerFeedFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeletePowerFeed(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeletePowerFeed = %v", err)
+		}
+	})
+	t.Run("ListDeviceBays", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListDeviceBaysFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.DeviceBay], error) {
+				return &domain.PaginatedResponse[domain.DeviceBay]{Count: 1}, nil
+			},
+		}).ListDeviceBays(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListDeviceBays = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateDeviceBay", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateDeviceBayFunc: func(
+				_ context.Context, _ string, in domain.DeviceBayWrite,
+			) (*domain.DeviceBay, error) {
+				return &domain.DeviceBay{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateDeviceBay(context.Background(), "t", domain.DeviceBayWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateDeviceBay = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateDeviceBay", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateDeviceBayFunc: func(
+				_ context.Context, _ string, id int, in domain.DeviceBayWrite,
+			) (*domain.DeviceBay, error) {
+				return &domain.DeviceBay{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateDeviceBay(context.Background(), "t", 7, domain.DeviceBayWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateDeviceBay = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteDeviceBay", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteDeviceBayFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteDeviceBay(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteDeviceBay = %v", err)
+		}
+	})
+	t.Run("ListRackReservations", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListRackReservationsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.RackReservation], error) {
+				return &domain.PaginatedResponse[domain.RackReservation]{Count: 1}, nil
+			},
+		}).ListRackReservations(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListRackReservations = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateRackReservation", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateRackReservationFunc: func(
+				_ context.Context, _ string, in domain.RackReservationWrite,
+			) (*domain.RackReservation, error) {
+				return &domain.RackReservation{ID: 1, Description: in.Description}, nil
+			},
+		}).CreateRackReservation(context.Background(), "t", domain.RackReservationWrite{Description: "reserved"})
+		if err != nil || got == nil || got.Description != "reserved" {
+			t.Errorf("CreateRackReservation = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateRackReservation", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateRackReservationFunc: func(
+				_ context.Context, _ string, id int, in domain.RackReservationWrite,
+			) (*domain.RackReservation, error) {
+				return &domain.RackReservation{ID: id, Description: in.Description}, nil
+			},
+		}).UpdateRackReservation(context.Background(), "t", 7, domain.RackReservationWrite{Description: "reserved"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateRackReservation = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteRackReservation", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteRackReservationFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteRackReservation(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteRackReservation = %v", err)
+		}
+	})
+	t.Run("ListInventoryItems", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListInventoryItemsFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.InventoryItem], error) {
+				return &domain.PaginatedResponse[domain.InventoryItem]{Count: 1}, nil
+			},
+		}).ListInventoryItems(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListInventoryItems = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateInventoryItem", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateInventoryItemFunc: func(
+				_ context.Context, _ string, in domain.InventoryItemWrite,
+			) (*domain.InventoryItem, error) {
+				return &domain.InventoryItem{ID: 1, Name: in.Name}, nil
+			},
+		}).CreateInventoryItem(context.Background(), "t", domain.InventoryItemWrite{Name: "A"})
+		if err != nil || got == nil || got.Name != "A" {
+			t.Errorf("CreateInventoryItem = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateInventoryItem", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateInventoryItemFunc: func(
+				_ context.Context, _ string, id int, in domain.InventoryItemWrite,
+			) (*domain.InventoryItem, error) {
+				return &domain.InventoryItem{ID: id, Name: in.Name}, nil
+			},
+		}).UpdateInventoryItem(context.Background(), "t", 7, domain.InventoryItemWrite{Name: "A"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateInventoryItem = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteInventoryItem", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteInventoryItemFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteInventoryItem(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteInventoryItem = %v", err)
+		}
+	})
+	t.Run("ListMACAddresses", func(t *testing.T) {
+		got, err := (&MockRepo{
+			ListMACAddressesFunc: func(
+				context.Context, string, map[string]string,
+			) (*domain.PaginatedResponse[domain.MACAddress], error) {
+				return &domain.PaginatedResponse[domain.MACAddress]{Count: 1}, nil
+			},
+		}).ListMACAddresses(context.Background(), "t", nil)
+		if err != nil || got.Count != 1 {
+			t.Errorf("ListMACAddresses = (%v, %v), want count 1, nil", got, err)
+		}
+	})
+	t.Run("CreateMACAddress", func(t *testing.T) {
+		got, err := (&MockRepo{
+			CreateMACAddressFunc: func(
+				_ context.Context, _ string, in domain.MACAddressWrite,
+			) (*domain.MACAddress, error) {
+				return &domain.MACAddress{ID: 1, Address: in.Address}, nil
+			},
+		}).CreateMACAddress(context.Background(), "t", domain.MACAddressWrite{Address: "00:11:22:33:44:55"})
+		if err != nil || got == nil || got.Address != "00:11:22:33:44:55" {
+			t.Errorf("CreateMACAddress = (%v, %v)", got, err)
+		}
+	})
+	t.Run("UpdateMACAddress", func(t *testing.T) {
+		got, err := (&MockRepo{
+			UpdateMACAddressFunc: func(
+				_ context.Context, _ string, id int, in domain.MACAddressWrite,
+			) (*domain.MACAddress, error) {
+				return &domain.MACAddress{ID: id, Address: in.Address}, nil
+			},
+		}).UpdateMACAddress(context.Background(), "t", 7, domain.MACAddressWrite{Address: "00:11:22:33:44:55"})
+		if err != nil || got == nil || got.ID != 7 {
+			t.Errorf("UpdateMACAddress = (%v, %v)", got, err)
+		}
+	})
+	t.Run("DeleteMACAddress", func(t *testing.T) {
+		err := (&MockRepo{
+			DeleteMACAddressFunc: func(_ context.Context, _ string, id int) error {
+				if id != 3 {
+					t.Errorf("id = %d, want 3", id)
+				}
+
+				return nil
+			},
+		}).DeleteMACAddress(context.Background(), "t", 3)
+		if err != nil {
+			t.Errorf("DeleteMACAddress = %v", err)
+		}
+	})
 }
 
 func TestMockRepo_PropagatesError(t *testing.T) {
@@ -2025,5 +2575,143 @@ func TestNilRepo_AllMethods(t *testing.T) { //nolint:funlen,gocognit,gocyclo,mai
 	}
 	if err := repo.DeleteInventoryItemRole(ctx, "t", 3); err != nil {
 		t.Errorf("DeleteInventoryItemRole = %v", err)
+	}
+	if r, err := repo.ListFrontPorts(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListFrontPorts", r.Count, err)
+	}
+	if fp, err := repo.CreateFrontPort(ctx, "t", domain.FrontPortWrite{Name: "A"}); err != nil || fp.Name != "A" {
+		t.Errorf("CreateFrontPort = (%v, %v)", fp, err)
+	}
+	if fp, err := repo.UpdateFrontPort(ctx, "t", 7, domain.FrontPortWrite{Name: "A"}); err != nil || fp.ID != 7 {
+		t.Errorf("UpdateFrontPort = (%v, %v)", fp, err)
+	}
+	if err := repo.DeleteFrontPort(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteFrontPort = %v", err)
+	}
+	if r, err := repo.ListRearPorts(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListRearPorts", r.Count, err)
+	}
+	if rp, err := repo.CreateRearPort(ctx, "t", domain.RearPortWrite{Name: "A"}); err != nil || rp.Name != "A" {
+		t.Errorf("CreateRearPort = (%v, %v)", rp, err)
+	}
+	if rp, err := repo.UpdateRearPort(ctx, "t", 7, domain.RearPortWrite{Name: "A"}); err != nil || rp.ID != 7 {
+		t.Errorf("UpdateRearPort = (%v, %v)", rp, err)
+	}
+	if err := repo.DeleteRearPort(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRearPort = %v", err)
+	}
+	if r, err := repo.ListConsolePorts(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListConsolePorts", r.Count, err)
+	}
+	if cp, err := repo.CreateConsolePort(ctx, "t", domain.ConsolePortWrite{Name: "A"}); err != nil || cp.Name != "A" {
+		t.Errorf("CreateConsolePort = (%v, %v)", cp, err)
+	}
+	if cp, err := repo.UpdateConsolePort(ctx, "t", 7, domain.ConsolePortWrite{Name: "A"}); err != nil || cp.ID != 7 {
+		t.Errorf("UpdateConsolePort = (%v, %v)", cp, err)
+	}
+	if err := repo.DeleteConsolePort(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteConsolePort = %v", err)
+	}
+	if r, err := repo.ListConsoleServerPorts(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListConsoleServerPorts", r.Count, err)
+	}
+	if csp, err := repo.CreateConsoleServerPort(ctx, "t", domain.ConsoleServerPortWrite{Name: "A"}); err != nil ||
+		csp.Name != "A" {
+		t.Errorf("CreateConsoleServerPort = (%v, %v)", csp, err)
+	}
+	if csp, err := repo.UpdateConsoleServerPort(ctx, "t", 7, domain.ConsoleServerPortWrite{Name: "A"}); err != nil ||
+		csp.ID != 7 {
+		t.Errorf("UpdateConsoleServerPort = (%v, %v)", csp, err)
+	}
+	if err := repo.DeleteConsoleServerPort(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteConsoleServerPort = %v", err)
+	}
+	if r, err := repo.ListPowerPorts(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListPowerPorts", r.Count, err)
+	}
+	if pp, err := repo.CreatePowerPort(ctx, "t", domain.PowerPortWrite{Name: "A"}); err != nil || pp.Name != "A" {
+		t.Errorf("CreatePowerPort = (%v, %v)", pp, err)
+	}
+	if pp, err := repo.UpdatePowerPort(ctx, "t", 7, domain.PowerPortWrite{Name: "A"}); err != nil || pp.ID != 7 {
+		t.Errorf("UpdatePowerPort = (%v, %v)", pp, err)
+	}
+	if err := repo.DeletePowerPort(ctx, "t", 3); err != nil {
+		t.Errorf("DeletePowerPort = %v", err)
+	}
+	if r, err := repo.ListPowerOutlets(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListPowerOutlets", r.Count, err)
+	}
+	if po, err := repo.CreatePowerOutlet(ctx, "t", domain.PowerOutletWrite{Name: "A"}); err != nil || po.Name != "A" {
+		t.Errorf("CreatePowerOutlet = (%v, %v)", po, err)
+	}
+	if po, err := repo.UpdatePowerOutlet(ctx, "t", 7, domain.PowerOutletWrite{Name: "A"}); err != nil || po.ID != 7 {
+		t.Errorf("UpdatePowerOutlet = (%v, %v)", po, err)
+	}
+	if err := repo.DeletePowerOutlet(ctx, "t", 3); err != nil {
+		t.Errorf("DeletePowerOutlet = %v", err)
+	}
+	if r, err := repo.ListPowerFeeds(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListPowerFeeds", r.Count, err)
+	}
+	if pf, err := repo.CreatePowerFeed(ctx, "t", domain.PowerFeedWrite{Name: "A"}); err != nil || pf.Name != "A" {
+		t.Errorf("CreatePowerFeed = (%v, %v)", pf, err)
+	}
+	if pf, err := repo.UpdatePowerFeed(ctx, "t", 7, domain.PowerFeedWrite{Name: "A"}); err != nil || pf.ID != 7 {
+		t.Errorf("UpdatePowerFeed = (%v, %v)", pf, err)
+	}
+	if err := repo.DeletePowerFeed(ctx, "t", 3); err != nil {
+		t.Errorf("DeletePowerFeed = %v", err)
+	}
+	if r, err := repo.ListDeviceBays(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListDeviceBays", r.Count, err)
+	}
+	if db, err := repo.CreateDeviceBay(ctx, "t", domain.DeviceBayWrite{Name: "A"}); err != nil || db.Name != "A" {
+		t.Errorf("CreateDeviceBay = (%v, %v)", db, err)
+	}
+	if db, err := repo.UpdateDeviceBay(ctx, "t", 7, domain.DeviceBayWrite{Name: "A"}); err != nil || db.ID != 7 {
+		t.Errorf("UpdateDeviceBay = (%v, %v)", db, err)
+	}
+	if err := repo.DeleteDeviceBay(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteDeviceBay = %v", err)
+	}
+	if r, err := repo.ListRackReservations(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListRackReservations", r.Count, err)
+	}
+	if rr, err := repo.CreateRackReservation(ctx, "t", domain.RackReservationWrite{Description: "reserved"}); err != nil ||
+		rr.Description != "reserved" {
+		t.Errorf("CreateRackReservation = (%v, %v)", rr, err)
+	}
+	rr, err := repo.UpdateRackReservation(ctx, "t", 7, domain.RackReservationWrite{Description: "reserved"})
+	if err != nil || rr.ID != 7 {
+		t.Errorf("UpdateRackReservation = (%v, %v)", rr, err)
+	}
+	if err := repo.DeleteRackReservation(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteRackReservation = %v", err)
+	}
+	if r, err := repo.ListInventoryItems(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListInventoryItems", r.Count, err)
+	}
+	if ii, err := repo.CreateInventoryItem(ctx, "t", domain.InventoryItemWrite{Name: "A"}); err != nil || ii.Name != "A" {
+		t.Errorf("CreateInventoryItem = (%v, %v)", ii, err)
+	}
+	if ii, err := repo.UpdateInventoryItem(ctx, "t", 7, domain.InventoryItemWrite{Name: "A"}); err != nil || ii.ID != 7 {
+		t.Errorf("UpdateInventoryItem = (%v, %v)", ii, err)
+	}
+	if err := repo.DeleteInventoryItem(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteInventoryItem = %v", err)
+	}
+	if r, err := repo.ListMACAddresses(ctx, "t", nil); err != nil || r.Count != 0 {
+		assertEmpty("ListMACAddresses", r.Count, err)
+	}
+	if ma, err := repo.CreateMACAddress(ctx, "t", domain.MACAddressWrite{Address: "00:11:22:33:44:55"}); err != nil ||
+		ma.Address != "00:11:22:33:44:55" {
+		t.Errorf("CreateMACAddress = (%v, %v)", ma, err)
+	}
+	if ma, err := repo.UpdateMACAddress(ctx, "t", 7, domain.MACAddressWrite{Address: "00:11:22:33:44:55"}); err != nil ||
+		ma.ID != 7 {
+		t.Errorf("UpdateMACAddress = (%v, %v)", ma, err)
+	}
+	if err := repo.DeleteMACAddress(ctx, "t", 3); err != nil {
+		t.Errorf("DeleteMACAddress = %v", err)
 	}
 }

@@ -648,6 +648,181 @@ type (
 		Created      string         `json:"created"`
 		LastUpdated  string         `json:"last_updated"`
 	}
+
+	// FrontPort is a NetBox DCIM front port.
+	FrontPort struct {
+		ID               int            `json:"id"`
+		URL              string         `json:"url,omitempty"`
+		Name             string         `json:"name"`
+		Display          string         `json:"display,omitempty"`
+		Device           *Nested        `json:"device"`
+		Type             *Label         `json:"type"`
+		RearPort         *Nested        `json:"rear_port"`
+		RearPortPosition int            `json:"rear_port_position,omitempty"`
+		Description      string         `json:"description,omitempty"`
+		Tags             []Tag          `json:"tags,omitempty"`
+		CustomFields     map[string]any `json:"custom_fields,omitempty"`
+		Created          string         `json:"created"`
+		LastUpdated      string         `json:"last_updated"`
+	}
+
+	// RearPort is a NetBox DCIM rear port.
+	RearPort struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *Nested        `json:"device"`
+		Type         *Label         `json:"type"`
+		Positions    int            `json:"positions"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// ConsolePort is a NetBox DCIM console port.
+	ConsolePort struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *Nested        `json:"device"`
+		Type         *Label         `json:"type"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// ConsoleServerPort is a NetBox DCIM console server port.
+	ConsoleServerPort struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *Nested        `json:"device"`
+		Type         *Label         `json:"type"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// PowerPort is a NetBox DCIM power port.
+	PowerPort struct {
+		ID            int            `json:"id"`
+		URL           string         `json:"url,omitempty"`
+		Name          string         `json:"name"`
+		Display       string         `json:"display,omitempty"`
+		Device        *Nested        `json:"device"`
+		Type          *Label         `json:"type"`
+		MaximumDraw   int            `json:"maximum_draw,omitempty"`
+		AllocatedDraw int            `json:"allocated_draw,omitempty"`
+		Description   string         `json:"description,omitempty"`
+		Tags          []Tag          `json:"tags,omitempty"`
+		CustomFields  map[string]any `json:"custom_fields,omitempty"`
+		Created       string         `json:"created"`
+		LastUpdated   string         `json:"last_updated"`
+	}
+
+	// PowerOutlet is a NetBox DCIM power outlet.
+	PowerOutlet struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *Nested        `json:"device"`
+		Type         *Label         `json:"type"`
+		PowerPort    *Nested        `json:"power_port"`
+		FeedLeg      *Label         `json:"feed_leg"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// PowerFeed is a NetBox DCIM power feed.
+	PowerFeed struct {
+		ID             int            `json:"id"`
+		URL            string         `json:"url,omitempty"`
+		Name           string         `json:"name"`
+		Display        string         `json:"display,omitempty"`
+		PowerPanel     *Nested        `json:"power_panel"`
+		Status         *Label         `json:"status"`
+		Type           *Label         `json:"type"`
+		Supply         *Label         `json:"supply"`
+		Phase          *Label         `json:"phase"`
+		Voltage        int            `json:"voltage"`
+		Amperage       int            `json:"amperage"`
+		MaxUtilization int            `json:"max_utilization,omitempty"`
+		Description    string         `json:"description,omitempty"`
+		Tags           []Tag          `json:"tags,omitempty"`
+		CustomFields   map[string]any `json:"custom_fields,omitempty"`
+		Created        string         `json:"created"`
+		LastUpdated    string         `json:"last_updated"`
+	}
+
+	// DeviceBay is a NetBox DCIM device bay.
+	DeviceBay struct {
+		ID              int            `json:"id"`
+		URL             string         `json:"url,omitempty"`
+		Name            string         `json:"name"`
+		Display         string         `json:"display,omitempty"`
+		Device          *Nested        `json:"device"`
+		InstalledDevice *Nested        `json:"installed_device"`
+		Description     string         `json:"description,omitempty"`
+		Tags            []Tag          `json:"tags,omitempty"`
+		CustomFields    map[string]any `json:"custom_fields,omitempty"`
+		Created         string         `json:"created"`
+		LastUpdated     string         `json:"last_updated"`
+	}
+
+	// RackReservation is a NetBox DCIM rack reservation.
+	RackReservation struct {
+		ID          int     `json:"id"`
+		URL         string  `json:"url,omitempty"`
+		Rack        *Nested `json:"rack"`
+		Units       []int   `json:"units,omitempty"`
+		Description string  `json:"description"`
+		User        *Nested `json:"user"`
+		Created     string  `json:"created"`
+		LastUpdated string  `json:"last_updated"`
+	}
+
+	// InventoryItem is a NetBox DCIM inventory item.
+	InventoryItem struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Name         string         `json:"name"`
+		Display      string         `json:"display,omitempty"`
+		Device       *Nested        `json:"device"`
+		Role         *Nested        `json:"role"`
+		Manufacturer *Nested        `json:"manufacturer"`
+		Serial       string         `json:"serial,omitempty"`
+		PartID       string         `json:"part_id,omitempty"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
+
+	// MACAddress is a NetBox DCIM MAC address.
+	MACAddress struct {
+		ID           int            `json:"id"`
+		URL          string         `json:"url,omitempty"`
+		Address      string         `json:"address"`
+		Description  string         `json:"description,omitempty"`
+		Tags         []Tag          `json:"tags,omitempty"`
+		CustomFields map[string]any `json:"custom_fields,omitempty"`
+		Created      string         `json:"created"`
+		LastUpdated  string         `json:"last_updated"`
+	}
 )
 
 type (
@@ -1378,6 +1553,208 @@ type InventoryItemRoleWrite struct {
 	Description  *string        `json:"description,omitempty"`
 	Tags         []string       `json:"tags,omitempty"`
 	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// FrontPortWrite is the domain DTO for creating or updating a NetBox DCIM
+// front port. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Device and RearPort are the numeric
+// NetBox IDs of the parent device and rear port; Type is a choice-string value.
+type FrontPortWrite struct {
+	Name             string         `json:"name,omitempty"`
+	Device           *int           `json:"device,omitempty"`
+	Type             *string        `json:"type,omitempty"`
+	RearPort         *int           `json:"rear_port,omitempty"`
+	RearPortPosition *int           `json:"rear_port_position,omitempty"`
+	Description      *string        `json:"description,omitempty"`
+	Tags             []string       `json:"tags,omitempty"`
+	CustomFields     map[string]any `json:"custom_fields,omitempty"`
+}
+
+// RearPortWrite is the domain DTO for creating or updating a NetBox DCIM rear
+// port. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Device is the numeric NetBox ID of the
+// parent device; Type is a choice-string value.
+type RearPortWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Positions    *int           `json:"positions,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ConsolePortWrite is the domain DTO for creating or updating a NetBox DCIM
+// console port. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Device is the numeric NetBox ID of the
+// parent device; Type is a choice-string value.
+type ConsolePortWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// ConsoleServerPortWrite is the domain DTO for creating or updating a NetBox
+// DCIM console server port. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Device is the numeric NetBox ID of the
+// parent device; Type is a choice-string value.
+type ConsoleServerPortWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// PowerPortWrite is the domain DTO for creating or updating a NetBox DCIM
+// power port. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Device is the numeric NetBox ID of the
+// parent device; Type is a choice-string value.
+type PowerPortWrite struct {
+	Name          string         `json:"name,omitempty"`
+	Device        *int           `json:"device,omitempty"`
+	Type          *string        `json:"type,omitempty"`
+	MaximumDraw   *int           `json:"maximum_draw,omitempty"`
+	AllocatedDraw *int           `json:"allocated_draw,omitempty"`
+	Description   *string        `json:"description,omitempty"`
+	Tags          []string       `json:"tags,omitempty"`
+	CustomFields  map[string]any `json:"custom_fields,omitempty"`
+}
+
+// PowerOutletWrite is the domain DTO for creating or updating a NetBox DCIM
+// power outlet. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Device and PowerPort are the numeric
+// NetBox IDs of the parent device and power port; Type and FeedLeg are
+// choice-string values.
+type PowerOutletWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Type         *string        `json:"type,omitempty"`
+	PowerPort    *int           `json:"power_port,omitempty"`
+	FeedLeg      *string        `json:"feed_leg,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// PowerFeedWrite is the domain DTO for creating or updating a NetBox DCIM
+// power feed. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". PowerPanel is the numeric NetBox ID of
+// the parent power panel; Status, Type, Supply and Phase are choice-string
+// values.
+type PowerFeedWrite struct {
+	Name           string         `json:"name,omitempty"`
+	PowerPanel     *int           `json:"power_panel,omitempty"`
+	Status         *string        `json:"status,omitempty"`
+	Type           *string        `json:"type,omitempty"`
+	Supply         *string        `json:"supply,omitempty"`
+	Phase          *string        `json:"phase,omitempty"`
+	Voltage        *int           `json:"voltage,omitempty"`
+	Amperage       *int           `json:"amperage,omitempty"`
+	MaxUtilization *int           `json:"max_utilization,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Tags           []string       `json:"tags,omitempty"`
+	CustomFields   map[string]any `json:"custom_fields,omitempty"`
+}
+
+// DeviceBayWrite is the domain DTO for creating or updating a NetBox DCIM
+// device bay. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Device is the numeric NetBox ID of the
+// parent device.
+type DeviceBayWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// RackReservationWrite is the domain DTO for creating or updating a NetBox DCIM
+// rack reservation. It carries only the writable fields.
+//
+// Description is a plain string because it is required on create; the omitempty
+// tag drops it from a PATCH body when not provided. Rack is the numeric NetBox
+// ID of the rack; Units lists the reserved rack units.
+type RackReservationWrite struct {
+	Description  string         `json:"description,omitempty"`
+	Rack         *int           `json:"rack,omitempty"`
+	Units        []int          `json:"units,omitempty"`
+	User         *int           `json:"user,omitempty"`
+	Tenant       *int           `json:"tenant,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// InventoryItemWrite is the domain DTO for creating or updating a NetBox DCIM
+// inventory item. It carries only the writable fields.
+//
+// Name is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. Optional scalar fields are
+// pointers so that a partial-update (PATCH) can distinguish "not provided"
+// (nil) from "explicitly set to empty". Device, Role and Manufacturer are the
+// numeric NetBox IDs of the related objects.
+type InventoryItemWrite struct {
+	Name         string         `json:"name,omitempty"`
+	Device       *int           `json:"device,omitempty"`
+	Role         *int           `json:"role,omitempty"`
+	Manufacturer *int           `json:"manufacturer,omitempty"`
+	Serial       *string        `json:"serial,omitempty"`
+	PartID       *string        `json:"part_id,omitempty"`
+	Description  *string        `json:"description,omitempty"`
+	Tags         []string       `json:"tags,omitempty"`
+	CustomFields map[string]any `json:"custom_fields,omitempty"`
+}
+
+// MACAddressWrite is the domain DTO for creating or updating a NetBox DCIM MAC
+// address. It carries only the writable fields.
+//
+// Address is a plain string because it is required on create; the omitempty tag
+// drops it from a PATCH body when not provided. AssignedObjectType is the
+// content type of the assigned object (e.g. "dcim.interface") and
+// AssignedObjectID is its numeric NetBox ID.
+type MACAddressWrite struct {
+	Address            string         `json:"address,omitempty"`
+	AssignedObjectType *string        `json:"assigned_object_type,omitempty"`
+	AssignedObjectID   *int           `json:"assigned_object_id,omitempty"`
+	Description        *string        `json:"description,omitempty"`
+	Tags               []string       `json:"tags,omitempty"`
+	CustomFields       map[string]any `json:"custom_fields,omitempty"`
 }
 
 // PaginatedResponse wraps a paginated API response with the total count,
