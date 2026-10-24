@@ -217,8 +217,9 @@ Logging uses **logrus**. Enablement follows the launch mode (L02):
 - **Format (L04):** `LOG_FORMAT` — default `text` (logrus text, full absolute
   timestamp) or `json`.
 - **Secrets (L05):** tokens, passwords and credentials are **never** logged. The
-  token is redacted (see [Security](#security--secrets)) and URLs are logged via
-  `url.Redacted()`.
+  token is redacted (see [Security](#security--secrets)) and the outbound log
+  records only the URL **path** — the authority (host) and any userinfo
+  credentials are never written.
 - **Startup banner (L06/B05):** when logging is enabled (always in HTTP mode; in
   STDIO only when `LOG_LEVEL` is set), the very first log line at startup is
   the banner
@@ -772,8 +773,9 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
   ingress). The server serves plain HTTP on its listener.
 - **Secret hygiene (S02/N02):** tools never leak tokens, passwords, or secrets in
   outputs where avoidable. The NetBox token is never logged, and its type
-  implements safe redaction (`String`/`GoString`/`MarshalJSON`). URLs are logged
-  via `url.Redacted()` to strip any embedded credentials.
+  implements safe redaction (`String`/`GoString`/`MarshalJSON`). The outbound
+  request log records only the URL **path**, never the authority or any userinfo
+  credentials, so no embedded credentials can be written to the log.
 - **Annotation-based redaction (S02):** secrets are masked with a single
   central redaction helper driven by a `secret:"true"` struct-tag annotation,
   backed by structural safeguards:
@@ -868,7 +870,7 @@ STRIDE-flavored and concrete to the NetBox-proxy domain, naming realistic attack
 
 | Data class | Sensitivity | Confidentiality | Integrity | Availability |
 |------------|-------------|-----------------|-----------|--------------|
-| **NetBox personal access token** (per-request `Authorization: Bearer` in HTTP; single `NETBOX_TOKEN` in STDIO) | **Secret** | **Redact (S02)**; never log (**L05**, log-hook + `url.Redacted()` + outbound auth-header exclusion); never persist (**X04** stateless). | Protected from modification in transit (TLS at reverse proxy, S01). | Token presence required; missing/malformed → 401. |
+| **NetBox personal access token** (per-request `Authorization: Bearer` in HTTP; single `NETBOX_TOKEN` in STDIO) | **Secret** | **Redact (S02)**; never log (**L05**, log-hook + outbound-log path-only URL recording + auth-header exclusion); never persist (**X04** stateless). | Protected from modification in transit (TLS at reverse proxy, S01). | Token presence required; missing/malformed → 401. |
 | **NetBox DCIM/IPAM/virtualization/tenancy/circuits data** (infra source-of-truth) | **High** | **Least privilege (S10)** — a single relayed token carries the caller's effective permissions; read-only by default posture; `readOnlyHint:true` on reads. | **Authz on write** — every create/update/delete is authorized by NetBox; **X02 idempotency** for create (non-idempotent) vs delete (404→no-op). | Destructive ops must not be silently disruptable — HITL/destructiveHint (S12). |
 | **Tool arguments / write payloads** (user-supplied, from Z1) | **Restricted** (treated as untrusted) | Sanitized before use; never logged with secrets. | **Validated (S08)** — `validatePositiveID`, `sanitizeAllStrings` (CRLF strip). | Rejected (400/401/403/429/413) rather than partially applied. |
 | **Config** (`NETBOX_URL`, `NETBOX_TOKEN`, `TRANSPORT`, `LOG_*`) | **High** (token part = **Secret**) | `config.Config.NetBoxToken` carries `secret:"true"` tag → redacted if config ever logged. | Validated at startup (envconfig + ozzo-validation); `NETBOX_URL` SSRF-checked (S11). | Availability of operations requires a valid configured upstream. |
@@ -885,7 +887,7 @@ STRIDE-flavored and concrete to the NetBox-proxy domain, naming realistic attack
 
 Each vector states the **Threat**, **Impact**, and the concrete **Mitigation** (a hardening of an existing S-code applied to this domain, or a domain requirement). All mitigations are MUST-level.
 
-**(a) Token relay & leakage** — *Threat:* the NetBox token could be exfiltrated via tool output, log lines, or error strings; *Impact:* full read/write/delete control of the caller's NetBox footprint; *Mitigation:* token type implements safe `String`/`GoString`/`MarshalJSON` redaction, `Authorization` header excluded from outbound request log, URLs logged via `url.Redacted()`, `domain.ValidationError.Error()` carries **only the HTTP status** (body goes to the model solely via `structuredContent` `validation_errors`), never logged; token never persisted (X04) — hardens **S02/L05**.
+**(a) Token relay & leakage** — *Threat:* the NetBox token could be exfiltrated via tool output, log lines, or error strings; *Impact:* full read/write/delete control of the caller's NetBox footprint; *Mitigation:* token type implements safe `String`/`GoString`/`MarshalJSON` redaction, `Authorization` header excluded from outbound request log, the outbound log records only the URL **path** (never authority/userinfo), `domain.ValidationError.Error()` carries **only the HTTP status** (body goes to the model solely via `structuredContent` `validation_errors`), never logged; token never persisted (X04) — hardens **S02/L05**.
 
 **(b) Per-operation authorization on the 71 irreversible `delete_*` tools** — *Threat:* a compromised model host or over-eager client issues destructive deletes beyond its authority or intent; *Impact:* irreversible loss of infrastructure source-of-truth records; *Mitigation:* all 71 `delete_*` tools are typed and marked `destructiveHint:true` with `idempotentHint:true` (NetBox 404 → no-op); the **relayed token carries only the caller's effective permissions** — authorization for every delete is **delegated entirely to NetBox** (the relay adds no privilege); clients MUST gate destructive calls behind explicit confirmation — hardens **S12/S10**.
 
@@ -910,7 +912,7 @@ Each vector states the **Threat**, **Impact**, and the concrete **Mitigation** (
 - [x] **YES** — Every data class the server touches classified with C-I-A requirements (§3).
 - [x] **YES** — Domain-specific attack vectors identified beyond the generic S01–S13 (token relay, per-op authz on `delete_*`, SSRF/`ALLOW_PRIVATE_NETBOX`, CRLF injection, ANSI/C0 output, positive-ID, DoS, free-text injection; §4).
 - [x] **YES** — Each vector mapped to a concrete requirement (hardened S-code or new domain requirement; §4 a–h).
-- [x] **YES** — Sensitive data redaction (**S02**) and no-secrets-in-logs (**L05**) confirmed for this domain (token `String`/`GoString`/`MarshalJSON`, `url.Redacted()`, auth-header exclusion, `ValidationError` status-only; §4a, §3).
+- [x] **YES** — Sensitive data redaction (**S02**) and no-secrets-in-logs (**L05**) confirmed for this domain (token `String`/`GoString`/`MarshalJSON`, path-only outbound URL recording, auth-header exclusion, `ValidationError` status-only; §4a, §3).
 - [x] **YES** — Destructive/irreversible operations flagged `destructiveHint` with HITL (**S12**) where the domain demands it — all 71 `delete_*` tools are `destructiveHint:true` with `idempotentHint:true` (404→no-op); §4b.
 - [x] **YES** — Mutating tools carry a real data-level idempotency mechanism (**X02**) where double-execution is harmful — create is explicitly `idempotentHint:false` (new object each call), delete is `idempotentHint:true` with a real 404→no-op mechanism; §3, §4b.
 - [x] **YES** — Filesystem access scoped per **S04** — **not applicable by design**: the server is stateless (X01) and writes no files; there is no filesystem surface to scope (X04 N/A). Confirmed vacuous.
