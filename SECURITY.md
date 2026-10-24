@@ -51,7 +51,8 @@ patched; upgrade to a supported version.
   reverse proxy.
 - **Secrets** (e.g. the NetBox API token) are never leaked into tool output or
   logs — annotation-based redaction (`secret:true`), token `String`/`GoString`/
-  `MarshalJSON` redaction, `url.Redacted()`, and auth-header exclusion.
+  `MarshalJSON` redaction, outbound-log path-only URL recording (never the
+  authority/userinfo), and auth-header exclusion.
 - **Stateless** — the server holds no state and persists nothing; the token is
   never stored server-side (per-request in HTTP, `NETBOX_TOKEN` env in STDIO).
 - **SSRF / DNS-rebinding** — `NETBOX_URL` is validated and the dialer rejects
