@@ -254,6 +254,7 @@ func TestIsPrivateIP(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
+		t.Setenv("TRANSPORT", "http")
 		t.Setenv("NETBOX_URL", "http://8.8.8.8")
 		t.Setenv("LISTEN_ADDR", ":9090")
 		t.Setenv("RATE_LIMIT_GLOBAL", "50")
@@ -462,6 +463,7 @@ func TestLoad_NetBoxCAFile(t *testing.T) {
 	validPEM := testSelfSignedCertPEM(t)
 
 	t.Run("unset uses empty path", func(t *testing.T) {
+		t.Setenv("TRANSPORT", "http")
 		t.Setenv("NETBOX_URL", "http://8.8.8.8")
 		t.Setenv("NETBOX_CA_FILE", "")
 
@@ -476,6 +478,7 @@ func TestLoad_NetBoxCAFile(t *testing.T) {
 
 	t.Run("set to a valid PEM path", func(t *testing.T) {
 		path := writeTempFile(t, validPEM)
+		t.Setenv("TRANSPORT", "http")
 		t.Setenv("NETBOX_URL", "http://8.8.8.8")
 		t.Setenv("NETBOX_CA_FILE", path)
 
