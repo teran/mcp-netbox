@@ -21,7 +21,7 @@ TAGS_SPACE := $(subst $(comma), ,$(TAGS))
 # the default (true) produces a local snapshot build into dist/.
 SNAPSHOT ?= true
 
-.PHONY: test lint lint-golangci lint-vuln arch build e2e container-image mutation
+.PHONY: test lint lint-golangci lint-gosec lint-vuln arch build e2e container-image mutation
 
 ## test runs the unit suite with the race detector and enforces the >=95% coverage gate.
 test:
@@ -33,15 +33,17 @@ test:
 	fi; \
 	echo "OK: coverage $${COVERAGE}% meets threshold of $(COVERAGE_THRESHOLD)%"
 
-## lint runs the full static-analysis suite (golangci + govulncheck + arch).
-## Note: the standalone `gosec` step is intentionally omitted — gosec's built-in
-## analyzer cannot read Go 1.27 export data (v5 > v4). gosec is still enforced as
-## a linter inside golangci-lint (.golangci.yml), so security scanning is retained.
-lint: lint-golangci lint-vuln arch
+## lint runs the full static-analysis suite (golangci + gosec + govulncheck + arch).
+lint: lint-golangci lint-gosec lint-vuln arch
 
 ## lint-golangci runs golangci-lint with the repo configuration.
 lint-golangci:
 	golangci-lint run --config .golangci.yml ./...
+
+## lint-gosec runs the standalone Go security scanner (C05GO, gosec v2.30.0).
+## gosec v2.29.0 could not read Go 1.27 export data (v5 > v4); v2.30.0 supports it.
+lint-gosec:
+	$(GO) run github.com/securego/gosec/v2/cmd/gosec@v2.30.0 -quiet ./...
 
 ## lint-vuln runs the Go vulnerability scanner (govulncheck).
 lint-vuln:

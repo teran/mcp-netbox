@@ -32,13 +32,14 @@ jobs:
       - name: Install golangci-lint
         run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
 
-      # `make lint` runs golangci-lint + govulncheck + go-arch-lint.
-      # The standalone `gosec` step is omitted (gosec cannot read Go 1.27
-      # export data); gosec is still enforced as a linter inside golangci-lint.
+      # `make lint` runs golangci-lint + gosec + govulncheck + go-arch-lint.
+      # gosec (v2.30.0, C05GO) runs as a standalone step (lint-gosec) in
+      # addition to the golangci-lint `gosec` linter. gosec v2.29.0 could not
+      # read Go 1.27 export data; v2.30.0 supports it.
       # govulncheck is folded into the make interface (lint-vuln sub-target)
       # rather than a separate GitHub action, so all static analysis lives
       # behind a single `make <target>` entry point (R07).
-      - name: Lint (golangci + govulncheck + arch)
+      - name: Lint (golangci + gosec + govulncheck + arch)
         run: make lint
 
       # `make test` runs the race-enabled unit suite and enforces the >=95%
