@@ -59,9 +59,9 @@ The server exposes **275 MCP tools** across **71 entities** — read-only `get_*
 
 ### Write tools — create / update
 
-For every entity `<e>` there is a **`create_<e>`** (POST, creates a new object) and an **`update_<e>`** (PATCH, **partial update** — only the fields you provide are changed). Write payloads are **validated on the NetBox side**: a NetBox 400 response is surfaced to the model as a structured `ValidationError` (the error string itself never includes the response body). The 27 entities are:
+For every entity `<e>` there is a **`create_<e>`** (POST, creates a new object) and an **`update_<e>`** (PATCH, **partial update** — only the fields you provide are changed). Write payloads are **validated on the NetBox side**: a NetBox 400 response is surfaced to the model as a structured `ValidationError` (the error string itself never includes the response body). The 71 entities are:
 
-`site`, `region`, `device`, `ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `rack`, `interface`, `circuit_termination`, `cable`, `vm_interface`, `provider`, `tenant`, `tenant_group`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`
+`site`, `region`, `tenant_group`, `device`, `ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`, `circuit`, `rack`, `interface`, `circuit_termination`, `cable`, `vm_interface`, `provider`, `tenant`, `tag`, `custom_field`, `manufacturer`, `device_type`, `location`, `cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`, `site_group`, `rack_group`, `rack_role`, `device_role`, `platform`, `virtual_chassis`, `power_panel`, `inventory_item_role`, `front_port`, `rear_port`, `console_port`, `console_server_port`, `power_port`, `power_outlet`, `power_feed`, `device_bay`, `rack_reservation`, `inventory_item`, `mac_address`, `rir`, `contact_group`, `contact_role`, `virtual_disk`, `virtual_machine_type`, `aggregate`, `ip_range`, `asn`, `asn_range`, `route_target`, `service`, `service_template`, `fhrp_group`, `fhrp_group_assignment`, `vlan_translation_policy`, `vlan_translation_rule`, `provider_account`, `provider_network`, `circuit_group`, `circuit_group_assignment`, `virtual_circuit`, `virtual_circuit_type`, `virtual_circuit_termination`
 
 ### Write tools — delete (destructive)
 
