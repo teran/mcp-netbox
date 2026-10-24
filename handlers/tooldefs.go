@@ -3,7 +3,7 @@ package handlers
 // toolDef describes one MCP tool registration, including the per-tool
 // Instructions metadata (M4) that guides the model on how and when to use it.
 //
-// The current official Go SDK (go-sdk v1.7.0) does not yet expose a per-tool
+// The current official Go SDK (go-sdk v1.8.0) does not yet expose a per-tool
 // Instructions field on mcp.Tool, so these instructions are surfaced to the
 // model through the Description channel (the SDK's only per-tool guidance
 // mechanism) and are kept as first-class, testable data here.

@@ -55,7 +55,7 @@ const (
 type Config struct {
 	NetBoxURL   string `envconfig:"NETBOX_URL" required:"true"`
 	NetBoxToken string `envconfig:"NETBOX_TOKEN" default:"" secret:"true"`
-	Transport   string `envconfig:"TRANSPORT" default:"http"`
+	Transport   string `envconfig:"TRANSPORT" default:"stdio"`
 	ListenAddr  string `envconfig:"LISTEN_ADDR" default:":8080"`
 	// InternalAddr is the internal observability endpoint (default :8081). It
 	// is separate from ListenAddr and serves Prometheus metrics, pprof, and the
