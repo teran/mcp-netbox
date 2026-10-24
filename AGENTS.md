@@ -70,15 +70,30 @@ This document describes the agents/assistants involved in the development and op
 | `get_tenant_groups`        | MCP Server | `GET /api/tenancy/tenant-groups/`                 |
 | `get_object_by_id`         | MCP Server | `GET /api/*/<type>/<id>/`                         |
 
+The table above is a representative sample of the read tools; in total the
+server exposes **62 read-only `get_*` tools** (including the generic
+`get_object_by_id`, which supports 68 object types).
+
 In addition to the read tools above, the server registers **typed write tools**
-for every one of the **27 entities**: `create_<e>` (POST), `update_<e>`
+for every one of the **71 entities**: `create_<e>` (POST), `update_<e>`
 (partial PATCH), and `delete_<e>` (irreversible, `DestructiveHint: true`) —
-81 write tools in total (97 tools overall). The entity set is: `site`, `region`,
-`device`, `ip_address`, `prefix`, `vlan`, `virtual_machine`, `cluster`,
-`circuit`, `rack`, `interface`, `circuit_termination`, `cable`, `vm_interface`,
-`provider`, `tenant`, `tenant_group`, `manufacturer`, `device_type`, `location`,
-`cluster_type`, `cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`,
-`contact`.
+213 write tools in total (275 tools overall). The entity set is: `site`,
+`region`, `tenant_group`, `device`, `ip_address`, `prefix`, `vlan`,
+`virtual_machine`, `cluster`, `circuit`, `rack`, `interface`,
+`circuit_termination`, `cable`, `vm_interface`, `provider`, `tenant`, `tag`,
+`custom_field`, `manufacturer`, `device_type`, `location`, `cluster_type`,
+`cluster_group`, `circuit_type`, `vrf`, `vlan_group`, `role`, `contact`,
+`site_group`, `rack_group`, `rack_role`, `device_role`, `platform`,
+`virtual_chassis`, `power_panel`, `inventory_item_role`, `front_port`,
+`rear_port`, `console_port`, `console_server_port`, `power_port`,
+`power_outlet`, `power_feed`, `device_bay`, `rack_reservation`,
+`inventory_item`, `mac_address`, `rir`, `contact_group`, `contact_role`,
+`virtual_disk`, `virtual_machine_type`, `aggregate`, `ip_range`, `asn`,
+`asn_range`, `route_target`, `service`, `service_template`, `fhrp_group`,
+`fhrp_group_assignment`, `vlan_translation_policy`, `vlan_translation_rule`,
+`provider_account`, `provider_network`, `circuit_group`,
+`circuit_group_assignment`, `virtual_circuit`, `virtual_circuit_type`,
+`virtual_circuit_termination`.
 
 The write tools map to the corresponding NetBox endpoints (`POST`, `PATCH`,
 `DELETE`) under `/api/dcim/`, `/api/ipam/`, `/api/virtualization/`,
