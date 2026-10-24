@@ -636,6 +636,120 @@ func TestRequestArgs_Empty(t *testing.T) {
 	}
 }
 
+func TestLogArgs_EmptyAndInvalid(t *testing.T) {
+	t.Parallel()
+
+	if got := logArgs(nil); got != nil {
+		t.Errorf("logArgs(nil) = %v, want nil", got)
+	}
+	if got := logArgs([]byte(`{"method":"ping"}`)); got != nil {
+		t.Errorf("logArgs(no params) = %v, want nil", got)
+	}
+	if got := logArgs([]byte(`not json`)); got != nil {
+		t.Errorf("logArgs(invalid body) = %v, want nil", got)
+	}
+}
+
+func TestLogArgs_ValidReturnsJSONString(t *testing.T) {
+	t.Parallel()
+
+	got := logArgs([]byte(`{"method":"tools/call/get_sites","params":{"q":"dc"}}`))
+	s, ok := got.(string)
+	if !ok {
+		t.Fatalf("logArgs type = %T, want string", got)
+	}
+	if !strings.Contains(s, `"q":"dc"`) {
+		t.Errorf("logArgs = %q, want the params as a JSON string", s)
+	}
+}
+
+// TestRedactArgs_MasksSecrets verifies the redaction step of the HTTP args
+// pipeline (L08/S02): a secret:"true" field is masked with ***redacted***
+// while non-secret fields survive, matching the stdio path's behavior.
+func TestRedactArgs_MasksSecrets(t *testing.T) {
+	t.Parallel()
+
+	const secret = "super-secret-value"
+	got := redactArgs(secretArgs{Secret: secret, Name: "site-a"})
+
+	if strings.Contains(got, secret) {
+		t.Errorf("redactArgs leaks a secret value; got: %s", got)
+	}
+	if !strings.Contains(got, "***redacted***") {
+		t.Errorf("redactArgs did not mask the secret field; got: %s", got)
+	}
+	if !strings.Contains(got, "site-a") {
+		t.Errorf("redactArgs should keep non-secret fields; got: %s", got)
+	}
+}
+
+// captureHTTPAccessLog runs a body through LoggingMiddleware with a capture
+// logger and returns everything written to the capture buffer.
+func captureHTTPAccessLog(t *testing.T, body string) string {
+	t.Helper()
+
+	var buf bytes.Buffer
+	l := logrus.New()
+	l.SetOutput(&buf)
+	l.SetLevel(logrus.InfoLevel)
+	SetLogger(l)
+	t.Cleanup(func() { SetLogger(nil) })
+
+	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/mcp", strings.NewReader(body))
+	req.RemoteAddr = "9.9.9.9:80"
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	return buf.String()
+}
+
+// TestLoggingMiddleware_ArgsSanitized verifies the HTTP access log never
+// receives raw ANSI escape or C0 control sequences embedded in write-payload
+// params (L08/S02). The args value is JSON-encoded (which escapes most control
+// bytes), but a raw DEL (0x7f) byte is not escaped by json.Marshal, so
+// sanitizeOutput must strip it; an ESC-based ANSI sequence is logged only in
+// its JSON-escaped \u001b text form, never as a raw byte. The Authorization
+// header (which carries the token) must not leak either.
+func TestLoggingMiddleware_ArgsSanitized(t *testing.T) {
+	body := `{"method":"tools/call/update_site","params":{"name":"srv` + "\x7f" + `DEL","esc":"\u001b[31m","q":"dc"}}`
+
+	out := captureHTTPAccessLog(t, body)
+
+	if !strings.Contains(out, "mcp_request") {
+		t.Fatalf("access log missing; got: %s", out)
+	}
+	// No raw control/ANSI byte (ESC, NUL, DEL) may reach the log.
+	for _, b := range []byte{0x1b, 0x00, 0x7f} {
+		if strings.ContainsRune(out, rune(b)) {
+			t.Errorf("access log contains raw control byte 0x%02x; got: %q", b, out)
+		}
+	}
+	if !strings.Contains(out, "srvDEL") {
+		t.Errorf("access log missing the DEL-sanitized args value; got: %s", out)
+	}
+	if strings.Contains(out, "Authorization") {
+		t.Errorf("access log must not contain Authorization header; got: %s", out)
+	}
+}
+
+// TestRedactArgs_SanitizesDelBytes verifies sanitizeOutput is applied to the
+// redacted args: a raw DEL (0x7f) byte, which json.Marshal does not escape,
+// is stripped from the serialized output.
+func TestRedactArgs_SanitizesDelBytes(t *testing.T) {
+	t.Parallel()
+
+	got := redactArgs(map[string]any{"name": "srv\x7fDEL"})
+	if strings.Contains(got, "\x7f") {
+		t.Errorf("redactArgs did not strip the DEL byte; got: %q", got)
+	}
+	if !strings.Contains(got, "srvDEL") {
+		t.Errorf("redactArgs should keep the sanitized value; got: %q", got)
+	}
+}
+
 func TestLoggingMiddleware_InfoLevelWithFields(t *testing.T) {
 	t.Cleanup(func() {
 		SetLogger(nil)

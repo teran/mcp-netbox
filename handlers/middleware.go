@@ -312,7 +312,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		WithSession(request.Context(), getLogger()).WithFields(logrus.Fields{
 			"tool":        toolName,
-			"args":        requestArgs(body),
+			"args":        logArgs(body),
 			"source":      requestSource(request),
 			"duration":    duration,
 			"in_bytes":    len(body),
@@ -382,6 +382,44 @@ func requestArgs(body []byte) any {
 	}
 
 	return req.Params
+}
+
+// logArgs derives the value logged in the HTTP access-log "args" field
+// (L08/S02). It extracts the JSON-RPC params from the body, applies the same
+// redaction mechanism as the stdio path (redact.MarshalJSON) and then
+// sanitizes the result of ANSI escape and C0 control sequences, so neither
+// secret-tagged fields nor terminal escape sequences reach the log. Empty or
+// non-JSON bodies yield nil; otherwise the result is a JSON string matching
+// the stdio path's string(args).
+func logArgs(body []byte) any {
+	params := requestArgs(body)
+	if params == nil {
+		return nil
+	}
+
+	raw, ok := params.(json.RawMessage)
+	if !ok {
+		return nil
+	}
+
+	var v any
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return nil
+	}
+
+	return redactArgs(v)
+}
+
+// redactArgs redacts v via redact.MarshalJSON (masking any secret:"true"
+// field) and returns the JSON serialization sanitized of ANSI/C0 sequences.
+// A serialization failure yields an empty string.
+func redactArgs(v any) string {
+	serialized, err := redact.MarshalJSON(v)
+	if err != nil {
+		return ""
+	}
+
+	return sanitizeOutput(string(serialized))
 }
 
 // requestSource derives the client source from the request headers, in order:
