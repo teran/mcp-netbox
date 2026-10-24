@@ -21,7 +21,7 @@ TAGS_SPACE := $(subst $(comma), ,$(TAGS))
 # the default (true) produces a local snapshot build into dist/.
 SNAPSHOT ?= true
 
-.PHONY: test lint lint-golangci lint-vuln arch build e2e container-image
+.PHONY: test lint lint-golangci lint-vuln arch build e2e container-image mutation
 
 ## test runs the unit suite with the race detector and enforces the >=95% coverage gate.
 test:
@@ -60,6 +60,16 @@ build:
 ## MCP_NETBOX_E2E=1; see e2e/netbox_e2e_test.go).
 e2e:
 	MCP_NETBOX_E2E=1 $(GO) test -tags e2e ./e2e/...
+
+## mutation runs the gremlins mutation-testing hard gate (C02/C08GO). CI binds
+## to this target (R07/N31) instead of calling gremlins directly. Thresholds
+## (efficacy / mutant-coverage) live in .gremlins.yaml at the repo root, NOT as
+## --threshold-* CLI flags: a gremlins/viper bug binds float CLI flags as
+## strings, so they are silently ignored by assess(). The config file is parsed
+## as real floats and DOES gate the exit code. The positional must be "."
+## (not "./...") — gremlins v0.6.0 does not expand "./...".
+mutation:
+	gremlins unleash .
 
 ## container-image builds the Docker image from the unified goreleaser dist/
 ## artifact. Usage:

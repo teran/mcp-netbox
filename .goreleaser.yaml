@@ -46,7 +46,10 @@ checksum:
   name_template: "checksums.txt"
 
 snapshot:
-  version_template: "{{ incpatch .Version }}-next"
+  # Non-tag/master builds MUST embed a SNAPSHOT version identifying the commit
+  # (B02/N43): "{X}-SNAPSHOT-{commit}". goreleaser's `.ShortCommit` provides the
+  # abbreviated commit hash in snapshot mode.
+  version_template: "{{ incpatch .Version }}-SNAPSHOT-{{ .ShortCommit }}"
 
 changelog:
   sort: asc
