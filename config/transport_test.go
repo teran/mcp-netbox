@@ -25,7 +25,6 @@ func TestValidateTransport(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			cfg := Config{
 				NetBoxURL:          "http://192.168.1.1:8000",
-				AllowPrivateNetBox: true,
 				NetBoxToken:        testCase.netboxToken,
 				Transport:          testCase.transport,
 				RateLimitGlobal:    100,

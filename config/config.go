@@ -3,12 +3,9 @@
 package config
 
 import (
-	"context"
 	"crypto/x509"
 	"fmt"
 	"io"
-	"net"
-	"net/netip"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -19,27 +16,6 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 )
-
-// IsPrivateAddr reports whether addr is a loopback, private, link-local, or
-// unspecified address. It uses netip.Addr which is the modern Go IP type.
-func IsPrivateAddr(addr netip.Addr) bool {
-	return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() ||
-		addr.IsLinkLocalMulticast() || addr.IsUnspecified()
-}
-
-// IsPrivateIP reports whether ip is a loopback, private, link-local, or
-// unspecified address.
-func IsPrivateIP(ip net.IP) bool {
-	if ip == nil {
-		return false
-	}
-	a, err := netip.ParseAddr(ip.String())
-	if err != nil {
-		return false
-	}
-
-	return IsPrivateAddr(a)
-}
 
 // Transport modes supported by the server. HTTP serves the MCP protocol over
 // Streamable HTTP (the token is taken from the per-request Authorization
@@ -65,7 +41,6 @@ type Config struct {
 	RateLimitPerClient int           `envconfig:"RATE_LIMIT_PER_CLIENT" default:"10"`
 	TrustedProxy       string        `envconfig:"TRUSTED_PROXY" default:""`
 	WriteTimeout       time.Duration `envconfig:"WRITE_TIMEOUT" default:"300s"`
-	AllowPrivateNetBox bool          `envconfig:"ALLOW_PRIVATE_NETBOX" default:"false"`
 	// NetBoxCAFile is an optional path to a PEM CA bundle used to trust a
 	// custom/private CA for the outbound HTTPS connection to NetBox. When empty,
 	// the Go system root pool is used. It is a file path, not a secret.
@@ -81,7 +56,6 @@ func (c Config) validate() error {
 			validation.Required,
 			validation.By(validateURLScheme),
 			validation.By(validateURLHost),
-			validation.By(validateURLNotPrivate(c.AllowPrivateNetBox)),
 		),
 		validation.Field(&c.Transport, validation.By(validateTransport(c.NetBoxToken))),
 		validation.Field(&c.RateLimitGlobal, validation.By(validatePositiveInt)),
@@ -190,69 +164,6 @@ func validateURLHost(value any) error {
 	}
 	if u.Host == "" {
 		return fmt.Errorf("must include a host (e.g. http://netbox:8000)")
-	}
-
-	return nil
-}
-
-func validateURLNotPrivate(allowPrivate bool) validation.RuleFunc {
-	return func(value any) error {
-		if allowPrivate {
-			return nil
-		}
-
-		return validateURLNotPrivateCheck(value)
-	}
-}
-
-func validateURLNotPrivateCheck(value any) error {
-	str, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("must be a string")
-	}
-	u, err := url.Parse(str)
-	if err != nil {
-		return err
-	}
-
-	host := u.Hostname()
-	// Strip IPv6 brackets if present
-	host = strings.Trim(host, "[]")
-
-	// Try to parse as IP address
-	addr := net.ParseIP(host)
-	if addr == nil {
-		// Hostname — resolve DNS to check for private IPs.
-		// This prevents SSRF bypass where a hostname resolves to a private IP.
-		ips, err := net.DefaultResolver.LookupNetIP(context.Background(), "ip", host)
-		if err != nil {
-			// DNS resolution failed — reject the hostname to prevent SSRF bypass.
-			// The operator must either fix DNS, use a literal IP, or set ALLOW_PRIVATE_NETBOX=true.
-			return fmt.Errorf("hostname %q DNS lookup failed (%w); set ALLOW_PRIVATE_NETBOX=true to bypass", host, err)
-		}
-		for _, resolvedIP := range ips {
-			if IsPrivateAddr(resolvedIP) {
-				return fmt.Errorf(
-					"hostname %q resolves to private/reserved IP %q (set ALLOW_PRIVATE_NETBOX=true to bypass)",
-					host, resolvedIP,
-				)
-			}
-		}
-
-		return nil
-	}
-
-	if addr.IsLoopback() {
-		return fmt.Errorf("must not be a loopback address (got %q)", host)
-	}
-	if addr.IsPrivate() {
-		return fmt.Errorf("must not be a private IP address (got %q)", host)
-	}
-	if addr.IsLinkLocalUnicast() || addr.IsLinkLocalMulticast() {
-		return fmt.Errorf("must not be a link-local address (got %q)", host)
-	}
-	if addr.IsUnspecified() {
-		return fmt.Errorf("must not be an unspecified address (got %q)", host)
 	}
 
 	return nil

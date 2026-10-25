@@ -162,21 +162,20 @@ The MCP `Server` is shared; only the transport wiring differs.
 | HTTP Router       | `net/http` standard library + middleware pattern                |
 | Tool Registration | `handlers/registration.go` — `RegisterTools()` function         |
 | Logging           | `github.com/sirupsen/logrus` — channel by transport, gated by `LOG_LEVEL`; SDK `slog` wired into logrus |
-| Outbound HTTP     | `resty.dev/v3` — NetBox client (DNS-rebinding dialer + circuit breaker transport preserved) |
+| Outbound HTTP     | `resty.dev/v3` — NetBox client (circuit breaker transport preserved) |
 | Metrics           | Prometheus (Go runtime + custom MCP metrics), pprof, and health/readiness/startup probes on the internal address port 8081 |
 
 ## Configuration (Environment Variables)
 
 | Variable               | Required | Default | Description                          |
 |------------------------|----------|---------|--------------------------------------|
-| `NETBOX_URL`           | Yes      | —       | Base URL of the NetBox instance (e.g. `http://netbox:8000`). Must be a valid HTTP(S) URL. Loopback, private, and link-local IP addresses are rejected for SSRF protection. |
+| `NETBOX_URL`           | Yes      | —       | Base URL of the NetBox instance (e.g. `http://netbox:8000`). Must be a valid HTTP(S) URL; the destination is fixed by the operator from environment and is not restricted by the server. |
 | `NETBOX_TOKEN`         | STDIO only | `""` | NetBox API token for **STDIO** transport. Required when `TRANSPORT=stdio`. Ignored for HTTP. |
 | `TRANSPORT`            | No       | `stdio` | MCP transport override: `http` (Streamable HTTP, remote) or `stdio` (stdin/stdout, local). Overridden by the `-mode` flag; defaults to `stdio`. |
 | `LISTEN_ADDR`          | No       | `:8080` | TCP address for the MCP server (HTTP transport) |
 | `INTERNAL_ADDR`        | No       | `:8081` | Internal observability address (HTTP transport): Prometheus `/metrics`, pprof `/debug/pprof/*`, and `healthz`/`readyz`/`startup` probes |
 | `RATE_LIMIT_GLOBAL`    | No       | `100`   | Global rate limit (requests/second)  |
 | `RATE_LIMIT_PER_CLIENT`| No       | `10`    | Per-client IP rate limit (requests/second) |
-| `ALLOW_PRIVATE_NETBOX` | No       | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
 | `NETBOX_CA_FILE`       | No       | `""`    | Optional path to a PEM CA bundle used to trust a custom/private CA on the outbound HTTPS connection to NetBox. When set, the given certificates are trusted (in addition to the system root pool) for TLS to NetBox; the server fails fast at startup if the file cannot be read or contains no valid PEM certificates. When empty (default), the Go system root pool is used. Only affects the outbound client TLS to NetBox; the server's inbound TLS is unchanged. |
 | `TRUSTED_PROXY`        | No       | `""`    | CIDR prefix for the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server uses the first IP from `X-Forwarded-For` for rate limiting instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT`        | No       | `300s`  | HTTP write timeout (Go duration format, e.g. `300s`). Minimum 1s. Note: 0 will fail validation; use a reverse proxy for no timeout. |
@@ -812,16 +811,13 @@ The middleware chain applies only to the **HTTP** transport. In **STDIO** mode t
   (**gosec**, **govulncheck**) are **fixed rather than suppressed**. There are no
   blanket suppressions or default excludes; any `//nolint` is narrowly scoped
   and justified (best effort).
-- **SSRF / DNS-rebinding protection:** `NETBOX_URL` is validated to reject
-  loopback, private, and link-local IPs, and the HTTP client's dialer rejects
-  connections to reserved IPs at dial time to prevent DNS rebinding
-  (`ALLOW_PRIVATE_NETBOX` overrides for private networks).
+- **Upstream destination (operator responsibility):** the destination NetBox address is **fixed by the operator from `NETBOX_URL`** in the environment and is never taken from an incoming MCP request. Because no client-controlled URL ever reaches the relay, the classic client-driven SSRF vector (a caller inducing the server to fetch an arbitrary internal address) is **not present**. Consequently the server places **no address restriction** on `NETBOX_URL` — loopback, private, and link-local targets are all permitted. This is a **deliberate, owner-acknowledged simplification of the threat model**: the operator is trusted to point `NETBOX_URL` at the intended NetBox instance, and operator misconfiguration (e.g. pointing it at metadata/loopback) is accepted as operator responsibility rather than defended in-process.
 - **Rate limiting & body limit:** global/per-client rate limits and a 1 MB body
   limit guard the HTTP listener against abuse.
 
 ### Domain security audit (S14)
 
-**Owner:** `security` agent. **Status:** produced by the `security` subagent per `reference/security-audit.md` and embedded verbatim (S14). This block layers on top of the existing S01–S05/CRUD/SSRF/ratelimit content in the Security section and the statelessness of **Data & state (X01)**; it introduces no renumbering or weakening of S01–S13.
+**Owner:** `security` agent. **Status:** produced by the `security` subagent per `reference/security-audit.md` and embedded verbatim (S14). This block layers on top of the existing S01–S05/CRUD/ratelimit content in the Security section and the statelessness of **Data & state (X01)**; it introduces no renumbering or weakening of S01–S13.
 
 ---
 
@@ -849,7 +845,7 @@ STRIDE-flavored and concrete to the NetBox-proxy domain, naming realistic attack
 **Realistic attackers:**
 - **A1 — Compromised / malicious model host or client (Z1).** The LLM host or client is out-of-band and its calls carry a caller token. It can attempt to invoke **write and `delete_*` tools** without legitimate authorization, submit malformed payloads, and abuse the relay as a scanning/probing tool.
 - **A2 — Hostile upstream NetBox response (Z3).** NetBox data (device names, descriptions, object labels, free-text fields) is attacker-influenced in many deployments (anyone able to write objects). Malicious strings can carry **CRLF/control characters**, **ANSI/C0 escapes**, or be crafted to inject through the model.
-- **A3 — Network attacker in HTTP mode (between Z4 and Z2, or at the NetBox boundary).** Can sniff/alter plaintext HTTP if TLS is misconfigured, replay relayed tokens, or target the relay as a DoS vector. Can also attempt **SSRF** by inducing the server to reach internal metadata/loopback via a hostile `NETBOX_URL` or DNS rebinding.
+- **A3 — Network attacker in HTTP mode (between Z4 and Z2, or at the NetBox boundary).** Can sniff/alter plaintext HTTP if TLS is misconfigured, replay relayed tokens, or target the relay as a DoS vector. Client-driven SSRF is not applicable: the relayed `NETBOX_URL` is fixed by the operator from environment and is never supplied by an incoming request.
 
 **Per-boundary actions / threats (STRIDE):**
 
@@ -858,8 +854,8 @@ STRIDE-flavored and concrete to the NetBox-proxy domain, naming realistic attack
 | T1 | **Token exfiltration** | Z1↔Z2, Z2↔Z3 | Info disclosure | Token leaked via tool output, log lines, or error strings on relay or upstream errors. |
 | T2 | **Unauthorized / over-privileged writes** | Z1→Z2→Z3 | Elevation of privilege | A1 invokes `create_*`/`update_*`/`delete_*` beyond its legitimate authority; especially the **71 irreversible `delete_*`** tools. |
 | T3 | **Destructive accidental/abusive deletion** | Z1→Z3 | DoS / integrity | A1 (or a misbehaving model) issues a `delete_*` for production infrastructure with no confirmation gate. |
-| T4 | **Upstream SSRF / DNS rebinding** | Z2↔Z3 | Spoofing / info disclosure | Hostile `NETBOX_URL` points to loopback/private/internal; DNS rebinding switches resolution to a reserved IP post-validation. |
-| T5 | **CRLF / header / JSON injection in write payloads** | Z1→Z2→Z3 | Tampering / injection | Crafted values embed `\r\n` to inject NetBox headers/query strings or corrupt the JSON body; the `ALLOW_PRIVATE_NETBOX` override weakens T4. |
+| T4 | **Upstream destination misconfiguration (operator responsibility — not a client SSRF vector)** | Z2↔Z3 | N/A — no client-controlled URL | `NETBOX_URL` is fixed by the operator from environment and is never supplied by an incoming MCP request, so the classic client-driven SSRF vector is absent. A misconfigured `NETBOX_URL` pointing at loopback/private/internal metadata is an **accepted operator responsibility**; the server places no address restriction on the destination (deliberate, owner-acknowledged simplification). |
+| T5 | **CRLF / header / JSON injection in write payloads** | Z1→Z2→Z3 | Tampering / injection | Crafted values embed `\r\n` to inject NetBox headers/query strings or corrupt the JSON body. |
 | T6 | **ANSI / C0 output injection** | Z3→Z2→Z1 | Tampering / spoofing | Malicious NetBox object names embed ANSI escapes/control bytes to inject terminal escape sequences into the model's rendering (S09/N23). |
 | T7 | **Relay DoS / resource abuse** | A3→Z2 | DoS | Flood the HTTP listener with requests or oversized bodies to exhaust connections and relay resources. |
 | T8 | **Injection via free-text / object-name fields** | Z1→Z3 | Tampering | Write payloads relay object names / free text that could carry injection payloads toward NetBox or downstream consumers. |
@@ -873,7 +869,7 @@ STRIDE-flavored and concrete to the NetBox-proxy domain, naming realistic attack
 | **NetBox personal access token** (per-request `Authorization: Bearer` in HTTP; single `NETBOX_TOKEN` in STDIO) | **Secret** | **Redact (S02)**; never log (**L05**, log-hook + outbound-log path-only URL recording + auth-header exclusion); never persist (**X04** stateless). | Protected from modification in transit (TLS at reverse proxy, S01). | Token presence required; missing/malformed → 401. |
 | **NetBox DCIM/IPAM/virtualization/tenancy/circuits data** (infra source-of-truth) | **High** | **Least privilege (S10)** — a single relayed token carries the caller's effective permissions; read-only by default posture; `readOnlyHint:true` on reads. | **Authz on write** — every create/update/delete is authorized by NetBox; **X02 idempotency** for create (non-idempotent) vs delete (404→no-op). | Destructive ops must not be silently disruptable — HITL/destructiveHint (S12). |
 | **Tool arguments / write payloads** (user-supplied, from Z1) | **Restricted** (treated as untrusted) | Sanitized before use; never logged with secrets. | **Validated (S08)** — `validatePositiveID`, `sanitizeAllStrings` (CRLF strip). | Rejected (400/401/403/429/413) rather than partially applied. |
-| **Config** (`NETBOX_URL`, `NETBOX_TOKEN`, `TRANSPORT`, `LOG_*`) | **High** (token part = **Secret**) | `config.Config.NetBoxToken` carries `secret:"true"` tag → redacted if config ever logged. | Validated at startup (envconfig + ozzo-validation); `NETBOX_URL` SSRF-checked (S11). | Availability of operations requires a valid configured upstream. |
+| **Config** (`NETBOX_URL`, `NETBOX_TOKEN`, `TRANSPORT`, `LOG_*`) | **High** (token part = **Secret**) | `config.Config.NetBoxToken` carries `secret:"true"` tag → redacted if config ever logged. | Validated at startup (envconfig + ozzo-validation); `NETBOX_URL` validated as a URL (destination not restricted by the server). | Availability of operations requires a valid configured upstream. |
 
 **Derived requirements:**
 - **Token = Secret** → redact (S02), never log (L05), never persist (X04).
@@ -891,7 +887,7 @@ Each vector states the **Threat**, **Impact**, and the concrete **Mitigation** (
 
 **(b) Per-operation authorization on the 71 irreversible `delete_*` tools** — *Threat:* a compromised model host or over-eager client issues destructive deletes beyond its authority or intent; *Impact:* irreversible loss of infrastructure source-of-truth records; *Mitigation:* all 71 `delete_*` tools are typed and marked `destructiveHint:true` with `idempotentHint:true` (NetBox 404 → no-op); the **relayed token carries only the caller's effective permissions** — authorization for every delete is **delegated entirely to NetBox** (the relay adds no privilege); clients MUST gate destructive calls behind explicit confirmation — hardens **S12/S10**.
 
-**(c) Upstream SSRF / DNS-rebinding and the `ALLOW_PRIVATE_NETBOX` risk** — *Threat:* a hostile or misconfigured `NETBOX_URL` directs the relay at loopback/private/internal metadata, or DNS rebinding swaps resolution to a reserved IP after validation; *Impact:* server becomes an SSRF proxy to internal services; *Mitigation:* `NETBOX_URL` validated to reject loopback/private/link-local IPs + dialer-time reserved-IP rejection; **`ALLOW_PRIVATE_NETBOX` is an explicit, operator-acknowledged override** — it weakens this control by design and must only be set when the operator trusts the private upstream, never exposed to remote callers — hardens **S11**.
+**(c) Upstream destination — client SSRF is not applicable; operator responsibility** — *Threat:* a client-controlled URL could otherwise let a remote caller turn the relay into an SSRF proxy to internal services; *Assessment:* this vector is **not present by design** — `NETBOX_URL` is fixed by the operator from environment and never accepted from an incoming MCP request, so no caller can induce the server to reach an arbitrary internal address. *Accepted operator responsibility:* the server places **no address restriction** on `NETBOX_URL` (loopback, private, link-local, and metadata-range targets are all permitted). An operator who points `NETBOX_URL` at an unintended target (e.g. cloud metadata/loopback) is the sole cause of any resulting exposure; this is a **deliberate, owner-acknowledged simplification of the threat model**, not a defect. There is no `ALLOW_PRIVATE_NETBOX` override — the absence of any address control is the documented baseline.
 
 **(d) CRLF / control-injection in write payloads** — *Threat:* crafted values embed `\r`/`\n` to inject NetBox headers/query strings or corrupt the JSON request body; *Impact:* header/JSON injection, request smuggling toward upstream, malformed objects; *Mitigation:* `handlers/validate.go` — **`sanitizeAllStrings`** recursively strips `\r`/`\n` (via `sanitizeControl`) from **every settable string field** of write payloads (incl. through pointers/maps) before `json.Marshal`; applied to the whole write path — hardens **S08**.
 
@@ -910,7 +906,7 @@ Each vector states the **Threat**, **Impact**, and the concrete **Mitigation** (
 - [x] **YES** — Trust zones and boundaries enumerated and documented (Z1–Z4, §1).
 - [x] **YES** — A concrete threat model for this domain recorded (attackers A1–A3, threats T1–T8, §2).
 - [x] **YES** — Every data class the server touches classified with C-I-A requirements (§3).
-- [x] **YES** — Domain-specific attack vectors identified beyond the generic S01–S13 (token relay, per-op authz on `delete_*`, SSRF/`ALLOW_PRIVATE_NETBOX`, CRLF injection, ANSI/C0 output, positive-ID, DoS, free-text injection; §4).
+- [x] **YES** — Domain-specific attack vectors identified beyond the generic S01–S13 (token relay, per-op authz on `delete_*`, CRLF injection, ANSI/C0 output, positive-ID, DoS, free-text injection, and the documented upstream-destination/operator-responsibility posture — client SSRF assessed as not applicable, §4).
 - [x] **YES** — Each vector mapped to a concrete requirement (hardened S-code or new domain requirement; §4 a–h).
 - [x] **YES** — Sensitive data redaction (**S02**) and no-secrets-in-logs (**L05**) confirmed for this domain (token `String`/`GoString`/`MarshalJSON`, path-only outbound URL recording, auth-header exclusion, `ValidationError` status-only; §4a, §3).
 - [x] **YES** — Destructive/irreversible operations flagged `destructiveHint` with HITL (**S12**) where the domain demands it — all 71 `delete_*` tools are `destructiveHint:true` with `idempotentHint:true` (404→no-op); §4b.

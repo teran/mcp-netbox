@@ -55,8 +55,11 @@ patched; upgrade to a supported version.
   authority/userinfo), and auth-header exclusion.
 - **Stateless** — the server holds no state and persists nothing; the token is
   never stored server-side (per-request in HTTP, `NETBOX_TOKEN` env in STDIO).
-- **SSRF / DNS-rebinding** — `NETBOX_URL` is validated and the dialer rejects
-  reserved IPs (`ALLOW_PRIVATE_NETBOX` is an explicit operator override).
+- **NetBox target address** — `NETBOX_URL` is set by the operator from the
+  environment and never takes a value from an incoming MCP request, so the
+  classic client-side SSRF vector does not apply. The network and addresses
+  that the server may reach are the operator's responsibility; the server does
+  not restrict destination addresses (private/self-hosted NetBox is supported).
 - **Input/output hygiene** — CRLF/control characters are stripped from write
   payloads and ANSI/C0 escapes are stripped from tool output.
 - **Destructive tools** (`delete_*`) require human confirmation (HITL) and are

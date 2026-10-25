@@ -43,7 +43,7 @@ This document describes the agents/assistants involved in the development and op
 | `domain/`                                   | Domain models + repository interfaces (ports), request_id context helpers (`WithRequestID`/`RequestIDFromContext`) |
 | `domain/errors.go`                          | `domain.ValidationError` — surfaces a NetBox 400 validation failure; `Error()` carries only the status code (never the body), the body goes to the model via structured content |
 | `domain/repository.go`                      | NetworkRepository interface (port), RawObject type for generic object retrieval |
-| `infrastructure/netbox/client.go`           | NetBox REST client via `resty.dev/v3` (DNS-rebinding dialer + circuit breaker transport), `X-Request-ID` forwarding + per-request outbound log |
+| `infrastructure/netbox/client.go`           | NetBox REST client via `resty.dev/v3` (circuit breaker transport), `X-Request-ID` forwarding + per-request outbound log |
 | `infrastructure/netbox/models.go`           | JSON wire models + `toDomain()` conversion      |
 | `logging/logging.go`               | logrus setup: channel-by-transport, `LOG_LEVEL` gating, `LOG_FORMAT`/`LOG_FILENAME` |
 | `logging/slog.go`                  | slog→logrus handler, `NewSlogLogger` (SDK logger wiring, L7/G10) |
