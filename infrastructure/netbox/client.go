@@ -116,8 +116,8 @@ type Client struct {
 
 // NewClient creates a new NetBox API client backed by resty. The supplied
 // *http.Client is wrapped via resty.NewWithClient so that its transport
-// (DNS-rebinding dialer + circuit breaker), timeout and redirect policy are
-// preserved. Upstream metrics are disabled (nil).
+// (circuit breaker), timeout and redirect policy are preserved. Upstream
+// metrics are disabled (nil).
 func NewClient(baseURL string, httpClient *http.Client) *Client {
 	return NewClientWithMetrics(baseURL, httpClient, nil)
 }

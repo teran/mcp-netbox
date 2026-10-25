@@ -97,47 +97,6 @@ func resolveTransport(modeFlag string) string {
 	return config.TransportStdio
 }
 
-// newPrivateIPCheckingDialer returns a net.Dialer whose DialContext rejects
-// connections to loopback, private, and link-local IPs. This prevents DNS
-// rebinding attacks where a hostname resolves to a private IP at dial time.
-//
-// When allowPrivate is true, only loopback, link-local, and unspecified
-// addresses are rejected (private RFC 1918 ranges are allowed).
-func newPrivateIPCheckingDialer(allowPrivate bool) *net.Dialer {
-	rejectAllPrivate := !allowPrivate
-
-	return &net.Dialer{
-		Timeout:   dialTimeout,
-		KeepAlive: dialKeepAlive,
-		Control: func(_, address string, _ syscall.RawConn) error {
-			host, _, err := net.SplitHostPort(address)
-			if err != nil {
-				return err
-			}
-			ips, err := net.DefaultResolver.LookupNetIP(context.Background(), "ip", host)
-			if err != nil {
-				return fmt.Errorf("DNS lookup for %q failed: %w", host, err)
-			}
-			for _, addr := range ips {
-				if config.IsPrivateAddr(addr) {
-					// Always reject loopback and unspecified, even when private is allowed.
-					if addr.IsLoopback() || addr.IsUnspecified() || addr.IsLinkLocalUnicast() || addr.IsLinkLocalMulticast() {
-						return fmt.Errorf("connection to reserved IP %q rejected (DNS rebinding protection)", addr)
-					}
-					if rejectAllPrivate {
-						return fmt.Errorf(
-							"connection to private IP %q rejected (DNS rebinding protection; set ALLOW_PRIVATE_NETBOX=true to bypass)",
-							addr,
-						)
-					}
-				}
-			}
-
-			return nil
-		},
-	}
-}
-
 // Run starts the server using the configured transport.
 //
 //   - TransportHTTP: serves MCP over Streamable HTTP. The NetBox token is
@@ -370,14 +329,19 @@ func newMCPServer(logger *logrus.Logger) *mcp.Server {
 }
 
 // newNetBoxHTTPClient builds the shared HTTP client used to talk to NetBox,
-// with DNS-rebinding protection and a circuit breaker transport. When
+// with a circuit breaker transport. The destination NetBox address comes from
+// the operator-supplied NETBOX_URL; the server does not restrict the target
+// address (private/self-hosted NetBox is a legitimate target). When
 // NETBOX_CA_FILE is set, the outbound TLS to NetBox trusts the given custom CA
 // bundle instead of (in addition to) the system roots. It fails fast if the
 // configured CA file is unreadable or contains no valid PEM certificates. It
 // returns the client and the circuit breaker (used by the internal readyz
 // endpoint).
 func newNetBoxHTTPClient(cfg config.Config) (*http.Client, *circuitbreaker.Breaker, error) {
-	dialer := newPrivateIPCheckingDialer(cfg.AllowPrivateNetBox)
+	dialer := &net.Dialer{
+		Timeout:   dialTimeout,
+		KeepAlive: dialKeepAlive,
+	}
 
 	transport := &http.Transport{
 		MaxIdleConns:        maxIdleConns,

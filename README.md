@@ -80,7 +80,6 @@ All configuration is via environment variables:
 | `INTERNAL_ADDR` | No | `:8081` | Internal observability address (HTTP transport): Prometheus `/metrics`, pprof `/debug/pprof/*`, and `healthz`/`readyz`/`startup` probes |
 | `RATE_LIMIT_GLOBAL` | No | `100` | Global rate limit (requests/second) |
 | `RATE_LIMIT_PER_CLIENT` | No | `10` | Per-client IP rate limit |
-| `ALLOW_PRIVATE_NETBOX` | No | `false` | When `true`, bypasses SSRF protection and allows `NETBOX_URL` to point to private/reserved IP addresses. Only enable if NetBox is on a private network without a public DNS name. |
 | `NETBOX_CA_FILE` | No | `""` | Optional path to a PEM CA bundle used to trust a custom/private CA on the outbound HTTPS connection to NetBox. When set, the given certificates are trusted (in addition to the system root pool) for TLS to NetBox; startup fails fast if the file cannot be read or contains no valid PEM certificates. Empty (default) = use the Go system root pool. Only affects outbound client TLS to NetBox. |
 | `TRUSTED_PROXY` | No | `""` | CIDR prefix of the trusted reverse proxy (e.g. `10.0.0.0/8`). When set, the server extracts the client IP from the `X-Forwarded-For` header instead of `RemoteAddr`. |
 | `WRITE_TIMEOUT` | No | `300s` (5 minutes) | HTTP write timeout (Go duration, minimum 1s). Note: 0 will fail validation; use a reverse proxy for no timeout. |
@@ -225,7 +224,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/teran/mcp-netb
 - **Rate limiting**: Built-in rate limiting prevents abuse (configurable via environment variables).
 - **Circuit breaker**: Built-in circuit breaker prevents cascading failures when NetBox is unreachable. After 5 consecutive transport-level failures, the circuit opens for 30 seconds.
 - **Host validation**: Requests with empty or malformed `Host` headers are rejected.
-- **SSRF protection**: The `NETBOX_URL` configuration is validated to reject loopback, private, and link-local IP addresses.
+- **NetBox target address**: The `NETBOX_URL` is set by the operator from the environment and never takes a value from an incoming MCP request, so the classic client-side SSRF vector does not apply. The server does not restrict the destination address — a private/self-hosted NetBox on an operator-controlled network is a legitimate target.
 
 ## Troubleshooting
 

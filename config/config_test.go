@@ -8,8 +8,6 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"math/big"
-	"net"
-	"net/netip"
 	"os"
 	"path/filepath"
 	"testing"
@@ -100,63 +98,6 @@ func TestValidatePositiveInt(t *testing.T) {
 	}
 }
 
-func TestValidateURLNotPrivate(t *testing.T) {
-	t.Parallel()
-
-	// Use the strict (non-allow) variant for all tests.
-	strictValidator := validateURLNotPrivate(false)
-
-	tests := []struct {
-		name      string
-		input     any
-		wantError bool
-	}{
-		{"public IP", "http://8.8.8.8:8000", false},
-		{"public IP (cloudflare)", "http://1.1.1.1", false},
-		{"hostname", "http://google.com", false},
-		{"hostname with path", "https://google.com/api", false},
-		{"loopback IPv4", "http://127.0.0.1:8000", true},
-		{"loopback IPv6", "http://[::1]:8000", true},
-		{"private IPv4 (10.x)", "http://10.0.0.1:8000", true},
-		{"private IPv4 (172.16.x)", "http://172.16.0.1:8000", true},
-		{"private IPv4 (192.168.x)", "http://192.168.1.1:8000", true},
-		{"link-local IPv4", "http://169.254.1.1:8000", true},
-		{"link-local IPv6", "http://[fe80::1]:8000", true},
-		{"unspecified IPv4", "http://0.0.0.0:8000", true},
-		{"unspecified IPv6", "http://[::]:8000", true},
-		{"non-string input", 123, true},
-		{"non-string input (nil)", nil, true},
-		{"invalid URL", "://invalid", true},
-	}
-
-	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-			err := strictValidator(testCase.input)
-			if testCase.wantError && err == nil {
-				t.Errorf("validateURLNotPrivate(%v) = nil, want error", testCase.input)
-			}
-			if !testCase.wantError && err != nil {
-				t.Errorf("validateURLNotPrivate(%v) = %v, want nil", testCase.input, err)
-			}
-		})
-	}
-}
-
-func TestValidateURLNotPrivate_AllowPrivate(t *testing.T) {
-	t.Parallel()
-
-	allowValidator := validateURLNotPrivate(true)
-
-	t.Run("bypasses validation when allowPrivate=true", func(t *testing.T) {
-		if err := allowValidator("http://127.0.0.1:8000"); err != nil {
-			t.Errorf("allowValidator(loopback) = %v, want nil", err)
-		}
-		if err := allowValidator("http://192.168.1.1:8000"); err != nil {
-			t.Errorf("allowValidator(private) = %v, want nil", err)
-		}
-	})
-}
-
 func TestValidateConfig(t *testing.T) {
 	t.Parallel()
 
@@ -193,65 +134,6 @@ func TestValidateConfig(t *testing.T) {
 	})
 }
 
-func TestIsPrivateAddr(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name string
-		addr string
-		want bool
-	}{
-		{"loopback", "127.0.0.1", true},
-		{"loopback v6", "::1", true},
-		{"private 10", "10.0.0.1", true},
-		{"private 172", "172.16.0.1", true},
-		{"private 192.168", "192.168.1.1", true},
-		{"link-local unicast", "169.254.1.1", true},
-		{"link-local multicast", "ff02::1", true},
-		{"unspecified", "0.0.0.0", true},
-		{"unspecified v6", "::", true},
-		{"public", "8.8.8.8", false},
-		{"public v6", "2606:4700:4700::1111", false},
-	}
-
-	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-			addr := mustParseAddr(t, testCase.addr)
-			if got := IsPrivateAddr(addr); got != testCase.want {
-				t.Errorf("IsPrivateAddr(%s) = %v, want %v", testCase.addr, got, testCase.want)
-			}
-		})
-	}
-}
-
-func TestIsPrivateIP(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name string
-		ip   string // empty means nil IP
-		want bool
-	}{
-		{"nil", "", false},
-		{"loopback", "127.0.0.1", true},
-		{"private", "10.1.2.3", true},
-		{"public", "8.8.8.8", false},
-		{"invalid", "not-an-ip", false},
-	}
-
-	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-			var ip net.IP
-			if testCase.ip != "" {
-				ip = net.ParseIP(testCase.ip)
-			}
-			if got := IsPrivateIP(ip); got != testCase.want {
-				t.Errorf("IsPrivateIP(%v) = %v, want %v", testCase.ip, got, testCase.want)
-			}
-		})
-	}
-}
-
 func TestLoad(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Setenv("TRANSPORT", "http")
@@ -274,10 +156,10 @@ func TestLoad(t *testing.T) {
 		}
 	})
 
-	t.Run("validation failure for private URL", func(t *testing.T) {
-		t.Setenv("NETBOX_URL", "http://127.0.0.1")
+	t.Run("validation failure for invalid scheme", func(t *testing.T) {
+		t.Setenv("NETBOX_URL", "ftp://127.0.0.1")
 		if _, err := Load(); err == nil {
-			t.Error("Load() = nil, want error for private URL")
+			t.Error("Load() = nil, want error for invalid scheme")
 		}
 	})
 
@@ -287,17 +169,6 @@ func TestLoad(t *testing.T) {
 			t.Error("Load() = nil, want error for empty URL")
 		}
 	})
-}
-
-// mustParseAddr parses a string into a netip.Addr, failing the test on error.
-func mustParseAddr(t *testing.T, s string) netip.Addr {
-	t.Helper()
-	a, err := netip.ParseAddr(s)
-	if err != nil {
-		t.Fatalf("ParseAddr(%q) error: %v", s, err)
-	}
-
-	return a
 }
 
 func TestLoad_EnvconfigError(t *testing.T) {

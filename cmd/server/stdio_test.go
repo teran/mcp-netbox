@@ -90,13 +90,12 @@ func (s *stdioSession) close() {
 	_ = s.inW.Close()
 }
 
-// testStdioConfig builds a stdio config whose NetBox URL is a loopback port
-// that the DNS-rebinding dialer rejects immediately, so tools/call returns
-// fast with an error instead of hanging on a real network connection.
+// testStdioConfig builds a stdio config whose NetBox URL points at a loopback
+// port with no listener, so tools/call fails fast (connection refused) instead
+// of hanging on a real network connection.
 func testStdioConfig() config.Config {
 	return config.Config{
 		NetBoxURL:          "http://127.0.0.1:1",
-		AllowPrivateNetBox: true,
 		Transport:          config.TransportStdio,
 		NetBoxToken:        "test-token",
 		RateLimitGlobal:    100,

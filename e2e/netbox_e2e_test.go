@@ -82,8 +82,9 @@ func TestNetBoxE2E(t *testing.T) {
 	}
 	defer func() { _ = app.Close(context.Background()) }()
 
-	// Plain http.Client is required: the production server's DNS-rebinding dialer
-	// rejects loopback, but NetBox publishes on 127.0.0.1:<random>.
+	// Plain http.Client is used here: this test talks directly to the
+	// container-local NetBox published on 127.0.0.1:<random>, independent of
+	// the production server's HTTP client construction.
 	netboxClient := infra.NewClient(app.MustURL(), &http.Client{Timeout: 30 * time.Second})
 	svc := application.NewNetworkService(netboxClient, app.SuperuserAPIToken())
 
