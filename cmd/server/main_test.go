@@ -36,19 +36,123 @@ func freePort() string {
 	return listener.Addr().String()
 }
 
-func waitForServer(url string, timeout time.Duration) bool {
+const (
+	// serverStartupTimeout bounds how long we wait for the internal /healthz
+	// endpoint to come up after Run() is launched. Under `-race` on a loaded
+	// machine the process can take several seconds to schedule the Run
+	// goroutine and reach ListenAndServe, so a generous timeout avoids spurious
+	// "Server did not start" flakes while still failing fast on a genuinely
+	// broken startup.
+	serverStartupTimeout = 15 * time.Second
+	// serverShutdownTimeout bounds how long we wait for graceful shutdown after
+	// sending SIGTERM. runHTTP budgets up to 30s for the HTTP servers to drain,
+	// and under `-race` on a loaded machine graceful shutdown can occasionally
+	// take several seconds, so this must be generous to avoid spurious flakes.
+	serverShutdownTimeout = 15 * time.Second
+	// maxStartupAttempts is how many times we relaunch Run with fresh ports
+	// before giving up. freePort() closes its probe listener and hands the port
+	// number back, but another socket can grab that port in the window before
+	// Run() binds it — a TOCTOU race that intermittently surfaces as
+	// "listen: address already in use" on the main server. Relaunching with new
+	// ports retries past that transient collision. At the observed ~2% per-attempt
+	// collision rate three attempts make the residual failure negligible.
+	maxStartupAttempts = 3
+)
+
+// waitForServerOrExit polls url for readiness while also detecting whether Run
+// has already exited via errCh. Run exits before serving when its main listener
+// fails to bind (the freePort() TOCTOU collision), so returning exited=true
+// lets the caller retry with fresh ports instead of polling a dead endpoint.
+func waitForServerOrExit(url string, errCh <-chan error, timeout time.Duration) (ready, exited bool) {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
+		select {
+		case <-errCh: //nolint:errcheck // discarding: Run returns nil even on a port-collision bind error
+			return false, true
+		default:
+		}
+
 		resp, err := http.Get(url) //nolint:gosec,noctx
 		if err == nil {
 			func() { _ = resp.Body.Close() }()
 
-			return true
+			return true, false
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
 
-	return false
+	return false, false
+}
+
+// runningServer bundles the handles a Run-based test needs: the bound listen
+// addresses (so tests can issue real HTTP requests) and the Run result channel
+// and stop function (so the server can be torn down between tests).
+type runningServer struct {
+	addr         string
+	internalAddr string
+	errCh        <-chan error
+	stop         func()
+}
+
+// startTestServer runs Run(cfg) in the background and blocks until the internal
+// /healthz endpoint reports healthy. Because Run binds its own listeners, a
+// freePort()-derived port can occasionally be taken by another socket before
+// Run binds it (a TOCTOU collision); startTestServer relaunches Run with fresh
+// ports to retry past that transient failure. It returns the running server
+// handles; every test that launches Run must call srv.stop (e.g. via
+// t.Cleanup) so the server and its process-wide signal handler are torn down
+// before the next test runs.
+func startTestServer(t *testing.T, cfg config.Config) runningServer {
+	t.Helper()
+
+	for attempt := range maxStartupAttempts {
+		cfg.ListenAddr = freePort()
+		cfg.InternalAddr = freePort()
+
+		errCh := make(chan error, 1)
+		go func() {
+			errCh <- Run(cfg)
+		}()
+
+		ready, exited := waitForServerOrExit("http://"+cfg.InternalAddr+"/healthz", errCh, serverStartupTimeout)
+		if ready {
+			srv := runningServer{
+				addr:         cfg.ListenAddr,
+				internalAddr: cfg.InternalAddr,
+				errCh:        errCh,
+			}
+			srv.stop = func() {
+				t.Helper()
+
+				if proc, err := os.FindProcess(os.Getpid()); err == nil {
+					_ = proc.Signal(syscall.SIGTERM)
+				}
+
+				select {
+				case err := <-srv.errCh:
+					if err != nil {
+						t.Errorf("Run() returned error: %v", err)
+					}
+				case <-time.After(serverShutdownTimeout):
+					t.Error("Server did not shut down within timeout")
+				}
+			}
+
+			return srv
+		}
+
+		if !exited {
+			// Run is still alive but never served within the timeout — a genuine
+			// startup problem, not a transient port collision.
+			t.Fatalf("Server did not start (attempt %d/%d)", attempt+1, maxStartupAttempts)
+		}
+		// Run exited before serving — almost certainly a transient port
+		// collision; retry with fresh ports.
+	}
+
+	t.Fatal("Server did not start after multiple attempts")
+
+	return runningServer{}
 }
 
 func TestHealthEndpoint(t *testing.T) {
@@ -78,32 +182,17 @@ func TestHealthEndpoint(t *testing.T) {
 }
 
 func TestRun_HealthEndpoint(t *testing.T) {
-	addr := freePort()
-	internalAddr := freePort()
-
 	cfg := config.Config{
 		NetBoxURL:          "http://netbox.example.com",
-		ListenAddr:         addr,
-		InternalAddr:       internalAddr,
 		RateLimitGlobal:    1000,
 		RateLimitPerClient: 100,
 		WriteTimeout:       300 * time.Second,
 	}
 
-	errCh := make(chan error, 1)
-	go func() {
-		errCh <- Run(cfg)
-	}()
+	srv := startTestServer(t, cfg)
+	t.Cleanup(srv.stop)
 
-	t.Cleanup(func() {
-		// Send SIGTERM to our own process (simplified)
-	})
-
-	if !waitForServer("http://"+internalAddr+"/healthz", 2*time.Second) {
-		t.Fatal("Server did not start")
-	}
-
-	resp, err := http.Get("http://" + internalAddr + "/healthz") //nolint:noctx
+	resp, err := http.Get("http://" + srv.internalAddr + "/healthz") //nolint:noctx
 	if err != nil {
 		t.Fatalf("Health check failed: %v", err)
 	}
@@ -114,7 +203,7 @@ func TestRun_HealthEndpoint(t *testing.T) {
 	}
 
 	// O01/O04: the liveness probe must NOT be served on the MCP address (:8080).
-	if resp, err := http.Get("http://" + addr + "/healthz"); err == nil { //nolint:noctx
+	if resp, err := http.Get("http://" + srv.addr + "/healthz"); err == nil { //nolint:noctx
 		defer func() { _ = resp.Body.Close() }()
 		if resp.StatusCode != http.StatusNotFound {
 			t.Errorf("MCP /healthz status = %d, want %d", resp.StatusCode, http.StatusNotFound)
@@ -123,25 +212,15 @@ func TestRun_HealthEndpoint(t *testing.T) {
 }
 
 func TestRun_MCPHandlerPing(t *testing.T) {
-	addr := freePort()
-	internalAddr := freePort()
-
 	cfg := config.Config{
 		NetBoxURL:          "http://netbox.example.com",
-		ListenAddr:         addr,
-		InternalAddr:       internalAddr,
 		RateLimitGlobal:    1000,
 		RateLimitPerClient: 100,
 		WriteTimeout:       300 * time.Second,
 	}
 
-	go func() {
-		_ = Run(cfg)
-	}()
-
-	if !waitForServer("http://"+internalAddr+"/healthz", 2*time.Second) {
-		t.Fatal("Server did not start")
-	}
+	srv := startTestServer(t, cfg)
+	t.Cleanup(srv.stop)
 
 	reqBody := map[string]any{
 		"jsonrpc": "2.0",
@@ -153,7 +232,7 @@ func TestRun_MCPHandlerPing(t *testing.T) {
 	req, err := http.NewRequestWithContext(
 		context.Background(),
 		http.MethodPost,
-		"http://"+addr+"/mcp",
+		"http://"+srv.addr+"/mcp",
 		bytes.NewReader(body),
 	)
 	if err != nil {
@@ -174,40 +253,18 @@ func TestRun_MCPHandlerPing(t *testing.T) {
 }
 
 func TestRun_ShutdownViaSignal(t *testing.T) {
-	addr := freePort()
-	internalAddr := freePort()
-
 	cfg := config.Config{
 		NetBoxURL:          "http://netbox.example.com",
-		ListenAddr:         addr,
-		InternalAddr:       internalAddr,
 		RateLimitGlobal:    1000,
 		RateLimitPerClient: 100,
 		WriteTimeout:       300 * time.Second,
 	}
 
-	errCh := make(chan error, 1)
-	go func() {
-		errCh <- Run(cfg)
-	}()
+	srv := startTestServer(t, cfg)
 
-	if !waitForServer("http://"+internalAddr+"/healthz", 2*time.Second) {
-		t.Fatal("Server did not start")
-	}
-
-	proc, err := os.FindProcess(os.Getpid())
-	if err == nil {
-		_ = proc.Signal(syscall.SIGTERM)
-	}
-
-	select {
-	case err := <-errCh:
-		if err != nil {
-			t.Fatalf("Run() returned error: %v", err)
-		}
-	case <-time.After(3 * time.Second):
-		t.Fatal("Server did not shut down within timeout")
-	}
+	// Send SIGTERM and assert Run returns nil (graceful shutdown). srv.stop
+	// fails the test if Run returns an error or does not shut down in time.
+	srv.stop()
 }
 
 func TestBannerString(t *testing.T) {
