@@ -103,6 +103,7 @@ func TestSanitizeMapKeysValues(t *testing.T) {
 	})
 }
 
+//nolint:funlen // Single flat assertion over one struct state; splitting is not sensible.
 func TestSanitizeAllStrings(t *testing.T) {
 	t.Parallel()
 
@@ -128,7 +129,7 @@ func TestSanitizeAllStrings(t *testing.T) {
 		Tags:     []string{"t\r\n1", "ok"},
 		Count:    5,
 		Enabled:  true,
-		Custom:   map[string]any{"k\r\n": "v"},
+		Custom:   map[string]any{"k\r\n": "v\r\nx", "nested": []string{"a\r\nb"}},
 		Inner:    nested{Note: &note},
 		InnerPtr: &nested{Note: &note},
 	}
@@ -141,9 +142,22 @@ func TestSanitizeAllStrings(t *testing.T) {
 	if sample.Desc == nil || *sample.Desc != "line1line2" {
 		t.Errorf("Desc = %v, want 'line1line2'", sample.Desc)
 	}
-	// slices/maps are not sanitized by the struct walker
-	if sample.Tags[0] != "t\r\n1" {
-		t.Errorf("Tags[0] = %q, want untouched 't\\r\\n1'", sample.Tags[0])
+	// slices are sanitized recursively by the struct walker
+	if sample.Tags[0] != "t1" {
+		t.Errorf("Tags[0] = %q, want 't1'", sample.Tags[0])
+	}
+	if sample.Tags[1] != "ok" {
+		t.Errorf("Tags[1] = %q, want 'ok'", sample.Tags[1])
+	}
+	// map keys AND values are sanitized (including nested string values)
+	if _, ok := sample.Custom["k"]; !ok {
+		t.Errorf("Custom = %v, want sanitized key 'k'", sample.Custom)
+	}
+	if sample.Custom["k"] != "vx" {
+		t.Errorf("Custom['k'] = %q, want 'vx'", sample.Custom["k"])
+	}
+	if nested, ok := sample.Custom["nested"].([]string); !ok || nested[0] != "ab" {
+		t.Errorf("Custom['nested'] = %v, want ['ab']", sample.Custom["nested"])
 	}
 	if sample.Count != 5 || !sample.Enabled {
 		t.Error("non-string fields must be left intact")
@@ -154,6 +168,108 @@ func TestSanitizeAllStrings(t *testing.T) {
 	if sample.InnerPtr.Note == nil || *sample.InnerPtr.Note != "note" {
 		t.Errorf("InnerPtr.Note = %v, want 'note'", sample.InnerPtr.Note)
 	}
+}
+
+//nolint:funlen // Table of subtests covering the nested-collection branches; splitting is not sensible.
+func TestSanitizeAllStrings_NestedCollections(t *testing.T) {
+	t.Parallel()
+
+	t.Run("slice of strings sanitized in place", func(t *testing.T) {
+		sl := []string{"a\r\nb", "ok", "\n"}
+		sanitizeAllStrings(reflect.ValueOf(&sl))
+
+		want := []string{"ab", "ok", ""}
+		if !reflect.DeepEqual(sl, want) {
+			t.Errorf("slice = %#v, want %#v", sl, want)
+		}
+	})
+
+	t.Run("nil slice is a no-op", func(t *testing.T) {
+		var sl []string
+		sanitizeAllStrings(reflect.ValueOf(&sl))
+		if sl != nil {
+			t.Errorf("nil slice became %#v, want nil", sl)
+		}
+	})
+
+	t.Run("array of strings sanitized", func(t *testing.T) {
+		arr := [2]string{"x\r\ny", "clean"}
+		sanitizeAllStrings(reflect.ValueOf(&arr))
+
+		want := [2]string{"xy", "clean"}
+		if arr != want {
+			t.Errorf("array = %#v, want %#v", arr, want)
+		}
+	})
+
+	t.Run("map[string]string keys and values sanitized", func(t *testing.T) {
+		mapping := map[string]string{"k\r\n1": "v\r\n1", "clean": "ok"}
+		sanitizeAllStrings(reflect.ValueOf(&mapping))
+
+		if got, ok := mapping["k1"]; !ok || got != "v1" {
+			t.Errorf("map = %#v, want sanitized 'k1' -> 'v1'", mapping)
+		}
+		if got := mapping["clean"]; got != "ok" {
+			t.Errorf("map['clean'] = %q, want 'ok'", got)
+		}
+		if _, ok := mapping["k\r\n1"]; ok {
+			t.Errorf("map = %#v, stale unsanitized key 'k\\r\\n1' still present", mapping)
+		}
+	})
+
+	t.Run("map[string]any nested values sanitized", func(t *testing.T) {
+		type inner struct {
+			Note *string
+		}
+		note := "n\r\no"
+		mapping := map[string]any{
+			"s":      "str\r\nval",
+			"slice":  []string{"a\r\nb", "c\n"},
+			"struct": inner{Note: &note},
+			"int":    42,
+		}
+		sanitizeAllStrings(reflect.ValueOf(&mapping))
+
+		if mapping["s"] != "strval" {
+			t.Errorf("map['s'] = %q, want 'strval'", mapping["s"])
+		}
+		if sl, ok := mapping["slice"].([]string); !ok || !reflect.DeepEqual(sl, []string{"ab", "c"}) {
+			t.Errorf("map['slice'] = %#v, want ['ab' 'c']", mapping["slice"])
+		}
+		if st, ok := mapping["struct"].(inner); !ok || st.Note == nil || *st.Note != "no" {
+			t.Errorf("map['struct'] = %#v, want Note 'no'", mapping["struct"])
+		}
+		if mapping["int"] != 42 {
+			t.Errorf("map['int'] = %v, want 42", mapping["int"])
+		}
+	})
+
+	t.Run("nil map is a no-op", func(t *testing.T) {
+		var mapping map[string]string
+		sanitizeAllStrings(reflect.ValueOf(&mapping))
+		if mapping != nil {
+			t.Errorf("nil map became %#v, want nil", mapping)
+		}
+	})
+
+	t.Run("interface field holding a string sanitized", func(t *testing.T) {
+		var v any = "iface\r\nval"
+		sanitizeAllStrings(reflect.ValueOf(&v))
+
+		if got, ok := v.(string); !ok || got != "ifaceval" {
+			t.Errorf("interface value = %#v, want 'ifaceval'", v)
+		}
+	})
+
+	t.Run("map with non-string key type: values stripped, keys untouched", func(t *testing.T) {
+		m := map[int]string{1: "a\r\nb", 2: "clean"}
+		sanitizeAllStrings(reflect.ValueOf(&m))
+
+		want := map[int]string{1: "ab", 2: "clean"}
+		if !reflect.DeepEqual(m, want) {
+			t.Errorf("map = %#v, want %#v", m, want)
+		}
+	})
 }
 
 func TestSanitizeOutput_EdgeCases(t *testing.T) {
