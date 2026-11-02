@@ -92,25 +92,77 @@ func sanitizeMapKeysValues(m map[string]string) map[string]string {
 }
 
 // sanitizeAllStrings recursively sanitizes every settable string field of a
-// struct value (including through pointers). It is applied to write payloads
-// before json.Marshal so CRLF never reaches the NetBox request body.
+// struct value (including through pointers, slices, arrays and maps). It is
+// applied to write payloads before json.Marshal so CRLF never reaches the
+// NetBox request body.
 func sanitizeAllStrings(value reflect.Value) {
 	if !value.IsValid() {
 		return
 	}
-	//nolint:exhaustive // reflect.Kind has ~27 values; only pointer/struct/string are handled here.
+	//nolint:exhaustive // reflect.Kind has ~27 values; pointer/interface/struct/string/slice/array/map are handled here.
 	switch value.Kind() {
 	case reflect.Pointer:
 		if !value.IsNil() {
 			sanitizeAllStrings(value.Elem())
 		}
+	case reflect.Interface:
+		if !value.IsNil() {
+			// The concrete value inside an interface is not settable via
+			// reflection, so copy it into an addressable slot, sanitize the
+			// copy, then write the sanitized value back into the interface.
+			elem := value.Elem()
+			if elem.IsValid() {
+				cp := reflect.New(elem.Type()).Elem()
+				cp.Set(elem)
+				sanitizeAllStrings(cp)
+				if value.CanSet() {
+					value.Set(cp)
+				}
+			}
+		}
 	case reflect.Struct:
 		for _, field := range value.Fields() {
 			sanitizeAllStrings(field)
 		}
+	case reflect.Slice, reflect.Array:
+		for i := range value.Len() {
+			sanitizeAllStrings(value.Index(i))
+		}
+	case reflect.Map:
+		sanitizeMap(value)
 	case reflect.String:
 		if value.CanSet() {
 			value.SetString(sanitizeControl(value.String()))
 		}
+	}
+}
+
+// sanitizeMap rebuilds a map so string keys are sanitized (keys are immutable)
+// and every value is recursively sanitized. A fresh map is required because
+// keys cannot be reassigned in place and map elements obtained from MapRange
+// are not settable, so each value is copied into an addressable slot first.
+func sanitizeMap(value reflect.Value) {
+	if value.IsNil() {
+		return
+	}
+	newMap := reflect.MakeMapWithSize(value.Type(), value.Len())
+	iter := value.MapRange()
+	for iter.Next() {
+		key := iter.Key()
+		if key.Kind() == reflect.String {
+			key = reflect.ValueOf(sanitizeControl(key.String())).Convert(value.Type().Key())
+		}
+		val := iter.Value()
+		if val.IsValid() && val.CanInterface() {
+			// Make a settable copy so recursion can mutate it, then store back.
+			cp := reflect.New(val.Type()).Elem()
+			cp.Set(val)
+			sanitizeAllStrings(cp)
+			val = cp
+		}
+		newMap.SetMapIndex(key, val)
+	}
+	if value.CanSet() {
+		value.Set(newMap)
 	}
 }
