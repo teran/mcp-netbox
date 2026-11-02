@@ -64,6 +64,19 @@ func bannerString() string {
 	return fmt.Sprintf("Starting %s/%s (commit: %s; built at %s) ...", name, appVersion, appCommitHash, appTimestamp)
 }
 
+// logToolSurface logs the registered MCP tool surface at startup (L10/L05GO).
+// All mcp-netbox tools are static, so always_present is true for every entry
+// (L11). It runs after the banner and performs no outbound request (A02/N35).
+func logToolSurface(logger *logrus.Logger) {
+	for _, t := range handlers.ToolSurface() {
+		logger.WithFields(logrus.Fields{
+			"tool":           t.Name,
+			"title":          t.Title,
+			"always_present": t.AlwaysPresent,
+		}).Info("registered tool")
+	}
+}
+
 func main() {
 	mode := flag.String("mode", "", "launch mode: http or stdio (default stdio; overrides TRANSPORT)")
 	flag.Parse()
@@ -159,6 +172,7 @@ func runStdioWithTransport(cfg config.Config, logger *logrus.Logger, transport m
 
 	// B5/L6: when logging is enabled, the startup banner is the very first log line.
 	logger.Info(bannerString())
+	logToolSurface(logger)
 
 	conn, err := srv.Connect(context.Background(), transport, nil)
 	if err != nil {
@@ -208,6 +222,7 @@ func runHTTP(cfg config.Config, logger *logrus.Logger) error {
 
 	// B5/L6: when logging is enabled, the startup banner is the very first log line.
 	logger.Info(bannerString())
+	logToolSurface(logger)
 
 	mainServer := &http.Server{
 		Addr:              cfg.ListenAddr,
